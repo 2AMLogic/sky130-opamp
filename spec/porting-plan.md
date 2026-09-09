@@ -168,18 +168,25 @@ ratified spec runs at 3.3 V, not this block's 1.8 V-primary scope.
 
 ## 4. Open items and next steps
 
-- **Topology decision.** No same-PDK sibling's amplifier schematic transfers
-  directly (§3), and this block's twin (`gf180-opamp`) has not yet made its
-  own topology decision either (verified against that repo's own
-  `porting-plan.md` §4, 2026-09-06) — so the first real design decision this
-  repo needs is its own two-stage Miller-compensated topology choice
-  (single-ended vs. fully differential first stage, output-stage class,
-  cascode-or-not), sized for a 1.8 V-core headroom budget. Not yet made, and
-  out of scope for this bootstrap pass.
-- **Load capacitance (`CL`) target.** `target-spec.md`'s GBW/PM rows are
-  stated "into stated CL" per the twin-row convention, but no CL value has
-  been chosen yet — see §2's "Compensation" row above. Choosing one is part
-  of the topology decision, not independent of it.
+- **Topology decision — done.** The two-stage Miller-compensated topology's
+  input-pair polarity (NMOS), first-stage load (simple mirror, no cascode —
+  single-ended first stage), output-stage class (Class-A common-source,
+  PMOS gain device), and Miller compensation scheme (with a nulling
+  resistor) are now decided in
+  [`spec/decision-records/DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
+  (status `proposed`), citing `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
+  directly for every device figure. This resolves the "first real design
+  decision this repo needs" this item originally named (issue #8) — sized
+  for a 1.8 V-core (1.62 V worst-case) headroom budget, as called for.
+  Device widths, bias currents, and mirror ratios remain open (`DR-001`'s
+  own "Open items" section).
+- **Load capacitance (`CL`) target — done.** `target-spec.md` §1's `CL` row
+  is now filled at `2 pF [DR-001]`, chosen in the same
+  [`DR-001`](decision-records/DR-001-topology-and-cl.md) record to match
+  `sg13g2-opamp`'s own `CL` choice for cross-PDK comparability (`gf180-opamp`
+  has no `CL` decision yet to compare against). `target-spec.md`'s GBW/PM
+  rows can now be read "into" a concrete value, though those rows
+  themselves remain `[TBD]` until a schematic and testbench exist.
 - **Device characterization — done.** `CLAUDE.md`'s "gm/ID first" ordering
   named this as the next concrete step after this bootstrap pass; it is now
   committed as

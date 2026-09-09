@@ -1,8 +1,12 @@
 # Target specification — sky130-opamp
 
-- **Status**: **DRAFT** — engineering input, not yet ratified. No decision
-  record exists yet in this repo; ratification is a future issue, once
-  gm/ID device-characterization data lands under `sim/`.
+- **Status**: **DRAFT** — engineering input, not yet ratified. One decision
+  record exists in this repo,
+  [`DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
+  (status `proposed`), covering the two-stage topology's input-pair
+  polarity, first-stage load, output-stage class, compensation scheme, and
+  the `CL` row below; ratification of this table as a whole is a separate,
+  future issue.
 - **Date**: 2026-09-06
 - **Assembled by**: Loom Builder agent, issue #2 (bootstrap/scaffolding pass)
 - **Scope**: 1.8 V primary variant only. The 3.3 V I/O-device flavor is named
@@ -36,7 +40,7 @@ glance:
 
 | Tag | Meaning |
 |---|---|
-| **[DR-n]** | Carried unchanged from a decision record `n`. None exist yet in this repo — no row currently carries this tag. |
+| **[DR-n]** | Carried unchanged from a decision record `n`. [`DR-001`](decision-records/DR-001-topology-and-cl.md) (status `proposed`) is the only one so far, and it tags the `CL` row below. |
 | **[P]** | **Proposed by this bootstrap pass** — an engineering placeholder with no measured sky130 data behind it yet (e.g. carried from this repo's own `README.md`/`CLAUDE.md` framing, or a structural convention borrowed from a same-PDK sibling's ratified spec). Needs an explicit ratification decision before it binds. |
 | **[TBD]** | Deliberately unset — no sky130 device data exists yet to propose even a placeholder number. Filled in once gm/ID device characterization (`sim/`) and PVT-cornered testbenches exist. Tracked collectively under the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3) (item 5, "Full PVT corner simulation vs a ratified spec"), rather than one issue per row. |
 
@@ -62,7 +66,7 @@ supersedes the prediction once it exists.
 | Supply voltage, VDD (I/O-device flavor) | **3.3 V — not opened** [P] | sky130's I/O-tolerant device flavor (`sky130_fd_pr__nfet_g5v0d10v5` / `pfet_g5v0d10v5`, used at 3.3 V per `sky130-ldo`'s [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/main/spec/decision-records/DR-001-pass-device-supply-framing.md) precedent for using this flavor below its full 5.0 V/10.5 V rating). Per `CLAUDE.md`, opening this row requires its own decision record; it is named here only so a future DR has a place to point at, not to imply the row is in scope. Never mixed with 1.8 V core-flavor devices in one variant. |
 | Operating temperature | **−40…+125 °C** [P] | Matches the fleet-wide convention (`sky130-bandgap`, `sky130-ldo`) for a commercial-grade PDK part. No sky130-specific device data has been checked against this range yet for this topology — proposed by analogy, not measured. |
 | Corner grid | **`tt, ff, ss, sf, fs` (sky130 1.8 V-core MOS process corners) — confirmed [P]** | Same *shape* `sky130-bandgap`'s ratified corner set uses, now confirmed specifically for the `_01v8` (1.8 V-core) device flavor against the pinned PDK checkout, rather than assumed by analogy from that 3.3 V-primary sibling — see [`sim/gm-id-characterization/corners/model-files.json`](../sim/gm-id-characterization/corners/model-files.json) and [`corners/README.md`](../sim/gm-id-characterization/corners/README.md) (issue #6), which resolve each corner to its literal `sky130_fd_pr__{nfet,pfet}_01v8__<corner>.*.spice` model file. Still `[P]`, not ratified — this row's binding-corner predictions and pass/fail behavior are decided independently, once a topology exists (see [`porting-plan.md`](porting-plan.md) §4). |
-| Load capacitance, CL | **[TBD]** | GBW/phase-margin targets are stated "into stated CL" per the twin-row convention; no CL has been chosen yet since no application/bench context exists for this standalone op-amp characterization. |
+| Load capacitance, CL | **2 pF [DR-001]** | GBW/phase-margin targets are stated "into stated CL" per the twin-row convention. Chosen in [`DR-001`](decision-records/DR-001-topology-and-cl.md) to match `sg13g2-opamp`'s own `CL` decision for cross-PDK comparability across the three-foundry twin set; `gf180-opamp` has no `CL` decision yet to compare against. |
 
 ## 2. Performance targets
 
@@ -90,18 +94,21 @@ sizing."
 
 ## 3. What this table is not
 
-- **Not ratified.** No `spec/decision-records/` directory exists yet in this
-  repo. Ratification flows through the two-key mechanism described in
-  `CLAUDE.md`/`.loom/CLAUDE.md` (an EE key + a market key, both installed by
-  the standard tooling) — a future issue's job, once the `[TBD]` rows above
-  have real sky130 device data behind them. Per the generalized 2026-08-28
-  ruling cited in issue #2's body ("scope-only spec DRs ratified with both
-  keys need no per-PR operator statement"), that applies at ratification
-  time, not to this DRAFT — this pass ratifies nothing and is not asking any
-  key-holder to act on it.
+- **Not ratified.** `spec/decision-records/DR-001-topology-and-cl.md` exists
+  ([status `proposed`](decision-records/DR-001-topology-and-cl.md)), but a
+  `proposed` record is input to a future ratification pass, not a
+  ratification itself. Ratification flows through the two-key mechanism
+  described in `CLAUDE.md`/`.loom/CLAUDE.md` (an EE key + a market key, both
+  installed by the standard tooling) — a future issue's job, once the
+  `[TBD]` rows above have real sky130 device data behind them. Per the
+  generalized 2026-08-28 ruling cited in issue #2's body ("scope-only spec
+  DRs ratified with both keys need no per-PR operator statement"), that
+  applies at ratification time, not to this DRAFT — this pass ratifies
+  nothing and is not asking any key-holder to act on it.
 - **Not a commitment that every `[TBD]` row will end up non-trivial.** Some
-  rows (e.g. the corner grid, or the load capacitance) may turn out to be
-  determined jointly with a topology decision rather than independently.
+  rows (e.g. the corner grid) may turn out to be determined jointly with a
+  topology decision rather than independently — `CL` above is now resolved
+  via `DR-001`, but every performance row in §2 remains `[TBD]`.
 - **Not opening the 3.3 V I/O-device-flavor row.** It is named, not scoped
   in.
 
