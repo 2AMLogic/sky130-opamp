@@ -1,0 +1,61 @@
+{
+  "record_id": "20260909-062847-35a9d46",
+  "timestamp": "2026-09-09T06:32:06.758489+00:00",
+  "git": {
+    "sha": "35a9d46"
+  },
+  "experiment": {
+    "slug": "gm-id-characterization",
+    "title": "gm/ID, gm/gds and fT vs overdrive for sky130 1.8V-core MOS devices",
+    "claim": "gm/ID-first device characterization ahead of topology/sizing work (porting-plan.md Section 4). NOT a claim about any circuit's spec row -- these are bare-device sweeps, not a closed-loop testbench."
+  },
+  "matrix": {
+    "devices": [
+      "nfet",
+      "pfet"
+    ],
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "lengths_um": [
+      0.15,
+      0.3,
+      0.6,
+      1.2
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "vds_v": 0.9,
+    "width_um": 2.0,
+    "vgs_step_v": 0.02,
+    "n_runs": 120,
+    "n_points": 10920
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/Users/rwalters/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true
+  },
+  "tools": {
+    "ngspice": "ngspice-46 : Circuit level simulation program",
+    "python": "3.14.7",
+    "platform": "Darwin 25.6.0 arm64"
+  },
+  "links": {
+    "full_sweep_csv": "sim/gm-id-characterization/records/20260909-062847-35a9d46-full-sweep.csv",
+    "summary_csv": "sim/gm-id-characterization/records/20260909-062847-35a9d46-summary.csv",
+    "record_md": "sim/gm-id-characterization/records/20260909-062847-35a9d46.md",
+    "netlist_snapshots": "sim/gm-id-characterization/netlist-snapshots/20260909-062847-35a9d46/",
+    "corner_model_files": "sim/gm-id-characterization/corners/model-files.json"
+  },
+  "elapsed_s": 198.5
+}

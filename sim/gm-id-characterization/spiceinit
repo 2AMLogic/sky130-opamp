@@ -1,0 +1,20 @@
+* ngspice init settings for the sky130 PDK model libraries.
+*
+* The sweep runner (bin/sweep.py) does not depend on this file directly --
+* it sets the equivalent options via explicit netlist `.option` lines in
+* every generated deck, so a run is reproducible independent of whatever
+* happens to be in ~/.spiceinit on the machine that runs it. This file is
+* kept in-repo for interactive/manual ngspice sessions against the same
+* PDK, and to document the settings a record was produced under.
+*
+* Same settings as the sibling sky130-ldo / sky130-bandgap harnesses (same
+* PDK, same pin): derived from the PDK's own libs.tech/ngspice/spinit.
+*
+*   cp sim/gm-id-characterization/spiceinit ./.spiceinit
+*   ngspice -b sim/gm-id-characterization/testbench/nfet_gmid.spice.tmpl
+
+set ngbehavior=hsa     ; HSPICE-ish compatibility, required to read PDK libs
+set skywaterpdk        ; skip some checks for faster lib loading
+set ng_nomodcheck      ; do not check model parameters
+option noinit          ; do not dump operating point data into the log
+option klu              ; KLU direct linear solver

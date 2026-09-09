@@ -180,18 +180,26 @@ ratified spec runs at 3.3 V, not this block's 1.8 V-primary scope.
   stated "into stated CL" per the twin-row convention, but no CL value has
   been chosen yet — see §2's "Compensation" row above. Choosing one is part
   of the topology decision, not independent of it.
-- **Device characterization.** `CLAUDE.md`'s "gm/ID first" ordering means the
-  next concrete step, once this bootstrap pass merges, is a gm/ID
-  characterization sweep over sky130's 1.8 V-core MOS flavors, committed to
-  `sim/` before any sizing work — the same practice `sky130-bandgap` and
+- **Device characterization — done.** `CLAUDE.md`'s "gm/ID first" ordering
+  named this as the next concrete step after this bootstrap pass; it is now
+  committed as
+  [`sim/gm-id-characterization/`](https://github.com/2AMLogic/sky130-opamp/tree/main/sim/gm-id-characterization)
+  (issue #6): gm/ID, gm/gds and fT vs overdrive for both `_01v8` polarities,
+  over the confirmed corner grid below and a channel-length sweep from
+  minimum length to 8x minimum — the same practice `sky130-bandgap` and
   `sky130-ldo` both already followed on this PDK (at their own, different,
-  primary supply voltages).
-- **Corner-grid confirmation.** `target-spec.md` §1 flags that
+  primary supply voltages). This is device-level input for a future sizing
+  pass, not a topology choice or a filled-in `target-spec.md` performance
+  row (both remain open below).
+- **Corner-grid confirmation — done.** `target-spec.md` §1 flagged that
   `sky130-bandgap`'s ratified corner grid runs its devices at 3.3 V, not this
-  block's 1.8 V-core primary — the corner *shape* (`tt, ff, ss, fs, sf` plus
-  device-family corners) is a reasonable starting template, but the specific
-  1.8 V-core corner-model file names need confirming against the sky130 PDK
-  checkout once device characterization starts.
+  block's 1.8 V-core primary. The corner *shape* (`tt, ff, ss, fs, sf`) has
+  now been confirmed specifically for the `_01v8` (1.8 V-core) flavor
+  against the pinned PDK checkout, by
+  [`sim/gm-id-characterization/corners/model-files.json`](https://github.com/2AMLogic/sky130-opamp/blob/main/sim/gm-id-characterization/corners/model-files.json)
+  (issue #6), which resolves each corner to its literal
+  `sky130_fd_pr__{nfet,pfet}_01v8__<corner>.*.spice` model file — not
+  assumed by analogy from the 3.3 V-primary sibling.
 - **Gap-to-T1 tracker.** [#3](https://github.com/2AMLogic/sky130-opamp/issues/3),
   filed alongside this pass, tracks the block's current distance from the
   klayout-tools T1 ("sim-validated") design-evidence tier — every checklist

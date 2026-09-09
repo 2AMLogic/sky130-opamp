@@ -1,0 +1,60 @@
+{
+  "_comment": [
+    "Confirmed 1.8V-core MOS corner-model file list for the sky130A PDK",
+    "checkout pinned in sim/gm-id-characterization/pdk.json (open_pdks",
+    "c6d73a35f524070e85faff4a6a9eef49553ebc2b). This is the artifact that",
+    "closes issue #6's 'corner-grid confirmation' scope item and is the",
+    "pointer target for spec/target-spec.md Section 1's 'Corner grid' row.",
+    "",
+    "Verified 2026-09-08 by directly grepping every",
+    "libs.tech/ngspice/corners/<corner>.spice file in the pinned checkout",
+    "for its nfet_01v8/pfet_01v8 .include lines (excluding the mismatch and",
+    "ESD-device .include lines, which are separate concerns not swept by",
+    "this experiment). Each entry below is the literal path resolved from",
+    "that checkout, relative to $PDK_ROOT/sky130A/.",
+    "",
+    "sky130-bandgap's own ratified corner set (tt, ff, ss, fs, sf) is the",
+    "same *shape* of grid, but that sibling's ratified spec runs its",
+    "devices at 3.3V using the I/O-tolerant flavor -- this file is the",
+    "1.8V-core-specific confirmation porting-plan.md Section 4 asked for,",
+    "not a copy of that sibling's file names.",
+    "",
+    "Naming convention (SkyWater sky130, standard across the PDK): tt =",
+    "typical-typical, ff = fast-fast, ss = slow-slow, fs = fast-NMOS/",
+    "slow-PMOS, sf = slow-NMOS/fast-PMOS. This experiment does not itself",
+    "depend on that mnemonic being correct in either direction -- each",
+    "corner's nfet_01v8 and pfet_01v8 data is measured and reported on its",
+    "own terms (see records/), not inferred from the corner's name."
+  ],
+  "pdk_variant": "sky130A",
+  "open_pdks_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+  "corner_include_dir": "libs.tech/ngspice/corners",
+  "corners": {
+    "tt": {
+      "corner_include": "libs.tech/ngspice/corners/tt.spice",
+      "nfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__tt.pm3.spice",
+      "pfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__tt.corner.spice"
+    },
+    "ff": {
+      "corner_include": "libs.tech/ngspice/corners/ff.spice",
+      "nfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__ff.pm3.spice",
+      "pfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__ff.corner.spice"
+    },
+    "ss": {
+      "corner_include": "libs.tech/ngspice/corners/ss.spice",
+      "nfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__ss.pm3.spice",
+      "pfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__ss.corner.spice"
+    },
+    "sf": {
+      "corner_include": "libs.tech/ngspice/corners/sf.spice",
+      "nfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__sf.pm3.spice",
+      "pfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__sf.corner.spice"
+    },
+    "fs": {
+      "corner_include": "libs.tech/ngspice/corners/fs.spice",
+      "nfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__nfet_01v8__fs.pm3.spice",
+      "pfet_01v8_model_file": "libs.ref/sky130_fd_pr/spice/sky130_fd_pr__pfet_01v8__fs.corner.spice"
+    }
+  },
+  "note_on_temperature_and_supply": "Process corner (this file) and simulation temperature are orthogonal in sky130's ngspice deck convention -- temperature is a `.temp` analysis setting, not a separate model file. This experiment's PVT grid is therefore process (5, this file) x temperature (3: -40C/27C/125C, matching spec/target-spec.md Section 1's Operating temperature row). Supply voltage is not a separate swept axis for this bare-device study: VDS is the study's own representative fixed bias (see README.md), not a node tied to a VDD net the way a full-circuit testbench's PSRR/line-regulation bench would sweep VIN -- there is no 'supply corner' for a two-terminal-bias device sweep, so this experiment does not manufacture one."
+}
