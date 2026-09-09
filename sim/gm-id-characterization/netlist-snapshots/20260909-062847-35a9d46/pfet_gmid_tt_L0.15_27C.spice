@@ -1,0 +1,38 @@
+* gm/ID characterization testbench -- sky130_fd_pr__pfet_01v8 (issue #6)
+*
+* Mirrors nfet_gmid.spice.tmpl's bias/measurement shape for the PFET.
+* Source and bulk are tied together at the 1.8 rail (this device's own
+* body-tie convention, source-referenced rather than ground-referenced,
+* since a PMOS common-source stage in a real circuit is normally biased
+* from the top rail). The gate is swept 0 -> VDD exactly like the NFET
+* template; bin/sweep.py derives this device's own overdrive axis from the
+* swept node directly (Vsg = VDD - v(g)) rather than the sweep direction
+* implying it -- see ../README.md's "How to read a record" for the Vov
+* definition used here (Vov = Vsg - |Vth|, both read from this same sweep).
+* 0.15, 2.0, 0.9 (the drain bias -- bin/sweep.py sets this to VDD minus
+* a representative |Vds|, so the drain sits below the source rail), 1.8,
+* 27.0, 0.02, /Users/rwalters/.volare/sky130A/libs.tech/ngspice/corners/tt.spice and /var/folders/0h/l9gwswj97wb82mh27zyw305r0000gn/T/gmid-sweep-y_unngkn/sweep_out.txt are substituted by
+* bin/sweep.py -- this file itself is never run directly.
+*
+* Device convention: d/g/s/b = drain/gate/source/bulk. 2.0 is a
+* representative width (see ../README.md); gm/ID, gm/gds and fT are, to
+* first order, W-independent normalized quantities.
+
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/corners/tt.spice"
+.temp 27.0
+
+Vg g 0 dc 0
+Vsup vdd 0 dc 1.8
+Vdrain d 0 dc 0.9
+
+XM1 d g vdd vdd sky130_fd_pr__pfet_01v8 l=0.15 w=2.0
+
+.control
+save all @m.xm1.msky130_fd_pr__pfet_01v8[gm] @m.xm1.msky130_fd_pr__pfet_01v8[gds] @m.xm1.msky130_fd_pr__pfet_01v8[id] @m.xm1.msky130_fd_pr__pfet_01v8[cgg] @m.xm1.msky130_fd_pr__pfet_01v8[vth]
+dc Vg 0 1.8 0.02
+wrdata /var/folders/0h/l9gwswj97wb82mh27zyw305r0000gn/T/gmid-sweep-y_unngkn/sweep_out.txt v(g) @m.xm1.msky130_fd_pr__pfet_01v8[gm] @m.xm1.msky130_fd_pr__pfet_01v8[gds] @m.xm1.msky130_fd_pr__pfet_01v8[id] @m.xm1.msky130_fd_pr__pfet_01v8[cgg] @m.xm1.msky130_fd_pr__pfet_01v8[vth]
+.endc
+.end

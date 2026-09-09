@@ -1,0 +1,37 @@
+* gm/ID characterization testbench -- sky130_fd_pr__nfet_01v8 (issue #6)
+*
+* A single core NMOS in a fixed-Vds common-source bias, with Vgs swept
+* from 0 to VDD. bin/sweep.py renders this template once per
+* (corner, length, temperature) point by substituting the {CORNER_INCLUDE},
+* {L}, {W}, {VDS}, {VDD}, {TEMP} and {OUT_FILE} placeholders below and
+* invoking ngspice -b on the result -- this file itself is never run
+* directly (the placeholders are not valid ngspice syntax on their own).
+*
+* Device convention: d/g/s/b = drain/gate/source/bulk, source and bulk
+* both grounded (no body effect swept -- this is a single-transistor
+* gm/ID sweep, not a stacked/cascode bias study). Vgs sweeps 0->VDD, which
+* for an NMOS is directly the gate overdrive axis this experiment reports
+* against (see ../README.md's "How to read a record" for the Vov
+* definition used: Vov = Vgs - Vth, both from this same sweep).
+*
+* {W} is a representative width (see ../README.md) -- gm/ID, gm/gds and
+* fT are, to first order, W-independent normalized quantities; W only
+* sets the absolute Id/gm scale, which this experiment does not claim.
+
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "{CORNER_INCLUDE}"
+.temp {TEMP}
+
+Vgs g 0 dc 0
+Vds d 0 dc {VDS}
+
+XM1 d g 0 0 sky130_fd_pr__nfet_01v8 l={L} w={W}
+
+.control
+save all @m.xm1.msky130_fd_pr__nfet_01v8[gm] @m.xm1.msky130_fd_pr__nfet_01v8[gds] @m.xm1.msky130_fd_pr__nfet_01v8[id] @m.xm1.msky130_fd_pr__nfet_01v8[cgg] @m.xm1.msky130_fd_pr__nfet_01v8[vth]
+dc Vgs 0 {VDD} {VSTEP}
+wrdata {OUT_FILE} v(g) @m.xm1.msky130_fd_pr__nfet_01v8[gm] @m.xm1.msky130_fd_pr__nfet_01v8[gds] @m.xm1.msky130_fd_pr__nfet_01v8[id] @m.xm1.msky130_fd_pr__nfet_01v8[cgg] @m.xm1.msky130_fd_pr__nfet_01v8[vth]
+.endc
+.end
