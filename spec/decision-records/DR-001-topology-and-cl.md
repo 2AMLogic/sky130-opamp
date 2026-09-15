@@ -1,13 +1,31 @@
 # DR-001: Two-stage topology (input-pair polarity, output stage, cascode) and CL target
 
-- **Status**: proposed (input to a future spec-ratification issue; this
-  repo has no ratified spec yet — `spec/target-spec.md` itself is still
-  DRAFT, per its own status banner)
-- **Date**: 2026-09-09
+- **Status**: submitted for ratification — promoted from `proposed` by the
+  PR that lands issue #10's sizing pass (2026-09-15). Per the 2026-08-19
+  canary spec/DR ratification-via-PR standing policy
+  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)) and the
+  two-key mechanism epic
+  ([2AMLogic/2am#372](https://github.com/2AMLogic/2am/issues/372)): **a
+  builder drafts the ratification as a PR on the evidence, and PR
+  approval — a non-author EE key plus a non-author market key, or direct
+  operator PR approval where the two-key rollout has not yet reached this
+  repo — is the ratification act, not this commit.** This record's own
+  author (and issue #10's builder) is the drafting party, not a
+  ratifying key-holder, and does not self-ratify by editing this status
+  line; the line is promoted here to *submit* the record for that review,
+  exactly as the cited standing policy frames a ratification-via-PR draft.
+  `spec/target-spec.md` itself remains `DRAFT` — this promotion covers only
+  this decision record (topology, `CL`, and the structural compensation
+  ratios its appendix names), not the target-spec table as a whole.
+- **Date**: 2026-09-09 (decision); 2026-09-15 (status promoted to
+  submitted-for-ratification, issue #10)
 - **Decided by**: Builder agent, issue #8
 - **Related**: #6 / PR #7 (the gm/ID device-characterization study this
-  record cites), `spec/target-spec.md` (`CL` row, §1), `spec/porting-plan.md`
-  §4 ("Open items and next steps"), gap-to-T1 tracker #3
+  record cites), #10 (the sizing pass that promotes this record's status
+  and cites its appendix ratios in `spec/target-spec.md` §2a),
+  `spec/target-spec.md` (`CL` row, §1; §2/§2a performance sizing),
+  `spec/porting-plan.md` §4 ("Open items and next steps"), gap-to-T1
+  tracker #3
 
 ## Context
 
@@ -296,17 +314,26 @@ found.
   mirroring how PR #7 marked the device-characterization and corner-grid
   bullets done in the same section.
 - No row in `spec/target-spec.md` §2 (performance targets) is filled or
-  relaxed by this record — every `[TBD]` performance row stays `[TBD]`
-  until PVT-cornered testbenches exist (gap-to-T1 tracker #3, item 5).
+  relaxed by this record itself — that sizing pass is performed by issue
+  #10's PR, which cites this record's appendix ratios (`Cc ≈ (0.2–0.3) ×
+  CL`, `gm2/gm1 ≈ 10`) and the same gm/ID CSVs this record cites, adding a
+  new `spec/target-spec.md` §2a with the per-row derivation. `[TBD]` rows
+  with no gm/ID-derivable basis (offset, CMRR, PSRR, area) remain `[TBD]`
+  with a stated reason even after that pass — full confirmation of every
+  §2 row still awaits PVT-cornered testbenches (gap-to-T1 tracker #3,
+  item 5).
 
 ## Consequences
 
 - Every gm/ID-dependent `[TBD]` row in `spec/target-spec.md` §2 (DC gain,
-  GBW, slew rate, quiescent power) can now be sized against a concrete
-  topology and load, citing
+  GBW, slew rate, output swing, quiescent power, and a noise thermal
+  floor) is now sized against this record's topology and load in issue
+  #10's PR (`spec/target-spec.md` §2a), citing
   `sim/gm-id-characterization/records/*.csv` directly per `CLAUDE.md`'s
-  "gm/ID first" rule — but no such sizing is performed by this record (see
-  "Open items" below).
+  "gm/ID first" rule and this record's own appendix ratios — but this
+  record itself still performs none of that sizing (see "Open items"
+  below); it only supplies the topology and the ratios #10's pass builds
+  on.
 - The non-cascoded architecture choice means output swing and input
   common-mode range are not further constrained by cascode headroom, but
   the two-stage DC-gain budget now depends on the output-stage PMOS device
@@ -343,14 +370,26 @@ This record does **not** perform any actual amplifier sizing — no device
 widths, bias currents, or mirror ratios are chosen here; the channel
 lengths named above (`L = 0.15 µm` input pair, `L = 0.3 µm` tail/mirror,
 `L = 1.2 µm` output stage) are candidates for a future sizing pass to
-confirm or revise, not commitments. Specifically left open:
+confirm or revise, not commitments. Issue #10's PR (`spec/target-spec.md`
+§2a) proposes a *bias-current sizing example* (`I_SS = 10 µA` tail,
+`ID2 = 50 µA` output stage, `Cc = 0.5 pF`) to turn this appendix's ratios
+into concrete GBW/slew-rate/power numbers, explicitly flagged there as a
+proposed choice rather than a value fixed by device data — it does not
+resolve the items below, which remain open pending an actual schematic:
 
-- Device widths, tail current, and mirror ratios for every device named
-  above.
-- `Cc` and `Rz` numeric values (the appendix-style budget below is
-  illustrative, not a sizing commitment).
+- Device widths and mirror ratios for every device named above (issue #10
+  proposes bias *currents* only, not widths — device width requires a
+  chosen current density from `sim/gm-id-characterization/records/*-full-sweep.csv`'s
+  `id_a`/`width_um` columns, not performed here or in #10).
+- `Rz`'s numeric value (`Rz ≈ 1/gm2` per Decision (d) above; with #10's
+  proposed `gm2 = 500 µS` sizing example this would be `Rz ≈ 2 kΩ`, but
+  this remains an illustrative consequence of that proposed example, not a
+  sizing commitment — `Cc`'s own proposed value is #10's `0.5 pF`, the
+  midpoint of the range in the appendix below).
 - Input-referred offset and mismatch budget (statistical basis is named in
-  `spec/target-spec.md` §2 but not sized here).
+  `spec/target-spec.md` §2; issue #10 leaves the numeric target `[TBD]`
+  there, since the committed gm/ID sweep has no mismatch/Pelgrom
+  coefficient data to size it from).
 - Whether the `ss/−40 °C` / `ff/125 °C` corner extremes cited above (chosen
   because they bound the swept grid) turn out to also be the binding
   corners once a full schematic exists — `spec/target-spec.md` §2's
