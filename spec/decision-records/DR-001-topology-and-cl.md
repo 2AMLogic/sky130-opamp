@@ -374,18 +374,44 @@ confirm or revise, not commitments. Issue #10's PR (`spec/target-spec.md`
 §2a) proposes a *bias-current sizing example* (`I_SS = 10 µA` tail,
 `ID2 = 50 µA` output stage, `Cc = 0.5 pF`) to turn this appendix's ratios
 into concrete GBW/slew-rate/power numbers, explicitly flagged there as a
-proposed choice rather than a value fixed by device data — it does not
-resolve the items below, which remain open pending an actual schematic:
+proposed choice rather than a value fixed by device data.
 
-- Device widths and mirror ratios for every device named above (issue #10
+**Status update (2026-09-15, issue #13):** the schematic-capture pass that
+this record's "Next step" calls for has landed —
+[`design/opamp_core.sch`](../../design/opamp_core.sch) — and the sizing
+pass behind it is recorded in
+[`DR-002`](DR-002-device-sizing.md). The first two items below are
+**resolved** by that record (and the candidate channel lengths above are
+revised there, with stated reasons, per this record's own instruction that
+a revision "should produce a superseding record, not a silent change");
+the remaining items are still open. **This record's own ratification
+status is unchanged by that update.**
+
+- ~~Device widths and mirror ratios for every device named above (issue #10
   proposes bias *currents* only, not widths — device width requires a
   chosen current density from `sim/gm-id-characterization/records/*-full-sweep.csv`'s
-  `id_a`/`width_um` columns, not performed here or in #10).
-- `Rz`'s numeric value (`Rz ≈ 1/gm2` per Decision (d) above; with #10's
+  `id_a`/`width_um` columns, not performed here or in #10).~~
+  **Resolved** by [`DR-002`](DR-002-device-sizing.md) (issue #13):
+  every device's width is chosen from that CSV's `id_a`/`width_um` columns
+  at a stated `gm/ID` point, and the mirror ratios are fixed at
+  `M3:M4 = 1:1` (first-stage mirror), `M4:M6 = 1:10` (mirror to output gain
+  device), and `MB1:M5:M7 = 1:2:10` (bias reference to tail and output
+  sink). DR-002 also revises all three candidate channel lengths above —
+  input pair to `1.2 µm` (`0.15 µm` needs a sub-minimum `W = 0.21 µm` at
+  `ID1 = 5 µA`), PMOS mirror and output gain device to a shared `0.6 µm`,
+  NMOS tail/sink/reference to a shared `1.2 µm` — each with its reason
+  stated there.
+- ~~`Rz`'s numeric value (`Rz ≈ 1/gm2` per Decision (d) above; with #10's
   proposed `gm2 = 500 µS` sizing example this would be `Rz ≈ 2 kΩ`, but
   this remains an illustrative consequence of that proposed example, not a
   sizing commitment — `Cc`'s own proposed value is #10's `0.5 pF`, the
-  midpoint of the range in the appendix below).
+  midpoint of the range in the appendix below).~~
+  **Resolved** by [`DR-002`](DR-002-device-sizing.md) (issue #13):
+  `Rz = 2.00 kΩ` — the `≈ 2 kΩ` value this bullet predicted, confirmed
+  because DR-002 keeps `gm2 = 500 µS` — drawn as one
+  `sky130_fd_pr__res_high_po_1p41` at `L = 7.585 µm`; `Cc = 0.4998 pF`
+  drawn as one `sky130_fd_pr__cap_mim_m3_1` at `W = L = 15.62 µm`. Both
+  remain unverified in simulation (DR-002 is `proposed`, not ratified).
 - Input-referred offset and mismatch budget (statistical basis is named in
   `spec/target-spec.md` §2; issue #10 leaves the numeric target `[TBD]`
   there, since the committed gm/ID sweep has no mismatch/Pelgrom
@@ -416,5 +442,9 @@ fixed by that sizing pass. None of these numbers are binding; they exist
 only to give a future sizing pass a starting point consistent with this
 record's topology choice.
 
-**Next step**: schematic capture in `design/` with xschem, sized from this
-DR's operating points.
+**Next step**: ~~schematic capture in `design/` with xschem, sized from this
+DR's operating points.~~ Done — [`design/opamp_core.sch`](../../design/opamp_core.sch)
+and [`DR-002`](DR-002-device-sizing.md) (issue #13). The next step after
+that is a PVT-cornered testbench (operating point, open-loop AC gain and
+phase margin, slew/settling, and an input-common-mode sweep) against the
+sizing DR-002 proposes — nothing in either record is simulated yet.
