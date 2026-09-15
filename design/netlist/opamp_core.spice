@@ -1,0 +1,28 @@
+** sch_path: /Users/rwalters/GitHub/sky130-opamp/.loom/worktrees/issue-13/design/opamp_core.sch
+**.subckt opamp_core vdd vss inn inp out ibias
+*.iopin vdd
+*.iopin vss
+*.iopin inn
+*.iopin inp
+*.iopin out
+*.iopin ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.6 W=2.745 nf=1 ad=0.79605 as=0.79605 pd=6.07 ps=6.07 nrd=0.105646630236794
++ nrs=0.105646630236794 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.6 W=2.745 nf=1 ad=0.79605 as=0.79605 pd=6.07 ps=6.07 nrd=0.105646630236794
++ nrs=0.105646630236794 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=1.325 nf=1 ad=0.38425 as=0.38425 pd=3.23 ps=3.23 nrd=0.218867924528302
++ nrs=0.218867924528302 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=1.325 nf=1 ad=0.38425 as=0.38425 pd=3.23 ps=3.23 nrd=0.218867924528302
++ nrs=0.218867924528302 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=3.835 nf=1 ad=1.11215 as=1.11215 pd=8.25 ps=8.25 nrd=0.075619295958279
++ nrs=0.075619295958279 sa=0 sb=0 sd=0 mult=2 m=2
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=3.835 nf=1 ad=1.11215 as=1.11215 pd=8.25 ps=8.25 nrd=0.075619295958279
++ nrs=0.075619295958279 sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.6 W=2.745 nf=1 ad=0.79605 as=0.79605 pd=6.07 ps=6.07 nrd=0.105646630236794
++ nrs=0.105646630236794 sa=0 sb=0 sd=0 mult=10 m=10
+XM7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=3.835 nf=1 ad=1.11215 as=1.11215 pd=8.25 ps=8.25 nrd=0.075619295958279
++ nrs=0.075619295958279 sa=0 sb=0 sd=0 mult=10 m=10
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=7.585 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+**.ends
+.end
