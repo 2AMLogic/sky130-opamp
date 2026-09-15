@@ -3,12 +3,25 @@
 - **Status**: **DRAFT** — engineering input, not yet ratified. One decision
   record exists in this repo,
   [`DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
-  (status `proposed`), covering the two-stage topology's input-pair
-  polarity, first-stage load, output-stage class, compensation scheme, and
-  the `CL` row below; ratification of this table as a whole is a separate,
-  future issue.
-- **Date**: 2026-09-06
-- **Assembled by**: Loom Builder agent, issue #2 (bootstrap/scaffolding pass)
+  (status `submitted for ratification`, via the PR that lands this pass —
+  see below), covering the two-stage topology's input-pair polarity,
+  first-stage load, output-stage class, compensation scheme, and the `CL`
+  row below; ratification of this table as a whole is a separate, future
+  issue.
+- **Date**: 2026-09-06 (bootstrap); **2026-09-15 sizing pass** — every §2
+  performance row is now either a proposed `[P]` sizing estimate cited to
+  `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
+  (per `CLAUDE.md`'s "gm/ID first" rule) and to
+  [`DR-001`](decision-records/DR-001-topology-and-cl.md)'s topology/
+  structural ratios, or an explicit `[TBD]` with a stated reason it cannot
+  yet be filled from that data. This pass performs **no schematic
+  capture, no layout, no simulation beyond the already-committed gm/ID
+  device sweep** — every number below is a sizing estimate under DR-001's
+  chosen topology, not a measured or simulated result. See
+  [§2a](#2a-sizing-basis-for-the-2026-09-15-pass-illustrative-non-binding)
+  for the shared assumptions and per-row derivation.
+- **Assembled by**: Loom Builder agent, issue #2 (bootstrap/scaffolding
+  pass); issue #10 (2026-09-15 sizing pass)
 - **Scope**: 1.8 V primary variant only. The 3.3 V I/O-device flavor is named
   but explicitly not opened here — per `CLAUDE.md`'s "1.8 V primary; 3.3 V
   I/O-device flavor only via decision record," opening it requires its own
@@ -22,12 +35,18 @@ basis, CMRR/PSRR, swing, power), matching the row set the sky130-opamp's
 same-topology twin
 [`gf180-opamp/spec/target-spec.md`](https://github.com/2AMLogic/gf180-opamp/blob/main/spec/target-spec.md)
 uses. Before this file existed, that row set lived only as prose in
-`CLAUDE.md`/`README.md`. Nothing in this pass performs circuit design,
-schematic capture, or simulation — every numeric target below is either an
-engineering placeholder proposal `[P]` or explicitly `[TBD]` pending sky130
-device data that does not exist in this repo yet (`design/`, `sim/`,
-`layout/`, and `measurements/` all currently hold only placeholder
-`README.md` files, verified against `main` @ `491adc3`, 2026-09-06).
+`CLAUDE.md`/`README.md`. At the original 2026-09-06 bootstrap pass, nothing
+performed circuit design, schematic capture, or simulation, and every
+numeric target was either an engineering placeholder proposal `[P]` or
+explicitly `[TBD]` pending sky130 device data that did not exist in this
+repo yet (`design/`, `sim/`, `layout/`, and `measurements/` all held only
+placeholder `README.md` files, verified against `main` @ `491adc3`,
+2026-09-06). The 2026-09-15 sizing pass (issue #10) has since committed
+device data (`sim/gm-id-characterization/`) and a topology decision
+(`DR-001`) and used both to size most §2 rows — but still performs **no
+circuit design, schematic capture, or simulation of its own**: `design/`,
+`layout/`, and `measurements/` remain placeholder-only, and every `[P]`
+value below is a sizing estimate, not a measured result (see §2a).
 
 ## How to read this table
 
@@ -40,9 +59,9 @@ glance:
 
 | Tag | Meaning |
 |---|---|
-| **[DR-n]** | Carried unchanged from a decision record `n`. [`DR-001`](decision-records/DR-001-topology-and-cl.md) (status `proposed`) is the only one so far, and it tags the `CL` row below. |
-| **[P]** | **Proposed by this bootstrap pass** — an engineering placeholder with no measured sky130 data behind it yet (e.g. carried from this repo's own `README.md`/`CLAUDE.md` framing, or a structural convention borrowed from a same-PDK sibling's ratified spec). Needs an explicit ratification decision before it binds. |
-| **[TBD]** | Deliberately unset — no sky130 device data exists yet to propose even a placeholder number. Filled in once gm/ID device characterization (`sim/`) and PVT-cornered testbenches exist. Tracked collectively under the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3) (item 5, "Full PVT corner simulation vs a ratified spec"), rather than one issue per row. |
+| **[DR-n]** | Carried unchanged from a decision record `n`. [`DR-001`](decision-records/DR-001-topology-and-cl.md) (status `submitted for ratification`) is the only one so far, and it tags the `CL` row below. |
+| **[P]** | **Proposed by this bootstrap pass, or by the 2026-09-15 sizing pass (issue #10)** — an engineering placeholder or sizing estimate with no PVT-cornered testbench evidence behind it yet (e.g. carried from this repo's own `README.md`/`CLAUDE.md` framing, a structural convention borrowed from a same-PDK sibling's ratified spec, or a §2 performance target sized from the committed gm/ID device sweep under [`DR-001`](decision-records/DR-001-topology-and-cl.md)'s topology — see [§2a](#2a-sizing-basis-for-the-2026-09-15-pass-illustrative-non-binding)). Needs an explicit ratification decision before it binds. |
+| **[TBD]** | Deliberately unset — no sky130 device data exists yet to propose even a placeholder number, or the committed gm/ID sweep (bare-device DC characterization only) has no basis for this row (e.g. offset/mismatch, CMRR/PSRR small-signal behavior, area — each has a one-line reason at its row, or in [§2a](#2a-sizing-basis-for-the-2026-09-15-pass-illustrative-non-binding)). Filled in once the relevant device/PVT-cornered testbench evidence exists. Tracked collectively under the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3) (item 5, "Full PVT corner simulation vs a ratified spec"), rather than one issue per row. |
 
 **Status** column values: `not started` (no `sim/` evidence exists for this
 row at all — true of every row in this pass). There is no `ratifiable` or
@@ -72,45 +91,203 @@ supersedes the prediction once it exists.
 
 | Parameter | Target | Stretch | Statistical basis | Binding corner (predicted) | Status |
 |---|---|---|---|---|---|
-| Open-loop DC gain | **[TBD]** | — | — (deterministic corner-worst-case candidate) | SS / −40 °C (lowest gm, highest output impedance loss) | not started |
-| GBW (into stated CL, [TBD] above) | **[TBD]** | — | — | SS / −40 °C / low VDD (slowest devices) | not started |
+| Open-loop DC gain | **≥ 60 dB [P]** — sizing estimate ≈ 62–65 dB across the swept corner grid (§2a) | ≥ 65 dB [P] | — (deterministic corner-worst-case candidate) | SS / −40 °C (lowest gm, highest output impedance loss) | not started |
+| GBW (into stated CL = 2 pF, per `DR-001`) | **≈ 16 MHz [P]** — self-consistent sizing example (§2a) | — | — | SS / −40 °C / low VDD (slowest devices) | not started |
 | Phase margin (at GBW, same CL) | **≥ 60° [P]** | ≥ 45° at the FF/hot corner if 60° is unreachable there | — (deterministic corner-worst-case) | FF / 125 °C (fastest devices, most peaking risk) | not started |
-| Slew rate | **[TBD]** | — | — | SS / −40 °C / low VDD (lowest tail-current headroom) | not started |
-| Input-referred noise | **[TBD]** — band not yet chosen | — | n/a until a band is set | n/a | not started |
-| Input-referred offset | **[TBD]** | — | **3σ, mismatch MC N≥300 + process corners [P]** — matches `sky130-bandgap`'s ratified statistical-basis convention (its output-reference row); sample count not yet re-derived for this topology | to be determined once a topology is drawn — likely SS/FF split-corner pairing on the input differential pair | not started |
-| CMRR | **[TBD]** | — | — (deterministic corner-worst-case) | to be determined | not started |
-| PSRR | **[TBD]** | — | — (deterministic corner-worst-case) | to be determined | not started |
-| Output swing | **[TBD]** — expected to show the low-headroom trade explicitly at 1.8 V, per `README.md` | — | — | low VDD / worst output-stage headroom corner — expected to be the row where 1.8 V-primary headroom cost is most visible relative to the 3.3 V/5 V twins | not started |
-| Quiescent power | **[TBD]** | — | — (deterministic corner-worst-case) | FF / 125 °C / 1.98 V (leakage + fastest devices) — matches `sky130-bandgap`'s ratified Iq binding-corner convention | not started |
-| Area | **[TBD]** | — | n/a (not a PVT line) | n/a | not started |
+| Slew rate | **≈ 20 V/µs [P]** — self-consistent sizing example (§2a) | — | — | SS / −40 °C / low VDD (lowest tail-current headroom) | not started |
+| Input-referred noise | **≈ 30 nV/√Hz thermal floor [P], proposed band 100 Hz – 1 MHz [P]** — flicker (1/f) not characterized by the committed gm/ID sweep (§2a) | — | n/a — deterministic device-noise estimate, not yet mismatch/MC-based | TT / 27 °C (thermal-floor estimate is only weakly corner-dependent under this pass's constant-current-bias assumption — see §2a caveat) | not started |
+| Input-referred offset | **[TBD]** — the committed gm/ID sweep is a bare-device DC characterization (gm/ID, gm/gds, fT only) with no Pelgrom/`AVT` mismatch coefficient extraction; a numeric offset target needs either a dedicated mismatch Monte-Carlo pass or PDK mismatch-model data, neither in scope for this issue (§2a) | — | **3σ, mismatch MC N≥300 + process corners [P]** — matches `sky130-bandgap`'s ratified statistical-basis convention (its output-reference row); sample count not yet re-derived for this topology | to be determined once a topology is drawn — likely SS/FF split-corner pairing on the input differential pair | not started |
+| CMRR | **[TBD]** — CMRR is set by the first stage's common-mode-to-differential conversion (tail-current-source and mirror-asymmetry small-signal behavior), which the committed gm/ID sweep's single-device DC operating points do not characterize; needs a common-mode AC testbench, not yet built (§2a) | — | — (deterministic corner-worst-case) | to be determined | not started |
+| PSRR | **[TBD]** — PSRR is a supply-to-output small-signal transfer function (through the compensation network and bias generator); the committed gm/ID sweep has no supply-voltage sweep axis at all (confirmed in `sim/gm-id-characterization/README.md`: "No supply-voltage axis is swept ... there is no 'supply corner' for a two-terminal-bias bare-device sweep"), so there is no device-level basis to size this row from yet (§2a) | — | — (deterministic corner-worst-case) | to be determined | not started |
+| Output swing | **≈ 0.17 – 1.45 V (≈ 1.27 Vpp, ≈ 79% of the 1.62 V worst-case-low rail) [P]** — sizing estimate from device `Vov` headroom (§2a) | — | — | low VDD / worst output-stage headroom corner — expected to be the row where 1.8 V-primary headroom cost is most visible relative to the 3.3 V/5 V twins | not started |
+| Quiescent power | **≈ 119 µW at the stated binding corner (1.98 V); ≈ 108 µW at nominal 1.8 V [P]** — self-consistent sizing example (§2a) | — | — (deterministic corner-worst-case) | FF / 125 °C / 1.98 V (leakage + fastest devices) — matches `sky130-bandgap`'s ratified Iq binding-corner convention | not started |
+| Area | **[TBD]** — no `layout/` exists yet (holds only a placeholder `README.md`); area has no gm/ID-derived basis at all — it is a post-layout quantity, not a circuit-sizing one, and is not proposed here even as a placeholder | — | n/a (not a PVT line) | n/a | not started |
 
-Every `[TBD]` row above is deliberately left unset rather than guessed, per
-`CLAUDE.md`'s "no claim without a testbench" and per this issue's explicit
-scope (scaffolding only, no circuit design or simulation). Filling any of
-them requires, at minimum, a topology decision (tracked in
-[`porting-plan.md`](porting-plan.md)) and a gm/ID device-characterization
-pass committed to `sim/`, per `CLAUDE.md`'s "gm/ID first, committed before
-sizing."
+Every row above now carries either a `[P]` sizing estimate (this pass,
+issue #10, sized from the committed gm/ID device sweep under `DR-001`'s
+topology — see §2a immediately below for the shared assumptions and
+per-row derivation) or an explicit `[TBD]` with a one-line reason it
+cannot yet be filled from that data (offset, CMRR, PSRR, area). None of
+these `[P]` values is measured or simulated — `CLAUDE.md`'s "no claim
+without a testbench" applies to any future *pass/fail* verdict on these
+rows, not to this pass's sizing estimates, which are explicitly flagged as
+such throughout. Filling the remaining `[TBD]` rows, and confirming any
+`[P]` sizing estimate, requires a schematic (`design/`) and PVT-cornered
+testbenches (tracked in [`porting-plan.md`](porting-plan.md) and the
+gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3)).
+
+## 2a. Sizing basis for the 2026-09-15 pass (illustrative, non-binding)
+
+This section is the citation trail the acceptance criteria for issue #10
+require: every `[P]` value in the table above is derived here from a
+literal, quoted row of
+[`sim/gm-id-characterization/records/20260909-062847-35a9d46-summary.csv`](../sim/gm-id-characterization/records/20260909-062847-35a9d46-summary.csv)
+(grep either that file or
+[`-full-sweep.csv`](../sim/gm-id-characterization/records/20260909-062847-35a9d46-full-sweep.csv)
+directly to reproduce any number below), plus the structural ratios
+`DR-001`'s own "Appendix — illustrative (non-binding) first-cut
+compensation budget" already names (`Cc ≈ (0.2–0.3) × CL`, `gm2/gm1 ≈ 10`).
+**No device width, mirror ratio, or absolute bias current is chosen
+anywhere in this repo yet** (`DR-001`'s own "Open items" leaves all three
+open) — the bias currents below are this pass's own proposed sizing
+example, explicitly flagged as a choice rather than a value read off a
+CSV, used to turn `DR-001`'s ratio-only appendix into concrete GBW/slew/
+power numbers. A future schematic-level sizing pass may choose different
+absolute currents; the ratios (`Cc`, `gm2/gm1`) are the more durable part
+of this estimate.
+
+**Shared sizing assumptions (this pass's proposal, not CSV-derived):**
+
+- `Cc = 0.5 pF` — the midpoint of `DR-001`'s own `Cc ≈ (0.2–0.3) × CL`
+  range at `CL = 2 pF`, and the exact value `DR-001`'s own worked example
+  uses (`(2/0.5) × 2.5 ≈ 10` for the `gm2/gm1` ratio).
+- Input-pair tail current `I_SS = 10 µA` (`ID1 = 5 µA` per side), at the
+  same `gm/ID = 10 V⁻¹` design point every device in `DR-001` is cited at.
+- Output-stage bias current `ID2`, set by `DR-001`'s `gm2/gm1 ≈ 10` ratio
+  at the same `gm/ID = 10 V⁻¹` target for the output-stage devices (so
+  `ID2/ID1 = gm2/gm1 = 10` when both stages share one `gm/ID` target):
+  `ID2 = 50 µA`.
+- A 1:1 first-stage mirror ratio (input NMOS drain current = PMOS mirror
+  device current) and a matched-current output-stage current-source load
+  (`DR-001`'s own framing: "matched-headroom bias branch") — both biased
+  at the same `gm/ID = 10 V⁻¹` target as the device they share a node
+  with, so the two devices at a shared small-signal node carry equal `gm`
+  when their currents are equal (used in the DC-gain parallel-resistance
+  calculation below).
+- Bias currents are assumed PVT-invariant in this simplified model (no
+  bias-generator design exists yet to say otherwise) — flagged as a
+  modeling limitation, not a claim about a real bias generator's PSRR/PVT
+  behavior.
+
+**Open-loop DC gain.** First-stage output resistance is the parallel
+combination of the input NMOS's own `ro` and the PMOS mirror device's
+`ro`; because both carry equal current at the same `gm/ID` target (1:1
+mirror), their `gm` values are equal, so the stage gain reduces to the
+harmonic-mean-style parallel combination of the two devices' `gm/gds`
+figures: `A1 = (gm_gds_n1 × gm_gds_p,mirror) / (gm_gds_n1 + gm_gds_p,mirror)`.
+The same reduction applies to the second stage (`A2`), between the PMOS
+gain device and its matched-current NMOS current-source load. At the
+table's stated binding corner (`SS / −40 °C`):
+`nfet,ss,0.15,-40.0,10.0,0.11065760695501746,23.055890095214018,53499354550.85566`
+(input pair, `gm/gds = 23.056`) and
+`pfet,ss,0.3,-40.0,10.0,0.16313970704600889,59.884981649589385,3519118888.054376`
+(mirror load, `gm/gds = 59.885`) give `A1 ≈ 16.65`; and
+`pfet,ss,1.2,-40.0,10.0,0.17374527049866112,391.3798627647017,279700538.2027164`
+(output gain device, `gm/gds = 391.38`) and
+`nfet,ss,1.2,-40.0,10.0,0.17338892591692476,147.9923717947348,1199214917.0636318`
+(output current-source load, `gm/gds = 147.99`) give `A2 ≈ 107.4` —
+`A_v = A1 × A2 ≈ 1788` (`≈ 65.1 dB`). Repeating at `TT / 27 °C`
+(`nfet,tt,0.15,27.0,10.0,0.08251096420151932,17.812185903821444,50310997967.09632`;
+`pfet,tt,0.3,27.0,10.0,0.14565187191474413,57.8640597462792,3365681803.31053`;
+`pfet,tt,1.2,27.0,10.0,0.15633370223321472,394.29946200230614,240374428.32014117`;
+`nfet,tt,1.2,27.0,10.0,0.1779772321718718,150.34338894034482,923694282.0334392`)
+gives `A_v ≈ 1483` (`≈ 63.4 dB`), and at `FF / 125 °C`
+(`nfet,ff,0.15,125.0,10.0,0.07637849840036044,14.890830794752453,48130572647.863014`;
+`pfet,ff,0.3,125.0,10.0,0.08012418418989142,51.9412838369931,2379111683.245384`;
+`pfet,ff,1.2,125.0,10.0,0.11079070052309993,393.3747331737141,173631100.59244695`;
+`nfet,ff,1.2,125.0,10.0,0.196416094071378,153.89886135344202,691484917.1382074`)
+gives `A_v ≈ 1280` (`≈ 62.1 dB`). **Finding**: under this simplified
+loaded-parallel-resistance model, `FF / 125 °C` (≈ 62.1 dB) trends
+slightly lower than the table's stated predicted binding corner
+`SS / −40 °C` (≈ 65.1 dB) — the predicted-binding-corner column is left
+unchanged here (it is a topology-level prediction, not a `[TBD]` row this
+issue fills), but a future corner sweep should confirm which corner
+actually binds once a schematic exists. The `Target: ≥ 60 dB` is set
+conservatively below all three corner estimates to leave margin for
+effects this simplified two-device-parallel model omits entirely
+(non-unity mirror ratios, finite tail-current-source loading of the first
+stage, layout mismatch).
+
+**GBW, slew rate, and the phase-margin cross-check.** With
+`gm1 = (gm/ID) × ID1 = 10 V⁻¹ × 5 µA = 50 µS`:
+`GBW ≈ gm1 / (2π·Cc) = 50 µS / (2π × 0.5 pF) ≈ 15.9 MHz`. Slew rate for a
+two-stage Miller topology is set by the tail current fully diverting into
+`Cc` during a large-signal step: `SR = I_SS / Cc = 10 µA / 0.5 pF = 20 V/µs`.
+As a self-consistency check against `DR-001`'s own appendix (which assumed
+`p2 / GBW ≈ 2.5` to derive its `gm2/gm1 ≈ 10` ratio): with
+`gm2 = 10 × gm1 = 500 µS`, the non-dominant pole
+`p2 = gm2 / CL = 500 µS / 2 pF ≈ 2.5 × 10⁸ rad/s ≈ 39.8 MHz`, giving
+`p2 / GBW ≈ 39.8 / 15.9 ≈ 2.50` — an exact match to `DR-001`'s own assumed
+ratio, i.e. this pass's chosen `Cc`/current values are internally
+consistent with the phase-margin budget `DR-001` already named, not an
+independent coincidence. Feasibility against device speed: the input
+pair's own `fT` at the GBW-binding corner
+(`nfet,ss,0.15,-40.0,10.0,...,53499354550.85566` → `fT ≈ 53.5 GHz`) is
+~3400x the ~16 MHz GBW target, leaving no plausibility concern at this
+level of estimate.
+
+**Quiescent power.** Total quiescent current
+`I_Q = I_SS + ID2 = 10 µA + 50 µA = 60 µA`. At the table's stated binding
+corner (`FF / 125 °C / 1.98 V`): `P_Q = 60 µA × 1.98 V ≈ 118.8 µW`; at
+nominal `1.8 V`: `P_Q = 60 µA × 1.8 V ≈ 108 µW`. This
+uses the same `I_SS`/`ID2` sizing choice as the GBW/slew-rate estimate
+above (not separately re-derived), under the PVT-invariant-bias-current
+simplification stated in "Shared sizing assumptions."
+
+**Input-referred noise (thermal floor only).** For a differential pair
+with a 1:1 current-mirror load, matched `gm` between the input device and
+the mirror device (per the DC-gain derivation above), the classic
+input-referred thermal-noise PSD reduces to
+`en² = (16kT / 3gm1) × (1 + gm_mirror/gm1) = 32kT / (3·gm1)`. At
+`gm1 = 50 µS`, `T = 300.15 K` (`27 °C`, `k = 1.380649×10⁻²³ J/K`):
+`en² ≈ 8.84×10⁻¹⁶ V²/Hz` → `en ≈ 29.7 nV/√Hz`, rounded to `≈ 30 nV/√Hz`.
+**Caveat, stated plainly**: this is a thermal-noise-floor estimate only —
+the committed gm/ID sweep characterizes DC operating points (`gm/ID`,
+`gm/gds`, `fT`), not flicker (`1/f`) noise coefficients, so no `1/f`
+corner or total-integrated-noise number is proposed. The `100 Hz – 1 MHz`
+band is a proposed measurement band (order-of-magnitude match to the GBW
+sizing estimate above), not a value read from any CSV. Corner-to-corner
+variation of this estimate is not modeled beyond the `kT` temperature
+term, under the same PVT-invariant-bias-current simplification as the
+power/GBW estimates.
+
+**Output swing.** At the output stage's candidate devices
+(`pfet,ss,1.2,-40.0,10.0,0.17374527049866112,391.3798627647017,279700538.2027164`,
+`Vov,p2 ≈ 0.174 V`; `nfet,ss,1.2,-40.0,10.0,0.17338892591692476,147.9923717947348,1199214917.0636318`,
+`Vov,n2 ≈ 0.173 V`) at the worst-case-low rail
+(`VDD = 1.62 V`, per `target-spec.md` §1): `Vout,min ≈ Vov,n2 ≈ 0.173 V`
+and `Vout,max ≈ VDD − Vov,p2 ≈ 1.62 − 0.174 ≈ 1.446 V`, giving a
+peak-to-peak swing of `≈ 1.27 V` (`≈ 79%` of the `1.62 V` rail) — this is
+a saturation-headroom estimate only (each device needs `Vds`/`Vsd` ≥ its
+own `Vov` to stay in saturation), not a full large-signal swing/settling
+simulation.
+
+**Rows left `[TBD]`.** Offset, CMRR, PSRR, and area each have a one-line
+reason directly in their table cell above; none is a gm/ID-derivable
+quantity with the committed sweep's data (bare single-device DC
+operating points only — no mismatch coefficients, no supply-sweep axis,
+no layout). Per this issue's explicit scope, no new device-characterization
+sweep is performed to fill them.
 
 ## 3. What this table is not
 
 - **Not ratified.** `spec/decision-records/DR-001-topology-and-cl.md` exists
-  ([status `proposed`](decision-records/DR-001-topology-and-cl.md)), but a
-  `proposed` record is input to a future ratification pass, not a
-  ratification itself. Ratification flows through the two-key mechanism
-  described in `CLAUDE.md`/`.loom/CLAUDE.md` (an EE key + a market key, both
-  installed by the standard tooling) — a future issue's job, once the
-  `[TBD]` rows above have real sky130 device data behind them. Per the
-  generalized 2026-08-28 ruling cited in issue #2's body ("scope-only spec
-  DRs ratified with both keys need no per-PR operator statement"), that
-  applies at ratification time, not to this DRAFT — this pass ratifies
-  nothing and is not asking any key-holder to act on it.
+  ([status `submitted for ratification`](decision-records/DR-001-topology-and-cl.md),
+  via the PR that lands this 2026-09-15 sizing pass), but the record's own
+  author (a Builder agent) cannot ratify it — this PR is the ratification
+  *draft*, per the 2026-08-19 canary spec/DR ratification-via-PR standing
+  policy ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357))
+  and the two-key mechanism epic
+  ([2AMLogic/2am#372](https://github.com/2AMLogic/2am/issues/372)): a
+  non-author EE key and a non-author market key (or, per the standing
+  policy, direct operator PR approval where the two-key rollout has not
+  yet reached this repo) are what perform the ratification act, not this
+  commit. The same applies to every `[P]` sizing estimate this pass adds
+  to §2 — proposed on the evidence shown in §2a, not self-ratified.
 - **Not a commitment that every `[TBD]` row will end up non-trivial.** Some
   rows (e.g. the corner grid) may turn out to be determined jointly with a
   topology decision rather than independently — `CL` above is now resolved
-  via `DR-001`, but every performance row in §2 remains `[TBD]`.
+  via `DR-001`, and most §2 performance rows now carry a `[P]` sizing
+  estimate (§2a); offset, CMRR, PSRR, and area remain `[TBD]`, each with a
+  stated reason at its row.
 - **Not opening the 3.3 V I/O-device-flavor row.** It is named, not scoped
   in.
+- **Not a schematic, layout, or simulation pass.** This 2026-09-15 sizing
+  pass (issue #10) adds no files under `design/`, `layout/`, or
+  `measurements/`, and runs no new simulation — every `[P]` value in §2 is
+  a sizing estimate computed from the already-committed gm/ID device sweep
+  and `DR-001`'s structural ratios (§2a), not a measured or simulated
+  result.
 
 ## 4. Sources
 
@@ -120,3 +297,6 @@ sizing."
 - [`sky130-bandgap` README](https://github.com/2AMLogic/sky130-bandgap#readme) (see its "Target specification" section, ratified per DR-005/issue #1, PSRR row amended by DR-006/issue #123) — ratified target-spec table shape (Target/Stretch columns), the `3σ, mismatch MC N≥300 + process corners` statistical-basis wording, and the Iq binding-corner convention this table borrows. Note this sibling's own ratified Supply row is 3.3 V, not 1.8 V — its device flavor does not transfer directly to this block's 1.8 V-primary scope (see `porting-plan.md` §2).
 - [`sky130-ldo/spec/target-spec.md`](https://github.com/2AMLogic/sky130-ldo/blob/main/spec/target-spec.md) — DRAFT-status target-spec precedent on this same PDK (per-row `Src` citation discipline, explicit "nothing here is ratified" banner, ratification gated on a dedicated issue rather than folded into the bootstrap issue) and [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/main/spec/decision-records/DR-001-pass-device-supply-framing.md) for the `pfet_g5v0d10v5`/`nfet_g5v0d10v5` I/O-flavor-at-3.3V precedent cited above.
 - [`klayout-tools/docs/design-evidence-tiers.md`](https://github.com/2AMLogic/klayout-tools/blob/main/docs/design-evidence-tiers.md) — the T1 checklist this spec's eventual evidence trail (`sim/`, `layout/`) will need to satisfy, tracked in the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3).
+- `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv` (issue #6 / PR #7) — the device data every `[P]` value added in the 2026-09-15 sizing pass (issue #10, §2a) is cited from directly.
+- `spec/decision-records/DR-001-topology-and-cl.md` (issue #8 / PR #9) — the topology decision and structural compensation ratios (`Cc ≈ (0.2–0.3) × CL`, `gm2/gm1 ≈ 10`) the 2026-09-15 sizing pass builds on.
+- [2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357) and [2AMLogic/2am#372](https://github.com/2AMLogic/2am/issues/372) — the canary spec/DR ratification-via-PR standing policy and two-key mechanism this pass's DR-001 status promotion follows.

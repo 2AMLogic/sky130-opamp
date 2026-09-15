@@ -174,19 +174,36 @@ ratified spec runs at 3.3 V, not this block's 1.8 V-primary scope.
   PMOS gain device), and Miller compensation scheme (with a nulling
   resistor) are now decided in
   [`spec/decision-records/DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
-  (status `proposed`), citing `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
+  (status `submitted for ratification`, promoted from `proposed` by issue
+  #10's PR per the 2026-08-19 ratification-via-PR standing policy,
+  [2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)/[#372](https://github.com/2AMLogic/2am/issues/372)),
+  citing `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
   directly for every device figure. This resolves the "first real design
   decision this repo needs" this item originally named (issue #8) — sized
   for a 1.8 V-core (1.62 V worst-case) headroom budget, as called for.
-  Device widths, bias currents, and mirror ratios remain open (`DR-001`'s
-  own "Open items" section).
+  Device widths and mirror ratios remain open (`DR-001`'s own "Open items"
+  section); issue #10 proposes bias *currents* only, as a sizing example
+  (see the next bullet).
 - **Load capacitance (`CL`) target — done.** `target-spec.md` §1's `CL` row
   is now filled at `2 pF [DR-001]`, chosen in the same
   [`DR-001`](decision-records/DR-001-topology-and-cl.md) record to match
   `sg13g2-opamp`'s own `CL` choice for cross-PDK comparability (`gf180-opamp`
   has no `CL` decision yet to compare against). `target-spec.md`'s GBW/PM
-  rows can now be read "into" a concrete value, though those rows
-  themselves remain `[TBD]` until a schematic and testbench exist.
+  rows can now be read "into" a concrete value.
+- **Performance-target sizing pass — done.** `target-spec.md` §2's `[TBD]`
+  rows are now either a `[P]` sizing estimate or an explicit `[TBD]` with a
+  stated reason, per
+  [issue #10](https://github.com/2AMLogic/sky130-opamp/issues/10): DC gain,
+  GBW, slew rate, a noise thermal floor, output swing, and quiescent power
+  are sized from
+  `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
+  and `DR-001`'s structural compensation ratios, with the full derivation
+  and CSV-row citation trail in `target-spec.md` §2a. Offset, CMRR, PSRR,
+  and area remain `[TBD]` — the committed gm/ID sweep is a bare-device DC
+  characterization with no mismatch coefficients, no supply-voltage sweep
+  axis, and (for area) no layout to size from. No schematic, layout, or
+  new simulation was added by this pass — every number is a sizing
+  estimate under `DR-001`'s topology, not a measured result.
 - **Device characterization — done.** `CLAUDE.md`'s "gm/ID first" ordering
   named this as the next concrete step after this bootstrap pass; it is now
   committed as
