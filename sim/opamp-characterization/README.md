@@ -72,7 +72,10 @@ and confirmed installed and matching in this environment (2026-09-15).
 experiment's own `pdk.json`/`corners/model-files.json` directly (reads them,
 does not duplicate or re-derive them, per this issue's acceptance criteria)
 and adds only the R+C ("typical") corner choice this experiment introduces
-in its own `pdk.json` — see "R+C corner" below.
+in its own `pdk.json` — see "R+C corner" below. The *code* that performs that
+resolution is likewise shared rather than copied: it lives once in
+[`../lib/spice_harness.py`](../lib/spice_harness.py), and `bin/pvt_sweep.py`
+subclasses its `Pdk` only to add this experiment's R+C includes (issue #23).
 
 ```bash
 volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
@@ -87,6 +90,7 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `testbench/opamp_tran_sr.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench |
 | `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above |
+| `../lib/spice_harness.py` | Shared (not per-experiment) PDK resolution, deck rendering, tool-version and git-SHA helpers `bin/pvt_sweep.py` imports |
 | `netlist-snapshots/<record_id>/` | Every rendered deck for that record (45 files), for provenance |
 | `records/<record_id>-{ac,tran-sr,dc-swing}.csv` | Every measured quantity at every (corner, temperature) point — the primary evidence artifacts |
 | `records/<record_id>-logs/` | The raw ngspice stdout/stderr for every one of the 45 runs, so a claimed measurement can be spot-checked against the actual simulator output (per this issue's own test plan) |

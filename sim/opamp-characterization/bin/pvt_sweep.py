@@ -23,6 +23,13 @@ acceptance criteria. Adds its own ../pdk.json only for the R+C ("typical")
 corner choice this experiment introduces (Rz/Cc are not swept by the sibling
 bare-MOS-device experiment).
 
+The PDK-resolution and ngspice-harness *code* that applies the same principle
+(`HarnessError`, `load_json`, `volare_path`, the `Pdk` base, `first_line`,
+`render`, `git_sha`) is likewise not duplicated here -- it lives once in
+`sim/lib/spice_harness.py` and is imported below (issue #23). Only this
+experiment's own additions stay in this file: the `OpampPdk` subclass that
+resolves the R+C corner includes, and the per-analysis run/parse logic.
+
 Stdlib only -- no third-party Python dependencies, so the only tools this
 script itself requires are python3 and ngspice (plus, to resolve the PDK,
 either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
@@ -40,7 +47,6 @@ import argparse
 import csv
 import json
 import math
-import os
 import platform
 import re
 import shutil
@@ -48,11 +54,23 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Iterable
 from datetime import datetime, timezone
 from pathlib import Path
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
+
+sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
+    HarnessError,
+    Pdk,
+    first_line,
+    git_sha,
+    load_json,
+    render,
+)
+
 GMID_DIR = EXP_DIR.parent / "gm-id-characterization"
 GMID_PDK_PIN_FILE = GMID_DIR / "pdk.json"
 GMID_MODEL_FILES = GMID_DIR / "corners" / "model-files.json"
@@ -78,105 +96,37 @@ IBIAS_A = "5u"  # DR-002 (a): 5 uA external reference into `ibias`
 VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
 
 
-class HarnessError(RuntimeError):
-    pass
-
-
 # --------------------------------------------------------------------------
-# PDK resolution -- reuses ../gm-id-characterization's own pdk.json/
-# model-files.json for MOS-corner resolution (same class shape as that
-# experiment's bin/sweep.py), plus this experiment's own pdk.json for the
-# R+C corner include files.
+# PDK resolution -- the MOS-corner resolution itself lives in
+# sim/lib/spice_harness.py and is driven by ../gm-id-characterization's own
+# pdk.json/model-files.json; only the R+C corner include files this experiment
+# introduces (from its own pdk.json) are resolved here.
 # --------------------------------------------------------------------------
 
 
-def load_json(path: Path) -> dict:
-    if not path.exists():
-        raise HarnessError(f"missing file: {path}")
-    return json.loads(path.read_text())
+class OpampPdk(Pdk):
+    """`Pdk` plus the R+C ("typical") corner includes this experiment adds."""
 
-
-def volare_path() -> Path | None:
-    exe = shutil.which("volare")
-    if not exe:
-        return None
-    try:
-        out = subprocess.run(
-            [exe, "path"], capture_output=True, text=True, timeout=60, check=True
-        ).stdout.strip()
-    except (subprocess.SubprocessError, OSError):
-        return None
-    return Path(out) if out else None
-
-
-class Pdk:
     def __init__(self, pin: dict, own_pin: dict):
-        self.pin = pin
+        super().__init__(pin)
         self.own_pin = own_pin
-        root_env = os.environ.get("PDK_ROOT", "").strip()
-        self.root = Path(root_env).expanduser() if root_env else (
-            volare_path() or Path(pin["default_pdk_root"]).expanduser()
-        )
-        self.variant = os.environ.get("PDK", "").strip() or pin["variant"]
-        self.dir = self.root / self.variant
-        self.corner_dir = self.dir / pin["ngspice_corner_dir"]
-        self.installed_commit = self._installed_commit()
-
-    def _installed_commit(self) -> str:
-        parts = self.dir.resolve().parts
-        if "versions" in parts:
-            idx = parts.index("versions")
-            if idx + 1 < len(parts):
-                return parts[idx + 1]
-        return "unknown"
-
-    @property
-    def matches_pin(self) -> bool:
-        return self.installed_commit == self.pin["open_pdks_commit"]
-
-    def corner_include(self, corner: str) -> Path:
-        return self.corner_dir / f"{corner}.spice"
 
     def rc_includes(self) -> list[Path]:
         return [self.dir / rel for rel in self.own_pin["rc_corner"]["include_files"]]
 
-    def validate(self) -> None:
-        if not self.dir.is_dir():
-            raise HarnessError(
-                f"no PDK at {self.dir}\n"
-                f"  install the pinned version with: {self.pin['install_command']}\n"
-                f"  (or set PDK_ROOT / PDK to an existing install)"
-            )
-        for corner in DEFAULT_CORNERS:
-            inc = self.corner_include(corner)
-            if not inc.is_file():
-                raise HarnessError(f"missing corner include: {inc}")
+    def validate(self, corners: Iterable[str]) -> None:
+        super().validate(corners)
         for inc in self.rc_includes():
             if not inc.is_file():
                 raise HarnessError(f"missing R+C corner include: {inc}")
 
 
-def resolve_pdk() -> Pdk:
+def resolve_pdk() -> OpampPdk:
     pin = load_json(GMID_PDK_PIN_FILE)
     own_pin = load_json(OWN_PDK_FILE)
-    pdk = Pdk(pin, own_pin)
-    pdk.validate()
+    pdk = OpampPdk(pin, own_pin)
+    pdk.validate(DEFAULT_CORNERS)
     return pdk
-
-
-def first_line(cmd: list[str]) -> str:
-    exe = shutil.which(cmd[0])
-    if not exe:
-        return "not found"
-    try:
-        proc = subprocess.run([exe, *cmd[1:]], capture_output=True, text=True, timeout=60)
-    except (subprocess.SubprocessError, OSError):  # pragma: no cover
-        return "error"
-    for line in (proc.stdout + "\n" + proc.stderr).splitlines():
-        line = line.strip().lstrip("*").strip()
-        if line:
-            return line
-    return "unknown"
 
 
 def check_env() -> int:
@@ -208,19 +158,8 @@ def check_env() -> int:
 
 
 # --------------------------------------------------------------------------
-# Rendering + running
+# Running + parsing (deck rendering itself is spice_harness.render)
 # --------------------------------------------------------------------------
-
-
-def render(template_path: Path, subs: dict) -> str:
-    text = template_path.read_text()
-    for key, val in subs.items():
-        text = text.replace("{" + key + "}", str(val))
-    if "{" in text and "}" in text:
-        remaining = {seg.split("}", 1)[0] for seg in text.split("{")[1:] if "}" in seg}
-        if remaining:
-            raise HarnessError(f"unsubstituted placeholders in {template_path.name}: {remaining}")
-    return text
 
 
 MEAS_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([-+0-9.eE]+)")
@@ -268,22 +207,12 @@ def run_ngspice(ngspice: str, deck_text: str, workdir: Path, log_path: Path, tim
     return proc.stdout, elapsed
 
 
-def git_sha() -> str:
-    try:
-        return subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=10, check=True,
-        ).stdout.strip()
-    except (subprocess.SubprocessError, OSError):
-        return "unknown"
-
-
 # --------------------------------------------------------------------------
 # Per-analysis run + parse
 # --------------------------------------------------------------------------
 
 
-def common_subs(pdk: Pdk, corner: str, temp: float, vdd: float) -> dict:
+def common_subs(pdk: OpampPdk, corner: str, temp: float, vdd: float) -> dict:
     rc = pdk.rc_includes()
     return {
         "CORNER_INCLUDE": pdk.corner_include(corner),
@@ -462,7 +391,7 @@ def main(argv=None) -> int:
             return 1
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    record_id = f"{ts}-{git_sha()}"
+    record_id = f"{ts}-{git_sha(REPO_ROOT)}"
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
     log_dir = RECORDS_DIR / f"{record_id}-logs"
     snapshot_run_dir = SNAPSHOT_DIR / record_id
@@ -517,7 +446,7 @@ def main(argv=None) -> int:
     record = {
         "record_id": record_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "git": {"sha": git_sha()},
+        "git": {"sha": git_sha(REPO_ROOT)},
         "experiment": {
             "slug": "opamp-characterization",
             "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",

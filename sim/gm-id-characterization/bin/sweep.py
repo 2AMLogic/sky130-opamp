@@ -16,6 +16,13 @@ Stdlib only -- no third-party Python dependencies, so the only tools this
 script itself requires are python3 and ngspice (plus, to resolve the PDK,
 either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
 
+The PDK-resolution and ngspice-harness helpers this script shares with the
+other sim runners (`HarnessError`, `load_json`, `volare_path`, `Pdk`,
+`first_line`, `render`, `git_sha`) are NOT duplicated here -- they live once in
+`sim/lib/spice_harness.py` and are imported below (issue #23). Only this
+experiment's own logic (its pdk.json/model-files.json wiring, deck rendering
+inputs, gm/ID derivation, and record writing) lives in this file.
+
     --check-env        report tool/PDK availability and exit (no simulation)
     --devices D,D      subset of {nfet,pfet}          (default: both)
     --corners C,C      subset of {tt,ff,ss,sf,fs}      (default: all five)
@@ -35,7 +42,6 @@ import argparse
 import csv
 import json
 import math
-import os
 import platform
 import shutil
 import subprocess
@@ -47,6 +53,17 @@ from pathlib import Path
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
+
+sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
+    HarnessError,
+    Pdk,
+    first_line,
+    git_sha,
+    load_json,
+    render,
+)
+
 PDK_PIN_FILE = EXP_DIR / "pdk.json"
 MODEL_FILES = EXP_DIR / "corners" / "model-files.json"
 TESTBENCH_DIR = EXP_DIR / "testbench"
@@ -61,97 +78,19 @@ DEFAULT_GMID_TARGETS = (20.0, 15.0, 10.0, 5.0)
 VDD = 1.8
 
 
-class HarnessError(RuntimeError):
-    pass
-
-
 # --------------------------------------------------------------------------
-# PDK resolution (same shape as sky130-ldo's sim/bin/corner-run.py resolve_pdk,
-# adapted to this experiment's own pdk.json, which points at the per-corner
-# ngspice include files rather than the combined library -- see
+# PDK resolution -- the resolution itself lives in sim/lib/spice_harness.py;
+# this experiment supplies only its own pdk.json pin, which points at the
+# per-corner ngspice include files rather than the combined library (see
 # ../corners/README.md for why).
 # --------------------------------------------------------------------------
-
-
-def load_json(path: Path) -> dict:
-    if not path.exists():
-        raise HarnessError(f"missing file: {path}")
-    return json.loads(path.read_text())
-
-
-def volare_path() -> Path | None:
-    exe = shutil.which("volare")
-    if not exe:
-        return None
-    try:
-        out = subprocess.run(
-            [exe, "path"], capture_output=True, text=True, timeout=60, check=True
-        ).stdout.strip()
-    except (subprocess.SubprocessError, OSError):
-        return None
-    return Path(out) if out else None
-
-
-class Pdk:
-    def __init__(self, pin: dict):
-        self.pin = pin
-        root_env = os.environ.get("PDK_ROOT", "").strip()
-        self.root = Path(root_env).expanduser() if root_env else (
-            volare_path() or Path(pin["default_pdk_root"]).expanduser()
-        )
-        self.variant = os.environ.get("PDK", "").strip() or pin["variant"]
-        self.dir = self.root / self.variant
-        self.corner_dir = self.dir / pin["ngspice_corner_dir"]
-        self.installed_commit = self._installed_commit()
-
-    def _installed_commit(self) -> str:
-        parts = self.dir.resolve().parts
-        if "versions" in parts:
-            idx = parts.index("versions")
-            if idx + 1 < len(parts):
-                return parts[idx + 1]
-        return "unknown"
-
-    @property
-    def matches_pin(self) -> bool:
-        return self.installed_commit == self.pin["open_pdks_commit"]
-
-    def corner_include(self, corner: str) -> Path:
-        return self.corner_dir / f"{corner}.spice"
-
-    def validate(self) -> None:
-        if not self.dir.is_dir():
-            raise HarnessError(
-                f"no PDK at {self.dir}\n"
-                f"  install the pinned version with: {self.pin['install_command']}\n"
-                f"  (or set PDK_ROOT / PDK to an existing install)"
-            )
-        for corner in DEFAULT_CORNERS:
-            inc = self.corner_include(corner)
-            if not inc.is_file():
-                raise HarnessError(f"missing corner include: {inc}")
 
 
 def resolve_pdk() -> Pdk:
     pin = load_json(PDK_PIN_FILE)
     pdk = Pdk(pin)
-    pdk.validate()
+    pdk.validate(DEFAULT_CORNERS)
     return pdk
-
-
-def first_line(cmd: list[str]) -> str:
-    exe = shutil.which(cmd[0])
-    if not exe:
-        return "not found"
-    try:
-        proc = subprocess.run([exe, *cmd[1:]], capture_output=True, text=True, timeout=60)
-    except (subprocess.SubprocessError, OSError) as exc:  # pragma: no cover
-        return f"error: {exc}"
-    for line in (proc.stdout + "\n" + proc.stderr).splitlines():
-        line = line.strip().lstrip("*").strip()
-        if line:
-            return line
-    return "unknown"
 
 
 def check_env() -> int:
@@ -184,17 +123,6 @@ def check_env() -> int:
 # v(g), gm, gds, id, cgg, vth -- each preceded by its own duplicate x-column
 # in ngspice `wrdata` output (see ../testbench/*.tmpl header comments).
 VALUE_COLS = {"vg": 1, "gm": 3, "gds": 5, "id": 7, "cgg": 9, "vth": 11}
-
-
-def render(template_path: Path, subs: dict) -> str:
-    text = template_path.read_text()
-    for key, val in subs.items():
-        text = text.replace("{" + key + "}", str(val))
-    if "{" in text and "}" in text:
-        remaining = {seg.split("}", 1)[0] for seg in text.split("{")[1:] if "}" in seg}
-        if remaining:
-            raise HarnessError(f"unsubstituted placeholders in {template_path.name}: {remaining}")
-    return text
 
 
 def run_point(ngspice: str, deck_text: str, workdir: Path, out_path: Path, timeout_s: int = 60):
@@ -272,16 +200,6 @@ def interp(x_target: float, xs: list[float], ys: list[float]):
             frac = (x_target - x0) / (x1 - x0)
             return ys_s[i] + frac * (ys_s[i + 1] - ys_s[i])
     return None
-
-
-def git_sha() -> str:
-    try:
-        return subprocess.run(
-            ["git", "-C", str(REPO_ROOT), "rev-parse", "--short", "HEAD"],
-            capture_output=True, text=True, timeout=10, check=True,
-        ).stdout.strip()
-    except (subprocess.SubprocessError, OSError):
-        return "unknown"
 
 
 def parse_args(argv):
@@ -383,7 +301,7 @@ def main(argv=None) -> int:
             return 1
 
     ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    record_id = f"{ts}-{git_sha()}"
+    record_id = f"{ts}-{git_sha(REPO_ROOT)}"
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
     snapshot_run_dir = SNAPSHOT_DIR / record_id
@@ -458,7 +376,7 @@ def main(argv=None) -> int:
     record = {
         "record_id": record_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "git": {"sha": git_sha()},
+        "git": {"sha": git_sha(REPO_ROOT)},
         "experiment": {
             "slug": "gm-id-characterization",
             "title": "gm/ID, gm/gds and fT vs overdrive for sky130 1.8V-core MOS devices",
