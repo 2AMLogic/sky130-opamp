@@ -13,3 +13,8 @@ ngspice testbenches and append-only results.
   over the same 5-corner grid at 3 temperatures, checked against
   `DR-002`'s hand sizing estimates. This block's first **circuit-level**
   `sim/` evidence (issue #17).
+- [`lib/spice_harness.py`](lib/spice_harness.py) — the PDK-resolution and
+  ngspice-harness helpers both runners above share (pin resolution against a
+  committed `pdk.json`, `.spice.tmpl` rendering, tool-version and git-SHA
+  stamping). Stdlib only. One copy, imported by every `*/bin/*.py` runner
+  rather than pasted into each (issue #23).

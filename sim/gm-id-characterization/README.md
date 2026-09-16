@@ -71,7 +71,10 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 `sweep.py` resolves the PDK the same way as `sky130-ldo`'s
 `sim/bin/corner-run.py` (`PDK_ROOT`/`PDK` env, else `volare path`, else
 `pdk.json`'s `default_pdk_root`) and warns (but does not refuse) if the
-installed commit does not match the pin.
+installed commit does not match the pin. That resolution — and the rest of
+the ngspice-harness plumbing every runner in `sim/` needs — lives once in
+[`../lib/spice_harness.py`](../lib/spice_harness.py), not in this
+experiment's runner (issue #23).
 
 ## Layout of this directory
 
@@ -82,6 +85,7 @@ installed commit does not match the pin.
 | `corners/model-files.json`, `corners/README.md` | The confirmed 1.8 V-core corner-model file list (this study's answer to the corner-grid-confirmation open item) |
 | `testbench/{nfet,pfet}_gmid.spice.tmpl` | The two ngspice deck templates `sweep.py` renders per sweep point |
 | `bin/sweep.py` | The sweep runner — the one cold-start command above |
+| `../lib/spice_harness.py` | Shared (not per-experiment) PDK resolution, deck rendering, tool-version and git-SHA helpers `bin/sweep.py` imports |
 | `netlist-snapshots/<record_id>/` | One representative rendered deck per device per record, for provenance (the `tt` corner, minimum length, 27 °C point) |
 | `records/<record_id>-full-sweep.csv` | Every derived quantity at every swept Vgs/Vsg point, for every (device, corner, length, temperature) combination — the primary evidence artifact |
 | `records/<record_id>-summary.csv` | The same data collapsed to fixed gm/ID targets (20, 15, 10, 5 1/V) via linear interpolation, for quick sizing-table lookups |
