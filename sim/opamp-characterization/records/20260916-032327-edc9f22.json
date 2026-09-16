@@ -1,0 +1,62 @@
+{
+  "record_id": "20260916-032327-edc9f22",
+  "timestamp": "2026-09-16T03:30:38.000574+00:00",
+  "git": {
+    "sha": "edc9f22"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "ac",
+      "tran_sr",
+      "dc_swing"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "n_runs": 45,
+    "n_failed": 0
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/Users/rwalters/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "ngspice-46 : Circuit level simulation program",
+    "python": "3.14.7",
+    "platform": "Darwin 25.6.0 arm64"
+  },
+  "links": {
+    "ac_csv": "sim/opamp-characterization/records/20260916-032327-edc9f22-ac.csv",
+    "tran_sr_csv": "sim/opamp-characterization/records/20260916-032327-edc9f22-tran-sr.csv",
+    "dc_swing_csv": "sim/opamp-characterization/records/20260916-032327-edc9f22-dc-swing.csv"
+  },
+  "errors": [],
+  "elapsed_s": 430.8
+}

@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "PDK version pin for the sky130-opamp op-amp-level PVT characterization",
+    "harness (issue #17). Same shape and same pin as the sibling",
+    "sim/gm-id-characterization/pdk.json this experiment reuses the MOS",
+    "process-corner resolution from (../gm-id-characterization/pdk.json and",
+    "../gm-id-characterization/corners/model-files.json are read directly by",
+    "bin/pvt_sweep.py, not re-resolved or copied here, per this issue's",
+    "acceptance criteria: 'using the literal model files already resolved in",
+    "sim/gm-id-characterization/corners/model-files.json -- not re-resolved",
+    "or guessed independently').",
+    "family            sky130 PDK family (via volare)",
+    "variant           sky130 flavor directory to use (A/B differ in metal stack)",
+    "open_pdks_commit  the volare version hash every record in this experiment",
+    "                  is pinned against -- verified installed and matching",
+    "                  in this environment at ~/.volare/sky130A (2026-09-15)",
+    "install_command   reproduces this exact install",
+    "default_pdk_root  fallback PDK_ROOT if neither $PDK_ROOT nor `volare path` resolve",
+    "ngspice_corner_dir directory holding the per-process-corner .spice include",
+    "                  files this harness points ngspice at directly, same as",
+    "                  ../gm-id-characterization's own harness (see that",
+    "                  experiment's corners/README.md for why: the combined",
+    "                  library pulls in RF/ESD/bipolar/high-voltage model",
+    "                  families this op-amp never touches)",
+    "rc_corner         this experiment's own addition: sky130's resistor/",
+    "                  capacitor process corner (Rz/Cc's own process spread)",
+    "                  is an axis ORTHOGONAL to the 5-corner MOS grid, exactly",
+    "                  as temperature is orthogonal to it in the sibling",
+    "                  experiment. Every MOS corner in this experiment's own",
+    "                  5x3 grid is run at the SAME (typical) R+C corner --",
+    "                  a stated methodology choice, not a re-derivation of",
+    "                  Rz/Cc's own process spread (out of scope; DR-002",
+    "                  Consequences already flags 'Rz does not track gm2",
+    "                  over PVT' as an open question for a future",
+    "                  compensation-specific bench)."
+  ],
+  "family": "sky130",
+  "variant": "sky130A",
+  "open_pdks_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+  "install_command": "volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+  "default_pdk_root": "~/.volare",
+  "ngspice_corner_dir": "libs.tech/ngspice/corners",
+  "process_corners": ["tt", "ff", "ss", "sf", "fs"],
+  "rc_corner": {
+    "choice": "typical",
+    "include_files": [
+      "libs.tech/ngspice/r+c/res_typical__cap_typical.spice",
+      "libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice"
+    ],
+    "note": "Both files are required together: the base file defines tol_m3/rm3/rcvia3-class parameters sky130_fd_pr__res_high_po_1p41's model needs, the __lin file separately defines camimc/cpmimc/*_var_mult parameters sky130_fd_pr__cap_mim_m3_1's model and the resistor's own process-variation terms need -- confirmed by directly running ngspice against design/netlist/opamp_core.spice with each file included alone (both fail with 'Undefined parameter' errors on Rz/Cc's own model expressions) and together (converges)."
+  }
+}
