@@ -1,0 +1,32 @@
+$ ngspice -b tb.spice
+
+--- stdout ---
+
+Note: Compatibility modes selected: hs a
+
+
+Circuit: * opamp_core open-loop ac testbench -- dc gain, gbw, phase margin, iq (issue #17)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+Doing analysis at TEMP = 125.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+iq_a = 6.170609e-05
+pq_w = 9.996387e-05
+Doing analysis at TEMP = 125.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 181
+gain_dc_db          =  6.97189e+01
+gbw_hz              =  8.44696e+06
+phase_at_gbw_rad    =  -1.91196e+00
+Note: Simulation executed from .control section 
+
+--- stderr ---
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+

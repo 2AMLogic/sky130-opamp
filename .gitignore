@@ -10,6 +10,11 @@ bsim4v5.out
 # sim/ harness: per-corner ngspice logs under corners/ are committed evidence
 # (append-only record trail), so they escape the *.log rule.
 !sim/*/corners/**/*.log
+# sim/ harness: raw per-run ngspice logs under records/<record_id>-logs/ are
+# committed evidence too (issue #17's opamp-characterization experiment and
+# any future one following the same convention), so they also escape the
+# *.log rule.
+!sim/*/records/**/*.log
 sim/build/
 design/build/
 # synthesis / P&R scratch

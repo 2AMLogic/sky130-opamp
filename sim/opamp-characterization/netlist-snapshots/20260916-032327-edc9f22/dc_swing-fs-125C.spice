@@ -1,0 +1,47 @@
+* opamp_core unity-gain-buffer DC transfer testbench -- output swing (issue #17)
+*
+* Measures `design/netlist/opamp_core.spice`'s headroom-limited output
+* compliance range at one (corner, temperature) point, via a unity-gain
+* -buffer DC transfer sweep (`out` wired directly to `inn`, `inp` swept
+* DC 0 -> VDD) -- the same real closed-loop connection
+* opamp_tran_sr.spice.tmpl uses, and the standard lab method for measuring
+* an amplifier's output swing (a voltage-follower DC transfer curve): while
+* the loop holds (v(out) tracks v(inp) with unity slope), the amplifier is
+* in its linear region; wherever the slope collapses toward zero, some
+* device has left saturation and v(out) has hit its headroom limit in that
+* direction. See opamp_ac.spice.tmpl's header for the included-flat-netlist
+* and ibias-current-source conventions shared by all three testbenches in
+* this experiment; not repeated here.
+*
+* bin/pvt_sweep.py parses the swept (v(inp), v(out)) pairs this testbench's
+* wrdata output produces and locates the largest contiguous run around
+* mid-supply where d(v(out))/d(v(inp)) stays within 0.8-1.2 of unity -- see
+* ../README.md "How output swing is derived from the DC sweep" for the
+* exact rule and its stated (not hidden) limitation: this is
+* a combined output-swing/closed-loop-compliance measurement, not an
+* independent measurement of the *open-loop* input-common-mode range DR-002
+* separately estimates (out of scope for this issue; see the issue body's
+* "Explicitly Out of Scope").
+
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/corners/fs.spice"
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice"
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice"
+.temp 125.0
+
+.include "/Users/rwalters/GitHub/sky130-opamp/.loom/worktrees/issue-17/design/netlist/opamp_core.spice"
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Rshort inn out 1m
+Vinp inp 0 dc 0
+Cload out 0 2p
+
+.control
+dc Vinp 0 1.8 0.005
+wrdata /var/folders/0h/l9gwswj97wb82mh27zyw305r0000gn/T/opamp-pvt-tqo5wnwd/dc_out.txt v(inp) v(out)
+.endc
+.end

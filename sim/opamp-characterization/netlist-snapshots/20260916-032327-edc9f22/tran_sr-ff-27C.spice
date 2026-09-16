@@ -1,0 +1,54 @@
+* opamp_core unity-gain-buffer slew-rate testbench (issue #17)
+*
+* Measures `design/netlist/opamp_core.spice`'s large-signal slew rate into
+* CL = 2 pF [DR-001], at one (corner, temperature) point, via the classic
+* 20%-80% unity-gain-buffer step response. bin/pvt_sweep.py renders this
+* template once per point -- see opamp_ac.spice.tmpl's header for the
+* included-flat-netlist and ibias-current-source conventions shared by all
+* three testbenches in this experiment; not repeated here.
+*
+* Feedback: `inn` is wired directly to `out` through a negligible-resistance
+* resistor (Rshort, 1 mOhm -- ngspice will not accept a literal zero-ohm
+* two-terminal element in some analysis modes, so a small non-zero value
+* stands in for a wire) -- a real physical unity-gain-buffer connection,
+* not the AC bench's DC-servo artifice, since this is a genuine large-signal
+* closed-loop transient, not an open-loop small-signal one.
+*
+* Stimulus: `inp` steps between 0.594 and 1.3860000000000001 (a fixed fraction of
+* VDD around mid-supply, chosen in bin/pvt_sweep.py so the same relative
+* stimulus scales with each corner's own supply -- see ../README.md
+* "Stimulus choices") with a fast 1n edge, well inside the linear
+* input range this experiment's own opamp_dc_swing.spice.tmpl bench
+* confirms independently (see that testbench's results for the actual
+* simulated compliance range, which this step is chosen to sit inside).
+*
+* Measurement: `.meas tran sr_rise`/`sr_fall` time the 20%-80% (rise) and
+* 80%-20% (fall) transit of `v(out)` between 0.594 and 1.3860000000000001 -- the
+* textbook slew-rate measurement convention -- so
+* SR = 0.6*(V_HIGH-V_LOW) / measured_time in each direction.
+* bin/pvt_sweep.py derives the 0.7524/1.2276000000000002 trigger levels from 0.594/
+* 1.3860000000000001 before rendering this template.
+
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/corners/ff.spice"
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice"
+.include "/Users/rwalters/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice"
+.temp 27.0
+
+.include "/Users/rwalters/GitHub/sky130-opamp/.loom/worktrees/issue-17/design/netlist/opamp_core.spice"
+
+Vdd vdd 0 dc 1.98
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Rshort inn out 1m
+Vinp inp 0 pulse(0.594 1.3860000000000001 200n 1n 1n 1u 2u)
+Cload out 0 2p
+
+.control
+tran 2n 2.2u
+meas tran sr_rise_s trig v(out) val=0.7524 rise=1 targ v(out) val=1.2276000000000002 rise=1
+meas tran sr_fall_s trig v(out) val=1.2276000000000002 fall=1 targ v(out) val=0.7524 fall=1
+.endc
+.end
