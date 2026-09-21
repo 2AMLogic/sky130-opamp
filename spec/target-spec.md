@@ -1,13 +1,31 @@
 # Target specification — sky130-opamp
 
-- **Status**: **DRAFT** — engineering input, not yet ratified. One decision
-  record exists in this repo,
+- **Status**: **RATIFIED (partial)** — per
+  [`DR-003-target-spec-ratification.md`](decision-records/DR-003-target-spec-ratification.md)
+  (2026-09-21 ratification pass, issue #26): 13 of this table's 17 rows
+  are **RATIFIED** with per-row dispositions recorded in that record (all
+  five §1 operating-condition rows, plus §2's open-loop DC gain, GBW,
+  phase margin, slew rate, input-referred noise, input common-mode range,
+  output swing, and quiescent power); §2's input-referred offset, CMRR,
+  PSRR, and area rows stay **OPEN**, explicitly, not silently. Per the
+  ratification-via-PR standing policy
+  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)), the
+  ratification act is the approval of the PR that carries DR-003, not
+  this file's edit alone. **No row's numeric value changed in
+  ratification**: six ratified §2 rows carry measured evidence, two are
+  ratified as targets with explicitly no "met" claim, and the measured
+  non-compliance (GBW, fall slew rate, output swing) keeps its targets
+  un-lowered per `CLAUDE.md`'s no-relaxation rule — the compliance path
+  is the resize pass (#22), never a spec edit. This table was DRAFT from
+  its 2026-09-06 bootstrap (issue #2) until this pass. The two earlier
+  decision records keep their own status lines unchanged:
   [`DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
-  (status `submitted for ratification`, via the PR that lands this pass —
-  see below), covering the two-stage topology's input-pair polarity,
-  first-stage load, output-stage class, compensation scheme, and the `CL`
-  row below; ratification of this table as a whole is a separate, future
-  issue.
+  (`submitted for ratification` — it covers the two-stage topology's
+  input-pair polarity, first-stage load, output-stage class, compensation
+  scheme, and the `CL` row below) and
+  [`DR-002-device-sizing.md`](decision-records/DR-002-device-sizing.md)
+  (`proposed` — device sizing). See §5 below for the current per-row
+  ratification map.
 - **Date**: 2026-09-06 (bootstrap); **2026-09-15 sizing pass** — every §2
   performance row is now either a proposed `[P]` sizing estimate cited to
   `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
@@ -302,3 +320,64 @@ sweep is performed to fill them.
 - `spec/decision-records/DR-001-topology-and-cl.md` (issue #8 / PR #9) — the topology decision and structural compensation ratios (`Cc ≈ (0.2–0.3) × CL`, `gm2/gm1 ≈ 10`) the 2026-09-15 sizing pass builds on.
 - [2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357) and [2AMLogic/2am#372](https://github.com/2AMLogic/2am/issues/372) — the canary spec/DR ratification-via-PR standing policy and two-key mechanism this pass's DR-001 status promotion follows.
 - `spec/decision-records/DR-002-device-sizing.md` (issue #13 / PR #15, status `proposed` — not ratified) — the schematic-level device sizing (`design/opamp_core.sch`) this issue (#16) reconciles the DC-gain, output-swing, and quiescent-power §2 rows against, and the source of the new input-common-mode-range row's numbers and finding.
+- `spec/decision-records/DR-003-target-spec-ratification.md` (issue #26) — the 2026-09-21 ratification pass whose per-row dispositions this table's `Status` field and §5 below record; its primary measured input is `sim/opamp-characterization`'s committed record (issue #17 / PR #19).
+- `sim/opamp-characterization/records/20260916-032327-edc9f22.md` (issue #17 / PR #19) — the measured, PVT-cornered circuit-level evidence (full 5-corner × 3-temperature grid) behind six §2 rows' DR-003 dispositions, and — via issue #20's still-open PR #21 — the pending cell-text reconciliation of those six rows.
+
+## 5. Ratification status (2026-09-21 pass — issue #26 / DR-003)
+
+As of [`DR-003`](decision-records/DR-003-target-spec-ratification.md), this
+table's rows divide as follows — dispositions below are DR-003's, take
+effect when the two-key PR carrying that record merges, and are recorded
+per row in the record itself. **No row's numeric value changed in
+ratification** — DR-003 disposes each row's *status* only:
+
+- **RATIFIED — measured evidence attached (6 §2 rows)**: open-loop DC gain
+  (target met at every grid point — worst 69.72 dB @ SS/125 °C, ≥ 9.7 dB
+  margin, stretch bound met everywhere), GBW (**not met** by the current
+  sizing — worst 8.45 MHz @ SS/125 °C vs. the unchanged ≈ 16 MHz target),
+  phase margin (met everywhere — worst 64.09° @ SF/27 °C), slew rate
+  (**not met on the falling edge** — worst 1.73 V/µs @ SS/−40 °C, under
+  9% of the unchanged ≈ 20 V/µs target, which DR-003 makes explicitly
+  both-edge), output swing (**not met** — worst 0.855 Vpp @ SS/−40 °C vs.
+  the unchanged ≈ 1.39 Vpp target; that binding-corner prediction itself
+  is confirmed), quiescent power (confirmed — 130.71 µW @ the confirmed
+  FF/125 °C/1.98 V binding corner, +1.6% vs. the estimate). Evidence:
+  [`sim/opamp-characterization/records/20260916-032327-edc9f22.md`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md)
+  — full 5-corner × 3-temperature grid, per-row verdicts in that
+  experiment's README.
+- **RATIFIED — target only, no measured evidence (2 §2 rows)**:
+  input-referred noise (≈ 30 nV/√Hz thermal floor, band 100 Hz – 1 MHz —
+  no noise testbench is committed anywhere in `sim/`, flicker
+  uncharacterized), input common-mode range (≈ 0.888–1.024 V window at
+  the worst-case corner — no ICMR-specific bench; the committed dc-swing
+  bench measures closed-loop compliance, which its own README states is
+  not an ICMR measurement). These bind as targets; **no "met" claim is
+  made or implied**.
+- **RATIFIED — operating conditions (all 5 §1 rows)**: 1.8 V ±10% supply;
+  the 3.3 V I/O-flavor row stays named-not-opened; −40…+125 °C; the
+  confirmed 5-corner `_01v8` MOS grid; CL = 2 pF (carried from DR-001).
+  Grading caveats carried from the committed evidence: VDD is tied to
+  process corner in the committed grid (not an independent supply sweep
+  per corner), and the R+C (resistor/capacitor process) axis is
+  "typical" only — both stated methodology choices in that record's
+  README, not ratified claims of coverage.
+- **OPEN — explicitly, not silently (4 §2 rows)**: input-referred offset,
+  CMRR, PSRR (each needs a bench that does not exist yet — mismatch
+  Monte Carlo, common-mode AC, supply AC respectively; the offset row's
+  `[P]` *statistical basis* — 3σ, MC N≥300 + process corners — likewise
+  stays proposed until that MC pass exists, and is what gap-to-T1
+  tracker item 6 gates), and area (post-layout; no `layout/` exists).
+  These rows carry `[TBD]` with one-line reasons at the row, tracked
+  under the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3).
+
+The six measured row lines above are deliberately untouched by this pass:
+their measured-value *citations* are issue #20's reconciliation, whose
+PR (#21) is open and blocked as of this writing — its row-text edits and
+this pass's ratification dispositions are complementary (citation axis
+vs. binding-status axis), and their diffs are disjoint, so the two PRs
+compose in either merge order. Consequently the `[P]` tag's "needs an
+explicit ratification decision before it binds" clause is now
+**discharged for the 13 ratified rows by DR-003 itself**, while the tag
+itself keeps marking each value's *provenance* (a sizing-pass proposal),
+not its binding status — which is what this section records. Rows will
+carry their measured citations at the cell once PR #21 lands.
