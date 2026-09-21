@@ -179,8 +179,10 @@ ratified values are the pre-measurement sizing-pass values, verbatim.
   committed bench's measurement convention, must meet it.** Measured:
   rise SR 16.88–19.69 V/µs grid-wide (worst SS/125 °C, ≈ 84% of target);
   fall SR 1.73–15.72 V/µs — the commit's single most actionable finding:
-  **fall SR at SS/−40 °C measures 1.73 V/µs, under 9% of both the target
-  and the rise SR at the same point**, varying ~9× across the grid. The
+  **fall SR at SS/−40 °C measures 1.73 V/µs — under 9% of the unchanged
+  20 V/µs target, and ≈ 10% of the 17.26 V/µs rise SR at that same
+  point** (1.7306/17.2561 = 10.0%, per the committed tran-sr CSV) —
+  varying ~9× across the grid. The
   design is ratified-non-compliant on the falling edge at cold/slow
   corners (and marginally under on rise at its worst corner). Target not
   lowered; root-cause diagnosis is explicitly out of scope here (the
@@ -192,8 +194,9 @@ ratified values are the pre-measurement sizing-pass values, verbatim.
   does *not* meet at the worst corner.** Measured: the predicted binding
   corner **is confirmed** (SS/−40 °C is the narrowest swing in the grid)
   but the magnitude is contradicted — **0.855 Vpp (52.8% of rail, window
-  0.328–1.184 V) at that exact corner, 62% of the `DR-002` estimate's
-  peak-to-peak magnitude**. Target not lowered. Grading definition
+  0.328–1.184 V) at that exact corner, ≈ 61% of `DR-002`'s 1.392 Vpp
+  (1.464 − 0.072) estimate magnitude** (0.8555/1.392 = 61.3%, per the
+  committed dc-swing CSV). Target not lowered. Grading definition
   stated for the future bench reader: the committed evidence measures
   this row as the **unity-buffer closed-loop compliance swing** (the
   record's README states plainly that both input-pair common-mode
