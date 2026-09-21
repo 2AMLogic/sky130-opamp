@@ -33,7 +33,10 @@ identified there.
 - **`design-evidence-tiers.md`** — the T1-T4 checklist the grader
   parses. Vendored **byte-identical** from
   [`2AMLogic/klayout-tools@31a3e3c`](https://github.com/2AMLogic/klayout-tools/blob/31a3e3c41c08bbd58719e0b99a3b6d19beb9be63/docs/design-evidence-tiers.md)
-  `docs/design-evidence-tiers.md` (2026-09-21). The installed release,
+  `docs/design-evidence-tiers.md` (2026-09-21; upstream is
+  [MIT-licensed](https://github.com/2AMLogic/klayout-tools/blob/main/LICENSE)
+  — this repo's Apache-2.0 `LICENSE` does not relicense the vendored
+  copy). The installed release,
   klt 0.5.0, bundles a copy that predates checklist item 11 ("Power
   delivery (structural)",
   [klayout-tools#2025](https://github.com/2AMLogic/klayout-tools/issues/2025),
