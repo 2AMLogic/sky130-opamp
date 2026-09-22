@@ -36,6 +36,11 @@ rather than ignoring it.
 Twin row structure at 1.8 V primary. Swing and gain rows will show the
 low-headroom trade explicitly; PVT corners on every recorded result.
 
+**Integrator view (machine-parseable, fixed path):**
+[`manifests/integrator.json`](manifests/integrator.json) — top cell, port
+list, netlist/GDS paths, area, maturity rung. Consumer requirement rows
+live in `## Consumers` in [`spec/target-spec.md`](spec/target-spec.md).
+
 ## License
 
 Apache-2.0.
