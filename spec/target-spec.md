@@ -381,3 +381,84 @@ explicit ratification decision before it binds" clause is now
 itself keeps marking each value's *provenance* (a sizing-pass proposal),
 not its binding status — which is what this section records. Rows will
 carry their measured citations at the cell once PR #21 lands.
+
+## Consumers (2am reuse rule 9 — this block's end of the edge)
+
+[`2am/repos.yml`](https://github.com/2AMLogic/2am/blob/main/repos.yml) records
+`consumes: [sky130-opamp]` on two fleet repos (read live 2026-09-22):
+**sky130-ldo** (`consumes: [sky130-opamp, sky130-bandgap]`) and
+**sky130-bandgap** (`consumes: [sky130-opamp]`). Cross-cutting reuse rule 9
+([2AMLogic/2am#899](https://github.com/2AMLogic/2am/issues/899), widened
+2026-09-21 to same-PDK sub-blocks) makes that dependency edge a recorded
+fact on *both* ends — this section is this repo's end. It names each
+consumer, the requirement rows it imposes on an amplifier in its position,
+and whether this block's ratified §1/§2 rows meet them. **"Unknown" is a
+legitimate row value** (the consumer states no explicit requirement for
+that axis); unnamed is the only invalid value.
+
+**Verdict stamp.** Every verdict below was evaluated at this repo's
+`8b3ec92` (2026-09-22) against the [DR-003](decision-records/DR-003-target-spec-ratification.md)-ratified rows,
+with each consumer read at its own pinned commit. Verdicts **will drift**
+when the #22 resize lands and when a consumer edits its tree — the pinned
+commits in each row are what make that drift detectable rather than silent.
+Re-evaluate on either head moving.
+
+Findings about a consumer's own block belong on the **consumer's** tracker,
+not here: each consumer's adopt-or-record evaluation of this block is
+already filed on its own side — [sky130-ldo#123](https://github.com/2AMLogic/sky130-ldo/issues/123)
+and [sky130-bandgap#286](https://github.com/2AMLogic/sky130-bandgap/issues/286).
+This section carries links out, not their findings. The machine-parseable
+integrator view (top cell, ports, netlist/GDS, area, maturity rung) lives at
+a fixed path: [`manifests/integrator.json`](../manifests/integrator.json) —
+not in this prose.
+
+### sky130-ldo — pinned @ `a0ff95b` (2026-09-22)
+
+Spec of record: [`spec/target-spec.md`](https://github.com/2AMLogic/sky130-ldo/blob/a0ff95b/spec/target-spec.md)
+(RATIFIED per its DR-006/#1). The error amplifier is embedded, not
+standalone, so most rows below read Unknown — that is the LDO's spec shape,
+not a research gap here.
+
+| Requirement row | Consumer's requirement (source @ `a0ff95b`) | This block's verdict (vs §1/§2 @ `8b3ec92`) |
+|---|---|---|
+| Port list | **Unknown** — the error amplifier is embedded inside `design/ldo_3v3in_1v8out.sch`; no standalone amplifier port contract exists to compare against. | unknown — nothing to meet yet; this block publishes `vdd vss inn inp out ibias` ([netlist](../design/netlist/opamp_core.spice) @ `8b3ec92`). |
+| Rails | Error-amp position spans the 3.3 V input rail (2.97–3.63 V) to ground; the whole amplifier/bias/protection chain runs on 5 V-gate `*_g5v0d10v5` devices (ratified framing A, its [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/a0ff95b/spec/decision-records/DR-001-pass-device-supply-framing.md); schematic header comments @ `a0ff95b`). | **not met** — §1's ratified supply row is 1.8 V ±10% on `_01v8` core devices; the 3.3 V I/O flavor is named-not-opened (§1 row — opening it requires its own decision record). |
+| Input range | **Unknown** — the ratified table states no error-amp input common-mode row; the feedback-divider tap voltage is not fixed there. | unknown — this block's ICMR row is a ratified target window (≈ 0.888–1.024 V worst-case) with no measured bench. |
+| Speed (GBW/SR) | **Unknown** — no explicit amp GBW/SR row. Nearest imposing rows are loop-level: Stability (PM ≥ 45°, GM ≥ 10 dB over 0–50 mA and the ratified C_out/ESR window) and Load transient (recover to ±1% in ≤ 20 µs). | unknown — and this block's own GBW row is ratified but **not met** by current sizing (worst 8.45 MHz vs the unchanged ≈ 16 MHz target, DR-003), so any future amp-level comparison moves with the #22 resize. |
+| Offset | **Unknown** — no explicit amp-offset row. Nearest accuracy rows: Line regulation < 5 mV/V and Load regulation < 1% (18 mV), counted inside the ±2% output window. | unknown — this block's input-referred offset row is OPEN (§2; no mismatch MC pass exists). |
+| Noise | **Not imposed** — its Output-noise row reads "not specified — waived unless a consumer states a requirement". | n/a — nothing to meet; this block's noise row is ratified as target-only. |
+| Area budget | **Unknown** — its ratified Area row (< 0.1 mm² total core, pass FET included) is a whole-LDO budget; no error-amp share is allocated. | unknown — this block's area row is OPEN (no layout exists). |
+| Iq / power | **Explicitly open** — "No number set"; its DR-003 declined to set an Iq figure (the ≈ 24.9 µA @ 50 mA loop-gain-sized draw is a data point, not a target); its own [#121](https://github.com/2AMLogic/sky130-ldo/issues/121) tracks ratifying the row. | unknown — no consumer number to compare; for reference this block's ratified quiescent-power row is I_Q = 65 µA (≈ 117.0 µW @ 1.8 V nominal). |
+
+**Not the same block (recorded once, by name).** sky130-ldo's error
+amplifier is a single-stage current-mirror ("symmetric") OTA embedded in
+`design/ldo_3v3in_1v8out.sch` — its second gain stage is the LDO's
+common-source pass device, and a two-stage Miller standalone second-gain-stage
+candidate was explicitly screened and rejected during that repo's own #22
+(schematic header comments @ `a0ff95b`). This block **is** a two-stage
+Miller-compensated standalone OTA. Not a drop-in; that fact is recorded
+here so no reader re-derives it.
+
+### sky130-bandgap — pinned @ `4ac0c24` (2026-09-22)
+
+Spec of record: the ratified target-specification table in its
+[README](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/README.md)
+(DR-005/#1; PSRR row amended by DR-006/#123). Its amplifier is a named
+sub-block with a fixed pin list, so more rows below are citable.
+
+| Requirement row | Consumer's requirement (source @ `4ac0c24`) | This block's verdict (vs §1/§2 @ `8b3ec92`) |
+|---|---|---|
+| Port list | Fixed pin list `VB VA GDRV TAIL VDD VSS` — `design/error_amp.sch`, instantiated by `bandgap_core.sch` as `XAMP`; TAIL is an external current input (the amp has no internal bias network — its tail comes from the core's MPAMP), and AOUT drives the core's PMOS mirror gate GDRV. | **not met (different contract)** — this block publishes `vdd vss inn inp out ibias`: a self-contained cell whose `ibias` is the on-chip diode-connected reference node (DR-002 §(a)), vs the bandgap amp's external-tail-in / gate-drive-out contract. |
+| Rails | Supply 3.3 V ±10% (stretch: 1.8 V-core Banba variant); the amp is all 5 V thick-oxide `*_g5v0d10v5` — "no 1.8 V core devices anywhere" per its [DR-001](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/spec/decision-records/DR-001-supply-flavor-scope.md) scope. | **not met** — same shape as the LDO row: this block's ratified rail is 1.8 V ±10% on `_01v8`; the 3.3 V flavor is named-not-opened. |
+| Input range | The amp senses the core's nodes at ≈ 0.73 V (one V_EB, which is what forces its PMOS input pair) — fixed by the core (`design/error_amp.sch` header @ `4ac0c24`). | **not met** — this block's ratified ICMR target window ≈ 0.888–1.024 V (worst-case corner) does not include 0.73 V. Caveat: DR-003 ratified that window as target-only (no measured ICMR bench exists). |
+| Speed (GBW/SR) | **Unknown** — no amp GBW/SR row. Nearest imposing rows are loop-level: PSRR > 60 dB DC–1 kHz (frequency-qualified, its DR-006) and Startup < 1 ms. | unknown. |
+| Offset | Amp input-referred allocation ≈ 0.275–0.369 mV σ (by temperature) — derived as "what is left after the fixed terms" of the output-accuracy row, via the measured Kuijk offset gain of 9.65 ([`design/error-amp-offset-budget.md` §3](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/design/error-amp-offset-budget.md)); its §10 re-derivation against the ratified ±2% row reads MET with 19–21% margin (N = 300 MC). | **unknown** — this block's input-referred offset row is OPEN (§2 [TBD]; no mismatch MC pass — gap-to-T1 item 6), so no number exists on this side to compare against ≈ 0.3 mV σ. |
+| Noise | **Not imposed** — its ratified table carries no output-noise row. | n/a. |
+| Area budget | Ratified Area < 0.08 mm² whole block, drawn MCC cap included (its DR-007); no amp share is allocated. | unknown — this block's area row is OPEN (no layout exists). |
+| Iq / power | Ratified Iq < 50 µA, whole block (README table @ `4ac0c24`). | **not met** — this block's ratified quiescent-power row is I_Q = 65 µA (≈ 117.0 µW @ 1.8 V nominal; 130.71 µW measured worst corner): the amplifier alone exceeds the bandgap's whole-block 50 µA budget before the core is counted — and that comparison is the charitable one, taken at 1.8 V rather than the bandgap's 3.3 V rail, where this block is not characterized at all. |
+
+**Not the same block (recorded once, by name).** sky130-bandgap's error
+amplifier is a single-stage current-mirror OTA (`design/error_amp.sch` /
+`.sym` @ `4ac0c24`: PMOS input pair, external tail, fixed 7-pin contract) —
+not a two-stage Miller standalone op-amp. Recorded here so no reader
+re-derives it.
