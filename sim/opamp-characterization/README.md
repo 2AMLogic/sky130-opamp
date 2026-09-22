@@ -338,8 +338,9 @@ consistent with the hand model, since the first stage's Miller-cap-charging
 mechanism the formula describes does drive the rising edge. **Fall SR** is
 a different story entirely: it varies **9×** across the grid (1.73–15.72
 V/µs) and collapses at cold/slow corners — most severely at **SS/-40°C,
-1.73 V/µs, under 9% of both the rise SR at the same point (17.26 V/µs) and
-the DR-002 estimate**. The mechanism is not fully diagnosed here (out of
+1.73 V/µs — under 9% of the DR-002 estimate (8.65% of the 20 V/µs target),
+and ≈ 10% of the rise SR at the same point (17.26 V/µs;
+1.7306/17.2561 = 10.0%)**. The mechanism is not fully diagnosed here (out of
 scope for this issue — see "Not done" below), but the qualitative picture is
 that `M7` (the fixed-current NMOS output-stage sink, gate tied to the
 bias-mirror node, not signal-modulated) sets an independent ceiling on how
