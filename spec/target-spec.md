@@ -459,6 +459,6 @@ sub-block with a fixed pin list, so more rows below are citable.
 
 **Not the same block (recorded once, by name).** sky130-bandgap's error
 amplifier is a single-stage current-mirror OTA (`design/error_amp.sch` /
-`.sym` @ `4ac0c24`: PMOS input pair, external tail, fixed 7-pin contract) —
+`.sym` @ `4ac0c24`: PMOS input pair, external tail, fixed 6-pin contract) —
 not a two-stage Miller standalone op-amp. Recorded here so no reader
 re-derives it.
