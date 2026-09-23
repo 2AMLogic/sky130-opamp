@@ -6,7 +6,8 @@ A two-stage Miller-compensated operational amplifier on SkyWater sky130 on
 open-source xschem + ngspice flow.
 
 **Status: just opened.** Nothing is designed yet. The first work is
-the gm/ID device-characterization study at 1.8 V, with the 3.3 V I/O flavor surveyed.
+the gm/ID device-characterization study at 1.8 V, with the 3.3 V I/O flavor
+surveyed but not served ([DR-005](spec/decision-records/DR-005-io-flavor-not-served.md)).
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
