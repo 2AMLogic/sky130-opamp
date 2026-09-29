@@ -2,11 +2,12 @@
 
 One copy of the logic that every `sim/*/bin/*.py` sweep runner needs before it
 can drive ngspice: resolving the installed PDK against a committed `pdk.json`
-pin, rendering a `.spice.tmpl` deck, reporting a tool version, and stamping a
-record with the repo's git SHA. Extracted from
+pin, rendering a `.spice.tmpl` deck, reporting a tool version, stamping a
+record with the repo's git SHA, and the shared `--check-env` tool/PDK
+availability report. Extracted from
 `sim/gm-id-characterization/bin/sweep.py` and
 `sim/opamp-characterization/bin/pvt_sweep.py`, which carried near-identical
-copies of all of it (issue #23).
+copies of all of it (issues #23 and #40).
 
 Stdlib only -- the runners that import this promise "python3 + ngspice and
 nothing else", and this module must not weaken that.
@@ -23,7 +24,9 @@ than as a package:
 Experiment-specific resolution stays in the runner: `Pdk` here covers only the
 MOS process-corner include files that every experiment needs. An experiment
 that resolves additional include files (e.g. the op-amp bench's R+C corner)
-subclasses `Pdk` and extends `validate()`.
+subclasses `Pdk` and extends `validate()`. Likewise, each runner's
+`check_env()` keeps only its own extra report lines (e.g. the op-amp bench's
+netlist and R+C-include checks) around the shared report below.
 """
 
 from __future__ import annotations
@@ -32,7 +35,7 @@ import json
 import os
 import shutil
 import subprocess
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 
@@ -155,3 +158,55 @@ def git_sha(repo_root: Path) -> str:
         ).stdout.strip()
     except (subprocess.SubprocessError, OSError):
         return "unknown"
+
+
+# --------------------------------------------------------------------------
+# --check-env reporting (the tool/PDK availability report every runner's
+# check_env() prints; extracted from the two runners' near-identical copies,
+# issue #40)
+# --------------------------------------------------------------------------
+
+
+def report_tool_status() -> int:
+    """Print the ngspice/volare availability lines; return 1 if ngspice is missing.
+
+    A missing `volare` is reported but not fatal -- the PDK can still resolve
+    via PDK_ROOT/PDK or the pin's own default root, so only a missing
+    `ngspice` (the simulator itself) sets the failure bit.
+    """
+    status = 0
+    for tool, flag in (("ngspice", "-v"), ("volare", "--version")):
+        exe = shutil.which(tool)
+        if exe:
+            print(f"{tool:<8}: OK   {first_line([tool, flag])}")
+        else:
+            print(f"{tool:<8}: MISSING (not on PATH)")
+            if tool == "ngspice":
+                status = 1
+    return status
+
+
+def report_pdk(
+    pdk_resolver: Callable[[], Pdk], corners: Iterable[str], corner_label: str = "corner"
+) -> tuple[int, Pdk | None]:
+    """Print the PDK resolve/report and per-corner include lines; return (status, pdk).
+
+    `pdk_resolver` is a zero-argument callable returning a resolved, validated
+    `Pdk` (each runner's own `resolve_pdk()`). On resolution failure the
+    MISSING lines are printed here and `(1, None)` is returned. On success
+    `(0, pdk)` is returned so a runner with extra report lines of its own
+    (e.g. the op-amp bench's R+C corner includes) can print them from the
+    resolved `pdk`. `corner_label` names the include lines ("corner" for the
+    bare-MOS-device bench, "MOS corner" for the op-amp bench, which also
+    reports R+C corner includes of its own).
+    """
+    try:
+        pdk = pdk_resolver()
+    except HarnessError as exc:
+        print(f"PDK     : MISSING\n{exc}")
+        return 1, None
+    note = "matches pdk.json pin" if pdk.matches_pin else "MISMATCH vs pdk.json pin"
+    print(f"PDK     : OK   {pdk.dir} (open_pdks {pdk.installed_commit}, {note})")
+    for corner in corners:
+        print(f"  {corner_label} include: {pdk.corner_include(corner)}")
+    return 0, pdk

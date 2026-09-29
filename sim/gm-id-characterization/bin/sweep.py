@@ -18,10 +18,11 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
 
 The PDK-resolution and ngspice-harness helpers this script shares with the
 other sim runners (`HarnessError`, `load_json`, `volare_path`, `Pdk`,
-`first_line`, `render`, `git_sha`) are NOT duplicated here -- they live once in
-`sim/lib/spice_harness.py` and are imported below (issue #23). Only this
-experiment's own logic (its pdk.json/model-files.json wiring, deck rendering
-inputs, gm/ID derivation, and record writing) lives in this file.
+`first_line`, `render`, `git_sha`, and the `--check-env` report pair
+`report_tool_status`/`report_pdk`) are NOT duplicated here -- they live once in
+`sim/lib/spice_harness.py` and are imported below (issues #23 and #40). Only
+this experiment's own logic (its pdk.json/model-files.json wiring, deck
+rendering inputs, gm/ID derivation, and record writing) lives in this file.
 
     --check-env        report tool/PDK availability and exit (no simulation)
     --devices D,D      subset of {nfet,pfet}          (default: both)
@@ -62,6 +63,8 @@ from spice_harness import (  # noqa: E402  -- import follows the sys.path bootst
     git_sha,
     load_json,
     render,
+    report_pdk,
+    report_tool_status,
 )
 
 PDK_PIN_FILE = EXP_DIR / "pdk.json"
@@ -94,25 +97,9 @@ def resolve_pdk() -> Pdk:
 
 
 def check_env() -> int:
-    status = 0
-    for tool, flag in (("ngspice", "-v"), ("volare", "--version")):
-        exe = shutil.which(tool)
-        if exe:
-            print(f"{tool:<8}: OK   {first_line([tool, flag])}")
-        else:
-            print(f"{tool:<8}: MISSING (not on PATH)")
-            if tool == "ngspice":
-                status = 1
-    try:
-        pdk = resolve_pdk()
-    except HarnessError as exc:
-        print(f"PDK     : MISSING\n{exc}")
-        return 1
-    note = "matches pdk.json pin" if pdk.matches_pin else "MISMATCH vs pdk.json pin"
-    print(f"PDK     : OK   {pdk.dir} (open_pdks {pdk.installed_commit}, {note})")
-    for corner in DEFAULT_CORNERS:
-        print(f"  corner include: {pdk.corner_include(corner)}")
-    return status
+    status = report_tool_status()
+    pdk_status, _ = report_pdk(resolve_pdk, DEFAULT_CORNERS)
+    return status | pdk_status
 
 
 # --------------------------------------------------------------------------

@@ -25,10 +25,13 @@ bare-MOS-device experiment).
 
 The PDK-resolution and ngspice-harness *code* that applies the same principle
 (`HarnessError`, `load_json`, `volare_path`, the `Pdk` base, `first_line`,
-`render`, `git_sha`) is likewise not duplicated here -- it lives once in
-`sim/lib/spice_harness.py` and is imported below (issue #23). Only this
-experiment's own additions stay in this file: the `OpampPdk` subclass that
-resolves the R+C corner includes, and the per-analysis run/parse logic.
+`render`, `git_sha`, and the `--check-env` report pair
+`report_tool_status`/`report_pdk`) is likewise not duplicated here -- it lives
+once in `sim/lib/spice_harness.py` and is imported below (issues #23 and #40).
+Only this experiment's own additions stay in this file: the `OpampPdk`
+subclass that resolves the R+C corner includes, the per-analysis run/parse
+logic, and `check_env()`'s own netlist and R+C-include report lines around the
+shared report.
 
 Stdlib only -- no third-party Python dependencies, so the only tools this
 script itself requires are python3 and ngspice (plus, to resolve the PDK,
@@ -69,6 +72,8 @@ from spice_harness import (  # noqa: E402  -- import follows the sys.path bootst
     git_sha,
     load_json,
     render,
+    report_pdk,
+    report_tool_status,
 )
 
 GMID_DIR = EXP_DIR.parent / "gm-id-characterization"
@@ -130,31 +135,16 @@ def resolve_pdk() -> OpampPdk:
 
 
 def check_env() -> int:
-    status = 0
-    for tool, flag in (("ngspice", "-v"), ("volare", "--version")):
-        exe = shutil.which(tool)
-        if exe:
-            print(f"{tool:<8}: OK   {first_line([tool, flag])}")
-        else:
-            print(f"{tool:<8}: MISSING (not on PATH)")
-            if tool == "ngspice":
-                status = 1
+    status = report_tool_status()
     if not DESIGN_NETLIST.is_file():
         print(f"netlist : MISSING {DESIGN_NETLIST}")
         return 1
     print(f"netlist : OK   {DESIGN_NETLIST}")
-    try:
-        pdk = resolve_pdk()
-    except HarnessError as exc:
-        print(f"PDK     : MISSING\n{exc}")
-        return 1
-    note = "matches pdk.json pin" if pdk.matches_pin else "MISMATCH vs pdk.json pin"
-    print(f"PDK     : OK   {pdk.dir} (open_pdks {pdk.installed_commit}, {note})")
-    for corner in DEFAULT_CORNERS:
-        print(f"  MOS corner include: {pdk.corner_include(corner)}")
-    for inc in pdk.rc_includes():
-        print(f"  R+C corner include: {inc}")
-    return status
+    pdk_status, pdk = report_pdk(resolve_pdk, DEFAULT_CORNERS, "MOS corner")
+    if pdk is not None:
+        for inc in pdk.rc_includes():
+            print(f"  R+C corner include: {inc}")
+    return status | pdk_status
 
 
 # --------------------------------------------------------------------------
