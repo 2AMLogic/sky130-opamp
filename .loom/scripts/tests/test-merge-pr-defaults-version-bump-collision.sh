@@ -1,34 +1,9 @@
 #!/usr/bin/env bash
-# test-merge-pr-defaults-version-bump-collision.sh - Unit tests for the
-# PRE-merge defaults/ VERSION-bump collision guard in merge-pr.sh (#7302).
+# Behavioral regression tests for merge-time no-hand-bump policy (#7827).
+# Real local origins/clones exercise fetch, ancestry, and the canonical
+# checker without mocking Git or version extraction.
+# The historical filename/function remain stable for test discovery.
 #
-# check-defaults-version-bump.sh's CI job gates a PR's own HEAD VERSION
-# against its PR's `base.sha` -- fixed at PR-open (or last-rebase) time and
-# never re-diffed against the CURRENT default branch. When two PRs are open
-# concurrently and both bump VERSION from the same stale base to the same
-# target, the first to merge advances the default branch to that target; the
-# CI gate on the second PR already passed against its own stale base and has
-# no visibility into that concurrent merge, so it can land on top with a
-# NET-ZERO version increment despite genuinely changing `defaults/` -- see
-# PR #7300 vs. concurrently-merged #7298.
-#
-# _check_defaults_version_bump_collision closes this by re-running the SAME
-# check-defaults-version-bump.sh script (unmodified) here, at the merge
-# choke point, against the default branch's CURRENT tip instead of the PR's
-# stale base.sha.
-#
-# Strategy: build two REAL local git repos ("origin" and a "local" clone of
-# it, playing REPO_ROOT) so the guard's actual `git fetch` / `git rev-parse`
-# calls run against genuine refs -- no git stubbing, unlike the gh-stubbing
-# tests for other guards, since this guard's whole job is comparing real git
-# state. The check-defaults-version-bump.sh script itself is copied
-# byte-for-byte from the real source tree (never modified, per #7302's own
-# acceptance criteria) into each fixture's defaults/scripts/ so
-# `$REPO_ROOT/defaults/scripts/check-defaults-version-bump.sh` resolves.
-#
-# Usage:
-#   ./.loom/scripts/tests/test-merge-pr-defaults-version-bump-collision.sh
-
 # SC2034: several globals (REPO_ROOT, DEFAULT_BRANCH_NAME, PR_BRANCH,
 # PR_HEAD_SHA, PR_JSON, PR_NUMBER, DRY_RUN) are read only by the function
 # extracted+sourced from merge-pr.sh, which shellcheck cannot see.
@@ -90,6 +65,12 @@ assert_not_contains() {
         echo "    In: '$haystack'"
     fi
 }
+
+# The guard is `loom-daemon merge-pr version-policy` since #8191's slice; pin
+# the binary the extracted stub calls to this checkout's build.
+# shellcheck source=lib/require-daemon-bin.sh
+source "$TEST_DIR/lib/require-daemon-bin.sh"
+loom_test_require_daemon_bin "$HELPERS_DIR" "merge-pr"
 
 if [[ ! -x "$REAL_CHECK_SCRIPT" ]]; then
     echo -e "${RED}FATAL${NC}: check-defaults-version-bump.sh missing or not executable: $REAL_CHECK_SCRIPT" >&2
@@ -192,149 +173,238 @@ run_guard() {
     set -e
 }
 
-echo "Testing _check_defaults_version_bump_collision behavior..."
+echo "Testing merge-time version policy (#7827)..."
 
-# T1: no collision -- origin/main unchanged since the PR branched off it, PR
-# bumps VERSION 1.0.0 -> 1.0.1 alongside a defaults/ change. Guard passes.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
-make_pr_branch "1.0.1"
-PR_JSON='{"body":""}'
+# Real repositories exercise both the helper fetch and the canonical checker.
+case_fixture() {
+    make_fixture
+    REPO_ROOT="$LOCAL"
+    DEFAULT_BRANCH_NAME="main"
+    PR_JSON='{"body":""}'
+    DRY_RUN=false
+}
+
+case_fixture
+make_pr_branch "1.0.0"
 run_guard
-assert_eq "0" "$LAST_RC" "No concurrent merge -> guard passes (exit 0)"
-assert_not_contains "$LAST_OUT" "Merge blocked" "No concurrent merge -> no block message"
+assert_eq "0" "$LAST_RC" "Installed behavior change without manual bump merges"
 
-# T2: collision -- a concurrent merge already advanced origin/main to the
-# SAME target VERSION (1.0.1) the PR itself bumps to. Guard hard-blocks.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
+case_fixture
 make_pr_branch "1.0.1"
-advance_origin_main "1.0.1"
-PR_JSON='{"body":""}'
 run_guard
-assert_eq "1" "$LAST_RC" "Concurrent merge to the same target VERSION -> merge hard-blocked (exit 1)"
-assert_contains "$LAST_OUT" "Merge blocked" "Collision -> block message emitted"
-assert_contains "$LAST_OUT" "#7302" "Collision -> block message references #7302"
-assert_contains "$LAST_OUT" "version.sh bump patch" "Collision -> block message points at the rebase+rebump remedy"
+assert_eq "1" "$LAST_RC" "Manual VERSION edit blocks even before main advances"
+assert_contains "$LAST_OUT" "hand-edit" "Block identifies the actual policy violation"
+assert_not_contains "$LAST_OUT" "version.sh bump patch" "Remedy never recommends a forbidden bump"
 
-# T3: --dry-run with the same collision as T2 -> reports the would-be block
-# WITHOUT exiting 1 (dry-run contract preserved).
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
+case_fixture
 make_pr_branch "1.0.1"
-advance_origin_main "1.0.1"
-PR_JSON='{"body":""}'
+PR_JSON='{"body":"<!-- loom:no-surface-change -->"}'
+run_guard
+assert_eq "1" "$LAST_RC" "No-surface marker cannot waive manual version edits"
 DRY_RUN=true
 run_guard
-assert_eq "0" "$LAST_RC" "--dry-run + collision -> guard does NOT exit 1 (dry-run contract)"
-assert_contains "$LAST_OUT" "[dry-run] Would BLOCK" "--dry-run -> reports the would-be block"
-DRY_RUN=false
+assert_eq "0" "$LAST_RC" "Dry-run reports without blocking"
+assert_contains "$LAST_OUT" "Would BLOCK" "Dry-run reports forbidden edit"
 
-# T4: PR bumps PAST current main's version (no collision) -- origin/main
-# already advanced to 1.0.1 (e.g. an earlier unrelated concurrent merge), and
-# the PR's own diff still bumps further, to 1.0.2. Must NOT false-positive.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
+case_fixture
+make_pr_branch "1.0.0"
 advance_origin_main "1.0.1"
-make_pr_branch "1.0.2"
-PR_JSON='{"body":""}'
 run_guard
-assert_eq "0" "$LAST_RC" "PR bumps past current main's VERSION -> guard passes (exit 0), no false positive"
-assert_not_contains "$LAST_OUT" "Merge blocked" "PR bumps past current main -> no block"
+assert_eq "0" "$LAST_RC" "Concurrent automated bump does not invalidate defaults PR"
 
-# T5: same collision as T2, but the PR body carries the
-# <!-- loom:no-surface-change --> marker -- check-defaults-version-bump.sh's
-# own marker exemption must still apply when re-run against current main.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
+case_fixture
+git -C "$LOCAL" checkout -q -b feature/unrelated
+printf 'Rust-only change\n' > "$LOCAL/code.rs"
+git -C "$LOCAL" add code.rs
+git -C "$LOCAL" commit -q -m 'non-defaults PR'
+git -C "$LOCAL" push --quiet origin feature/unrelated
+PR_BRANCH=feature/unrelated
+PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+advance_origin_main "1.0.1"
+run_guard
+assert_eq "0" "$LAST_RC" "Main-only defaults/version drift does not block non-defaults PR"
+
+case_fixture
 make_pr_branch "1.0.1"
 advance_origin_main "1.0.1"
-PR_JSON='{"body":"some text\n<!-- loom:no-surface-change -->\nmore text"}'
 run_guard
-assert_eq "0" "$LAST_RC" "no-surface-change marker in PR body -> guard passes even on a would-be collision"
-assert_not_contains "$LAST_OUT" "Merge blocked" "no-surface-change marker -> no block"
+assert_eq "1" "$LAST_RC" "Matching main version cannot hide a manual PR edit"
 
-# T6: base already current (no concurrent merge at all, PR base IS current
-# main) -- the common, non-colliding case. Must NOT false-positive (mirrors
-# T1 but named for the specific "base is already current" edge case).
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
+case_fixture
+make_pr_branch "0.9.0"
+run_guard
+assert_eq "1" "$LAST_RC" "Manual version downgrade also blocks"
+
+case_fixture
+make_pr_branch "1.0.0"
+git -C "$LOCAL" checkout -q --orphan unrelated-history
+git -C "$LOCAL" commit -q -m 'disconnected history'
+git -C "$LOCAL" push --quiet origin unrelated-history
+PR_BRANCH=unrelated-history
+PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+run_guard
+assert_eq "0" "$LAST_RC" "Unresolvable ancestry keeps best-effort skip contract"
+assert_contains "$LAST_OUT" "ancestry" "Unknown ancestry is diagnosed, not treated as a version edit"
+
+case_fixture
 make_pr_branch "1.0.1"
-PR_JSON='{"body":""}'
-run_guard
-assert_eq "0" "$LAST_RC" "PR's base is already current main -> guard passes (exit 0)"
-
-# T7: default branch cannot be resolved (empty DEFAULT_BRANCH_NAME) ->
-# best-effort skip, never blocks.
-make_fixture
-REPO_ROOT="$LOCAL"
 DEFAULT_BRANCH_NAME=""
-make_pr_branch "1.0.1"
-advance_origin_main "1.0.1"
-PR_JSON='{"body":""}'
 run_guard
-assert_eq "0" "$LAST_RC" "Empty DEFAULT_BRANCH_NAME -> guard skips (exit 0)"
-assert_not_contains "$LAST_OUT" "Merge blocked" "Empty DEFAULT_BRANCH_NAME -> no block"
-
-# T8: PR head SHA not reachable locally (bogus/unfetchable SHA) ->
-# best-effort skip, never blocks.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
-make_pr_branch "1.0.1"
-advance_origin_main "1.0.1"
-PR_BRANCH="main"
-PR_HEAD_SHA="0000000000000000000000000000000000dead"
-PR_JSON='{"body":""}'
+assert_eq "0" "$LAST_RC" "Unknown default branch keeps skip contract"
+DEFAULT_BRANCH_NAME=main
+PR_HEAD_SHA=000000000000000000000000000000000000dead
 run_guard
-assert_eq "0" "$LAST_RC" "Unreachable PR_HEAD_SHA -> guard skips (exit 0)"
-assert_not_contains "$LAST_OUT" "Merge blocked" "Unreachable PR_HEAD_SHA -> no block"
-
-# T9: origin unreachable (fetch fails) -> best-effort skip, never blocks.
-make_fixture
-REPO_ROOT="$LOCAL"
-DEFAULT_BRANCH_NAME="main"
-make_pr_branch "1.0.1"
-git -C "$LOCAL" remote set-url origin "$WORKDIR/does-not-exist"
-PR_JSON='{"body":""}'
+assert_eq "0" "$LAST_RC" "Unknown head keeps skip contract"
+git -C "$LOCAL" remote set-url origin "$WORKDIR/missing"
 run_guard
-assert_eq "0" "$LAST_RC" "Unreachable origin remote -> guard skips (exit 0)"
-assert_not_contains "$LAST_OUT" "Merge blocked" "Unreachable origin -> no block"
+assert_eq "0" "$LAST_RC" "Failed fetch keeps skip contract"
 
-# --- Source-contains guards (fail if a refactor drops the key behavior) ---
-echo ""
-echo "Testing merge-pr.sh source guards..."
-src="$(cat "$MERGE_PR_SRC")"
-assert_contains "$src" "_check_defaults_version_bump_collision" \
-  "merge-pr.sh defines and invokes _check_defaults_version_bump_collision"
-assert_contains "$src" 'check_script="$REPO_ROOT/defaults/scripts/check-defaults-version-bump.sh"' \
-  "merge-pr.sh re-runs the UNMODIFIED check-defaults-version-bump.sh (not a reimplementation)"
-assert_contains "$src" 'git -C "$REPO_ROOT" fetch --quiet origin "$DEFAULT_BRANCH_NAME" "$PR_BRANCH"' \
-  "merge-pr.sh re-checks against a freshly-fetched CURRENT default branch tip"
+# Non-defaults edits of each other canonical value are forbidden too.
+# CLAUDE.md is deliberately absent: #8147 removed it from the version-bearing
+# set (it is injected into every agent session's prompt prefix, so it carries
+# no version stamp at all any more) -- the case below asserts the inverse.
+for file in package.json mcp-loom/package.json Cargo.toml; do
+    case_fixture
+    git -C "$LOCAL" checkout -q -b feature/value
+    mkdir -p "$(dirname "$LOCAL/$file")"
+    case "$file" in
+        *.json) printf '{"version":"2.0.0"}\n' > "$LOCAL/$file" ;;
+        *.toml) printf 'version = "2.0.0"\n' > "$LOCAL/$file" ;;
+    esac
+    git -C "$LOCAL" add "$file"
+    git -C "$LOCAL" commit -q -m 'manual version value'
+    git -C "$LOCAL" push --quiet origin feature/value
+    PR_BRANCH=feature/value
+    PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+    PR_JSON='{"body":"<!-- loom:no-surface-change -->"}'
+    run_guard
+    assert_eq 1 "$LAST_RC" "$file value edit blocks without defaults change, even with marker"
+done
 
-# Assert the guard is invoked BEFORE the auto-merge path (line ordering).
+case_fixture
+git -C "$LOCAL" checkout -q -b feature/prose
+printf 'Documentation only\n' > "$LOCAL/CLAUDE.md"
+git -C "$LOCAL" add CLAUDE.md
+git -C "$LOCAL" commit -q -m 'prose only'
+git -C "$LOCAL" push --quiet origin feature/prose
+PR_BRANCH=feature/prose
+PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+run_guard
+assert_eq 0 "$LAST_RC" "Prose in version-bearing file passes with unchanged value"
+
+# #8147: a CLAUDE.md edit that DOES rewrite a `**Loom Version**:` line is no
+# longer a hand-edit at all -- the file left the version-bearing set with the
+# stamp. Without this the PR that removed the stamp could not have merged.
+case_fixture
+git -C "$LOCAL" checkout -q -b feature/claude-version-line
+printf '**Loom Version**: 2.0.0\n' > "$LOCAL/CLAUDE.md"
+git -C "$LOCAL" add CLAUDE.md
+git -C "$LOCAL" commit -q -m 'CLAUDE.md version-looking line'
+git -C "$LOCAL" push --quiet origin feature/claude-version-line
+PR_BRANCH=feature/claude-version-line
+PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+run_guard
+assert_eq 0 "$LAST_RC" "CLAUDE.md is no longer version-bearing (#8147)"
+
+case_fixture
+make_pr_branch "1.0.0"
+printf '#!/bin/sh\nexit 2\n' > "$LOCAL/defaults/scripts/check-defaults-version-bump.sh"
+run_guard
+assert_eq 0 "$LAST_RC" "Checker usage/internal fault retains skip contract"
+assert_contains "$LAST_OUT" "exited 2" "Internal checker failure is diagnosed"
+
+# --- #8284: which ref's checker is the oracle -------------------------------
+#
+# merge-pr.sh runs from a primary checkout sitting on the DEFAULT BRANCH, so
+# $REPO_ROOT's on-disk checker is main's copy while the PR's own copy exists
+# only as a git object. Every case below depends on that distinction, which
+# make_pr_branch deliberately does not model (it leaves the local checkout on
+# the PR branch), so these build the branch and then return to main.
+start_pr_branch() {
+    git -C "$LOCAL" fetch --quiet origin
+    git -C "$LOCAL" checkout -q -B "$1" "origin/main"
+}
+finish_pr_branch() {
+    git -C "$LOCAL" add -A
+    git -C "$LOCAL" commit -q -m "$2"
+    git -C "$LOCAL" push --quiet origin "$1"
+    PR_BRANCH="$1"
+    PR_HEAD_SHA="$(git -C "$LOCAL" rev-parse HEAD)"
+    git -C "$LOCAL" checkout -q main
+}
+
+# Drops "VERSION" from the working copy's version-bearing set, mirroring what
+# #8190 did to CLAUDE.md. Rewrites via a temp file so the edit works the same
+# on BSD and GNU userlands (no `sed -i` portability split).
+shrink_version_bearing_set() {
+    grep -v '^  "VERSION"$' "$LOCAL/defaults/scripts/check-defaults-version-bump.sh" > "$WORKDIR/checker.new"
+    mv "$WORKDIR/checker.new" "$LOCAL/defaults/scripts/check-defaults-version-bump.sh"
+    chmod +x "$LOCAL/defaults/scripts/check-defaults-version-bump.sh"
+}
+
+# The #8190 shape: the PR removes a file from the version-bearing set AND
+# changes that file's value in the same commit. main's checker still encodes the
+# old set and reports a hand-edit; the PR head's checker (what CI runs) does
+# not. Without the head-ref oracle such a PR can never pass this guard.
+case_fixture
+start_pr_branch feature/shrink-version-set
+shrink_version_bearing_set
+echo "9.9.9" > "$LOCAL/VERSION"
+finish_pr_branch feature/shrink-version-set 'drop VERSION from the version-bearing set'
+run_guard
+assert_eq 0 "$LAST_RC" "PR that shrinks the version-bearing set is judged by its own checker (#8284)"
+assert_contains "$LAST_OUT" "the PR head ($PR_HEAD_SHA)" "Guard names the PR head as the oracle it used"
+
+# The head oracle is not a bypass: touching the machinery does not excuse a
+# hand-bump the head's OWN checker still forbids (VERSION stays in its set).
+case_fixture
+start_pr_branch feature/touch-version-sh
+mkdir -p "$LOCAL/scripts"
+printf '#!/usr/bin/env bash\n# unrelated edit to the version helper\n' > "$LOCAL/scripts/version.sh"
+echo "1.0.1" > "$LOCAL/VERSION"
+finish_pr_branch feature/touch-version-sh 'touch scripts/version.sh and hand-bump VERSION'
+run_guard
+assert_eq 1 "$LAST_RC" "PR head's own checker still blocks a hand-bump it forbids (#8284)"
+assert_contains "$LAST_OUT" "hand-edit" "Head-oracle block still identifies the policy violation"
+
+# Fail closed on a lookup error: a PR that deletes the checker at its head
+# touches the machinery, so the head oracle is attempted, but `git show` finds
+# nothing. That must fall back to main's checker (which blocks the hand-bump),
+# never silently pass.
+case_fixture
+start_pr_branch feature/delete-checker
+git -C "$LOCAL" rm -q defaults/scripts/check-defaults-version-bump.sh
+echo "1.0.1" > "$LOCAL/VERSION"
+finish_pr_branch feature/delete-checker 'delete the checker and hand-bump VERSION'
+run_guard
+assert_eq 1 "$LAST_RC" "Unreadable PR-head checker falls back to main's, not a free pass (#8284)"
+assert_contains "$LAST_OUT" "'main' (" "Fallback names the default branch as the oracle actually used"
+
+# Unchanged for every other PR: main's checker, no mention of the head oracle.
+case_fixture
+make_pr_branch "1.0.1"
+run_guard
+assert_eq 1 "$LAST_RC" "Ordinary hand-bump still blocks under main's checker"
+assert_not_contains "$LAST_OUT" "version-policy machinery" "Ordinary PR keeps main's checker as the oracle"
+
+# Base-branch drift must not flip the oracle: the machinery-touch test is scoped
+# to merge-base..head, so a concurrent merge that touches scripts/version.sh on
+# main leaves this PR (which touches nothing of the sort) on main's checker.
+case_fixture
+start_pr_branch feature/untouched-machinery
+echo "changed by PR" >> "$LOCAL/defaults/scripts/foo.md"
+finish_pr_branch feature/untouched-machinery 'ordinary defaults change'
+mkdir -p "$ORIGIN/scripts"
+printf '#!/usr/bin/env bash\n# concurrent edit on main\n' > "$ORIGIN/scripts/version.sh"
+git -C "$ORIGIN" add -A
+git -C "$ORIGIN" commit -q -m 'concurrent machinery change on main'
+run_guard
+assert_eq 0 "$LAST_RC" "Concurrent machinery change on main does not block the PR"
+assert_not_contains "$LAST_OUT" "version-policy machinery" "Main-side machinery drift does not flip the oracle"
+
+# The guard must remain before either merge path.
 guard_line="$(grep -n '^_check_defaults_version_bump_collision$' "$MERGE_PR_SRC" | head -1 | cut -d: -f1)"
 automerge_line="$(grep -n '^# Handle auto-merge mode' "$MERGE_PR_SRC" | head -1 | cut -d: -f1)"
-if [[ -n "$guard_line" && -n "$automerge_line" && "$guard_line" -lt "$automerge_line" ]]; then
-    ordered="yes"
-else
-    ordered="no (guard=$guard_line automerge=$automerge_line)"
-fi
-assert_eq "yes" "$ordered" \
-  "guard is invoked before both merge paths (before '# Handle auto-merge mode')"
-
-# --- Summary ---
-echo ""
-echo "────────────────────────────────"
+assert_eq yes "$( [[ "$guard_line" -lt "$automerge_line" ]] && echo yes || echo no )" "Guard precedes merge paths"
 echo "Results: $TESTS_PASSED/$TESTS_RUN passed, $TESTS_FAILED failed"
-
-if [[ $TESTS_FAILED -gt 0 ]]; then
-    exit 1
-fi
-exit 0
+[[ $TESTS_FAILED -eq 0 ]]

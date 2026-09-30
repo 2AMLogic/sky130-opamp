@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "block": "sky130-opamp",
+  "top_cell": "opamp_core",
+  "ports": ["vdd", "vss", "inn", "inp", "out", "ibias"],
+  "netlist": "design/netlist/opamp_core.spice",
+  "gds": null,
+  "gds_note": "no layout exists yet — layout/ holds a placeholder README only (evaluated @ 8b3ec92, 2026-09-22)",
+  "area_um2": null,
+  "area_note": "post-layout quantity; no layout exists (evaluated @ 8b3ec92, 2026-09-22)",
+  "maturity": {
+    "tier": null,
+    "t1_met": 0,
+    "t1_total": 11,
+    "source": "manifests/sky130-opamp.signoff.json"
+  },
+  "spec_status": {
+    "state": "RATIFIED (partial)",
+    "detail": "13 of 17 rows ratified per DR-003 (2026-09-21); input-referred offset, CMRR, PSRR, and area rows OPEN",
+    "source": "spec/target-spec.md"
+  },
+  "consumers": [
+    {
+      "repo": "2AMLogic/sky130-ldo",
+      "recorded_in": "2am/repos.yml — consumes: [sky130-opamp, sky130-bandgap]",
+      "pinned_commit": "a0ff95b",
+      "requirement_rows": "spec/target-spec.md '## Consumers' (this repo)",
+      "consumer_side_tracker": "https://github.com/2AMLogic/sky130-ldo/issues/123"
+    },
+    {
+      "repo": "2AMLogic/sky130-bandgap",
+      "recorded_in": "2am/repos.yml — consumes: [sky130-opamp]",
+      "pinned_commit": "4ac0c24",
+      "requirement_rows": "spec/target-spec.md '## Consumers' (this repo)",
+      "consumer_side_tracker": "https://github.com/2AMLogic/sky130-bandgap/issues/286"
+    }
+  ],
+  "evaluated_at": {
+    "commit": "8b3ec92",
+    "date": "2026-09-22",
+    "port_list_source": "re-derived from the .subckt line of design/netlist/opamp_core.spice at the same commit",
+    "maturity_source": "manifests/sky130-opamp.signoff.json at the same commit"
+  }
+}

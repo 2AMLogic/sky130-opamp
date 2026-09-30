@@ -1,13 +1,31 @@
 # Target specification — sky130-opamp
 
-- **Status**: **DRAFT** — engineering input, not yet ratified. One decision
-  record exists in this repo,
+- **Status**: **RATIFIED (partial)** — per
+  [`DR-003-target-spec-ratification.md`](decision-records/DR-003-target-spec-ratification.md)
+  (2026-09-21 ratification pass, issue #26): 13 of this table's 17 rows
+  are **RATIFIED** with per-row dispositions recorded in that record (all
+  five §1 operating-condition rows, plus §2's open-loop DC gain, GBW,
+  phase margin, slew rate, input-referred noise, input common-mode range,
+  output swing, and quiescent power); §2's input-referred offset, CMRR,
+  PSRR, and area rows stay **OPEN**, explicitly, not silently. Per the
+  ratification-via-PR standing policy
+  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)), the
+  ratification act is the approval of the PR that carries DR-003, not
+  this file's edit alone. **No row's numeric value changed in
+  ratification**: six ratified §2 rows carry measured evidence, two are
+  ratified as targets with explicitly no "met" claim, and the measured
+  non-compliance (GBW, fall slew rate, output swing) keeps its targets
+  un-lowered per `CLAUDE.md`'s no-relaxation rule — the compliance path
+  is the resize pass (#22), never a spec edit. This table was DRAFT from
+  its 2026-09-06 bootstrap (issue #2) until this pass. The two earlier
+  decision records keep their own status lines unchanged:
   [`DR-001-topology-and-cl.md`](decision-records/DR-001-topology-and-cl.md)
-  (status `submitted for ratification`, via the PR that lands this pass —
-  see below), covering the two-stage topology's input-pair polarity,
-  first-stage load, output-stage class, compensation scheme, and the `CL`
-  row below; ratification of this table as a whole is a separate, future
-  issue.
+  (`submitted for ratification` — it covers the two-stage topology's
+  input-pair polarity, first-stage load, output-stage class, compensation
+  scheme, and the `CL` row below) and
+  [`DR-002-device-sizing.md`](decision-records/DR-002-device-sizing.md)
+  (`proposed` — device sizing). See §5 below for the current per-row
+  ratification map.
 - **Date**: 2026-09-06 (bootstrap); **2026-09-15 sizing pass** — every §2
   performance row is now either a proposed `[P]` sizing estimate cited to
   `sim/gm-id-characterization/records/20260909-062847-35a9d46-{summary,full-sweep}.csv`
@@ -33,8 +51,10 @@
   ≈53% of target) and fall slew rate (measured worst-case under 9% of
   target). Per `CLAUDE.md`, this pass does **not** lower either target to
   match the measurement, does **not** touch `DR-002`, the schematic, or
-  device sizing, and does **not** ratify the `Status` field above (stays
-  `DRAFT`) — see each row below and the note following §2's table.
+  device sizing, and does **not** itself ratify anything (the `Status`
+  field above was still `DRAFT` when this pass was written; ratification
+  is `DR-003`'s separate pass, issue #26 — see §5) — see each row below
+  and the note following §2's table.
 - **Assembled by**: Loom Builder agent, issue #2 (bootstrap/scaffolding
   pass); issue #10 (2026-09-15 sizing pass); issue #20 (2026-09-16
   reconciliation pass)
@@ -89,8 +109,8 @@ started`. There is still no `ratifiable` or `conditional` row, unlike the
 more mature same-PDK siblings (`sky130-bandgap`, `sky130-ldo`) this table's
 shape is borrowed from — `measured` is **not** a synonym for `ratifiable`:
 it states only that PVT-cornered testbench evidence now backs the row's
-cited number, not that the row (or this table's overall `Status: DRAFT`
-above) is ready for a ratification decision.
+cited number, not that the row is ratified. Which rows are ratified is
+recorded separately, by `DR-003` (issue #26) — see §5.
 
 **Binding corner** — the corner at which a row's hard edge is expected to
 bind, reasoned from the topology's *generic* behavior (a two-stage
@@ -106,7 +126,7 @@ supersedes the prediction once it exists.
 | Parameter | Value | Notes |
 |---|---|---|
 | Supply voltage, VDD | **1.8 V ±10% → 1.62–1.98 V** [P] | Primary variant per `CLAUDE.md`'s "1.8 V primary" framing — sky130's 1.8 V core device flavor (`sky130_fd_pr__nfet_01v8` / `pfet_01v8`). This is the **low-voltage member of the three-foundry op-amp twin** (gf180-opamp: 3.3 V primary; sg13g2-opamp: to be confirmed) — headroom-driven divergences from those twins (cascoding choices, swing-row bounds) are expected and will be documented as findings, not hidden, per `CLAUDE.md`. |
-| Supply voltage, VDD (I/O-device flavor) | **3.3 V — not opened** [P] | sky130's I/O-tolerant device flavor (`sky130_fd_pr__nfet_g5v0d10v5` / `pfet_g5v0d10v5`, used at 3.3 V per `sky130-ldo`'s [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/main/spec/decision-records/DR-001-pass-device-supply-framing.md) precedent for using this flavor below its full 5.0 V/10.5 V rating). Per `CLAUDE.md`, opening this row requires its own decision record; it is named here only so a future DR has a place to point at, not to imply the row is in scope. Never mixed with 1.8 V core-flavor devices in one variant. |
+| Supply voltage, VDD (I/O-device flavor) | **3.3 V — not opened** [P] | sky130's I/O-tolerant device flavor (`sky130_fd_pr__nfet_g5v0d10v5` / `pfet_g5v0d10v5`, used at 3.3 V per `sky130-ldo`'s [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/main/spec/decision-records/DR-001-pass-device-supply-framing.md) precedent for using this flavor below its full 5.0 V/10.5 V rating). Per `CLAUDE.md`, opening this row requires its own decision record; it is named here only so a future DR has a place to point at, not to imply the row is in scope. [`DR-005`](decision-records/DR-005-io-flavor-not-served.md) records the standing decision that this block does not serve a 3.3 V-rail amplifier position — a superseding DR is the only path to opening the flavor. Never mixed with 1.8 V core-flavor devices in one variant. |
 | Operating temperature | **−40…+125 °C** [P] | Matches the fleet-wide convention (`sky130-bandgap`, `sky130-ldo`) for a commercial-grade PDK part. No sky130-specific device data has been checked against this range yet for this topology — proposed by analogy, not measured. |
 | Corner grid | **`tt, ff, ss, sf, fs` (sky130 1.8 V-core MOS process corners) — confirmed [P]** | Same *shape* `sky130-bandgap`'s ratified corner set uses, now confirmed specifically for the `_01v8` (1.8 V-core) device flavor against the pinned PDK checkout, rather than assumed by analogy from that 3.3 V-primary sibling — see [`sim/gm-id-characterization/corners/model-files.json`](../sim/gm-id-characterization/corners/model-files.json) and [`corners/README.md`](../sim/gm-id-characterization/corners/README.md) (issue #6), which resolve each corner to its literal `sky130_fd_pr__{nfet,pfet}_01v8__<corner>.*.spice` model file. Still `[P]`, not ratified — this row's binding-corner predictions and pass/fail behavior are decided independently, once a topology exists (see [`porting-plan.md`](porting-plan.md) §4). |
 | Load capacitance, CL | **2 pF [DR-001]** | GBW/phase-margin targets are stated "into stated CL" per the twin-row convention. Chosen in [`DR-001`](decision-records/DR-001-topology-and-cl.md) to match `sg13g2-opamp`'s own `CL` decision for cross-PDK comparability across the three-foundry twin set; `gf180-opamp` has no `CL` decision yet to compare against. |
@@ -115,9 +135,9 @@ supersedes the prediction once it exists.
 
 | Parameter | Target | Stretch | Statistical basis | Binding corner (predicted) | Status |
 |---|---|---|---|---|---|
-| Open-loop DC gain | **≥ 60 dB [P]** — met at every measured corner, ≥ 9.7 dB of margin. Measured worst-case **69.72 dB @ SS / 125 °C** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Open-loop DC gain), vs. `DR-002` §(f)'s ≈ 72.8–75.1 dB sizing estimate across its three named corners (supersedes §2a's earlier ≈ 62–65 dB estimate, computed before any device width existed) — every named `DR-002` point measures 0.5–3.6 dB below its hand estimate (FF / 125 °C is the closest at ≈0.5 dB, SS / −40 °C the furthest at ≈3.6 dB) | ≥ 65 dB [P] | — (deterministic corner-worst-case candidate) | **SS / 125 °C (measured worst-case)** — contradicts this row's own prior prediction of SS / −40 °C: the measured sweep confirms SS as the worst *process* corner as predicted, but finds the worst *temperature* within it is 125 °C, not −40 °C (SS / −40 °C measures 71.43 dB, 1.7 dB better than SS / 125 °C) — gain falls monotonically with increasing temperature at every corner, a direction the hand model did not predict. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); not yet ratified |
+| Open-loop DC gain | **≥ 60 dB [P]** — met at every measured corner, ≥ 9.7 dB of margin. Measured worst-case **69.72 dB @ SS / 125 °C** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Open-loop DC gain), vs. `DR-002` §(f)'s ≈ 72.8–75.1 dB sizing estimate across its three named corners (supersedes §2a's earlier ≈ 62–65 dB estimate, computed before any device width existed) — every named `DR-002` point measures 0.5–3.6 dB below its hand estimate (FF / 125 °C is the closest at ≈0.5 dB, SS / −40 °C the furthest at ≈3.6 dB) | ≥ 65 dB [P] | — (deterministic corner-worst-case candidate) | **SS / 125 °C (measured worst-case)** — contradicts this row's own prior prediction of SS / −40 °C: the measured sweep confirms SS as the worst *process* corner as predicted, but finds the worst *temperature* within it is 125 °C, not −40 °C (SS / −40 °C measures 71.43 dB, 1.7 dB better than SS / 125 °C) — gain falls monotonically with increasing temperature at every corner, a direction the hand model did not predict. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); ratified by `DR-003` (see §5) |
 | GBW (into stated CL = 2 pF, per `DR-001`) | **≈ 16 MHz [P]** — self-consistent sizing example (§2a). **Not met by the current sizing**: measured worst-case **8.45 MHz @ SS / 125 °C, only ≈53% of target** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → GBW). Even the row's own predicted-binding-corner point, SS / −40 °C, measures **9.56 MHz (≈60% of target, ≈53% of `DR-002` §(f)'s 17.94 MHz hand estimate at that exact point)** — not a rounding-level miss. Per `CLAUDE.md` the target is **not** lowered to match this measurement; see the note following this table | — | — | **SS / 125 °C (measured worst-case)** — contradicts this row's own prior prediction of SS / −40 °C / low VDD: SS is confirmed as the slowest *process* corner as predicted, but GBW falls with *increasing* temperature at every corner (same direction as the gain row) — a qualitative reversal of `DR-002` §(f)'s bare-device model, which had predicted SS / −40 °C to be the *fastest* of its three named points. Full 15-point grid at the cited record | **measured, target not met at the cited corner** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); the current `DR-002` sizing does not close this gap — see the note following this table |
-| Phase margin (at GBW, same CL) | **≥ 60° [P]** — **confirmed**: measured worst-case **64.09° @ SF / 27 °C**, ≥ 4° of margin at every measured corner (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Phase margin); `DR-002` never computed phase margin directly (only the `p2/GBW ≈ 2.5` proxy ratio), whose qualitative prediction of a comfortable margin above 60° holds | ≥ 45° at the FF/hot corner if 60° is unreachable there — not exercised; target met at every measured corner | — (deterministic corner-worst-case) | **SF / 27 °C (measured worst-case)** — updates this row's prior prediction of FF / 125 °C: FF / 125 °C measures 65.98°, close to the true worst but not it; SF (slow-NMOS/fast-PMOS), essentially flat across temperature (64.10–64.18°), is the actual worst process corner, ≈1.9° below FF / 125 °C. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); not yet ratified |
+| Phase margin (at GBW, same CL) | **≥ 60° [P]** — **confirmed**: measured worst-case **64.09° @ SF / 27 °C**, ≥ 4° of margin at every measured corner (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Phase margin); `DR-002` never computed phase margin directly (only the `p2/GBW ≈ 2.5` proxy ratio), whose qualitative prediction of a comfortable margin above 60° holds | ≥ 45° at the FF/hot corner if 60° is unreachable there — not exercised; target met at every measured corner | — (deterministic corner-worst-case) | **SF / 27 °C (measured worst-case)** — updates this row's prior prediction of FF / 125 °C: FF / 125 °C measures 65.98°, close to the true worst but not it; SF (slow-NMOS/fast-PMOS), essentially flat across temperature (64.10–64.18°), is the actual worst process corner, ≈1.9° below FF / 125 °C. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); ratified by `DR-003` (see §5) |
 | Slew rate | **≈ 20 V/µs [P]** — self-consistent sizing example (§2a), assumed rise/fall-symmetric (`SR = I_SS/Cc`), an assumption `DR-002` never stated explicitly but its single-number formula implies. **Rise SR is close to target**: measured worst-case **16.88 V/µs @ SS / 125 °C (≈84% of target)**. **Fall SR is not met by the current sizing, and badly**: measured worst-case **1.73 V/µs @ SS / −40 °C — under 9% of target**, and under 9% of the rise SR at that same point (17.26 V/µs) — `sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Slew rate. Per `CLAUDE.md` the target is **not** lowered to match this measurement; see the note following this table | — | — | **SS / 125 °C for rise SR (measured worst-case); SS / −40 °C for fall SR (measured worst-case — matches this row's own prior prediction)** — the qualitative hypothesis (not confirmed by a dedicated bench, out of scope for this reconciliation) is that `M7`'s fixed, non-signal-modulated bias current sets an independent, corner-sensitive ceiling on the falling edge, unlike the rising edge where `M6`'s gate is the signal path. Full 15-point grid at the cited record | **measured, target not met (fall SR) at the cited corner** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); the current `DR-002` sizing does not close this gap — see the note following this table |
 | Input-referred noise | **≈ 30 nV/√Hz thermal floor [P], proposed band 100 Hz – 1 MHz [P]** — flicker (1/f) not characterized by the committed gm/ID sweep (§2a) | — | n/a — deterministic device-noise estimate, not yet mismatch/MC-based | TT / 27 °C (thermal-floor estimate is only weakly corner-dependent under this pass's constant-current-bias assumption — see §2a caveat) | not started |
 | Input-referred offset | **[TBD]** — the committed gm/ID sweep is a bare-device DC characterization (gm/ID, gm/gds, fT only) with no Pelgrom/`AVT` mismatch coefficient extraction; a numeric offset target needs either a dedicated mismatch Monte-Carlo pass or PDK mismatch-model data, neither in scope for this issue (§2a) | — | **3σ, mismatch MC N≥300 + process corners [P]** — matches `sky130-bandgap`'s ratified statistical-basis convention (its output-reference row); sample count not yet re-derived for this topology | to be determined once a topology is drawn — likely SS/FF split-corner pairing on the input differential pair | not started |
@@ -125,7 +145,7 @@ supersedes the prediction once it exists.
 | PSRR | **[TBD]** — PSRR is a supply-to-output small-signal transfer function (through the compensation network and bias generator); the committed gm/ID sweep has no supply-voltage sweep axis at all (confirmed in `sim/gm-id-characterization/README.md`: "No supply-voltage axis is swept ... there is no 'supply corner' for a two-terminal-bias bare-device sweep"), so there is no device-level basis to size this row from yet (§2a) | — | — (deterministic corner-worst-case) | to be determined | not started |
 | Input common-mode range | **≈ 0.888 – 1.024 V (≈ 136 mV window) at the worst-case corner [P]** — sizing estimate from `DR-002` §(f)/§(d), computed from the drawn input-pair and PMOS-mirror `Vov`/`Vth` at that corner. No `[TBD]`-to-`[P]` history for this row: it did not exist before this issue, because no device widths existed to size it from until `DR-002` (issue #13). The window sits *above* mid-rail (0.81 V) rather than spanning it, and is markedly narrower than the twins' topology would suggest — `DR-002` traces this to `DR-001`'s NMOS-input-pair / PMOS-mirror choice meeting sky130's PMOS threshold magnitude (`Vth_p` = 1.1065 V at `ss / −40 °C`), which alone would cap the window near ≈ 0.29 V even at zero PMOS-mirror overdrive. This is left as a recorded finding, not a design decision: `DR-002`'s own "Alternatives considered" names the knob to turn if it binds (biasing the PMOS group at `gm/ID = 12.5 V⁻¹` instead of 10, for ≈ 189 mV of window at ≈ 76 dB gain), but states — and this issue does not override that — that the choice between the current sizing and that alternative belongs against a *simulated* phase margin and common-mode sweep, not another hand calculation. If a future PVT-cornered bench confirms the window does not cover this block's intended input range, reopening `DR-001`'s input-pair polarity requires a **new** decision record superseding `DR-001`, per `DR-001`'s own superseding-record rule — not a silent edit to `DR-001` or to this row | — | — (deterministic corner-worst-case) | SS / −40 °C / VDD = 1.62 V (the PMOS mirror's threshold magnitude `Vth_p` and the NMOS current-source `Vov` both bind hardest at this corner) | not started |
 | Output swing | **≈ 0.072 – 1.464 V (≈ 1.39 Vpp, ≈ 86% of the 1.62 V worst-case-low rail) [P]** — sizing estimate from `DR-002` §(f)'s device-level (drawn-width) `Vov` headroom at the worst-case-low rail (SS / −40 °C / 1.62 V), superseding §2a's earlier ≈ 0.17–1.45 V estimate, computed before any device width existed. **Not met by the current sizing**: the unity-buffer DC-swing bench measures **0.328 – 1.184 V (0.855 Vpp, 52.8% of the 1.62 V rail) at that same corner (SS / −40 °C)**, only **62% of the `DR-002` estimate's peak-to-peak magnitude** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Output swing). Per `CLAUDE.md` the target is **not** lowered to match this measurement; see the note following this table | — | — | **SS / −40 °C / low VDD (measured worst-case — confirms this row's own prior prediction)**: swing widens monotonically with increasing temperature at every process corner, the same direction as the gain/GBW rows, so cold is the binding condition throughout this experiment, not just here — expected to be the row where 1.8 V-primary headroom cost is most visible relative to the 3.3 V/5 V twins. Full 15-point grid at the cited record | **measured, target not met at the cited corner** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); the current `DR-002` sizing does not close this gap — see the note following this table |
-| Quiescent power | **≈ 128.7 µW at the stated binding corner (1.98 V); ≈ 117.0 µW at nominal 1.8 V [P]** — **confirmed**: measured **130.71 µW @ FF / 125 °C / 1.98 V (+1.6% vs. the `DR-002` estimate)** and **116.27 µW @ TT / 27 °C (nominal, within 0.6%)** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Quiescent power) — both the binding corner and the magnitude confirm the `DR-002` §(f)/§(a) hand estimate (`I_Q = 65 µA`: `I_SS = 10 µA + ID2 = 50 µA` signal branches + 5 µA diode-connected on-chip bias-reference branch `MB1`, per `DR-002` §(a)); measured `Iq` ranges 59.67–66.01 µA across the full 15-point grid | — | — (deterministic corner-worst-case) | **FF / 125 °C / 1.98 V (measured worst-case — confirms this row's own prior prediction)** — matches `sky130-bandgap`'s ratified Iq binding-corner convention. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); not yet ratified |
+| Quiescent power | **≈ 128.7 µW at the stated binding corner (1.98 V); ≈ 117.0 µW at nominal 1.8 V [P]** — **confirmed**: measured **130.71 µW @ FF / 125 °C / 1.98 V (+1.6% vs. the `DR-002` estimate)** and **116.27 µW @ TT / 27 °C (nominal, within 0.6%)** (`sim/opamp-characterization` record [`20260916-032327-edc9f22`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md), "Results by row" → Quiescent power) — both the binding corner and the magnitude confirm the `DR-002` §(f)/§(a) hand estimate (`I_Q = 65 µA`: `I_SS = 10 µA + ID2 = 50 µA` signal branches + 5 µA diode-connected on-chip bias-reference branch `MB1`, per `DR-002` §(a)); measured `Iq` ranges 59.67–66.01 µA across the full 15-point grid | — | — (deterministic corner-worst-case) | **FF / 125 °C / 1.98 V (measured worst-case — confirms this row's own prior prediction)** — matches `sky130-bandgap`'s ratified Iq binding-corner convention. Full 15-point grid at the cited record | **measured** — `sim/opamp-characterization` record `20260916-032327-edc9f22` (issue #17 / PR #19); ratified by `DR-003` (see §5) |
 | Area | **[TBD]** — no `layout/` exists yet (holds only a placeholder `README.md`); area has no gm/ID-derived basis at all — it is a post-layout quantity, not a circuit-sizing one, and is not proposed here even as a placeholder | — | n/a (not a PVT line) | n/a | not started |
 
 Every row above now carries either a `[P]` sizing estimate (issue #10,
@@ -166,10 +186,10 @@ this issue (tracked separately, not by this table edit) — as is a
 dedicated bench diagnosing the fall-slew-rate collapse's root cause
 (`sim/opamp-characterization/README.md`'s own stated hypothesis: `M7`'s
 fixed, non-signal-modulated bias current). This reconciliation also does
-**not** ratify this table's `Status: DRAFT` banner (top of file) or any
-individual row — `measured` (see "How to read this table" above) states
-only that PVT-cornered evidence now exists, not that a row is ready for a
-ratification decision.
+**not** itself ratify the table or any individual row — `measured` (see
+"How to read this table" above) states only that PVT-cornered evidence now
+exists. Ratification is `DR-003`'s separate pass (issue #26), recorded in
+§5.
 
 None of the remaining `[TBD]` rows (offset, CMRR, PSRR, area, and the
 separately-estimated input-common-mode-range `[P]` row) is affected by
@@ -375,8 +395,9 @@ sweep is performed to fill them.
   corner and value, slew rate, output-swing magnitude) are reported as
   gaps against the *unchanged* target, not closed. Closing them is a
   future device-resizing issue against this reconciled baseline. Issue #20
-  also does not ratify this table's `Status: DRAFT` banner or promote any
-  row past `measured` (see "How to read this table").
+  also does not itself ratify the table or promote any row past `measured`
+  (see "How to read this table"); ratification is `DR-003`'s separate pass
+  (issue #26, §5).
 
 ## 4. Sources
 
@@ -390,4 +411,146 @@ sweep is performed to fill them.
 - `spec/decision-records/DR-001-topology-and-cl.md` (issue #8 / PR #9) — the topology decision and structural compensation ratios (`Cc ≈ (0.2–0.3) × CL`, `gm2/gm1 ≈ 10`) the 2026-09-15 sizing pass builds on.
 - [2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357) and [2AMLogic/2am#372](https://github.com/2AMLogic/2am/issues/372) — the canary spec/DR ratification-via-PR standing policy and two-key mechanism this pass's DR-001 status promotion follows.
 - `spec/decision-records/DR-002-device-sizing.md` (issue #13 / PR #15, status `proposed` — not ratified) — the schematic-level device sizing (`design/opamp_core.sch`) this issue (#16) reconciles the DC-gain, output-swing, and quiescent-power §2 rows against, and the source of the new input-common-mode-range row's numbers and finding.
-- [`sim/opamp-characterization/records/20260916-032327-edc9f22.md`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md) / `.json` and [`sim/opamp-characterization/README.md`](../sim/opamp-characterization/README.md) (issue #17 / PR #19) — the PVT-cornered, circuit-level measured evidence (open-loop AC, slew-rate transient, DC-swing testbenches against `design/netlist/opamp_core.spice`) this issue (#20) reconciles into the six `[P]`-tagged §2 performance rows (open-loop DC gain, GBW, phase margin, slew rate, output swing, quiescent power), confirming two and contradicting four against `DR-002`'s hand estimates.
+- `spec/decision-records/DR-003-target-spec-ratification.md` (issue #26) — the 2026-09-21 ratification pass whose per-row dispositions this table's `Status` field and §5 below record; its primary measured input is `sim/opamp-characterization`'s committed record (issue #17 / PR #19).
+- [`sim/opamp-characterization/records/20260916-032327-edc9f22.md`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md) / `.json` and [`sim/opamp-characterization/README.md`](../sim/opamp-characterization/README.md) (issue #17 / PR #19) — the PVT-cornered, circuit-level measured evidence (open-loop AC, slew-rate transient, DC-swing testbenches against `design/netlist/opamp_core.spice`) this issue (#20) reconciles into the six `[P]`-tagged §2 performance rows (open-loop DC gain, GBW, phase margin, slew rate, output swing, quiescent power), confirming two and contradicting four against `DR-002`'s hand estimates — and the evidence behind those six rows' `DR-003` dispositions (§5).
+
+## 5. Ratification status (2026-09-21 pass — issue #26 / DR-003)
+
+As of [`DR-003`](decision-records/DR-003-target-spec-ratification.md), this
+table's rows divide as follows — dispositions below are DR-003's, take
+effect when the two-key PR carrying that record merges, and are recorded
+per row in the record itself. **No row's numeric value changed in
+ratification** — DR-003 disposes each row's *status* only:
+
+- **RATIFIED — measured evidence attached (6 §2 rows)**: open-loop DC gain
+  (target met at every grid point — worst 69.72 dB @ SS/125 °C, ≥ 9.7 dB
+  margin, stretch bound met everywhere), GBW (**not met** by the current
+  sizing — worst 8.45 MHz @ SS/125 °C vs. the unchanged ≈ 16 MHz target),
+  phase margin (met everywhere — worst 64.09° @ SF/27 °C), slew rate
+  (**not met on the falling edge** — worst 1.73 V/µs @ SS/−40 °C, under
+  9% of the unchanged ≈ 20 V/µs target, which DR-003 makes explicitly
+  both-edge), output swing (**not met** — worst 0.855 Vpp @ SS/−40 °C vs.
+  the unchanged ≈ 1.39 Vpp target; that binding-corner prediction itself
+  is confirmed), quiescent power (confirmed — 130.71 µW @ the confirmed
+  FF/125 °C/1.98 V binding corner, +1.6% vs. the estimate). Evidence:
+  [`sim/opamp-characterization/records/20260916-032327-edc9f22.md`](../sim/opamp-characterization/records/20260916-032327-edc9f22.md)
+  — full 5-corner × 3-temperature grid, per-row verdicts in that
+  experiment's README.
+- **RATIFIED — target only, no measured evidence (2 §2 rows)**:
+  input-referred noise (≈ 30 nV/√Hz thermal floor, band 100 Hz – 1 MHz —
+  no noise testbench is committed anywhere in `sim/`, flicker
+  uncharacterized), input common-mode range (≈ 0.888–1.024 V window at
+  the worst-case corner — no ICMR-specific bench; the committed dc-swing
+  bench measures closed-loop compliance, which its own README states is
+  not an ICMR measurement). These bind as targets; **no "met" claim is
+  made or implied**.
+- **RATIFIED — operating conditions (all 5 §1 rows)**: 1.8 V ±10% supply;
+  the 3.3 V I/O-flavor row stays named-not-opened; −40…+125 °C; the
+  confirmed 5-corner `_01v8` MOS grid; CL = 2 pF (carried from DR-001).
+  Grading caveats carried from the committed evidence: VDD is tied to
+  process corner in the committed grid (not an independent supply sweep
+  per corner), and the R+C (resistor/capacitor process) axis is
+  "typical" only — both stated methodology choices in that record's
+  README, not ratified claims of coverage.
+- **OPEN — explicitly, not silently (4 §2 rows)**: input-referred offset,
+  CMRR, PSRR (each needs a bench that does not exist yet — mismatch
+  Monte Carlo, common-mode AC, supply AC respectively; the offset row's
+  `[P]` *statistical basis* — 3σ, MC N≥300 + process corners — likewise
+  stays proposed until that MC pass exists, and is what gap-to-T1
+  tracker item 6 gates), and area (post-layout; no `layout/` exists).
+  These rows carry `[TBD]` with one-line reasons at the row, tracked
+  under the gap-to-T1 tracker, [#3](https://github.com/2AMLogic/sky130-opamp/issues/3).
+
+The six measured row lines above are deliberately untouched by this pass:
+their measured-value *citations* are issue #20's reconciliation, whose
+PR (#21) is open and blocked as of this writing — its row-text edits and
+this pass's ratification dispositions are complementary (citation axis
+vs. binding-status axis), and their diffs are disjoint, so the two PRs
+compose in either merge order. Consequently the `[P]` tag's "needs an
+explicit ratification decision before it binds" clause is now
+**discharged for the 13 ratified rows by DR-003 itself**, while the tag
+itself keeps marking each value's *provenance* (a sizing-pass proposal),
+not its binding status — which is what this section records. The rows
+carry their measured citations at the cell since PR #21 (issue #20)
+landed.
+
+## Consumers (2am reuse rule 9 — this block's end of the edge)
+
+[`2am/repos.yml`](https://github.com/2AMLogic/2am/blob/main/repos.yml) records
+`consumes: [sky130-opamp]` on two fleet repos (read live 2026-09-22):
+**sky130-ldo** (`consumes: [sky130-opamp, sky130-bandgap]`) and
+**sky130-bandgap** (`consumes: [sky130-opamp]`). Cross-cutting reuse rule 9
+([2AMLogic/2am#899](https://github.com/2AMLogic/2am/issues/899), widened
+2026-09-21 to same-PDK sub-blocks) makes that dependency edge a recorded
+fact on *both* ends — this section is this repo's end. It names each
+consumer, the requirement rows it imposes on an amplifier in its position,
+and whether this block's ratified §1/§2 rows meet them. **"Unknown" is a
+legitimate row value** (the consumer states no explicit requirement for
+that axis); unnamed is the only invalid value.
+
+**Verdict stamp.** Every verdict below was evaluated at this repo's
+`8b3ec92` (2026-09-22) against the [DR-003](decision-records/DR-003-target-spec-ratification.md)-ratified rows,
+with each consumer read at its own pinned commit. Verdicts **will drift**
+when the #22 resize lands and when a consumer edits its tree — the pinned
+commits in each row are what make that drift detectable rather than silent.
+Re-evaluate on either head moving.
+
+Findings about a consumer's own block belong on the **consumer's** tracker,
+not here: each consumer's adopt-or-record evaluation of this block is
+already filed on its own side — [sky130-ldo#123](https://github.com/2AMLogic/sky130-ldo/issues/123)
+and [sky130-bandgap#286](https://github.com/2AMLogic/sky130-bandgap/issues/286).
+This section carries links out, not their findings. The machine-parseable
+integrator view (top cell, ports, netlist/GDS, area, maturity rung) lives at
+a fixed path: [`manifests/integrator.json`](../manifests/integrator.json) —
+not in this prose.
+
+### sky130-ldo — pinned @ `a0ff95b` (2026-09-22)
+
+Spec of record: [`spec/target-spec.md`](https://github.com/2AMLogic/sky130-ldo/blob/a0ff95b/spec/target-spec.md)
+(RATIFIED per its DR-006/#1). The error amplifier is embedded, not
+standalone, so most rows below read Unknown — that is the LDO's spec shape,
+not a research gap here.
+
+| Requirement row | Consumer's requirement (source @ `a0ff95b`) | This block's verdict (vs §1/§2 @ `8b3ec92`) |
+|---|---|---|
+| Port list | **Unknown** — the error amplifier is embedded inside `design/ldo_3v3in_1v8out.sch`; no standalone amplifier port contract exists to compare against. | unknown — nothing to meet yet; this block publishes `vdd vss inn inp out ibias` ([netlist](../design/netlist/opamp_core.spice) @ `8b3ec92`). |
+| Rails | Error-amp position spans the 3.3 V input rail (2.97–3.63 V) to ground; the whole amplifier/bias/protection chain runs on 5 V-gate `*_g5v0d10v5` devices (ratified framing A, its [DR-001](https://github.com/2AMLogic/sky130-ldo/blob/a0ff95b/spec/decision-records/DR-001-pass-device-supply-framing.md); schematic header comments @ `a0ff95b`). | **not met** — §1's ratified supply row is 1.8 V ±10% on `_01v8` core devices; the 3.3 V I/O flavor is named-not-opened (§1 row — opening it requires its own decision record). Standing decision recorded in [`DR-005`](decision-records/DR-005-io-flavor-not-served.md): this block does not serve a 3.3 V-rail amplifier position. |
+| Input range | **Unknown** — the ratified table states no error-amp input common-mode row; the feedback-divider tap voltage is not fixed there. | unknown — this block's ICMR row is a ratified target window (≈ 0.888–1.024 V worst-case) with no measured bench. |
+| Speed (GBW/SR) | **Unknown** — no explicit amp GBW/SR row. Nearest imposing rows are loop-level: Stability (PM ≥ 45°, GM ≥ 10 dB over 0–50 mA and the ratified C_out/ESR window) and Load transient (recover to ±1% in ≤ 20 µs). | unknown — and this block's own GBW row is ratified but **not met** by current sizing (worst 8.45 MHz vs the unchanged ≈ 16 MHz target, DR-003), so any future amp-level comparison moves with the #22 resize. |
+| Offset | **Unknown** — no explicit amp-offset row. Nearest accuracy rows: Line regulation < 5 mV/V and Load regulation < 1% (18 mV), counted inside the ±2% output window. | unknown — this block's input-referred offset row is OPEN (§2; no mismatch MC pass exists). |
+| Noise | **Not imposed** — its Output-noise row reads "not specified — waived unless a consumer states a requirement". | n/a — nothing to meet; this block's noise row is ratified as target-only. |
+| Area budget | **Unknown** — its ratified Area row (< 0.1 mm² total core, pass FET included) is a whole-LDO budget; no error-amp share is allocated. | unknown — this block's area row is OPEN (no layout exists). |
+| Iq / power | **Explicitly open** — "No number set"; its DR-003 declined to set an Iq figure (the ≈ 24.9 µA @ 50 mA loop-gain-sized draw is a data point, not a target); its own [#121](https://github.com/2AMLogic/sky130-ldo/issues/121) tracks ratifying the row. | unknown — no consumer number to compare; for reference this block's ratified quiescent-power row is I_Q = 65 µA (≈ 117.0 µW @ 1.8 V nominal). |
+
+**Not the same block (recorded once, by name).** sky130-ldo's error
+amplifier is a single-stage current-mirror ("symmetric") OTA embedded in
+`design/ldo_3v3in_1v8out.sch` — its second gain stage is the LDO's
+common-source pass device, and a two-stage Miller standalone second-gain-stage
+candidate was explicitly screened and rejected during that repo's own #22
+(schematic header comments @ `a0ff95b`). This block **is** a two-stage
+Miller-compensated standalone OTA. Not a drop-in; that fact is recorded
+here so no reader re-derives it.
+
+### sky130-bandgap — pinned @ `4ac0c24` (2026-09-22)
+
+Spec of record: the ratified target-specification table in its
+[README](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/README.md)
+(DR-005/#1; PSRR row amended by DR-006/#123). Its amplifier is a named
+sub-block with a fixed pin list, so more rows below are citable.
+
+| Requirement row | Consumer's requirement (source @ `4ac0c24`) | This block's verdict (vs §1/§2 @ `8b3ec92`) |
+|---|---|---|
+| Port list | Fixed pin list `VB VA GDRV TAIL VDD VSS` — `design/error_amp.sch`, instantiated by `bandgap_core.sch` as `XAMP`; TAIL is an external current input (the amp has no internal bias network — its tail comes from the core's MPAMP), and AOUT drives the core's PMOS mirror gate GDRV. | **not met (different contract)** — this block publishes `vdd vss inn inp out ibias`: a self-contained cell whose `ibias` is the on-chip diode-connected reference node (DR-002 §(a)), vs the bandgap amp's external-tail-in / gate-drive-out contract. |
+| Rails | Supply 3.3 V ±10% (stretch: 1.8 V-core Banba variant); the amp is all 5 V thick-oxide `*_g5v0d10v5` — "no 1.8 V core devices anywhere" per its [DR-001](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/spec/decision-records/DR-001-supply-flavor-scope.md) scope. | **not met** — same shape as the LDO row: this block's ratified rail is 1.8 V ±10% on `_01v8`; the 3.3 V flavor is named-not-opened. Standing decision recorded in [`DR-005`](decision-records/DR-005-io-flavor-not-served.md). |
+| Input range | The amp senses the core's nodes at ≈ 0.73 V (one V_EB, which is what forces its PMOS input pair) — fixed by the core (`design/error_amp.sch` header @ `4ac0c24`). | **not met** — this block's ratified ICMR target window ≈ 0.888–1.024 V (worst-case corner) does not include 0.73 V. Caveat: DR-003 ratified that window as target-only (no measured ICMR bench exists). |
+| Speed (GBW/SR) | **Unknown** — no amp GBW/SR row. Nearest imposing rows are loop-level: PSRR > 60 dB DC–1 kHz (frequency-qualified, its DR-006) and Startup < 1 ms. | unknown. |
+| Offset | Amp input-referred allocation ≈ 0.275–0.369 mV σ (by temperature) — derived as "what is left after the fixed terms" of the output-accuracy row, via the measured Kuijk offset gain of 9.65 ([`design/error-amp-offset-budget.md` §3](https://github.com/2AMLogic/sky130-bandgap/blob/4ac0c24/design/error-amp-offset-budget.md)); its §10 re-derivation against the ratified ±2% row reads MET with 19–21% margin (N = 300 MC). | **unknown** — this block's input-referred offset row is OPEN (§2 [TBD]; no mismatch MC pass — gap-to-T1 item 6), so no number exists on this side to compare against ≈ 0.3 mV σ. |
+| Noise | **Not imposed** — its ratified table carries no output-noise row. | n/a. |
+| Area budget | Ratified Area < 0.08 mm² whole block, drawn MCC cap included (its DR-007); no amp share is allocated. | unknown — this block's area row is OPEN (no layout exists). |
+| Iq / power | Ratified Iq < 50 µA, whole block (README table @ `4ac0c24`). | **not met** — this block's ratified quiescent-power row is I_Q = 65 µA (≈ 117.0 µW @ 1.8 V nominal; 130.71 µW measured worst corner): the amplifier alone exceeds the bandgap's whole-block 50 µA budget before the core is counted — and that comparison is the charitable one, taken at 1.8 V rather than the bandgap's 3.3 V rail, where this block is not characterized at all. |
+
+**Not the same block (recorded once, by name).** sky130-bandgap's error
+amplifier is a single-stage current-mirror OTA (`design/error_amp.sch` /
+`.sym` @ `4ac0c24`: PMOS input pair, external tail, fixed 6-pin contract) —
+not a two-stage Miller standalone op-amp. Recorded here so no reader
+re-derives it.

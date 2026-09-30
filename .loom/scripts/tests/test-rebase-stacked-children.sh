@@ -69,10 +69,14 @@ assert_eq() {
     fi
 }
 
+# assert_contains/assert_not_contains use a pure-bash substring match (no
+# forked printf|grep pipeline) so a transient fork/exec failure under
+# run-ci-suites.sh's parallel suite pool can never masquerade as a genuine
+# content mismatch (#7819, #7874).
 assert_contains() {
     local haystack="$1" needle="$2" msg="$3"
     TESTS_RUN=$((TESTS_RUN + 1))
-    if printf '%s' "$haystack" | grep -qF -- "$needle"; then
+    if [[ "$haystack" == *"$needle"* ]]; then
         TESTS_PASSED=$((TESTS_PASSED + 1))
         echo -e "  ${GREEN}PASS${NC}: $msg"
     else
@@ -86,7 +90,7 @@ assert_contains() {
 assert_not_contains() {
     local haystack="$1" needle="$2" msg="$3"
     TESTS_RUN=$((TESTS_RUN + 1))
-    if ! printf '%s' "$haystack" | grep -qF -- "$needle"; then
+    if ! [[ "$haystack" == *"$needle"* ]]; then
         TESTS_PASSED=$((TESTS_PASSED + 1))
         echo -e "  ${GREEN}PASS${NC}: $msg"
     else
@@ -127,6 +131,14 @@ source "$FUNCS_FILE"
 # above) — source the real library directly so the extracted functions can call it.
 # shellcheck disable=SC1091
 source "$HELPERS_DIR/lib/push-lease-verify.sh"
+
+# Same deal for check_branch_name (#9106): _process_one_stacked_child validates
+# each child's forge-supplied headRefName before the fetch, and the script's own
+# `source lib/default-branch.sh` sits above the extracted span. The REAL library
+# is sourced here — a stub would let the guard rot untested in the one suite
+# that drives this function.
+# shellcheck disable=SC1091
+source "$HELPERS_DIR/lib/default-branch.sh"
 
 # --- Stub gh on PATH ---
 #   gh api repos/OWNER/REPO/issues/N   -> cat $STUB_DIR/issue-N.json (or {})
@@ -279,7 +291,7 @@ reset_state
 write_prlist "feature/issue-100" '[{"number":501,"headRefName":"feature/issue-201"}]'
 clear_uptodate "feature/issue-201"   # stale
 _rebase_stacked_children "feature/issue-100"
-assert_contains "$(read_git)" "git rebase origin/feature/issue-100 feature/issue-201" \
+assert_contains "$(read_git)" "git rebase -- origin/feature/issue-100 feature/issue-201" \
   "(c) Safe stale child -> rebased onto origin/feature/issue-100"
 assert_contains "$(read_git)" "git push --force-with-lease" \
   "(c) Safe stale child -> pushed with --force-with-lease"
@@ -304,7 +316,7 @@ OUT_C2_FILE="$(mktemp)"
 _rebase_stacked_children "feature/issue-100" >"$OUT_C2_FILE" 2>&1
 OUT_C2="$(cat "$OUT_C2_FILE")"
 rm -f "$OUT_C2_FILE"
-assert_contains "$(read_git)" "git rebase origin/feature/issue-100 feature/issue-201" \
+assert_contains "$(read_git)" "git rebase -- origin/feature/issue-100 feature/issue-201" \
   "(c2) Version mismatch after rebase -> rebase still ran"
 assert_not_contains "$(read_git)" "git push --force-with-lease" \
   "(c2) Version mismatch after rebase -> push NEVER attempted"
@@ -357,7 +369,7 @@ DRY_RUN=true
 write_prlist "feature/issue-100" '[{"number":501,"headRefName":"feature/issue-201"}]'
 clear_uptodate "feature/issue-201"   # stale
 _rebase_stacked_children "feature/issue-100"
-assert_not_contains "$(read_git)" "git rebase origin/feature/issue-100 feature/issue-201" \
+assert_not_contains "$(read_git)" "git rebase -- origin/feature/issue-100 feature/issue-201" \
   "(f) Dry-run stale safe child -> rebase NOT executed"
 assert_not_contains "$(read_git)" "git push --force-with-lease" \
   "(f) Dry-run stale safe child -> push NOT executed"
@@ -428,8 +440,10 @@ assert_contains "$src" 'git merge-base --is-ancestor "origin/$parent_branch" "or
   "script determines staleness via git merge-base --is-ancestor"
 assert_contains "$src" "grep -qx 'loom:building'" \
   "script gates safe/unsafe on the child issue's loom:building label"
-assert_contains "$src" 'run git rebase "origin/$parent_branch" "$child_branch"' \
-  "safe path rebases the child onto the parent tip"
+# `--` before the two ref operands (#9106): without it, a forge-supplied
+# headRefName beginning with `-` is parsed by `git rebase` as a switch.
+assert_contains "$src" 'run git rebase -- "origin/$parent_branch" "$child_branch"' \
+  "safe path rebases the child onto the parent tip, with the -- separator"
 assert_contains "$src" "run git push --force-with-lease" \
   "safe path publishes with --force-with-lease (never bare --force)"
 assert_not_contains "$src" "gh pr edit" \

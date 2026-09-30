@@ -273,8 +273,8 @@ resolve_host() {
     printf 'unknown-host'
 }
 
-# --- ISO-8601 -> epoch (portable across GNU date and BSD/macOS date, mirrors
-# urgent-flip-guard.sh's `_iso_to_epoch`) ------------------------------------
+# --- ISO-8601 -> epoch (portable across GNU date and BSD/macOS date, same
+# dual-path idiom as check-evaluating-staleness.sh) --------------------------
 iso_to_epoch() {
     local ts="$1" out
     out="$(date -u -d "$ts" +%s 2>/dev/null)" && [[ "$out" =~ ^[0-9]+$ ]] && {
@@ -386,7 +386,7 @@ cmd_check() {
     # fetched together in ONE round trip so the yield-exclusion filter below
     # never needs a second `gh api` call.
     local comments_ndjson
-    if ! comments_ndjson="$(gh api "${repo_args[@]}" "repos/{owner}/{repo}/issues/${issue}/comments" \
+    if ! comments_ndjson="$(gh api "${repo_args[@]+"${repo_args[@]}"}" "repos/{owner}/{repo}/issues/${issue}/comments" \
         --paginate --jq \
         ".[] | select(.body != null and ((.body | startswith(\"${LEASE_MARKER_PREFIX}\")) or (.body | startswith(\"${YIELD_MARKER_PREFIX}\")))) | {updated_at: .updated_at, body: .body}" \
         2>&1)"; then

@@ -59,10 +59,14 @@ assert_eq() {
     fi
 }
 
+# assert_contains/assert_not_contains use a pure-bash substring match (no
+# forked printf|grep pipeline) so a transient fork/exec failure under
+# run-ci-suites.sh's parallel suite pool can never masquerade as a genuine
+# content mismatch (#7819, #7874).
 assert_contains() {
     local haystack="$1" needle="$2" msg="$3"
     TESTS_RUN=$((TESTS_RUN + 1))
-    if printf '%s' "$haystack" | grep -qF -- "$needle"; then
+    if [[ "$haystack" == *"$needle"* ]]; then
         TESTS_PASSED=$((TESTS_PASSED + 1))
         echo -e "  ${GREEN}PASS${NC}: $msg"
     else
@@ -120,7 +124,7 @@ case "$1" in
       canned="$STUB_DIR_FROM_ENV/workflow-runs.json"
       if [[ -f "$canned" ]]; then cat "$canned"; else echo '{"workflow_runs": []}'; fi
       exit 0
-    elif [[ "$path" == *"/check-runs" ]]; then
+    elif [[ "$path" == *"/check-runs" || "$path" == *"/check-runs?"* ]]; then
       if [[ -f "$STUB_DIR_FROM_ENV/check-runs-fail" ]]; then
         echo "stub gh: check-runs api call failed" >&2
         exit 1

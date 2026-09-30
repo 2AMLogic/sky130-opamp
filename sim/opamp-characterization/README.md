@@ -72,7 +72,10 @@ and confirmed installed and matching in this environment (2026-09-15).
 experiment's own `pdk.json`/`corners/model-files.json` directly (reads them,
 does not duplicate or re-derive them, per this issue's acceptance criteria)
 and adds only the R+C ("typical") corner choice this experiment introduces
-in its own `pdk.json` — see "R+C corner" below.
+in its own `pdk.json` — see "R+C corner" below. The *code* that performs that
+resolution is likewise shared rather than copied: it lives once in
+[`../lib/spice_harness.py`](../lib/spice_harness.py), and `bin/pvt_sweep.py`
+subclasses its `Pdk` only to add this experiment's R+C includes (issue #23).
 
 ```bash
 volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
@@ -87,6 +90,7 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `testbench/opamp_tran_sr.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench |
 | `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above |
+| `../lib/spice_harness.py` | Shared (not per-experiment) PDK resolution, deck rendering, tool-version and git-SHA helpers `bin/pvt_sweep.py` imports |
 | `netlist-snapshots/<record_id>/` | Every rendered deck for that record (45 files), for provenance |
 | `records/<record_id>-{ac,tran-sr,dc-swing}.csv` | Every measured quantity at every (corner, temperature) point — the primary evidence artifacts |
 | `records/<record_id>-logs/` | The raw ngspice stdout/stderr for every one of the 45 runs, so a claimed measurement can be spot-checked against the actual simulator output (per this issue's own test plan) |
@@ -334,8 +338,9 @@ consistent with the hand model, since the first stage's Miller-cap-charging
 mechanism the formula describes does drive the rising edge. **Fall SR** is
 a different story entirely: it varies **9×** across the grid (1.73–15.72
 V/µs) and collapses at cold/slow corners — most severely at **SS/-40°C,
-1.73 V/µs, under 9% of both the rise SR at the same point (17.26 V/µs) and
-the DR-002 estimate**. The mechanism is not fully diagnosed here (out of
+1.73 V/µs — under 9% of the DR-002 estimate (8.65% of the 20 V/µs target),
+and ≈ 10% of the rise SR at the same point (17.26 V/µs;
+1.7306/17.2561 = 10.0%)**. The mechanism is not fully diagnosed here (out of
 scope for this issue — see "Not done" below), but the qualitative picture is
 that `M7` (the fixed-current NMOS output-stage sink, gate tied to the
 bias-mirror node, not signal-modulated) sets an independent ceiling on how

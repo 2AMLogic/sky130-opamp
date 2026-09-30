@@ -6,7 +6,8 @@ A two-stage Miller-compensated operational amplifier on SkyWater sky130 on
 open-source xschem + ngspice flow.
 
 **Status: just opened.** Nothing is designed yet. The first work is
-the gm/ID device-characterization study at 1.8 V, with the 3.3 V I/O flavor surveyed.
+the gm/ID device-characterization study at 1.8 V, with the 3.3 V I/O flavor
+surveyed but not served ([DR-005](spec/decision-records/DR-005-io-flavor-not-served.md)).
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
@@ -35,6 +36,11 @@ rather than ignoring it.
 
 Twin row structure at 1.8 V primary. Swing and gain rows will show the
 low-headroom trade explicitly; PVT corners on every recorded result.
+
+**Integrator view (machine-parseable, fixed path):**
+[`manifests/integrator.json`](manifests/integrator.json) — top cell, port
+list, netlist/GDS paths, area, maturity rung. Consumer requirement rows
+live in `## Consumers` in [`spec/target-spec.md`](spec/target-spec.md).
 
 ## License
 

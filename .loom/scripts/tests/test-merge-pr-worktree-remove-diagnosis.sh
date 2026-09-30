@@ -53,6 +53,24 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MERGE_PR="$SCRIPTS_DIR/merge-pr.sh"
 
+# #8191: _maybe_delete_local_branch (called directly and via
+# _remove_loom_worktree) now delegates to `loom-daemon merge-pr delete-branch`.
+# Pin the binary built from this tree so a stale installed daemon cannot answer
+# instead — it would warn-and-keep every branch and fail these cases for the
+# wrong reason.
+#
+# #8191 slice: the porcelain lookups this suite extracts (_primary_worktree_path
+# / _worktree_branch_for) now delegate to `loom-daemon merge-pr worktree-*`, so
+# the LEAF verbs are checked too — a binary with only the `merge-pr` group
+# predates this slice and would make every lookup fail, which the #3710 guard
+# turns into "refuse to clean up anything at all": a whole-suite failure that
+# reads as broken logic rather than as one stale binary.
+# shellcheck source=lib/require-daemon-bin.sh
+source "$SCRIPT_DIR/lib/require-daemon-bin.sh"
+loom_test_require_daemon_bin "$SCRIPTS_DIR" "merge-pr" \
+    "merge-pr worktree-primary" "merge-pr worktree-branch-for" \
+    "merge-pr worktree-find-by-branch"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
@@ -104,10 +122,19 @@ success() { echo "OK: $*"; }
 error()   { echo "ERROR: $*" >&2; return 1; }
 loom_record_worktree_removal() { :; }  # no-op stub; ledger writes are out of scope here
 
+# #8191 slice: the porcelain lookups below shell out through _mp_worktree, so it
+# is extracted with them — without it they die with "_mp_worktree: command not
+# found" under `set -e`.
+eval "$(extract_fn _mp_worktree           "$MERGE_PR")"
 eval "$(extract_fn _primary_worktree_path "$MERGE_PR")"
 eval "$(extract_fn _worktree_branch_for   "$MERGE_PR")"
-# #6694: _maybe_delete_local_branch delegates its tip-match check here.
-eval "$(extract_fn _worktree_branch_fully_captured "$MERGE_PR")"
+# #7812: _maybe_delete_local_branch's `-d` -> `-D` safety check is now the
+# shared `branch_landed` primitive — a real library, so it is SOURCED here
+# rather than extracted. Offline: these cases exercise merge-pr.sh's local
+# branch logic, not the forge rung, and the suite must stay hermetic.
+export LOOM_BRANCH_LANDED_OFFLINE=1
+# shellcheck source=../lib/branch-landed.sh
+source "$(dirname "$MERGE_PR")/lib/branch-landed.sh"
 eval "$(extract_fn _maybe_delete_local_branch "$MERGE_PR")"
 eval "$(extract_fn _remove_loom_worktree  "$MERGE_PR")"
 

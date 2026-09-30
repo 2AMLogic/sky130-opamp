@@ -217,7 +217,7 @@ assert_eq "1" "$EXIT_CODE" "Explicit LOOM_VERSION_CHECK_SCRIPT override is honor
 # proving create-pr.sh + version.sh compose correctly end to end. ===
 #
 # version.sh's `check` subcommand only reads files (package.json,
-# mcp-loom/package.json, the two Cargo.tomls, CLAUDE.md, VERSION, Cargo.lock,
+# mcp-loom/package.json, the two Cargo.tomls, VERSION, Cargo.lock,
 # mcp-loom/package-lock.json, and .loom/install-metadata.json when present)
 # -- no cargo/npm invocation is needed to exercise it, unlike `bump`/`set`.
 
@@ -229,9 +229,13 @@ make_fixture_repo() {
 
   printf '{"version": "%s"}\n' "$version" > "$dir/package.json"
   printf '{"version": "%s"}\n' "$version" > "$dir/mcp-loom/package.json"
-  printf '[package]\nname = "loom-daemon"\nversion = "%s"\n' "$version" > "$dir/loom-daemon/Cargo.toml"
-  printf '[package]\nname = "loom-api"\nversion = "%s"\n' "$version" > "$dir/loom-api/Cargo.toml"
-  printf '**Loom Version**: %s\n' "$version" > "$dir/CLAUDE.md"
+  # Mirror the real workspace (#7780): the version lives once in the root
+  # manifest's [workspace.package] and both members inherit it. A fixture with
+  # two hardcoded crate versions and no workspace root no longer resembles the
+  # tree version.sh operates on.
+  printf '[workspace]\nmembers = ["loom-api", "loom-daemon"]\nresolver = "2"\n\n[workspace.package]\nversion = "%s"\n' "$version" > "$dir/Cargo.toml"
+  printf '[package]\nname = "loom-daemon"\nversion.workspace = true\n' > "$dir/loom-daemon/Cargo.toml"
+  printf '[package]\nname = "loom-api"\nversion.workspace = true\n' > "$dir/loom-api/Cargo.toml"
   printf '%s\n' "$version" > "$dir/VERSION"
   cat > "$dir/Cargo.lock" <<EOF
 [[package]]

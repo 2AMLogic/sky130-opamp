@@ -1941,15 +1941,21 @@ STUB
 chmod +x "$CONTAIN_STUB_DIR/docker"
 
 # Test: default (no config, no env override) -> containment stays disabled,
-# docker is never invoked (byte-for-byte pre-#7429 default behavior).
+# docker is never invoked (byte-for-byte pre-#7429 default behavior). This is
+# also the regression case for issue #7431's "bare installs and macOS keep
+# bare-metal dispatch as their default" acceptance criterion: the containment
+# resolution in spawn-claude.sh has no OS/fleet branch at all (grep for
+# `CONTAINMENT_ENABLED=` — it is a single unconditional default, unbranched
+# by platform), so this same assertion covers macOS and every non-fleet Linux
+# install identically to Linux fleet hosts, not just the pre-#7429 baseline.
 : > "$DOCKER_LOG"
 output=$(LOOM_WORKSPACE="$CONTAIN_WS" LOOM_DAEMON_BIN="$DAEMON_BIN" PATH="$CONTAIN_STUB_DIR:$PATH" \
     env -u LOOM_SWEEP_CONTAINERIZED LOOM_SWEEP_CPU_QUOTA=0 \
     "$SCRIPTS_DIR/spawn-claude.sh" -p "ping" 2>&1 || true)
-assert_contains "stub-claude ran" "$output" \
-    "containment disabled by default: the spawn still runs directly (#7429)"
+assert_contains "stub-claude ran" "$output" "containment disabled by default: the spawn still runs directly (#7429)"
 assert_eq "" "$(cat "$DOCKER_LOG" 2>/dev/null)" \
     "containment disabled by default: docker is never invoked (#7429)"
+assert_contains "# LOOM_DISPATCH_MODE mode=bare-metal" "$output" "containment disabled by default: the bare-metal marker confirms the default is unaffected by platform/fleet-membership (#7431)"
 
 # Test: runtimes.containment.enabled=true wraps the spawn in `docker run`,
 # under the path-parity mount contract, defaulting to the loom-worker image,
@@ -1975,8 +1981,15 @@ assert_contains "stub-claude ran, args=-p ping" "$output" \
 # Issue #7430: with no explicit cpus/memory config, `--cpus` is omitted
 # (LOOM_SWEEP_CPU_QUOTA=0 above means no host CPU budget was computed) but
 # `--memory` is ALWAYS applied by default, computed from host memory.
-assert_contains "--memory" "$docker_log" \
-    "containerized dispatch: --memory is applied by default even with no config (#7430)"
+assert_contains "--memory" "$docker_log" "containerized dispatch: --memory is applied by default even with no config (#7430)"
+# Issue #8456: the worker env carries CARGO_INCREMENTAL=0 across the docker
+# boundary (exported alongside the build-cache CARGO_TARGET_DIR -e above):
+# sccache cannot cache an incrementally-compiled crate, and cargo keys
+# incremental session state by absolute source path, so on a
+# shared-target-dir host it is orphaned disk (213 GB / 6,402 session dirs on
+# one fleet host). The --memory assert above and this one are single-line so
+# the frozen-at-1822-code-lines file stays within the file-size ratchet.
+assert_contains "-e CARGO_INCREMENTAL=0" "$docker_log" "containerized dispatch: the worker env carries CARGO_INCREMENTAL=0 (#8456)"
 assert_contains "# LOOM_DISPATCH_MODE mode=container" "$output" \
     "containerized dispatch: the canonical LOOM_DISPATCH_MODE marker names mode=container (#7430)"
 assert_contains "cpus=none" "$output" \

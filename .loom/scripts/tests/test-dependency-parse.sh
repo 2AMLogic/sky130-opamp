@@ -52,9 +52,33 @@ else
     PROMPT_DIR="$(cd "$SCRIPTS_DIR/../.claude/commands/loom" && pwd)"
 fi
 GUIDE_MD="$PROMPT_DIR/guide.md"
-SWEEP_MD="$PROMPT_DIR/sweep.md"
 CHAMPION_MD="$PROMPT_DIR/champion-pr-merge.md"
 CHAMPION_COMMON_MD="$PROMPT_DIR/champion-common.md"
+
+# The /loom:sweep skill in document order (#7726 split the monolithic
+# sweep.md into a dispatcher + 11 sibling reference files). Concatenate them
+# into one file so the --auto-stack detection pattern is found wherever it
+# now lives — mirrors SWEEP_SKILL_FILES in
+# loom-daemon/tests/sweep_md_doc_lint.rs.
+SWEEP_SKILL_FILES=(
+    sweep.md
+    sweep-arguments.md
+    sweep-examples.md
+    sweep-execution-model.md
+    sweep-backend-detection.md
+    sweep-scheduling-signals.md
+    sweep-dry-run.md
+    sweep-mode-c-lifecycle.md
+    sweep-wave-lifecycle.md
+    sweep-summary-output.md
+    sweep-run-hygiene.md
+    sweep-reference.md
+)
+SWEEP_MD="$(mktemp)"
+trap 'rm -f "$SWEEP_MD"' EXIT
+for f in "${SWEEP_SKILL_FILES[@]}"; do
+    cat "$PROMPT_DIR/$f" >> "$SWEEP_MD"
+done
 
 # Source warn-out-of-set-deps.sh's real parse_out_of_set_deps BEFORE defining
 # our own RED/GREEN/NC below — the script's own `[[ -t 2 ]]` color block
@@ -101,12 +125,13 @@ assert_doc_contains() {
 
 # =====================================================================
 # guide.md's parse_dependencies — mirrors defaults/.claude/commands/loom/guide.md
-# verbatim (four alternatives incl. checkbox form; widened separator).
+# verbatim (four alternatives incl. checkbox form, UNCHECKED only per #7973;
+# widened separator).
 # =====================================================================
 guide_parse_dependencies() {
     local body="$1"
     echo "$body" \
-        | grep -E '(Blocked by|Depends on|Requires|\- \[.\])[*_:[:space:]]*#[0-9]+' \
+        | grep -E '(Blocked by|Depends on|Requires|\- \[ \])[*_:[:space:]]*#[0-9]+' \
         | grep -oE '#[0-9]+' | tr -d '#' | sort -u
 }
 
@@ -168,6 +193,15 @@ assert_eq "9" "$out" "plain Requires #N (no regression)"
 
 out="$(guide_parse_dependencies '- [ ] #12: some description')"
 assert_eq "12" "$out" "checkbox form still works (- [ ] #N)"
+
+echo
+echo "--- guide.md parse_dependencies: checked vs. unchecked checklist (#7973) ---"
+
+out="$(guide_parse_dependencies '- [x] #7431 (soak criteria + rollback path documented)')"
+assert_eq "" "$out" "a CHECKED checklist box (- [x] #N) is NOT a dependency (#7973 regression guard)"
+
+out="$(guide_parse_dependencies '- [ ] #12: some description')"
+assert_eq "12" "$out" "an UNCHECKED checklist box (- [ ] #N) still IS a dependency (no regression to #4508)"
 
 echo
 echo "--- guide.md parse_dependencies: edge case (unrelated same-line ref) ---"
@@ -238,8 +272,8 @@ echo
 echo "--- Doc pins: shipped markdown matches the mirrored functions above ---"
 
 assert_doc_contains "$GUIDE_MD" \
-    "grep -E '(Blocked by|Depends on|Requires|\- \[.\])[*_:[:space:]]*#[0-9]+'" \
-    "guide.md parse_dependencies ships the widened four-alternative pattern"
+    "grep -E '(Blocked by|Depends on|Requires|\- \[ \])[*_:[:space:]]*#[0-9]+'" \
+    "guide.md parse_dependencies ships the widened four-alternative pattern (unchecked checkbox only, #7973)"
 
 assert_doc_contains "$SWEEP_MD" \
     "grep -E '(Depends on|Requires)[*_:[:space:]]*#[0-9]+'" \
