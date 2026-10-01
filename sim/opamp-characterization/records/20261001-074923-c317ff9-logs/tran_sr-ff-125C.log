@@ -1,0 +1,49 @@
+$ ngspice -b tb.spice
+
+--- stdout ---
+
+Note: Compatibility modes selected: hs a
+
+
+Circuit: * opamp_core unity-gain-buffer slew-rate testbench (issue #17)
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+Doing analysis at TEMP = 125.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+d1                                     1.27222
+vdd                                       1.98
+d2                                     1.24133
+inn                                   0.593276
+tail                                 0.0501544
+vss                                          0
+inp                                      0.594
+ibias                                 0.550233
+out                                   0.593276
+cz                                     1.24133
+xrz.ra                                 1.24133
+xcc.a                                 0.593276
+xcc.b1                                0.593276
+vinp#branch                                  0
+vss#branch                         6.10937e-05
+vdd#branch                        -6.10937e-05
+
+ Reference value :  0.00000e+00
+No. of Data Rows : 1124
+sr_rise_s           =  2.28467e-08 targ=  2.32050e-07 trig=  2.09203e-07
+sr_fall_s           =  3.17513e-08 targ=  1.24793e-06 trig=  1.21618e-06
+Note: Simulation executed from .control section 
+
+--- stderr ---
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+

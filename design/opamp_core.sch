@@ -2,8 +2,10 @@ v {xschem version=3.4.7 file_version=1.2
 * opamp_core -- sky130-opamp two-stage Miller-compensated op-amp core
 * (issue #13), implementing the topology fixed by
 * spec/decision-records/DR-001-topology-and-cl.md at the device sizing
-* proposed by spec/decision-records/DR-002-device-sizing.md (status
-* "proposed" -- unverified in simulation, see "caveats" below).
+* proposed by spec/decision-records/DR-002-device-sizing.md and RESIZED by
+* spec/decision-records/DR-007-device-resize-gbw-slew-swing.md (issue #22,
+* which supersedes DR-002's widths/channel lengths per DR-002's own
+* superseding-record convention -- DR-002 is not edited in place).
 *
 * 1.8 V core devices only (sky130_fd_pr__nfet_01v8 / __pfet_01v8), per
 * CLAUDE.md's "1.8 V primary; 3.3 V I/O-device flavor only via decision
@@ -11,8 +13,9 @@ v {xschem version=3.4.7 file_version=1.2
 *
 * Full per-device sizing derivation -- W, L, Id, gm/ID, and the literal
 * sim/gm-id-characterization/records/20260909-062847-35a9d46-full-sweep.csv
-* rows each width is computed from -- is in DR-002. Read that first; this
-* header names the topology and the conclusions, it does not re-derive them.
+* rows each width is computed from -- is in DR-002 (original) and DR-007
+* (resize). Read those first; this header names the topology and the
+* conclusions, it does not re-derive them.
 *
 * --------------------------------------------------------------- topology
 * Stage 1 (differential transconductance stage, differential-to-single-ended):
@@ -36,7 +39,8 @@ v {xschem version=3.4.7 file_version=1.2
 *            source = vss. mult=10 of the SAME unit device as MB1/M5.
 *   Rz, Cc   nulling-resistor Miller compensation from d2 to out
 *            (DR-001 decision (d)): d2 - Rz - cz - Cc - out.
-*            Rz = res_high_po_1p41 (2.00 kohm), Cc = cap_mim_m3_1 (0.50 pF).
+*            Rz = res_high_po_1p41 (2.50 kohm, DR-007), Cc = cap_mim_m3_1
+*            (0.50 pF).
 *
 * Bias:
 *   MB1      nfet_01v8 diode-connected bias reference: gate = drain = ibias,
@@ -54,10 +58,13 @@ v {xschem version=3.4.7 file_version=1.2
 * inverting one, which is the assignment wired below.
 *
 * --------------------------------------------------------------- caveats
-* Nothing in this schematic has been simulated. Every operating point named
-* in DR-002 is interpolated from the committed bare-device gm/ID sweep at
-* |Vds| = 0.9 V and Vsb = 0, not from an operating-point solve of this
-* circuit. See DR-002 "Open items" and the follow-on PVT/AC-bench issue.
+* DR-007's resize is validated by circuit-level PVT simulation: the
+* full 5-corner x 3-temperature grid in
+* sim/opamp-characterization/records/ (issue #17's bench re-run against
+* this sizing, per issue #22). The DR-002 caveats about operating points
+* interpolated at |Vds| = 0.9 V / Vsb = 0 from the bare-device gm/ID
+* sweep apply to the ORIGINAL sizing only; see DR-007 for what
+* simulation confirmed and contradicted.
 *
 * Pins: vdd, vss, inn, inp, out, ibias.
 }
@@ -69,8 +76,8 @@ E {}
 
 * M3: first-stage mirror reference (diode-connected), 1 unit PMOS, 5 uA
 C {sky130_fd_pr/pfet_01v8.sym} -800 0 0 0 {name=M3
-L=0.6
-W=2.745
+L=0.3
+W=4.634
 nf=1
 mult=1
 model=pfet_01v8
@@ -86,8 +93,8 @@ C {devices/lab_pin.sym} -760 0 0 0 {name=l4 lab=vdd}
 
 * M4: first-stage mirror output, 1 unit PMOS (1:1 with M3), 5 uA
 C {sky130_fd_pr/pfet_01v8.sym} -400 0 0 0 {name=M4
-L=0.6
-W=2.745
+L=0.3
+W=4.634
 nf=1
 mult=1
 model=pfet_01v8
@@ -104,7 +111,7 @@ C {devices/lab_pin.sym} -360 0 0 0 {name=l8 lab=vdd}
 * M1: NMOS input pair, inverting input, 5 uA
 C {sky130_fd_pr/nfet_01v8.sym} -800 400 0 0 {name=M1
 L=1.2
-W=1.325
+W=6.030
 nf=1
 mult=1
 model=nfet_01v8
@@ -121,7 +128,7 @@ C {devices/lab_pin.sym} -760 400 0 0 {name=l12 lab=vss}
 * M2: NMOS input pair, non-inverting input, 5 uA
 C {sky130_fd_pr/nfet_01v8.sym} -400 400 0 0 {name=M2
 L=1.2
-W=1.325
+W=6.030
 nf=1
 mult=1
 model=nfet_01v8
@@ -138,7 +145,7 @@ C {devices/lab_pin.sym} -360 400 0 0 {name=l16 lab=vss}
 * M5: tail current source, 2 unit NMOS (2:1 from MB1), I_SS = 10 uA
 C {sky130_fd_pr/nfet_01v8.sym} -800 800 0 0 {name=M5
 L=1.2
-W=3.835
+W=7.819
 nf=1
 mult=2
 model=nfet_01v8
@@ -155,7 +162,7 @@ C {devices/lab_pin.sym} -760 800 0 0 {name=l20 lab=vss}
 * MB1: diode-connected bias reference, 1 unit NMOS, Iref = 5 uA
 C {sky130_fd_pr/nfet_01v8.sym} -400 800 0 0 {name=MB1
 L=1.2
-W=3.835
+W=7.819
 nf=1
 mult=1
 model=nfet_01v8
@@ -171,8 +178,8 @@ C {devices/lab_pin.sym} -360 800 0 0 {name=l24 lab=vss}
 
 * M6: Class-A common-source gain device, 10 unit PMOS (10:1 on M3/M4), ID2 = 50 uA
 C {sky130_fd_pr/pfet_01v8.sym} 400 0 0 0 {name=M6
-L=0.6
-W=2.745
+L=0.3
+W=4.634
 nf=1
 mult=10
 model=pfet_01v8
@@ -189,7 +196,7 @@ C {devices/lab_pin.sym} 440 0 0 0 {name=l28 lab=vdd}
 * M7: output current sink, 10 unit NMOS (10:1 from MB1), ID2 = 50 uA
 C {sky130_fd_pr/nfet_01v8.sym} 400 400 0 0 {name=M7
 L=1.2
-W=3.835
+W=7.819
 nf=1
 mult=10
 model=nfet_01v8
@@ -203,9 +210,9 @@ C {devices/lab_pin.sym} 440 450 0 0 {name=l31 lab=vss}
 N 420 400 440 400 {}
 C {devices/lab_pin.sym} 440 400 0 0 {name=l32 lab=vss}
 
-* Rz: nulling resistor, 2.00 kohm = 1/gm2 [DR-001 (d), DR-002]
+* Rz: nulling resistor, 2.50 kohm [DR-001 (d); DR-007]
 C {sky130_fd_pr/res_high_po_1p41.sym} 900 150 0 0 {name=Rz
-L=7.585
+L=9.763
 model=res_high_po_1p41
 spiceprefix=X
 mult=1}
