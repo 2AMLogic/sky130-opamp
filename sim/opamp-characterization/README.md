@@ -35,6 +35,20 @@ hidden or softened.
 | Output swing | ≈ 1.39 V (86%) @ SS/-40°C | **0.855 V (52.8%)** @ SS/-40°C | 0.072–1.464 V (≈86%) at SS/-40°C | Worst-case corner **confirmed**; magnitude **contradicted** (62% of estimate) |
 | Quiescent power | ≈ 128.7 µW @ FF/125°C | **130.7 µW** @ FF/125°C | 128.7 µW @ FF/125°C | **Confirmed** (+1.6%), including the binding corner |
 
+> **Superseded 2026-10-01 (issue #22 / DR-007).** The headline table and
+> "Results by row" grids below describe the **DR-002 sizing** this
+> experiment first measured; they are kept verbatim as the pre-resize
+> baseline. The DR-007 device resize (input pair gm/ID 17, PMOS group
+> L=0.3 µm, NMOS mirror group gm/ID 18, Rz 2.50 kΩ) was measured by
+> re-running this bench unchanged: see record
+> [`records/20261001-074923-c317ff9`](records/20261001-074923-c317ff9.md)
+> (GBW and rise SR now met everywhere; fall SR ×6.4; swing +11% at the
+> worst corner; the fall-SR mechanism — first-stage tail starvation, not
+> `M7`'s sink magnitude — is diagnosed and measured in
+> [`DR-007`](../../spec/decision-records/DR-007-device-resize-gbw-slew-swing.md)).
+> The fall-SR "Not done" bench below remains open and is now better-specified
+> by that diagnosis.
+
 Full per-row detail, every one of the 45 measured points, and the exact
 DR-002 citations each verdict is checked against, are in "Results by row"
 below.
