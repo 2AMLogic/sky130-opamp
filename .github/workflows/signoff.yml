@@ -37,6 +37,94 @@ jobs:
       - name: Install pinned klt
         run: pip install klayout-tools==0.5.0
 
+      # Generic ("kind": "generic") evidence envelopes are hand-written, and
+      # `klt signoff` grades their freshness against the hash the envelope
+      # declares about itself -- it never re-hashes the artifact that hash
+      # names (klayout-tools#2196, and #2403 for the generic-specific case:
+      # the upstream fix reports `input_verified` but, by its own stated
+      # invariant, still grades the item `met` either way, so no `klt`
+      # version will ever fail the build on this drift). A native `klt`
+      # envelope's `provenance.input.content_hash` was computed by `klt`
+      # itself from the artifact at run time; a generic one's was typed by
+      # hand, so only the generic kind needs this independent re-hash. This
+      # step is what makes the staleness gate real for item 8 rather than
+      # nominal: regenerate the cited record without updating the envelope
+      # and this fails.
+      - name: Re-hash every generic envelope's cited artifact
+        run: |
+          set -uo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          import sys
+
+          MANIFEST = "manifests/sky130-opamp.json"
+          evidence = (json.load(open(MANIFEST)).get("evidence") or {})
+
+          checked = 0
+          failures = []
+
+          for item, entry in sorted(evidence.items(), key=lambda kv: int(kv[0])):
+              # An evidence entry is either a bare path string or
+              # {"file": ..., "content_hash": ...}; a {"command": [...]} entry
+              # has no file to open and is skipped.
+              path = entry if isinstance(entry, str) else (entry or {}).get("file")
+              if not path:
+                  continue
+              try:
+                  envelope = json.load(open(path))
+              except Exception as exc:  # unreadable/malformed cited evidence
+                  failures.append(f"item {item}: cannot read evidence envelope {path}: {exc}")
+                  continue
+              if envelope.get("kind") != "generic":
+                  continue
+
+              provenance = (envelope.get("provenance") or {}).get("input") or {}
+              artifact = provenance.get("path")
+              declared = provenance.get("content_hash")
+              if not artifact or not declared:
+                  failures.append(
+                      f"item {item}: generic envelope {path} must declare both "
+                      "provenance.input.path and provenance.input.content_hash, so the "
+                      "artifact it cites can be re-hashed here"
+                  )
+                  continue
+
+              # `klt` resolves provenance.input.path relative to the envelope's
+              # own directory first (then as repo-relative); match that order.
+              resolved = os.path.normpath(os.path.join(os.path.dirname(path), artifact))
+              if not os.path.isfile(resolved):
+                  resolved = os.path.normpath(artifact)
+              if not os.path.isfile(resolved):
+                  failures.append(
+                      f"item {item}: {path} names provenance.input.path {artifact!r}, "
+                      "which resolves to no file"
+                  )
+                  continue
+
+              with open(resolved, "rb") as handle:
+                  actual = "sha256:" + hashlib.sha256(handle.read()).hexdigest()
+              checked += 1
+              if actual == declared:
+                  print(f"item {item}: OK {resolved} -> {declared}")
+              else:
+                  failures.append(
+                      f"item {item}: {resolved} hashes to {actual}, but {path} declares "
+                      f"{declared} -- the cited artifact changed under its envelope"
+                  )
+
+          if failures:
+              for failure in failures:
+                  print(f"::error::{failure}")
+              print("Re-hash the artifact, write the new value into BOTH the envelope's")
+              print("provenance.input.content_hash and the manifest's pinned content_hash,")
+              print("then regenerate manifests/sky130-opamp.signoff.json in the same PR.")
+              sys.exit(1)
+
+          print(f"Generic evidence envelopes verified against their cited artifacts: {checked}")
+          PY
+
       - name: Re-run klt signoff and compare against the committed record
         run: |
           set -uo pipefail
