@@ -5,9 +5,14 @@ A two-stage Miller-compensated operational amplifier on SkyWater sky130 on
 [klayout-tools](https://github.com/2AMLogic/klayout-tools) and the
 open-source xschem + ngspice flow.
 
-**Status: just opened.** Nothing is designed yet. The first work is
-the gm/ID device-characterization study at 1.8 V, with the 3.3 V I/O flavor
-surveyed but not served ([DR-005](spec/decision-records/DR-005-io-flavor-not-served.md)).
+**Status: schematic and PVT evidence committed; layout pending.** The
+[gm/ID study](sim/gm-id-characterization/README.md) informs the
+[op-amp schematic](design/README.md), whose resized design has
+[PVT characterization records](sim/opamp-characterization/README.md).
+Performance gaps remain, including falling slew rate; the
+[target specification](spec/target-spec.md) is partially ratified.
+The 3.3 V I/O flavor is not served
+([DR-005](spec/decision-records/DR-005-io-flavor-not-served.md)).
 
 **Built agent-native.** Every specification, decision record, testbench, and
 line of documentation here is produced by AI agents working from a ratified
@@ -32,7 +37,7 @@ sky130's open ecosystem is the deepest of the three; where prior open
 op-amp work exists publicly, cite it and position against it honestly
 rather than ignoring it.
 
-## Target specification (DRAFT — engineering to ratify)
+## Target specification (partially ratified)
 
 Twin row structure at 1.8 V primary. Swing and gain rows will show the
 low-headroom trade explicitly; PVT corners on every recorded result.
