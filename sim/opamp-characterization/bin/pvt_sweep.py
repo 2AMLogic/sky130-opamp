@@ -86,6 +86,7 @@ EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+import dut_identity  # noqa: E402
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     KLT_CMD,
     HarnessError,
@@ -111,6 +112,10 @@ TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / "design" / "netlist" / "opamp_core.spice"
+# The DUT netlist the campaign actually includes (issue #104). Defaults to the
+# live design netlist (unit tests, --check-env); main() replaces it with the
+# immutable per-campaign snapshot before any analysis is scheduled.
+ACTIVE_DUT: list[Path] = [DESIGN_NETLIST]
 
 DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
 DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
@@ -245,7 +250,7 @@ def common_subs(pdk: OpampPdk, corner: str, temp: float, vdd: float) -> dict:
         "CORNER_INCLUDE": pdk.corner_include(corner),
         "RC_INCLUDE_BASE": rc[0],
         "RC_INCLUDE_LIN": rc[1],
-        "OPAMP_NETLIST": DESIGN_NETLIST,
+        "OPAMP_NETLIST": ACTIVE_DUT[0],
         "TEMP": temp,
         "VDD": vdd,
         "IBIAS_A": IBIAS_A,
@@ -474,8 +479,14 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
     icmr: one request per corner (`.meas ... at=VDD/2` needs a literal mid-supply,
     and the 9-unit tt/sf/fs 1.8 V request stalled on the fleet; see ICMR_REQUEST_PER_CORNER).
     """
+    # klt stages a body's .include closure at submit time (sim_staging), resolving
+    # a relative target against the request's directory. Copy the campaign's DUT
+    # snapshot next to the body and include it by bare name, so the saved
+    # request/body replay against the snapshot sitting beside them.
+    req_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ACTIVE_DUT[0], req_dir / dut_identity.SNAPSHOT_NAME)
     body_subs = {
-        "OPAMP_NETLIST": DESIGN_NETLIST, "VDD_NOM": vdd_group or VDD_BY_CORNER["tt"],
+        "OPAMP_NETLIST": dut_identity.SNAPSHOT_NAME, "VDD_NOM": vdd_group or VDD_BY_CORNER["tt"],
         "IBIAS_A": IBIAS_A, "CL_F": CL_F,
     }
     if analysis == "icmr":
@@ -991,6 +1002,12 @@ def main(argv=None) -> int:
     log_dir = RECORDS_DIR / f"{record_id}-logs"
     snapshot_run_dir = SNAPSHOT_DIR / record_id
     make_new_dir(snapshot_run_dir)
+    # Capture the DUT bytes ONCE, before any analysis is scheduled; every local
+    # and klt analysis below uses this copy, so editing the working tree
+    # mid-campaign cannot change later points (issue #104).
+    dut_meta = dut_identity.capture_dut(DESIGN_NETLIST, snapshot_run_dir, REPO_ROOT)
+    ACTIVE_DUT[0] = REPO_ROOT / dut_meta["snapshot_path"]
+    print(f"DUT snapshot: {dut_meta['snapshot_path']} ({dut_meta['sha256']})", file=sys.stderr)
 
     results: dict[str, list[dict]] = {a: [] for a in analyses}
     errors: list[str] = []
@@ -1007,7 +1024,9 @@ def main(argv=None) -> int:
                     log_path = log_dir / f"{tag}.log"
                     try:
                         row, deck = fn(pdk, ngspice, corner, temp, workdir, log_path)
-                        (snapshot_run_dir / f"{tag}.spice").write_text(deck)
+                        # replayable from the repo root: point the saved include at the snapshot
+                        (snapshot_run_dir / f"{tag}.spice").write_text(
+                            deck.replace(str(ACTIVE_DUT[0]), dut_meta["snapshot_path"]))
                         results[analysis].append(row)
                         n_runs += 1
                         print(f"[{n_runs:>3}] {tag:<24} OK   {row.get('elapsed_s', 0):.1f}s", file=sys.stderr)
@@ -1073,6 +1092,7 @@ def main(argv=None) -> int:
         "record_id": record_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "git": {"sha": git_sha(REPO_ROOT)},
+        "dut": dut_meta,
         "experiment": {
             "slug": "opamp-characterization",
             "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",

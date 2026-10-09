@@ -154,10 +154,42 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `bin/validate_psrr_noise.py` | Four independent single-corner cross-checks of those benches (DC finite difference, band-limited noise, negative control) |
 | `records/<id>-psrr-{vdd,vss}.csv`, `<id>-noise.csv` | One row per (corner, T): window figures plus the full curve at 4 points/decade; `.klt.json` is the unmodified `klt sim` response, `.request.json` the request that produced it |
 | `../lib/spice_harness.py` | Shared (not per-experiment) PDK resolution, deck rendering, tool-version and git-SHA helpers `bin/pvt_sweep.py` imports |
-| `netlist-snapshots/<record_id>/` | Every rendered deck for that record (45 files), for provenance |
+| `netlist-snapshots/<record_id>/` | Every rendered deck for that record (45 files), for provenance. Records written since issue #104 also hold `opamp_core.spice`, the immutable DUT copy every deck includes (legacy snapshots only point at a live file; see the clarification record) |
+| `../lib/dut_identity.py` | Stdlib checker for the recorded DUT snapshot and current-design binding (below) |
 | `records/<record_id>-{ac,tran-sr,dc-swing}.csv` | Every measured quantity at every (corner, temperature) point — the primary evidence artifacts |
 | `records/<record_id>-logs/` | The raw ngspice stdout/stderr for every one of the 45 runs, so a claimed measurement can be spot-checked against the actual simulator output (per this issue's own test plan) |
 | `records/<record_id>.json` / `.md` | Machine-readable / human-readable record metadata and headline table |
+
+## DUT identity (issue #104)
+
+`bin/pvt_sweep.py` copies the DUT bytes once, into
+`netlist-snapshots/<record_id>/opamp_core.spice`, before scheduling any
+analysis, and runs every local and `klt sim` analysis against that copy
+(editing `design/netlist/opamp_core.spice` mid-campaign changes nothing). The
+record JSON carries `dut.{source_path,snapshot_path,sha256}`. Saved ngspice
+decks include the repo-relative snapshot path (replay from the repo root); saved
+klt bodies include `opamp_core.spice` by bare name, which `klt sim` resolves
+against the request's directory and stages with the job (klt stages the
+`.include` closure at submit; it does not capture it by saving the request), so
+replay needs the request, body and snapshot copied side by side. The PDK is
+governed separately by the pin policy.
+
+Reproduce (no simulator needed):
+
+    python3 sim/lib/dut_identity.py validate   # every record with a dut block: snapshot present, hash matches, decks include only the snapshot
+    python3 sim/lib/dut_identity.py current    # the report cited for T1 item 8 must record the current netlist's hash
+    python3 sim/lib/dut_identity.py current --require-verified   # additionally reject a legacy (identity-less) record
+
+Current versus historical: `validate` is historical -- a record stays valid
+after the design changes. `current` fails with a "DUT mismatch (stale design)"
+diagnostic when the cited record measured different bytes than the committed
+netlist. Records written before this check have no recorded identity and are
+reported UNVERIFIED rather than inferred (see
+`records/20261009-200000-ca03ee8-dut-identity-clarification.md`); until the
+cited report is rerun, `current` passes them with that warning, and
+`--require-verified` is the strict mode. This is complementary to the
+report-integrity re-hash in `.github/workflows/signoff.yml` and says nothing
+about spec compliance.
 
 ## Methodology
 
