@@ -775,16 +775,31 @@ follower disagree.
 
 ### Status of the PVT record
 
-- Pipeline verified on one point (tt / 27 C, `klt sim --backend local`, record
-  `20261009-174430-8da114f-662ed9`): overshoot 3.93 % vs 4.40 % implied by the
-  AC PM of 65.4 deg (delta -0.46 pp, inside tolerance), 1 % settling 31.7 ns,
-  follower offset -146 uV.
-- The 15-point PVT grid was submitted to the batch fleet and **refused for
-  capacity** (`batch_no_capacity`, no pool in 30). It was deliberately not
-  run as a local loop; the grid record is a pending follow-up
-  (`pvt_sweep.py --analyses tran_step` once the fleet has capacity). The
-  AC-PM-vs-overshoot comparison table over PVT is therefore not yet filled in;
-  the single row above is the only measured comparison.
+Full 5x3 PVT grid recorded as `20261009-180955-8473615-5e318a` (one `klt sim`
+batch request on the fleet; 15 / 15 points, 0 failed). AC reference:
+`20261001-074923-c317ff9-ac.csv`. All 15 points agree with the AC phase margin
+within the 5 pp tolerance (max |delta| 0.66 pp); the measured overshoot sits
+slightly below the second-order estimate at nearly every point, as expected from
+the ignored third pole / RHP zero. Worst measured overshoot 4.87 % (sf, 27 C);
+worst 1 % settling 40.5 ns (ss, 125 C). Report only; no spec target edited.
+
+| corner | T (C) | AC PM (deg) | implied OS (%) | measured OS (%) | delta (pp) | 1% settle (ns) |
+|---|---|---|---|---|---|---|
+| tt | -40 | 67.5 | 2.95 | 2.83 | -0.13 | 27.3 |
+| tt | 27 | 65.4 | 4.40 | 3.93 | -0.46 | 31.7 |
+| tt | 125 | 64.3 | 5.26 | 4.67 | -0.60 | 38.1 |
+| ff | -40 | 68.4 | 2.36 | 2.35 | -0.01 | 25.6 |
+| ff | 27 | 66.0 | 4.01 | 3.60 | -0.41 | 30.4 |
+| ff | 125 | 64.1 | 5.41 | 4.75 | -0.65 | 36.9 |
+| ss | -40 | 66.3 | 3.80 | 3.69 | -0.11 | 31.2 |
+| ss | 27 | 64.6 | 5.00 | 4.57 | -0.43 | 34.8 |
+| ss | 125 | 64.6 | 5.05 | 4.61 | -0.44 | 40.5 |
+| sf | -40 | 65.4 | 4.42 | 3.95 | -0.47 | 27.3 |
+| sf | 27 | 63.9 | 5.53 | 4.87 | -0.66 | 31.3 |
+| sf | 125 | 64.1 | 5.37 | 4.78 | -0.59 | 36.8 |
+| fs | -40 | 68.8 | 2.09 | 2.20 | +0.11 | 27.5 |
+| fs | 27 | 66.5 | 3.60 | 3.30 | -0.29 | 32.5 |
+| fs | 125 | 64.6 | 4.99 | 4.44 | -0.56 | 39.5 |
 
 ## What this experiment does not do
 
