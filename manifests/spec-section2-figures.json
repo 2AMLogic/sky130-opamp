@@ -1,0 +1,17 @@
+{
+  "_comment": "Authored mapping for design/bin/spec_figures_check.py. Each row ties a figure printed in spec/target-spec.md section 2 to a column of a committed PVT record CSV. `reduce` is taken over the (optionally `where`-filtered) rows; `expected` is the printed worst case, `tol` the printed precision (half a unit of the last printed digit); `at` is the binding corner the spec names; `printed` substrings must appear verbatim in section 2. The checker only reports; it never edits the spec or any record.",
+  "figures": [
+    {"row": "Open-loop DC gain", "record": "20261001-074923-c317ff9", "csv": "ac", "key": "gain_dc_db", "reduce": "min", "expected": 61.64, "tol": 0.005, "unit": "dB", "at": {"corner": "fs", "temp_c": 125}, "printed": ["61.64 dB"]},
+    {"row": "GBW", "record": "20261001-074923-c317ff9", "csv": "ac", "key": "gbw_hz", "reduce": "min", "scale": 1e-6, "expected": 17.92, "tol": 0.005, "unit": "MHz", "at": {"corner": "ss", "temp_c": 125}, "printed": ["17.92 MHz"]},
+    {"row": "Phase margin", "record": "20261001-074923-c317ff9", "csv": "ac", "key": "phase_margin_deg", "reduce": "min", "expected": 63.94, "tol": 0.005, "unit": "deg", "at": {"corner": "sf", "temp_c": 27}, "printed": ["63.94°"]},
+    {"row": "Slew rate (rise)", "record": "20261001-074923-c317ff9", "csv": "tran-sr", "key": "sr_rise_v_per_us", "reduce": "min", "expected": 19.88, "tol": 0.005, "unit": "V/us", "at": {"corner": "ss", "temp_c": -40}, "printed": ["19.88 V/µs"]},
+    {"row": "Slew rate (fall)", "record": "20261001-074923-c317ff9", "csv": "tran-sr", "key": "sr_fall_v_per_us", "reduce": "min", "expected": 11.03, "tol": 0.005, "unit": "V/us", "at": {"corner": "ss", "temp_c": -40}, "printed": ["11.03 V/µs"]},
+    {"row": "Output swing", "record": "20261001-074923-c317ff9", "csv": "dc-swing", "key": "vpp_v", "reduce": "min", "expected": 0.948, "tol": 0.0005, "unit": "Vpp", "at": {"corner": "ss", "temp_c": -40}, "printed": ["0.948 Vpp"]},
+    {"row": "Quiescent power", "record": "20261001-074923-c317ff9", "csv": "ac", "key": "pq_w", "reduce": "max", "scale": 1e6, "expected": 131.92, "tol": 0.005, "unit": "uW", "at": {"corner": "ff", "temp_c": 125}, "printed": ["131.92 µW"]},
+    {"row": "CMRR (mid-rail common mode)", "record": "20261009-103006-566b9a5", "csv": "cmrr", "where": {"cm_point": "mid"}, "key": "cmrr_1hz_db", "reduce": "min", "expected": 55.11, "tol": 0.005, "unit": "dB", "at": {"corner": "ss", "temp_c": -40}, "printed": ["55.11 dB"]},
+    {"row": "CMRR (ICMR-window-centre common mode)", "record": "20261009-103006-566b9a5", "csv": "cmrr", "where": {"cm_point": "window"}, "key": "cmrr_1hz_db", "reduce": "min", "expected": 69.34, "tol": 0.005, "unit": "dB", "at": {"corner": "fs", "temp_c": 125}, "printed": ["69.34 dB"]},
+    {"row": "ICMR (narrowest window width)", "record": "20261009-103006-566b9a5", "csv": "icmr", "key": "icmr_width_v", "reduce": "min", "expected": 0.452, "tol": 0.0005, "unit": "V", "at": {"corner": "ss", "temp_c": -40}, "printed": ["0.452 V"]},
+    {"row": "ICMR (highest low edge)", "record": "20261009-103006-566b9a5", "csv": "icmr", "key": "icmr_low_v", "reduce": "max", "expected": 0.7388, "tol": 0.00005, "unit": "V", "at": {"corner": "fs", "temp_c": -40}, "printed": ["0.7388 V"]},
+    {"row": "ICMR (lowest high edge)", "record": "20261009-103006-566b9a5", "csv": "icmr", "key": "icmr_high_v", "reduce": "min", "expected": 1.1686, "tol": 0.00005, "unit": "V", "at": {"corner": "ss", "temp_c": -40}, "printed": ["1.1686 V"]}
+  ]
+}
