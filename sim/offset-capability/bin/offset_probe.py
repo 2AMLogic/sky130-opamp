@@ -12,7 +12,7 @@ Usage:
   offset_probe.py run --bench pair|offset --label NAME [--mismatch on|off]
                       [--seed N --n N] [--backend NAME] [--dry-run]
   offset_probe.py campaign --label NAME --base-seed N [--corners tt,ss,ff]
-                      [--only corner:chunk,...]
+                      [--only corner:chunk,...] [--resume]
                       [--n-total 300 --chunk 100] [--backend NAME] [--dry-run]
   offset_probe.py summarize CHUNK.summary.json ...
 
@@ -30,11 +30,25 @@ expanded and executed by klt on its backend -- the batch fleet on dispatch
 hosts). Campaign requests set `keep_artifacts: false`: every per-sample value
 and seed is in the committed klt report, and 1500 per-sample deck/log
 directories would bloat the evidence tree. Stdlib only.
+
+DUT identity (issue #113). Every new offset campaign (and standalone full-opamp
+`run --bench offset`) captures the design netlist ONCE, via
+sim/lib/dut_identity.py, into `records/dut-<label>/` together with a rendered
+bench (`offset_dc.spice`) whose include resolves to that copy. Every chunk,
+retry and resumed submission uses that rendered bench, so editing the live
+netlist mid-campaign cannot change what is simulated. Chunk summaries and the
+campaign report carry the `dut` block (snapshot path + SHA-256); `--resume`
+re-reads the campaign's original snapshot and seed/chunk plan
+(`dut-<label>/campaign.plan.json`) and never recaptures today's design.
+`summarize` rejects missing/corrupt snapshots and mixed DUT hashes; records
+without a `dut` block are legacy and reported UNVERIFIED. The pair diagnostic
+bench is out of scope and unchanged.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import math
 import os
 import subprocess
@@ -46,8 +60,15 @@ EXP = Path(__file__).resolve().parent.parent
 REPO = EXP.parent.parent
 RECORDS = EXP / "records"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
+import dut_identity  # noqa: E402
 from spice_harness import (KltSimError, allocate_record_id, klt_sim,  # noqa: E402
                            klt_version, write_new)
+
+DESIGN_NETLIST = REPO / "design" / "netlist" / "opamp_core.spice"
+BENCH_TEMPLATE = EXP / "bench" / "offset_dc.cir"
+RENDERED_BENCH = "offset_dc.spice"   # in the snapshot dir; ``*.spice`` so dut_identity checks its include
+PLAN_NAME = "campaign.plan.json"
+_INCLUDE_LINE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
 VDD = 1.8
 VREF = VDD / 2          # output reference for the offset crossing
@@ -67,9 +88,36 @@ class ProbeError(RuntimeError):
 CORNERS = ("tt", "ss", "ff", "sf", "fs")
 
 
+def render_bench(template_text: str) -> str:
+    """The offset bench with its DUT include pointed at the sibling snapshot."""
+    out, n = _INCLUDE_LINE.subn(rf'\1"{dut_identity.SNAPSHOT_NAME}"', template_text)
+    if n != 1:
+        raise ProbeError(f"offset bench template must include the DUT exactly once (found {n})")
+    return out
+
+
+def capture_offset_dut(snap_dir: Path) -> dict:
+    """Capture the DUT once into a fresh ``snap_dir`` and render the bench
+    against it. Returns the ``dut`` metadata block. Refuses an existing dir."""
+    snap_dir = Path(snap_dir)
+    try:
+        snap_dir.mkdir(parents=True)
+    except FileExistsError:
+        raise ProbeError(f"DUT snapshot {snap_dir} already exists; use --resume to continue that campaign") from None
+    dut = dut_identity.capture_dut(DESIGN_NETLIST, snap_dir, REPO)
+    write_new(snap_dir / RENDERED_BENCH, render_bench(BENCH_TEMPLATE.read_text()))
+    return dut
+
+
+def snapshot_netlist(snap_dir: Path) -> str:
+    """Request ``netlist`` value (relative to RECORDS) for a captured bench."""
+    return os.path.relpath(Path(snap_dir) / RENDERED_BENCH, RECORDS)
+
+
 def build_request(bench: str, mismatch: bool, mc: dict | None,
-                  corner: str = "tt", keep_artifacts: bool = True) -> dict:
-    cir = {"pair": "../bench/pair_diag.cir", "offset": "../bench/offset_dc.cir"}[bench]
+                  corner: str = "tt", keep_artifacts: bool = True,
+                  netlist: str | None = None) -> dict:
+    cir = {"pair": "../bench/pair_diag.cir", "offset": netlist or "../bench/offset_dc.cir"}[bench]
     if bench == "pair":
         analysis = {"kind": "dc", "args": "Vg 0.79 0.81 0.01"}
         meas = [
@@ -211,7 +259,7 @@ def run_one(req: dict, label: str, backend: str | None, bench: str = "offset",
     outdir = RECORDS / f"{rid}-artifacts"
     cmd, rc, payload, err = run_klt(req_path, outdir, backend)
     write_new(RECORDS / f"{rid}.klt.json", json.dumps(payload, indent=2) + "\n" if payload else "null\n")
-    meta = {"record_id": rid, **(extra or {}), "command": cmd, "exit_code": rc, "stderr": err[-4000:],
+    meta = {"record_id": rid, "bench": bench, **(extra or {}), "command": cmd, "exit_code": rc, "stderr": err[-4000:],
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
             "client_klt_version": klt_version(),
             "git_sha": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
@@ -263,12 +311,49 @@ def corner_report(chunks: list[dict], n_requested: int) -> dict:
     return aggregate(samples, n_requested)
 
 
-def campaign(a) -> int:
-    corners = [c.strip() for c in a.corners.split(",") if c.strip()]
-    bad = [c for c in corners if c not in CORNERS]
+def open_campaign_dut(a) -> tuple[Path, dict, dict]:
+    """(snapshot dir, dut block, plan params) for a fresh or resumed campaign.
+    Fresh: capture the live DUT once and persist the plan. Resume: reload the
+    ORIGINAL snapshot and plan; never recapture, and reject contradicting args."""
+    snap_dir = RECORDS / f"dut-{a.label}"
+    if a.resume:
+        plan_path = snap_dir / PLAN_NAME
+        if not plan_path.is_file():
+            raise ProbeError(f"cannot resume {a.label!r}: no DUT snapshot/plan at {plan_path} "
+                             "(legacy campaigns have no recorded DUT and cannot be bound retroactively)")
+        saved = json.loads(plan_path.read_text())
+        _, problems = dut_identity.verify_record_dut(saved, REPO)
+        if problems:
+            raise ProbeError(f"cannot resume {a.label!r}: " + "; ".join(problems))
+        for k in ("base_seed", "corners", "n_total", "chunk"):
+            given = getattr(a, k)
+            if k == "corners" and given is not None:
+                given = [c.strip() for c in given.split(",") if c.strip()]
+            if given is not None and given != saved[k]:
+                raise ProbeError(f"resume of {a.label!r}: --{k.replace('_', '-')} {given!r} contradicts "
+                                 f"the original plan ({saved[k]!r})")
+        return snap_dir, saved["dut"], {k: saved[k] for k in ("base_seed", "corners", "n_total", "chunk")}
+    if a.base_seed is None:
+        raise SystemExit("--base-seed is required for a new campaign")
+    params = {"base_seed": a.base_seed,
+              "corners": [c.strip() for c in (a.corners or "tt,ss,ff").split(",") if c.strip()],
+              "n_total": a.n_total if a.n_total is not None else 300,
+              "chunk": a.chunk if a.chunk is not None else 100}
+    bad = [c for c in params["corners"] if c not in CORNERS]
     if bad:
         raise SystemExit(f"unknown corner(s) {bad}; choose from {CORNERS}")
-    plan = chunk_plan(corners, a.n_total, a.chunk, a.base_seed)
+    RECORDS.mkdir(exist_ok=True)
+    dut = capture_offset_dut(snap_dir)
+    write_new(snap_dir / PLAN_NAME, json.dumps({"campaign": a.label, **params, "dut": dut}, indent=2) + "\n")
+    return snap_dir, dut, params
+
+
+def campaign(a) -> int:
+    snap_dir, dut, params = open_campaign_dut(a)
+    corners = params["corners"]
+    plan = chunk_plan(corners, params["n_total"], params["chunk"], params["base_seed"])
+    a.n_total, a.chunk, a.base_seed = params["n_total"], params["chunk"], params["base_seed"]
+    netlist = snapshot_netlist(snap_dir)
     if a.only:   # resume: run only the listed corner:chunk requests (same seeds)
         want = {(x.split(":")[0], int(x.split(":")[1])) for x in a.only.split(",") if x}
         plan = [p for p in plan if (p["corner"], p["chunk"]) in want]
@@ -276,7 +361,7 @@ def campaign(a) -> int:
     log = []
     for p in plan:
         mc = {"n": p["n"], "seed": p["seed"]}
-        req = build_request("offset", True, mc, corner=p["corner"], keep_artifacts=False)
+        req = build_request("offset", True, mc, corner=p["corner"], keep_artifacts=False, netlist=netlist)
         label = f"{a.label}-{p['corner']}-c{p['chunk']}"
         if a.dry_run:
             RECORDS.mkdir(exist_ok=True)
@@ -286,7 +371,7 @@ def campaign(a) -> int:
             continue
         for attempt in range(1, a.max_attempts + 1):
             meta = run_one(req, label if attempt == 1 else f"{label}-r{attempt}", a.backend, mc=mc,
-                           extra={"campaign": a.label, "corner": p["corner"], "chunk": p["chunk"],
+                           extra={"campaign": a.label, "dut": dut, "corner": p["corner"], "chunk": p["chunk"],
                                   "chunk_seed": p["seed"], "chunk_n": p["n"],
                                   "global_offset": p["offset"], "attempt": attempt})
             ok_payload = "samples" in meta
@@ -300,7 +385,7 @@ def campaign(a) -> int:
         results[p["corner"]].append({**p, "record_id": meta["record_id"], "samples": meta.get("samples")})
     if a.dry_run:
         return 0
-    report = {"campaign": a.label, "base_seed": a.base_seed, "n_total": a.n_total, "chunk": a.chunk,
+    report = {"campaign": a.label, "dut": dut, "base_seed": a.base_seed, "n_total": a.n_total, "chunk": a.chunk,
               "corners": {c: {"chunks": [{k: ch[k] for k in ("chunk", "seed", "n", "offset", "record_id")}
                                          for ch in results[c]],
                               **corner_report(results[c], a.n_total)} for c in corners},
@@ -312,9 +397,27 @@ def campaign(a) -> int:
     return 0 if all(r["n_failed"] == 0 for r in report["corners"].values()) else 1
 
 
+def check_chunk_provenance(paths: list[str]) -> tuple[str, str | None]:
+    """DUT provenance of the chunk summaries about to be aggregated.
+    Returns (state, sha256): VERIFIED with the single common hash, or
+    UNVERIFIED (legacy, no ``dut`` anywhere). Raises ProbeError naming the
+    offending records on missing/corrupt snapshots or mixed/partial hashes."""
+    metas = []
+    for path in paths:
+        meta = json.loads(Path(path).read_text())
+        if "samples" in meta:
+            metas.append((Path(path).name, meta))
+    state, sha, problems = dut_identity.common_dut(metas, REPO)
+    if problems:
+        raise ProbeError("DUT provenance check failed: " + "; ".join(problems))
+    return state, sha
+
+
 def summarize(paths: list[str]) -> dict:
     """Re-aggregate committed chunk summaries (one successful attempt per
-    (corner, chunk)) from their klt reports via the same extractor."""
+    (corner, chunk)) from their klt reports via the same extractor. Rejects
+    chunks that do not share one intact DUT snapshot."""
+    check_chunk_provenance(paths)
     by_corner: dict[str, dict[int, dict]] = {}
     for path in paths:
         meta = json.loads(Path(path).read_text())
@@ -354,10 +457,12 @@ def main(argv=None) -> int:
     r.add_argument("--dry-run", action="store_true")
     c = sub.add_parser("campaign")
     c.add_argument("--label", required=True)
-    c.add_argument("--base-seed", type=int, required=True)
-    c.add_argument("--corners", default="tt,ss,ff")
-    c.add_argument("--n-total", type=int, default=300)
-    c.add_argument("--chunk", type=int, default=100)
+    c.add_argument("--base-seed", type=int, help="required for a new campaign")
+    c.add_argument("--corners", help="default tt,ss,ff")
+    c.add_argument("--n-total", type=int, help="default 300")
+    c.add_argument("--chunk", type=int, help="default 100")
+    c.add_argument("--resume", action="store_true",
+                   help="continue campaign --label from its original DUT snapshot and plan")
     c.add_argument("--max-attempts", type=int, default=6)
     c.add_argument("--retry-wait-s", type=int, default=300)
     c.add_argument("--only", help="resume: comma list of corner:chunk to run, e.g. ss:2,ff:0")
@@ -369,17 +474,27 @@ def main(argv=None) -> int:
     if a.cmd == "campaign":
         return campaign(a)
     if a.cmd == "summarize":
+        state, sha = check_chunk_provenance(a.summaries)
         print(json.dumps(summarize(a.summaries), indent=2))
+        print(f"DUT: {state.upper()}" + (f" {sha}" if sha else " (legacy chunks; no recorded DUT identity)"),
+              file=sys.stderr)
         return 0
     mc = {"n": a.n, "seed": a.seed} if a.seed is not None else None
-    req = build_request(a.bench, a.mismatch == "on", mc)
+    dut = None
+    netlist = None
+    if a.bench == "offset":   # full-opamp offset run: capture a one-off snapshot too
+        RECORDS.mkdir(exist_ok=True)
+        snap_dir = RECORDS / f"dut-run-{a.label}"
+        dut = capture_offset_dut(snap_dir)
+        netlist = snapshot_netlist(snap_dir)
+    req = build_request(a.bench, a.mismatch == "on", mc, netlist=netlist)
     if a.dry_run:
         RECORDS.mkdir(exist_ok=True)
         rid = allocate_record_id(RECORDS, f"{a.bench}-{a.label}")
         req_path = write_new(RECORDS / f"{rid}.request.json", json.dumps(req, indent=2) + "\n")
         print(req_path)
         return 0
-    meta = run_one(req, a.label, a.backend, bench=a.bench)
+    meta = run_one(req, a.label, a.backend, bench=a.bench, extra={"dut": dut} if dut else None)
     print(json.dumps({k: meta.get(k) for k in ("record_id", "exit_code", "samples")}, indent=2))
     return 0 if meta.get("samples") and all(s["ok"] for s in meta["samples"]) else 1
 

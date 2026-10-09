@@ -14,6 +14,13 @@ is *historical* evidence: it stays valid after the design moves on. Records
 without ``dut`` are legacy and reported UNVERIFIED -- never inferred from the
 Git SHA or from today's netlist.
 
+Offset Monte Carlo campaigns (issue #113) use the same snapshot discipline under
+sim/offset-capability/records: ``validate`` also checks every offset chunk
+summary and campaign report that carries ``dut`` (snapshot intact, request
+netlist is the rendered bench in the snapshot, all chunks share one hash);
+older records are UNVERIFIED. ``current-offset`` is the separate, explicit
+"does a historical offset campaign equal today's netlist" diagnostic.
+
 ``current`` takes the characterization the block manifest cites for a T1 item
 (default 8) and additionally requires its recorded DUT hash to equal the hash
 of the *current* ``design/netlist/opamp_core.spice``; a mismatch is reported
@@ -36,6 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CURRENT_NETLIST_REL = "design/netlist/opamp_core.spice"
 SNAPSHOT_NAME = "opamp_core.spice"
 RECORDS_REL = "sim/opamp-characterization/records"
+OFFSET_RECORDS_REL = "sim/offset-capability/records"
 MANIFEST_REL = "manifests/sky130-opamp.json"
 
 VERIFIED = "verified"
@@ -142,8 +150,123 @@ def cited_record(manifest: dict, item: str, repo_root: Path = REPO_ROOT) -> Path
     return repo_root / Path(cite["file"]).parent / (name[: -len(".characterization.json")] + ".json")
 
 
-def validate_all(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
+def common_dut(named_records: list[tuple[str, dict]], repo_root: Path = REPO_ROOT):
+    """Check that records (e.g. the chunks of one offset campaign) share one DUT.
+
+    Returns (state, sha256, problems). state is VERIFIED when every record
+    declares an intact snapshot with the same hash, UNVERIFIED when none
+    declares ``dut`` (legacy; no problems). Mixed hashes, a mix of declared and
+    legacy records, and missing/corrupt snapshots are problems naming the
+    offending record. Says nothing about equality to today's design.
+    """
+    problems: list[str] = []
+    hashes: dict[str, list[str]] = {}
+    legacy = []
+    for name, rec in named_records:
+        state, probs = verify_record_dut(rec, repo_root)
+        if state == UNVERIFIED:
+            legacy.append(name)
+            continue
+        problems += [f"{name}: {p}" for p in probs]
+        sha = (rec.get("dut") or {}).get("sha256")
+        if sha:
+            hashes.setdefault(sha, []).append(name)
+    if legacy and hashes:
+        problems.append(f"mixed provenance: {', '.join(legacy)} have no dut block but "
+                        f"{', '.join(n for v in hashes.values() for n in v)} do")
+    if len(hashes) > 1:
+        problems.append("mixed DUT hashes: " + "; ".join(f"{h} <- {', '.join(n)}" for h, n in sorted(hashes.items())))
+    if problems:
+        return (VERIFIED if hashes else UNVERIFIED), None, problems
+    if hashes:
+        return VERIFIED, next(iter(hashes)), problems
+    return UNVERIFIED, None, problems
+
+
+def _load(path: Path):
+    try:
+        d = json.loads(path.read_text())
+    except (ValueError, OSError):
+        return None
+    return d if isinstance(d, dict) else None
+
+
+def offset_records(repo_root: Path = REPO_ROOT) -> list[tuple[Path, str]]:
+    """(path, kind) for offset-runner chunk summaries ('summary') and campaign
+    reports ('campaign'). Pair-diagnostic summaries are out of scope."""
+    rdir = repo_root / OFFSET_RECORDS_REL
+    out = []
+    for p in sorted(rdir.glob("*.summary.json")):
+        d = _load(p)
+        if d is None:
+            continue
+        bench = d.get("bench")
+        if bench is None:
+            req = _load(p.with_name(p.name[: -len(".summary.json")] + ".request.json")) or {}
+            bench = "offset" if "offset_dc" in str(req.get("netlist", "")) else None
+        if bench == "offset":
+            out.append((p, "summary"))
+    out += [(p, "campaign") for p in sorted(rdir.glob("*.campaign.json"))]
+    return out
+
+
+def offset_problems(path: Path, kind: str, repo_root: Path = REPO_ROOT) -> tuple[str, list[str]]:
+    rec = json.loads(path.read_text())
+    state, problems = verify_record_dut(rec, repo_root)
+    if state == UNVERIFIED:
+        return state, []
+    if kind == "summary":
+        req = _load(path.with_name(path.name[: -len(".summary.json")] + ".request.json")) or {}
+        sp = rec["dut"].get("snapshot_path")
+        snap = (repo_root / sp).parent.resolve() if sp else None
+        net = (path.parent / str(req.get("netlist", ""))).resolve()
+        if snap is None or net.parent != snap:
+            problems.append(f"submitted request netlist {req.get('netlist')!r} is not the rendered bench in the DUT snapshot")
+    else:
+        named = []
+        for cname, c in sorted((rec.get("corners") or {}).items()):
+            for ch in c.get("chunks") or []:
+                sp = path.parent / f"{ch['record_id']}.summary.json"
+                s = _load(sp)
+                if s is None:
+                    problems.append(f"{cname} chunk {ch.get('chunk')}: summary {sp.name} missing or unreadable")
+                else:
+                    named.append((sp.name, s))
+        _, sha, probs = common_dut(named, repo_root)
+        problems += probs
+        if sha and rec["dut"].get("sha256") and sha != rec["dut"]["sha256"]:
+            problems.append(f"chunks use {sha} but the campaign declares {rec['dut']['sha256']}")
+    return state, problems
+
+
+def validate_offset(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
     rc = 0
+    for p, kind in offset_records(repo_root):
+        state, problems = offset_problems(p, kind, repo_root)
+        if state == UNVERIFIED:
+            print(f"{p.name}: UNVERIFIED legacy offset record (no recorded DUT identity)")
+            rc = 1 if require_verified else rc
+        elif problems:
+            rc = 1
+            for pr in problems:
+                print(f"{p.name}: FAIL {pr}")
+        else:
+            print(f"{p.name}: OK offset DUT snapshot verified")
+    return rc
+
+
+def check_current_offset(repo_root: Path = REPO_ROOT) -> int:
+    """Explicit current-design check for every verified offset record."""
+    rc = 0
+    for p, kind in offset_records(repo_root):
+        for pr in check_current(json.loads(p.read_text()), repo_root):
+            print(f"{p.name}: STALE {pr}")
+            rc = 1
+    return rc
+
+
+def validate_all(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
+    rc = validate_offset(repo_root, require_verified)
     for p in pvt_record_paths(repo_root):
         state, problems = verify_record_dut(json.loads(p.read_text()), repo_root)
         if state == UNVERIFIED:
@@ -183,15 +306,18 @@ def validate_current(repo_root: Path, manifest_path: Path, item: str, require_ve
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("validate", "current"):
+    for name in ("validate", "current", "current-offset"):
         p = sub.add_parser(name)
         p.add_argument("--require-verified", action="store_true", help="treat legacy/unverified records as failures")
         p.add_argument("--repo-root", type=Path, default=REPO_ROOT)
+    sub.choices["current-offset"].add_argument("--manifest", default=MANIFEST_REL)  # unused; uniform CLI
     sub.choices["current"].add_argument("--manifest", default=MANIFEST_REL)
     sub.choices["current"].add_argument("--item", default="8")
     a = ap.parse_args(argv)
     if a.cmd == "validate":
         return validate_all(a.repo_root, a.require_verified)
+    if a.cmd == "current-offset":
+        return check_current_offset(a.repo_root)
     return validate_current(a.repo_root, a.repo_root / a.manifest, a.item, a.require_verified)
 
 

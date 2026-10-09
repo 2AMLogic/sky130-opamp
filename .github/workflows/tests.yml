@@ -40,7 +40,7 @@ jobs:
       - name: Check spec section 2 figures against committed PVT records
         run: python design/bin/spec_figures_check.py validate
 
-      - name: Validate DUT snapshots and current-design binding of cited evidence
+      - name: Validate DUT snapshots (PVT and offset campaigns) and current-design binding of cited evidence
         run: |
           python sim/lib/dut_identity.py validate
           python sim/lib/dut_identity.py current
