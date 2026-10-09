@@ -35,7 +35,8 @@ program exists to produce.
 
 sky130's open ecosystem is the deepest of the three; where prior open
 op-amp work exists publicly, cite it and position against it honestly
-rather than ignoring it.
+rather than ignoring it. The survey and comparison table are in
+[`spec/prior-art.md`](spec/prior-art.md).
 
 ## Target specification (partially ratified)
 
