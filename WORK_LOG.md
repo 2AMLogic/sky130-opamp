@@ -4,6 +4,19 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-09
 
+- **PR #103**: tests: add unit tests for gm/ID sweep.py derive_points and interp
+- **PR #100**: Make PSRR and noise cross-check disagreements fail validation
+- **PR #99**: Validate PVT matrix completeness before accepting spec figures
+- **PR #95**: sim: PVT grid record for closed-loop step bench (#86)
+- **PR #94**: sim: closed-loop small-step overshoot/settling bench to cross-check AC phase margin (#86)
+- **PR #92**: sim: offset Monte Carlo campaign N=300 TT/SS/FF (+SF/FS) on the batch fleet (#85)
+- **PR #91**: docs(sim): log third batch noise-grid attempt for #54
+- **Issue #102** (closed): tests: add unit tests for gm/ID sweep.py derive_points and interp
+- **Issue #96** (closed): Auditor guard review: worktree-write-confinement-unresolved-var should remain blocked
+- **Issue #98** (closed): Make PSRR and noise cross-check disagreements fail validation
+- **Issue #97** (closed): Validate PVT matrix completeness before accepting spec figures
+- **Issue #86** (closed): sim: add a closed-loop small-step (overshoot/settling) bench to cross-check AC phase margin across PVT
+- **Issue #85** (closed): sim: run the offset Monte Carlo campaign (TT/SS/FF, batch fleet) on the #52 capability probe
 - **PR #87**: test: assert sky130 PDK pin is identical across CI, sim and layout configs
 - **PR #89**: spec: check target-spec §2 measured figures against committed PVT records
 - **PR #88**: docs(spec): add prior-art survey of public sky130 op-amps

@@ -7,7 +7,7 @@ This roadmap is generated from the repository's current Loom label state.
 
 Judge-approved PRs stuck under a `loom:operator` merge-risk hold — implementation work is done, only a human merge decision is missing.
 
-_None._
+- **#93**: ratification: install ee-key and market-key reviewer trees; fix stale DR Status lines (#49)
 
 ## Operator Priority
 
@@ -19,14 +19,13 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#54**: Add PSRR and input-referred noise benches to the PVT characterization
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#85**: sim: run the offset Monte Carlo campaign (TT/SS/FF, batch fleet) on the #52 capability probe
-- **#86**: sim: add a closed-loop small-step (overshoot/settling) bench to cross-check AC phase margin across PVT
+_None._
 
 ## PRs Awaiting Review
 
@@ -38,7 +37,7 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-_None._
+- **#93**: ratification: install ee-key and market-key reviewer trees; fix stale DR Status lines (#49)
 
 ## Proposed
 
@@ -47,10 +46,13 @@ Issues carrying `loom:curated`.
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
 - **#46**: T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched *(curated)*
 - **#47**: T1 item 5: evaluate the two structural fixes DR-007 names for the falling slew-rate gap and draft the superseding topology record *(curated)*
+- **#49**: Install ratification/ee-key and ratification/market-key reviewer trees (product#151) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
+- **#101**: Wire package.json test/check:ci to the real simulator-free checks *(architect)*
+- **#104**: Preserve the exact DUT netlist for PVT campaigns and check current-design identity *(architect)*
 
 ## Epics
 
@@ -60,13 +62,13 @@ _None._
 
 | Tier | Count |
 |------|-------|
-| Operator merge-risk holds | 0 |
+| Operator merge-risk holds | 1 |
 | Operator priority | 0 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 2 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 0 |
-| Curated | 3 |
-| Architect / Hermit proposals | 1 |
+| Approved PRs awaiting merge | 1 |
+| Curated | 4 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
