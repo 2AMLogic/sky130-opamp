@@ -1,0 +1,583 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": "sim/offset-capability/bench/pair_diag.cir",
+    "scope": "repo"
+  },
+  "status": "pass",
+  "corner_count": 4,
+  "passed": 4,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 4,
+    "sim__corner__passed_count": 4,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/usr/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1",
+    "netlist_closure": [
+      {
+        "path": "sim/offset-capability/bench/pair_diag.cir",
+        "scope": "repo",
+        "sha256": "4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1"
+      }
+    ],
+    "netlist_source": "schematic",
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-a1addbf2cba7",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-0ceb5d9d2c6082bd3",
+      "instance_type": "c7i.8xlarge",
+      "availability_zone": "us-east-1a",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "2",
+      "physical_cores": "16",
+      "elapsed_seconds": 45,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g4cbdfa769875",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g4cbdfa769875; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    },
+    "monte_carlo": {
+      "n": 4,
+      "seed": 20261009,
+      "vary": "mismatch",
+      "family_mismatch": [
+        {
+          "family": "mosfet",
+          "active": true,
+          "note": "MOS per-instance mismatch is active in any _mm-suffixed process-corner section (e.g. tt_mm) -- select that section via corners.process to sample it (see docs/cli/sim.md's 'Known-good mismatch mechanisms')."
+        }
+      ]
+    }
+  },
+  "coverage": {
+    "corners_simulated": 4,
+    "measurements_declared": 4,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idn1\"]/observation",
+      "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idn2\"]/observation",
+      "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idp1\"]/observation",
+      "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idp2\"]/observation",
+      "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idn1\"]/observation",
+      "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idn2\"]/observation",
+      "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idp1\"]/observation",
+      "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idp2\"]/observation",
+      "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idn1\"]/observation",
+      "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idn2\"]/observation",
+      "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idp1\"]/observation",
+      "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idp2\"]/observation",
+      "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idn1\"]/observation",
+      "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idn2\"]/observation",
+      "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idp1\"]/observation",
+      "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idp2\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idn1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idn2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idp1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C/mc0\",\"idp2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idn1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idn2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idp1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt_mm/1.800V/27C/mc1\",\"idp2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idn1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idn2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idp1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt_mm/1.800V/27C/mc2\",\"idp2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idn1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idn2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idp1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt_mm/1.800V/27C/mc3\",\"idp2\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "idn1",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C/mc0",
+        "value": -6.81593e-06,
+        "margin": null
+      },
+      "monte_carlo": {
+        "n": 4,
+        "errored": 0,
+        "inconclusive": 0,
+        "mean": -6.94711e-06,
+        "stddev": 2.5241119428424733e-07,
+        "min": -7.20022e-06,
+        "max": -6.65984e-06,
+        "quantiles": {
+          "p5": -7.1870545e-06,
+          "p50": -6.9641899999999995e-06,
+          "p95": -6.6832535e-06
+        },
+        "sigma_window": null,
+        "by_corner": [
+          {
+            "corner_id": "tt_mm/1.800V/27C",
+            "n": 4,
+            "errored": 0,
+            "inconclusive": 0,
+            "mean": -6.94711e-06,
+            "stddev": 2.5241119428424733e-07,
+            "min": -7.20022e-06,
+            "max": -6.65984e-06,
+            "quantiles": {
+              "p5": -7.1870545e-06,
+              "p50": -6.9641899999999995e-06,
+              "p95": -6.6832535e-06
+            },
+            "sigma_window": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "idn2",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C/mc0",
+        "value": -7.47259e-06,
+        "margin": null
+      },
+      "monte_carlo": {
+        "n": 4,
+        "errored": 0,
+        "inconclusive": 0,
+        "mean": -7.4010625e-06,
+        "stddev": 7.182006586544366e-07,
+        "min": -8.19308e-06,
+        "max": -6.44863e-06,
+        "quantiles": {
+          "p5": -8.0876105e-06,
+          "p50": -7.48127e-06,
+          "p95": -6.602224e-06
+        },
+        "sigma_window": null,
+        "by_corner": [
+          {
+            "corner_id": "tt_mm/1.800V/27C",
+            "n": 4,
+            "errored": 0,
+            "inconclusive": 0,
+            "mean": -7.4010625e-06,
+            "stddev": 7.182006586544366e-07,
+            "min": -8.19308e-06,
+            "max": -6.44863e-06,
+            "quantiles": {
+              "p5": -8.0876105e-06,
+              "p50": -7.48127e-06,
+              "p95": -6.602224e-06
+            },
+            "sigma_window": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "idp1",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C/mc0",
+        "value": 4.61526e-08,
+        "margin": null
+      },
+      "monte_carlo": {
+        "n": 4,
+        "errored": 0,
+        "inconclusive": 0,
+        "mean": 3.6229125e-08,
+        "stddev": 6.81037123382419e-09,
+        "min": 3.06349e-08,
+        "max": 4.61526e-08,
+        "quantiles": {
+          "p5": 3.1145155e-08,
+          "p50": 3.40645e-08,
+          "p95": 4.434356999999999e-08
+        },
+        "sigma_window": null,
+        "by_corner": [
+          {
+            "corner_id": "tt_mm/1.800V/27C",
+            "n": 4,
+            "errored": 0,
+            "inconclusive": 0,
+            "mean": 3.6229125e-08,
+            "stddev": 6.81037123382419e-09,
+            "min": 3.06349e-08,
+            "max": 4.61526e-08,
+            "quantiles": {
+              "p5": 3.1145155e-08,
+              "p50": 3.40645e-08,
+              "p95": 4.434356999999999e-08
+            },
+            "sigma_window": null
+          }
+        ]
+      }
+    },
+    {
+      "name": "idp2",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C/mc0",
+        "value": 2.7875e-08,
+        "margin": null
+      },
+      "monte_carlo": {
+        "n": 4,
+        "errored": 0,
+        "inconclusive": 0,
+        "mean": 3.23719e-08,
+        "stddev": 3.792140996851252e-09,
+        "min": 2.7875e-08,
+        "max": 3.69124e-08,
+        "quantiles": {
+          "p5": 2.8385345e-08,
+          "p50": 3.23501e-08,
+          "p95": 3.6388975e-08
+        },
+        "sigma_window": null,
+        "by_corner": [
+          {
+            "corner_id": "tt_mm/1.800V/27C",
+            "n": 4,
+            "errored": 0,
+            "inconclusive": 0,
+            "mean": 3.23719e-08,
+            "stddev": 3.792140996851252e-09,
+            "min": 2.7875e-08,
+            "max": 3.69124e-08,
+            "quantiles": {
+              "p5": 2.8385345e-08,
+              "p50": 3.23501e-08,
+              "p95": 3.6388975e-08
+            },
+            "sigma_window": null
+          }
+        ]
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc0",
+      "process": "tt_mm",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.41,
+      "measurements": [
+        {
+          "name": "idn1",
+          "value": -6.81593e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idn2",
+          "value": -7.47259e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp1",
+          "value": 4.61526e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp2",
+          "value": 2.7875e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc0/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc0/corner.cir"
+      },
+      "monte_carlo": {
+        "sample_index": 0,
+        "seed": 1189634286,
+        "process_seed": 341215995,
+        "mismatch_seed": 676181226
+      }
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc1",
+      "process": "tt_mm",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 38.564,
+      "measurements": [
+        {
+          "name": "idn1",
+          "value": -7.11245e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idn2",
+          "value": -8.19308e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp1",
+          "value": 3.40924e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp2",
+          "value": 3.12773e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc1/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc1/corner.cir"
+      },
+      "monte_carlo": {
+        "sample_index": 1,
+        "seed": 328376976,
+        "process_seed": 341215995,
+        "mismatch_seed": 2083000830
+      }
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc2",
+      "process": "tt_mm",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.358,
+      "measurements": [
+        {
+          "name": "idn1",
+          "value": -6.65984e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idn2",
+          "value": -7.48995e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp1",
+          "value": 3.06349e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp2",
+          "value": 3.69124e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc2/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc2/corner.cir"
+      },
+      "monte_carlo": {
+        "sample_index": 2,
+        "seed": 1668344203,
+        "process_seed": 341215995,
+        "mismatch_seed": 17898354
+      }
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc3",
+      "process": "tt_mm",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.358,
+      "measurements": [
+        {
+          "name": "idn1",
+          "value": -7.20022e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idn2",
+          "value": -6.44863e-06,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp1",
+          "value": 3.40366e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "idp2",
+          "value": 3.34229e-08,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc3/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103043-pair-seedA-replay-artifacts/tt_mm_1p800V_27C_mc3/corner.cir"
+      },
+      "monte_carlo": {
+        "sample_index": 3,
+        "seed": 754629558,
+        "process_seed": 341215995,
+        "mismatch_seed": 1620484244
+      }
+    }
+  ]
+}

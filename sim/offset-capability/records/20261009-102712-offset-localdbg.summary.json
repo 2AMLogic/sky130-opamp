@@ -1,0 +1,29 @@
+{
+  "record_id": "20261009-102712-offset-localdbg",
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102712-offset-localdbg.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102712-offset-localdbg-artifacts",
+    "--format",
+    "json",
+    "--backend",
+    "local"
+  ],
+  "exit_code": 4,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "git_sha": "3f7fe3cbdf52b1a13ad635a1b70d4e219efb363d",
+  "remote": null,
+  "monte_carlo_echo": null,
+  "samples": [
+    {
+      "corner_id": "tt/1.800V/27C",
+      "klt_status": "error",
+      "monte_carlo": null,
+      "ok": false,
+      "reason": "corner status 'error'"
+    }
+  ]
+}

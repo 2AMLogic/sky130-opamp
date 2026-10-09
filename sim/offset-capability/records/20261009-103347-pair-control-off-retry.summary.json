@@ -1,0 +1,107 @@
+{
+  "record_id": "20261009-103347-pair-control-off-retry",
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103347-pair-control-off-retry.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103347-pair-control-off-retry-artifacts",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "git_sha": "3f7fe3cbdf52b1a13ad635a1b70d4e219efb363d",
+  "remote": {
+    "provider": "aws-batch-fleet",
+    "job_id": "klt-sim-25ce1d355c4f",
+    "bucket": "2am-batch-jobs-221082181346",
+    "region": "us-east-1",
+    "instance_id": "i-042493d41fb95f15c",
+    "instance_type": "m7i.4xlarge",
+    "availability_zone": "us-east-1f",
+    "ami_id": "ami-0e40e3245f1923ac8",
+    "lifecycle": "spot",
+    "spot": true,
+    "state": "done",
+    "exit_code": "0",
+    "concurrency": "1",
+    "physical_cores": "8",
+    "elapsed_seconds": 42,
+    "runner_klt_version": "0.5.0",
+    "client_klt_version": "0.7.0+g4cbdfa769875",
+    "runner_compatibility": "mismatch",
+    "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g4cbdfa769875; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+  },
+  "monte_carlo_echo": {
+    "n": 4,
+    "seed": 20261009,
+    "vary": "mismatch",
+    "family_mismatch": [
+      {
+        "family": "mosfet",
+        "active": true,
+        "note": "MOS per-instance mismatch is active in any _mm-suffixed process-corner section (e.g. tt_mm) -- select that section via corners.process to sample it (see docs/cli/sim.md's 'Known-good mismatch mechanisms')."
+      }
+    ]
+  },
+  "samples": [
+    {
+      "corner_id": "tt/1.800V/27C/mc0",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 0,
+        "seed": 1189634286,
+        "process_seed": 341215995,
+        "mismatch_seed": 676181226
+      },
+      "ok": true,
+      "reason": null,
+      "dn": 0.0,
+      "dp": 0.0
+    },
+    {
+      "corner_id": "tt/1.800V/27C/mc1",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 1,
+        "seed": 328376976,
+        "process_seed": 341215995,
+        "mismatch_seed": 2083000830
+      },
+      "ok": true,
+      "reason": null,
+      "dn": 0.0,
+      "dp": 0.0
+    },
+    {
+      "corner_id": "tt/1.800V/27C/mc2",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 2,
+        "seed": 1668344203,
+        "process_seed": 341215995,
+        "mismatch_seed": 17898354
+      },
+      "ok": true,
+      "reason": null,
+      "dn": 0.0,
+      "dp": 0.0
+    },
+    {
+      "corner_id": "tt/1.800V/27C/mc3",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 3,
+        "seed": 754629558,
+        "process_seed": 341215995,
+        "mismatch_seed": 1620484244
+      },
+      "ok": true,
+      "reason": null,
+      "dn": 0.0,
+      "dp": 0.0
+    }
+  ]
+}

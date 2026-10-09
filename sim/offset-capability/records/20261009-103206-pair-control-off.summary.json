@@ -1,0 +1,16 @@
+{
+  "record_id": "20261009-103206-pair-control-off",
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103206-pair-control-off.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-103206-pair-control-off-artifacts",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "{\n  \"schema_version\": 1,\n  \"error\": {\n    \"command\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 8 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n}\n",
+  "env_KLT_SIM_BACKEND": "batch",
+  "git_sha": "3f7fe3cbdf52b1a13ad635a1b70d4e219efb363d"
+}

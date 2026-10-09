@@ -1,0 +1,15 @@
+* klt sim -- generated corner deck, do not edit
+.lib /home/ubuntu/.volare/sky130A/libs.tech/ngspice/sky130.lib.spice tt_mm
+.include /home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/../bench/pair_diag.cir
+.temp 27.0
+.meas dc idn1 find i(Vn1) at=0.8
+.meas dc idn2 find i(Vn2) at=0.8
+.meas dc idp1 find i(Vp1) at=0.8
+.meas dc idp2 find i(Vp2) at=0.8
+.control
+save all
+alter vdd=1.8
+dc Vg 0.8 0.8 0.1
+quit
+.endc
+.end
