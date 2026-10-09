@@ -87,14 +87,17 @@ REPO_ROOT = EXP_DIR.parent.parent
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
+    KLT_CMD,
     HarnessError,
     Pdk,
     first_line,
     git_sha,
+    klt_version,
     load_json,
     render,
     report_pdk,
     report_tool_status,
+    run_klt_sim,
 )
 
 GMID_DIR = EXP_DIR.parent / "gm-id-characterization"
@@ -170,7 +173,7 @@ def check_env() -> int:
     # missing klt must not fail the legacy ac/tran_sr/dc_swing workflow.
     klt = klt_available()
     if klt:
-        print(f"klt     : OK   {' '.join(KLT_CMD)} ({first_line([*KLT_CMD, '--version'])})")
+        print(f"klt     : OK   {' '.join(KLT_CMD)} ({klt_version()})")
         print(f"  klt sim backend for icmr/cmrr: {DEFAULT_KLT_BACKEND}"
               f" (env KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '<unset>')}; override with --backend)")
     else:
@@ -437,7 +440,6 @@ CAPACITY_RETRIES = 30
 CAPACITY_WAIT_S = 60
 RUNNER_VERSION_CHECK = ["warn"]  # set from --batch-runner-check
 KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set from --timeout-s
-KLT_CMD: list[str] = shlex.split(os.environ.get("KLT_CMD", "klt"))
 
 
 def klt_available() -> str | None:
@@ -515,23 +517,6 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
     req_path = req_dir / f"{tag}-request.json"
     req_path.write_text(json.dumps(request, indent=2) + "\n")
     return req_path, tag
-
-
-def run_klt_sim(req_path: Path, out_dir: Path, backend: str) -> dict:
-    """Submit one request; return klt's parsed JSON report (gate on `status`, not exit code)."""
-    out_dir = out_dir.resolve()  # klt resolves -o against each corner's own cwd: must be absolute
-    out_dir.mkdir(parents=True, exist_ok=True)
-    proc = subprocess.run(
-        [*KLT_CMD, "sim", str(req_path), "-o", str(out_dir), "--backend", backend, "--format", "json"],
-        capture_output=True, text=True,
-    )
-    (out_dir / f"{req_path.stem}.stderr.txt").write_text(proc.stderr)
-    try:
-        return json.loads(proc.stdout)
-    except json.JSONDecodeError as exc:
-        raise HarnessError(
-            f"klt sim exit {proc.returncode}: no JSON report on stdout ({proc.stderr.strip()[:500]})"
-        ) from exc
 
 
 def _corner_values(report: dict) -> dict[tuple[str, float], dict]:
@@ -926,7 +911,7 @@ def main(argv=None) -> int:
             "ngspice": first_line(["ngspice", "-v"]),
             "python": platform.python_version(),
             "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
-            **({"klt": first_line([*KLT_CMD, "--version"]), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
+            **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
         },
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
         "links": {

@@ -20,10 +20,7 @@ one append-only record `records/<id>-psrr-noise-validation.json`:
 from __future__ import annotations
 
 import json
-import os
-import shlex
 import math
-import subprocess
 import sys
 import tempfile
 from datetime import datetime, timezone
@@ -32,7 +29,7 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
-from spice_harness import git_sha  # noqa: E402
+from spice_harness import git_sha, run_klt_sim  # noqa: E402
 
 TB = EXP_DIR / "testbench"
 MODELS = {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"}
@@ -50,9 +47,7 @@ def req(netlist, corner, vdd, temp, analysis, meas, digits=10):
 def run(tmp: Path, name: str, r: dict) -> dict:
     p = tmp / f"{name}.request.json"
     p.write_text(json.dumps(r, indent=2))
-    out = subprocess.run([*shlex.split(os.environ.get("KLT_CMD", "klt")), "sim", str(p), "--backend", "local", "--format", "json"],
-                         capture_output=True, text=True)
-    d = json.loads(out.stdout)
+    d = run_klt_sim(p, tmp / f"{name}-out", "local")
     vals = [{c["corner_id"]: {m["name"]: m["value"] for m in c["measurements"]}} for c in d["corners"]]
     return {"status": d["status"], "values": vals, "request": r}
 

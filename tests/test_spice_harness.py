@@ -107,5 +107,69 @@ class PdkResolutionTests(unittest.TestCase):
         self.assertFalse(pdk.matches_pin)
 
 
+class KltSimTests(unittest.TestCase):
+    """The shared `klt sim` client, with subprocess.run stubbed (no klt needed)."""
+
+    def setUp(self):
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        self.tmp = Path(d.name)
+        self.req = self.tmp / "bench.request.json"
+        self.req.write_text("{}")
+        saved = list(sh.KLT_CMD)
+        self.addCleanup(lambda: sh.KLT_CMD.__setitem__(slice(None), saved))
+
+    def _run(self, stdout, stderr="warn: skew\n", rc=0, outdir=None, backend=None):
+        proc = mock.Mock(stdout=stdout, stderr=stderr, returncode=rc)
+        with mock.patch.object(sh.subprocess, "run", return_value=proc) as run:
+            cwd = os.getcwd()
+            os.chdir(self.tmp)  # so a relative outdir resolves under tmp
+            try:
+                result = sh.klt_sim(self.req, outdir or Path("out"), backend)
+            finally:
+                os.chdir(cwd)
+        return result, run.call_args.args[0]
+
+    def test_command_absolute_outdir_and_stderr_file(self):
+        sh.KLT_CMD[:] = ["uvx", "--from", "klayout-tools==0.5.0", "klt"]  # as pvt_sweep --klt-cmd does
+        res, cmd = self._run('{"status": "pass", "corners": []}', rc=1, backend="batch")
+        out = (self.tmp / "out").resolve()
+        self.assertEqual(cmd, ["uvx", "--from", "klayout-tools==0.5.0", "klt", "sim", str(self.req),
+                               "-o", str(out), "--backend", "batch", "--format", "json"])
+        self.assertTrue(Path(cmd[cmd.index("-o") + 1]).is_absolute())
+        self.assertEqual((out / "bench.request.stderr.txt").read_text(), "warn: skew\n")
+        self.assertEqual(res.payload, {"status": "pass", "corners": []})
+        self.assertEqual((res.returncode, res.stderr), (1, "warn: skew\n"))
+        cmd_, rc, payload, err = res  # offset_probe's (cmd, rc, payload, stderr) shape
+        self.assertEqual(cmd_, cmd)
+
+    def test_no_backend_flag_when_unset(self):
+        sh.KLT_CMD[:] = ["klt"]
+        _res, cmd = self._run("{}")
+        self.assertNotIn("--backend", cmd)
+        self.assertEqual(cmd[-2:], ["--format", "json"])
+
+    def test_non_json_stdout_raises_typed_error_with_invocation(self):
+        sh.KLT_CMD[:] = ["klt"]
+        with self.assertRaises(sh.KltSimError) as cm:
+            self._run("Traceback ...", stderr="boom: BATCH_MAX_CONCURRENT_INSTANCES", rc=2)
+        exc = cm.exception
+        self.assertIsInstance(exc, sh.HarnessError)  # pvt_sweep's retry loop catches HarnessError
+        self.assertEqual((exc.returncode, exc.stderr), (2, "boom: BATCH_MAX_CONCURRENT_INSTANCES"))
+        self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", str(exc))
+        self.assertEqual(exc.cmd[:2], ["klt", "sim"])
+
+    def test_run_klt_sim_returns_report_dict(self):
+        proc = mock.Mock(stdout='{"status": "fail"}', stderr="", returncode=1)
+        with mock.patch.object(sh.subprocess, "run", return_value=proc):
+            self.assertEqual(sh.run_klt_sim(self.req, self.tmp / "o", "local"), {"status": "fail"})
+
+    def test_klt_version_goes_through_klt_cmd(self):
+        sh.KLT_CMD[:] = ["uvx", "--from", "klayout-tools==0.5.0", "klt"]
+        with mock.patch.object(sh, "first_line", return_value="klt 0.5.0") as fl:
+            self.assertEqual(sh.klt_version(), "klt 0.5.0")
+        fl.assert_called_once_with(["uvx", "--from", "klayout-tools==0.5.0", "klt", "--version"])
+
+
 if __name__ == "__main__":
     unittest.main()
