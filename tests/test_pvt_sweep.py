@@ -1,5 +1,6 @@
 import csv
 import json
+import math
 import re
 import tempfile
 import unittest
@@ -333,6 +334,121 @@ class KltBenchTests(unittest.TestCase):
         ic = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "iq_mid_a": float(r["iq_a"])}
         self.assertTrue(pvt.crosscheck(ref, [cm], [ic])["ok"])
         self.assertFalse(pvt.crosscheck(ref, [dict(cm, adm_1hz_db=cm["adm_1hz_db"] + 1.0)], [ic])["ok"])
+
+
+def synthetic_step(vdd=1.8, zeta=0.5, wn=2 * math.pi * 20e6, v_ofs=0.0, t_stop=pvt.STEP_T_STOP_S, dt=0.25e-9,
+                   gain=1.0):
+    """v(out) of a closed-loop second-order system for the +-20 mV step at
+    T_DELAY (instant edge), on a uniform time axis. zeta >= 1 -> overdamped
+    (zeta == 1 handled as the critically damped form)."""
+    lo = 0.5 * vdd - pvt.STEP_HALF_V + v_ofs
+    t, v = [], []
+    n = int(round(t_stop / dt))
+    for i in range(n + 1):
+        ti = i * dt
+        x = ti - pvt.STEP_T_DELAY_S
+        if x <= 0:
+            y = 0.0
+        elif zeta < 1:
+            wd = wn * math.sqrt(1 - zeta ** 2)
+            y = 1 - math.exp(-zeta * wn * x) * (math.cos(wd * x) + zeta / math.sqrt(1 - zeta ** 2) * math.sin(wd * x))
+        else:
+            y = 1 - math.exp(-wn * x) * (1 + wn * x)
+        t.append(ti)
+        v.append(lo + gain * pvt.STEP_V * y)
+    return t, v
+
+
+class StepMetricsTests(unittest.TestCase):
+    def test_template_renders_with_no_unrendered_placeholders(self):
+        req, body, tag = klt_request("tran_step")
+        live = "\n".join(ln for ln in body.splitlines() if not ln.lstrip().startswith("*")) + "\n"
+        self.assertNotRegex(live, r"\{[A-Za-z_]")
+        self.assertEqual(tag, "tran-step")
+        self.assertEqual(req["analysis"]["kind"], "tran")
+        self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
+        self.assertIn("Rshort inn out", body)
+        self.assertEqual({m["name"] for m in req["measurements"]},
+                         {"v_init", "v_ofs", "v_final", "v_peak", "t_lo_cross", "t_hi_cross"})
+
+    def test_underdamped_overshoot_matches_analytic(self):
+        for zeta in (0.3, 0.5, 0.7):
+            with self.subTest(zeta=zeta):
+                t, v = synthetic_step(zeta=zeta)
+                m = pvt.analyze_waveform(t, v, 1.8)
+                want = 100 * math.exp(-math.pi * zeta / math.sqrt(1 - zeta ** 2))
+                self.assertAlmostEqual(m["overshoot_pct"], want, delta=0.3)
+                self.assertGreater(m["settle_1pct_s"], 0)
+                self.assertLess(m["settle_1pct_s"], pvt.STEP_T_STOP_S)
+
+    def test_settling_time_is_the_last_exit_from_the_band(self):
+        t, v = synthetic_step(zeta=0.5)
+        m = pvt.analyze_waveform(t, v, 1.8)
+        centre = 0.5 * 1.8 + pvt.STEP_HALF_V
+        last_out = max(ti for ti, x in zip(t, v) if abs(x - centre) > pvt.STEP_TOL_V)
+        self.assertAlmostEqual(m["settle_1pct_s"], last_out - pvt.STEP_EDGE_MID_S, delta=1e-9)
+
+    def test_static_offset_is_not_counted_as_overshoot_or_settling_error(self):
+        a = pvt.analyze_waveform(*synthetic_step(zeta=0.5), 1.8)
+        b = pvt.analyze_waveform(*synthetic_step(zeta=0.5, v_ofs=-0.3e-3), 1.8)
+        self.assertAlmostEqual(a["overshoot_pct"], b["overshoot_pct"], delta=0.15)
+        self.assertAlmostEqual(a["settle_1pct_s"], b["settle_1pct_s"], delta=2e-9)
+
+    def test_overdamped_has_zero_overshoot_as_a_real_measurement(self):
+        m = pvt.analyze_waveform(*synthetic_step(zeta=1.0), 1.8)
+        self.assertEqual(m["overshoot_pct"], 0.0)
+        self.assertGreater(m["settle_1pct_s"], 0)
+
+    def test_non_settling_runs_fail_rather_than_report_zero(self):
+        # undamped ringing never enters the band; a very slow pole is still outside it at the window end
+        for kw in ({"zeta": 0.001}, {"zeta": 1.0, "wn": 2 * math.pi * 0.2e6}):
+            with self.subTest(**kw):
+                with self.assertRaises(sh.HarnessError):
+                    pvt.analyze_waveform(*synthetic_step(**kw), 1.8)
+        with self.assertRaisesRegex(sh.HarnessError, "non-settling"):  # slow pole: window ends outside the band
+            pvt.analyze_waveform(*synthetic_step(zeta=1.0, wn=2 * math.pi * 0.2e6), 1.8)
+
+    def test_failed_measurements_are_errors_not_zeros(self):
+        good = {"v_init": 0.88, "v_ofs": 0.0, "v_final": 0.92, "v_peak": 0.9216, "t_lo_cross": 2.1e-7, "t_hi_cross": 2.3e-7}
+        self.assertGreater(pvt.step_metrics(good, 1.8)["overshoot_pct"], 0)
+        for key in ("v_init", "v_ofs", "v_final", "v_peak", "t_lo_cross"):
+            with self.subTest(missing=key):
+                with self.assertRaisesRegex(sh.HarnessError, "missing"):
+                    pvt.step_metrics({k: v for k, v in good.items() if k != key}, 1.8)
+        with self.assertRaisesRegex(sh.HarnessError, "non-finite"):
+            pvt.step_metrics(dict(good, v_peak=float("nan")), 1.8)
+        with self.assertRaisesRegex(sh.HarnessError, "step not seen"):
+            pvt.step_metrics(dict(good, v_final=0.88), 1.8)
+        with self.assertRaisesRegex(sh.HarnessError, "inconsistent"):
+            pvt.step_metrics({k: v for k, v in good.items() if k != "t_hi_cross"} | {"v_peak": 0.95}, 1.8)
+        with self.assertRaisesRegex(sh.HarnessError, "tran_step"):
+            pvt.tran_step_row("tt", 27.0, {"values": {}, "status": "error", "runtime_s": 1.0})
+
+    def test_row_matches_fieldnames(self):
+        good = {"v_init": 0.88, "v_ofs": 0.0, "v_final": 0.92, "v_peak": 0.9216, "t_lo_cross": 2.1e-7, "t_hi_cross": 2.3e-7}
+        row = pvt.tran_step_row("tt", 27.0, {"values": good, "status": "pass", "runtime_s": 2.0})
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["tran_step"]))
+        self.assertAlmostEqual(row["overshoot_pct"], 4.0, places=6)
+
+    def test_pm_to_overshoot_known_points(self):
+        self.assertAlmostEqual(pvt.pm_to_overshoot_pct(65.24), 100 * math.exp(-math.pi * 0.7 / math.sqrt(1 - 0.49)), delta=0.15)
+        self.assertAlmostEqual(pvt.pm_to_overshoot_pct(60.0), 8.8, delta=0.3)
+        self.assertEqual(pvt.pm_to_overshoot_pct(80.0), 0.0)
+        self.assertGreater(pvt.pm_to_overshoot_pct(40.0), pvt.pm_to_overshoot_pct(60.0))
+
+    def test_pm_overshoot_table_flags_disagreement_and_missing_reference(self):
+        pm = 60.0
+        want = pvt.pm_to_overshoot_pct(pm)
+        ac = [{"corner": "tt", "temp_c": "27.0", "phase_margin_deg": str(pm)},
+              {"corner": "ss", "temp_c": "27.0", "phase_margin_deg": str(pm)}]
+        step = [{"corner": "tt", "temp_c": 27.0, "overshoot_pct": want + 1.0, "settle_1pct_ns": 30.0},
+                {"corner": "ss", "temp_c": 27.0, "overshoot_pct": want + 12.0, "settle_1pct_ns": 30.0},
+                {"corner": "ff", "temp_c": 27.0, "overshoot_pct": 1.0, "settle_1pct_ns": 30.0}]
+        tab = pvt.pm_overshoot_table(ac, step)
+        self.assertEqual([r["agrees"] for r in tab], [True, False, None])
+        summ = pvt.pm_overshoot_summary(tab)
+        self.assertEqual(summ["points_disagreeing"], ["ss/27C"])
+        self.assertEqual(summ["points_with_ac_reference"], 2)
 
 
 if __name__ == "__main__":

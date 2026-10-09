@@ -1,0 +1,62 @@
+{
+  "netlist": "tran-step-body.spice",
+  "engine": "ngspice",
+  "backend": "local",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      27.0
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "1n 4e-06"
+  },
+  "measurements": [
+    {
+      "name": "v_init",
+      "unit": "V",
+      "spice": ".meas tran v_init find v(out) at=1.9e-07"
+    },
+    {
+      "name": "v_ofs",
+      "unit": "V",
+      "spice": ".meas tran v_ofs find v(ofs) at=1.9e-07"
+    },
+    {
+      "name": "v_final",
+      "unit": "V",
+      "spice": ".meas tran v_final find v(out) at=4e-06"
+    },
+    {
+      "name": "v_peak",
+      "unit": "V",
+      "spice": ".meas tran v_peak max v(out) from=2e-07 to=4e-06"
+    },
+    {
+      "name": "t_lo_cross",
+      "unit": "s",
+      "spice": ".meas tran t_lo_cross when v(out)=v(lo) cross=last"
+    },
+    {
+      "name": "t_hi_cross",
+      "unit": "s",
+      "spice": ".meas tran t_hi_cross when v(out)=v(hi) cross=last"
+    }
+  ],
+  "options": {
+    "timeout_s": 1200,
+    "keep_artifacts": true
+  }
+}

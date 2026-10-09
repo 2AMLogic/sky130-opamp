@@ -735,6 +735,57 @@ each had 7 failed units (fleet-side non-convergence in the per-supply-group
 layout) and are not committed; the per-corner layout with `.nodeset` seeding at
 566b9a5 passed 45 / 45.
 
+## Closed-loop small-step bench: AC phase margin cross-check (issue #86)
+
+The AC bench reads phase margin at a DC-servo loop break; nothing else
+checked it against the real unity-gain connection. `opamp_tran_step.spice.tmpl`
+is the independent second bench: the same follower wiring, `ibias` and
+CL = 2 pF as `opamp_tran_sr.spice.tmpl`, driven by a **+-20 mV (40 mV) rising
+step about VDD/2** (linear regime, no slewing), as a `klt sim` circuit body
+like icmr/cmrr. Reported per (corner, temperature):
+
+- **overshoot %** = (peak - settled) / (settled - initial step level);
+- **1 % settling time** = last exit from a +-1 % (of the 40 mV step) band
+  around the settled level, from the edge midpoint. The band is centred on
+  the ideal level plus the follower's static offset (sampled before the edge
+  by a track-then-hold node), so offset is not mistaken for settling error.
+
+Overshoot and settling are derived in `step_metrics` in `bin/pvt_sweep.py`
+from raw `.meas` levels/crossings. A run that is missing a quantity, shows no
+step, is outside the band at the 4 us window end, or has inconsistent
+crossings **fails** (listed in the record's `errors`, absent from the CSV) --
+it is never reported as 0 % / 0 ns. A monotonic (overdamped) response is a real
+0 % overshoot.
+
+```bash
+python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses tran_step   # whole 5x3 grid = ONE klt batch request
+```
+
+Like icmr/cmrr there is no local ngspice loop; a failed batch submit is an
+error, not a fallback. The record gets `<id>-tran-step.csv` plus, when an AC
+reference exists (this run's `ac` analysis, else the newest committed `-ac.csv`),
+a `tran_step_pm_crosscheck` object: for each point the AC phase margin, the
+overshoot a standard second-order unity-feedback loop with that PM would show
+(`pm_to_overshoot_pct`), the measured overshoot, and the difference, flagged
+when it exceeds **5 percentage points** (`STEP_PM_TOL_PP`). It is a
+consistency report only; no spec target is edited or gated by it. The
+second-order model ignores the third pole / RHP zero, so small systematic
+differences are expected; a large one means the AC loop break and the real
+follower disagree.
+
+### Status of the PVT record
+
+- Pipeline verified on one point (tt / 27 C, `klt sim --backend local`, record
+  `20261009-174430-8da114f-662ed9`): overshoot 3.93 % vs 4.40 % implied by the
+  AC PM of 65.4 deg (delta -0.46 pp, inside tolerance), 1 % settling 31.7 ns,
+  follower offset -146 uV.
+- The 15-point PVT grid was submitted to the batch fleet and **refused for
+  capacity** (`batch_no_capacity`, no pool in 30). It was deliberately not
+  run as a local loop; the grid record is a pending follow-up
+  (`pvt_sweep.py --analyses tran_step` once the fleet has capacity). The
+  AC-PM-vs-overshoot comparison table over PVT is therefore not yet filled in;
+  the single row above is the only measured comparison.
+
 ## What this experiment does not do
 
 - **Does not touch `spec/target-spec.md` or the gap-to-T1 tracker

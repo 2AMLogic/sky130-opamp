@@ -1,0 +1,111 @@
+{
+  "record_id": "20261009-174430-8da114f-662ed9",
+  "timestamp": "2026-10-09T17:45:48.015907+00:00",
+  "git": {
+    "sha": "8da114f"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt"
+    ],
+    "temps_c": [
+      27.0
+    ],
+    "analyses": [
+      "tran_step"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "n_runs": 1,
+    "n_failed": 0,
+    "klt_backend": "local",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "ngspice-46 : Circuit level simulation program",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+gb82427b30c96",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "tran-step",
+      "backend": "local",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 77.2,
+      "remote": null,
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261009-174430-8da114f-662ed9/tran-step-request.json",
+      "response": "sim/opamp-characterization/records/20261009-174430-8da114f-662ed9-logs/klt-tran-step-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "tran_step_pm_crosscheck": {
+    "ac_reference": "sim/opamp-characterization/records/20261001-074923-c317ff9-ac.csv",
+    "summary": {
+      "tolerance_pp": 5.0,
+      "points": 1,
+      "points_with_ac_reference": 1,
+      "points_disagreeing": [],
+      "max_abs_delta_pp": 0.463805571741827
+    },
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.42734858107467,
+        "expected_overshoot_pct": 4.397288942584657,
+        "measured_overshoot_pct": 3.93348337084283,
+        "delta_pp": -0.463805571741827,
+        "agrees": true,
+        "settle_1pct_ns": 31.749000000000002
+      }
+    ]
+  },
+  "links": {
+    "tran_step_csv": "sim/opamp-characterization/records/20261009-174430-8da114f-662ed9-tran-step.csv"
+  },
+  "errors": [],
+  "elapsed_s": 77.2
+}

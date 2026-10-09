@@ -40,9 +40,9 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --check-env        report tool/PDK availability and exit (no simulation)
     --corners C,C       subset of {tt,ff,ss,sf,fs}      (default: all five)
     --temps T,T          temperatures in degC             (default: -40,27,125)
-    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr}
-                         (default: ac,tran_sr,dc_swing -- icmr/cmrr are opt-in)
-    --backend NAME       `klt sim` backend for icmr/cmrr (default: batch;
+    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step}
+                         (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step are opt-in)
+    --backend NAME       `klt sim` backend for icmr/cmrr/tran_step (default: batch;
                          `local` for a single-point debug probe)
     --klt-cmd CMD        the klt invocation for icmr/cmrr (default: `klt`, or
                          $KLT_CMD). The batch fleet refuses a client whose
@@ -54,7 +54,7 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
 
 `ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
 decks and drives `ngspice -b` itself, one subprocess per (corner, temperature)
-point. `icmr` and `cmrr` (issue #53) are different by design: their templates
+point. `icmr`, `cmrr` (issue #53) and `tran_step` (issue #86) are different by design: their templates
 are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
 `klt sim` request (corner/supply/temperature axes) and submitted with
 `klt sim <request> --backend batch`, and the per-corner measurement values in
@@ -368,7 +368,7 @@ def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path):
 # `.lib`/`.temp`/`alter vdd` cards and the measurements live in the request.
 # --------------------------------------------------------------------------
 
-KLT_ANALYSES = ("icmr", "cmrr")
+KLT_ANALYSES = ("icmr", "cmrr", "tran_step")
 SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
 
 # ICMR bench constants -- fixed before any batch result existed; the README's
@@ -486,6 +486,14 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         measurements = icmr_measurements(vdd_group)
         vdds, exclude = [vdd_group], []
         tag = f"icmr-{corners[0]}" if len(corners) == 1 else f"icmr-vdd{vdd_group:g}"
+    elif analysis == "tran_step":
+        body_subs.update({"STEP_HALF_V": f"{STEP_HALF_V:g}", "TOL_V": f"{STEP_TOL_V:g}",
+                          "T_DELAY": f"{STEP_T_DELAY_S:g}", "T_EDGE": f"{STEP_T_EDGE_S:g}",
+                          "T_PW": "20u", "T_PER": "40u"})
+        analysis_card = {"kind": "tran", "args": f"1n {STEP_T_STOP_S:g}"}
+        measurements = tran_step_measurements()
+        vdds, exclude = vdd_pairing(corners)
+        tag = "tran-step"
     else:
         body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
         analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
@@ -633,6 +641,167 @@ def crosscheck(ref_csv: Path, cmrr_mid_rows: list[dict], icmr_rows: list[dict]) 
     }
 
 
+# --------------------------------------------------------------------------
+# tran_step (issue #86): closed-loop small-step overshoot / 1% settling bench,
+# an independent time-domain cross-check of the AC bench's phase margin. A klt
+# analysis like icmr/cmrr (one request for the whole grid, batch fleet); the
+# deck only reports raw levels / band crossings and `step_metrics` below turns
+# them into overshoot and settling time, failing (never zeroing) any run that
+# did not produce a well-formed, settled response.
+# --------------------------------------------------------------------------
+
+STEP_HALF_V = 0.020  # input steps VDD/2 -/+ 20 mV (40 mV total: linear regime, no slewing)
+STEP_V = 2 * STEP_HALF_V
+STEP_BAND_FRAC = 0.01  # settling band: +-1 % of the step
+STEP_TOL_V = STEP_BAND_FRAC * STEP_V
+STEP_T_DELAY_S = 200e-9
+STEP_T_EDGE_S = 1e-9
+STEP_T_STOP_S = 4e-6  # observation window end; a response not inside the band by here is non-settling
+STEP_T_PRE_S = 190e-9  # pre-edge sample time for v_init / v_ofs
+STEP_PM_TOL_PP = 5.0  # AC-PM-implied vs measured overshoot: agreement tolerance, percentage points
+STEP_EDGE_MID_S = STEP_T_DELAY_S + 0.5 * STEP_T_EDGE_S  # settling time is counted from the edge midpoint
+
+
+def tran_step_measurements() -> list[dict]:
+    t0, t1 = f"{STEP_T_DELAY_S:g}", f"{STEP_T_STOP_S:g}"
+    return [
+        {"name": "v_init", "unit": "V", "spice": f".meas tran v_init find v(out) at={STEP_T_PRE_S:g}"},
+        {"name": "v_ofs", "unit": "V", "spice": f".meas tran v_ofs find v(ofs) at={STEP_T_PRE_S:g}"},
+        {"name": "v_final", "unit": "V", "spice": f".meas tran v_final find v(out) at={t1}"},
+        {"name": "v_peak", "unit": "V", "spice": f".meas tran v_peak max v(out) from={t0} to={t1}"},
+        {"name": "t_lo_cross", "unit": "s", "spice": ".meas tran t_lo_cross when v(out)=v(lo) cross=last"},
+        {"name": "t_hi_cross", "unit": "s", "spice": ".meas tran t_hi_cross when v(out)=v(hi) cross=last"},
+    ]
+
+
+def step_metrics(values: dict, vdd: float, label: str = "tran_step") -> dict:
+    """Overshoot (% of the settled step) and 1 % settling time from the raw
+    deck quantities. Raises HarnessError -- a FAILED measurement, never a
+    zero -- when a quantity is missing/non-finite, the step did not happen, the
+    output is not inside the +-1 % band at the end of the window, or the
+    crossings are inconsistent. `t_hi_cross` is legitimately absent when the
+    response never exceeds the upper band edge (checked against v_peak)."""
+    def num(k, required=True):
+        x = values.get(k)
+        if x is None:
+            if required:
+                raise HarnessError(f"{label}: missing measurement '{k}'")
+            return None
+        if not math.isfinite(x):
+            raise HarnessError(f"{label}: non-finite measurement '{k}'")
+        return float(x)
+
+    v_init, v_ofs, v_final, v_peak = (num(k) for k in ("v_init", "v_ofs", "v_final", "v_peak"))
+    center = 0.5 * vdd + STEP_HALF_V + v_ofs  # same centre the deck's band uses
+    eps = 1e-9
+    if abs((v_final - v_init) - STEP_V) > 0.5 * STEP_V:
+        raise HarnessError(f"{label}: step not seen at the output (v_init={v_init:.5g}, v_final={v_final:.5g})")
+    if abs(v_final - center) > STEP_TOL_V + eps:
+        raise HarnessError(f"{label}: non-settling -- v_final {v_final:.6g} is outside the +-{STEP_BAND_FRAC:.0%} "
+                           f"band around {center:.6g} at t={STEP_T_STOP_S:g}s")
+    t_lo, t_hi = num("t_lo_cross"), num("t_hi_cross", required=False)
+    if t_hi is None and v_peak > center + STEP_TOL_V + eps:
+        raise HarnessError(f"{label}: inconsistent -- v_peak above the upper band edge but no upper crossing")
+    t_end = max(t_lo, t_hi if t_hi is not None else t_lo)
+    if t_end <= STEP_EDGE_MID_S:
+        raise HarnessError(f"{label}: inconsistent -- band crossing at {t_end:g}s precedes the step edge")
+    if t_end >= STEP_T_STOP_S:
+        raise HarnessError(f"{label}: non-settling -- last band crossing {t_end:g}s is at the window end")
+    return {
+        "overshoot_pct": max(0.0, (v_peak - v_final) / (v_final - v_init) * 100.0),
+        "settle_1pct_s": t_end - STEP_EDGE_MID_S,
+        "v_ofs_v": v_ofs, "v_final_v": v_final,
+    }
+
+
+def analyze_waveform(t: list[float], v: list[float], vdd: float, label: str = "tran_step") -> dict:
+    """Reference implementation of the deck's .meas cards on a sampled v(out)
+    waveform (monotonic time axis): derives the same raw quantities and hands
+    them to `step_metrics`. Used by the simulator-free test; also handy for
+    checking a rawfile dumped from a single-corner debug run."""
+    def at(x):
+        for i in range(1, len(t)):
+            if t[i] >= x:
+                return v[i - 1] + (v[i] - v[i - 1]) * (x - t[i - 1]) / (t[i] - t[i - 1])
+        return v[-1]
+
+    def last_cross(level):
+        for i in range(len(t) - 1, 0, -1):
+            a, b = v[i - 1] - level, v[i] - level
+            if a * b <= 0.0 and a != b:
+                return t[i - 1] + (t[i] - t[i - 1]) * (0.0 - a) / (b - a)
+        return None
+
+    v_init = at(STEP_T_PRE_S)
+    v_ofs = v_init - (0.5 * vdd - STEP_HALF_V)
+    center = 0.5 * vdd + STEP_HALF_V + v_ofs
+    raw = {
+        "v_init": v_init, "v_ofs": v_ofs, "v_final": at(STEP_T_STOP_S),
+        "v_peak": max(x for tt, x in zip(t, v) if STEP_T_DELAY_S <= tt <= STEP_T_STOP_S),
+        "t_lo_cross": last_cross(center - STEP_TOL_V), "t_hi_cross": last_cross(center + STEP_TOL_V),
+    }
+    return step_metrics(raw, vdd, label)
+
+
+def pm_to_overshoot_pct(pm_deg: float) -> float:
+    """Step overshoot (%) of the unity-feedback standard second-order loop
+    L(s) = wn^2 / (s (s + 2 zeta wn)) whose phase margin is `pm_deg` (the
+    textbook PM -> zeta -> overshoot chain). PM >= 76.3 deg means zeta >= 1:
+    no overshoot. An approximation: a real op-amp has a third pole/RHP zero."""
+    def pm_of(z):
+        return math.degrees(math.atan(2 * z / math.sqrt(math.sqrt(1 + 4 * z ** 4) - 2 * z ** 2)))
+    if pm_deg <= 0:
+        raise ValueError("phase margin must be positive")
+    lo, hi = 1e-6, 1.0
+    if pm_deg >= pm_of(hi):
+        return 0.0
+    for _ in range(80):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if pm_of(mid) < pm_deg else (lo, mid)
+    z = 0.5 * (lo + hi)
+    return 100.0 * math.exp(-math.pi * z / math.sqrt(1 - z * z))
+
+
+def tran_step_row(corner: str, temp: float, info: dict) -> dict:
+    vdd = VDD_BY_CORNER[corner]
+    m = step_metrics(info["values"], vdd, f"tran_step[{corner}/{temp:g}C]")
+    return {"corner": corner, "temp_c": temp, "vdd_v": vdd, "step_v": STEP_V,
+            "overshoot_pct": m["overshoot_pct"], "settle_1pct_ns": m["settle_1pct_s"] * 1e9,
+            "v_ofs_uv": m["v_ofs_v"] * 1e6, "elapsed_s": round(info["runtime_s"] or 0.0, 2)}
+
+
+def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float = STEP_PM_TOL_PP) -> list[dict]:
+    """AC phase margin vs measured step overshoot, one row per step point.
+    Report only: `agrees` is None when there is no AC reference at the point,
+    else whether |measured - AC-PM-implied| <= tol_pp. Nothing here edits or
+    gates a spec target."""
+    ac = {(r["corner"], float(r["temp_c"])): float(r["phase_margin_deg"]) for r in ac_rows}
+    out = []
+    for r in step_rows:
+        pm = ac.get((r["corner"], float(r["temp_c"])))
+        row = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "ac_pm_deg": pm,
+               "expected_overshoot_pct": None, "measured_overshoot_pct": float(r["overshoot_pct"]),
+               "delta_pp": None, "agrees": None, "settle_1pct_ns": float(r["settle_1pct_ns"])}
+        if pm is not None:
+            row["expected_overshoot_pct"] = pm_to_overshoot_pct(pm)
+            row["delta_pp"] = row["measured_overshoot_pct"] - row["expected_overshoot_pct"]
+            row["agrees"] = abs(row["delta_pp"]) <= tol_pp
+        out.append(row)
+    return out
+
+
+def pm_overshoot_summary(table: list[dict], tol_pp: float = STEP_PM_TOL_PP) -> dict:
+    cmp_rows = [r for r in table if r["agrees"] is not None]
+    return {"tolerance_pp": tol_pp, "points": len(table), "points_with_ac_reference": len(cmp_rows),
+            "points_disagreeing": [f"{r['corner']}/{r['temp_c']:g}C" for r in cmp_rows if not r["agrees"]],
+            "max_abs_delta_pp": max((abs(r["delta_pp"]) for r in cmp_rows), default=None)}
+
+
+def latest_ac_rows(before_id: str) -> tuple[Path, list[dict]] | None:
+    ref = latest_ac_csv(before_id)
+    return (ref, list(csv.DictReader(ref.open()))) if ref else None
+
+
 ANALYSES = {"ac": run_ac, "tran_sr": run_tran_sr, "dc_swing": run_dc_swing}
 FIELDNAMES = {
     "ac": ["corner", "temp_c", "vdd_v", "vcm_v", "iq_a", "pq_w", "gain_dc_db",
@@ -647,6 +816,7 @@ FIELDNAMES = {
              "icmr_low_v_50db", "icmr_high_v_50db", "icmr_width_v_50db",
              "vid_mid_v", "cmrr_mid_db", "vout_mid_v", "iq_mid_a", "elapsed_s"],
     "cmrr": klt_fieldnames_cmrr(),
+    "tran_step": ["corner", "temp_c", "vdd_v", "step_v", "overshoot_pct", "settle_1pct_ns", "v_ofs_uv", "elapsed_s"],
 }
 
 
@@ -662,6 +832,8 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                 plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
             else:
                 plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
+        elif a == "tran_step":
+            plan.append(("tran_step", None, None, corners))
         else:
             plan.extend(("cmrr", cp, None, corners) for cp in CMRR_CM_POINTS)
     # Build every request first, then submit them concurrently (the jobs are
@@ -728,7 +900,12 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                     if bad:
                         head = "; ".join(f"{d.get('code')}: {d.get('message')}"[:160] for d in bad[:2])
                         raise HarnessError(f"{head} (+{len(bad) - 2} more)" if len(bad) > 2 else head)
-                    row = icmr_row(corner, temp, info) if analysis == "icmr" else cmrr_row(corner, temp, info, cm_point)
+                    if analysis == "tran_step":
+                        row = tran_step_row(corner, temp, info)
+                    elif analysis == "icmr":
+                        row = icmr_row(corner, temp, info)
+                    else:
+                        row = cmrr_row(corner, temp, info, cm_point)
                 except HarnessError as exc:
                     errors.append(f"{label}: {exc}")
                     print(f"{label:<28} FAIL {exc}", file=sys.stderr)
@@ -849,6 +1026,7 @@ def main(argv=None) -> int:
 
     klt_jobs: list[dict] = []
     klt_crosscheck = None
+    pm_crosscheck = None
     if klt_analyses:
         n_klt_errors0 = len(errors)
         with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
@@ -858,6 +1036,18 @@ def main(argv=None) -> int:
             )
         # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
         n_runs += sum(len(corners) * len(temps) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
+        if "tran_step" in klt_analyses and results["tran_step"]:
+            ref_name, ac_rows = None, None
+            if results.get("ac"):
+                ref_name, ac_rows = "this record's ac analysis", results["ac"]
+            else:
+                got = latest_ac_rows(record_id)
+                if got:
+                    ref_name, ac_rows = f"sim/opamp-characterization/records/{got[0].name}", got[1]
+            if ac_rows:
+                pm_table = pm_overshoot_table(ac_rows, results["tran_step"])
+                pm_crosscheck = {"ac_reference": ref_name, "summary": pm_overshoot_summary(pm_table), "table": pm_table}
+                print(f"AC-PM vs overshoot ({ref_name}): {json.dumps(pm_crosscheck['summary'])}", file=sys.stderr)
         if not len(errors) > n_klt_errors0 and "icmr" in klt_analyses and "cmrr" in klt_analyses:
             ref = latest_ac_csv(record_id)
             if ref is not None:
@@ -917,6 +1107,7 @@ def main(argv=None) -> int:
             **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
         },
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
+        **({"tran_step_pm_crosscheck": pm_crosscheck} if pm_crosscheck else {}),
         "links": {
             f"{a}_csv": f"sim/opamp-characterization/records/{record_id}-{a.replace('_', '-')}.csv"
             for a in results if results[a]
