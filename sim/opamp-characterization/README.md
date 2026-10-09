@@ -635,6 +635,13 @@ runner/client mismatch (runner klt 0.5.0, client 0.7.0+g4cbdfa769875, request
 not run). No record written, no local grid run. Status unchanged: blocked on
 the fleet runner image (see klayout-tools#2938).
 
+**Third re-attempt (appended 2026-10-09; earlier text unchanged).**
+`psrr_noise_sweep.py --benches noise` on the batch backend: batch job
+`klt-sim-2d893a22c1f3` failed 15/15 corners with the same runner/client
+mismatch (runner klt 0.5.0, client 0.7.0+g4cbdfa769875; request not run). No
+record written, no local grid run. Still blocked on the fleet runner image
+(klayout-tools#2938).
+
 What does exist is evidence that the bench measures the right thing, all
 single-corner and run locally (permitted for one corner / one operating point):
 
