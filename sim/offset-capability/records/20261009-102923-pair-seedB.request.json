@@ -1,0 +1,59 @@
+{
+  "netlist": "../bench/pair_diag.cir",
+  "netlist_source": "schematic",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt_mm"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      27.0
+    ]
+  },
+  "analysis": {
+    "kind": "dc",
+    "args": "Vg 0.79 0.81 0.01"
+  },
+  "measurements": [
+    {
+      "name": "idn1",
+      "spice": ".meas dc idn1 find i(Vn1) at=0.8",
+      "unit": "A"
+    },
+    {
+      "name": "idn2",
+      "spice": ".meas dc idn2 find i(Vn2) at=0.8",
+      "unit": "A"
+    },
+    {
+      "name": "idp1",
+      "spice": ".meas dc idp1 find i(Vp1) at=0.8",
+      "unit": "A"
+    },
+    {
+      "name": "idp2",
+      "spice": ".meas dc idp2 find i(Vp2) at=0.8",
+      "unit": "A"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  },
+  "monte_carlo": {
+    "n": 4,
+    "seed": 20261010,
+    "vary": "mismatch"
+  }
+}

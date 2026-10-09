@@ -1,0 +1,18 @@
+* klt sim -- generated corner deck, do not edit
+.options seed=1668344203
+.param mc_sample_index=2
+.param mc_process_seed=341215995
+.param mc_mismatch_seed=17898354
+.lib /opt/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include /var/tmp/eda-job-klt-sim-25ce1d355c4f/inputs/netlist.cir
+.temp 27.0
+.meas dc idn1 find i(Vn1) at=0.8
+.meas dc idn2 find i(Vn2) at=0.8
+.meas dc idp1 find i(Vp1) at=0.8
+.meas dc idp2 find i(Vp2) at=0.8
+.control
+alter vdd=1.8
+dc Vg 0.79 0.81 0.01
+quit
+.endc
+.end

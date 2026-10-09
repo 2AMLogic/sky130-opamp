@@ -1,0 +1,31 @@
+{
+  "record_id": "20261009-102701-pair-localdbg2",
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102701-pair-localdbg2.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102701-pair-localdbg2-artifacts",
+    "--format",
+    "json",
+    "--backend",
+    "local"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "git_sha": "3f7fe3cbdf52b1a13ad635a1b70d4e219efb363d",
+  "remote": null,
+  "monte_carlo_echo": null,
+  "samples": [
+    {
+      "corner_id": "tt_mm/1.800V/27C",
+      "klt_status": "pass",
+      "monte_carlo": null,
+      "ok": true,
+      "reason": null,
+      "dn": -5.6593000000001306e-08,
+      "dp": 2.151657e-08
+    }
+  ]
+}

@@ -17,6 +17,10 @@ ngspice testbenches and append-only results.
   `klt sim` corner requests (`bin/psrr_noise_sweep.py`); PSRR is recorded over
   the full grid, the noise PVT grid is pending a fleet runner that supports
   `measurements[].expr`.
+- [`offset-capability/`](offset-capability/README.md) — bounded capability
+  probe (issue #52): does the pinned PDK's mismatch model and the seeded
+  `klt sim` `monte_carlo` path (client and batch fleet) work end to end,
+  before any offset Monte Carlo campaign. Not T1 item 6 evidence.
 - [`lib/spice_harness.py`](lib/spice_harness.py) — the PDK-resolution and
   ngspice-harness helpers both runners above share (pin resolution against a
   committed `pdk.json`, `.spice.tmpl` rendering, tool-version and git-SHA

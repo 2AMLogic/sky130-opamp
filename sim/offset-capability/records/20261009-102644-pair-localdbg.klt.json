@@ -1,0 +1,234 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": "sim/offset-capability/bench/pair_diag.cir",
+    "scope": "repo"
+  },
+  "status": "error",
+  "corner_count": 1,
+  "passed": 0,
+  "failed": 0,
+  "errored": 1,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "measurement": 4
+    },
+    "by_severity": {
+      "error": 4
+    },
+    "corners_with_diagnostics": 1
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 0,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 1,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "42",
+    "ngspice_binary": "/usr/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1",
+    "netlist_closure": [
+      {
+        "path": "sim/offset-capability/bench/pair_diag.cir",
+        "scope": "repo",
+        "sha256": "4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1"
+      }
+    ],
+    "netlist_source": "schematic"
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 4,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [],
+    "skipped": [
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idn1\"]/observation",
+        "reason": "unavailable_measurement"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idn2\"]/observation",
+        "reason": "unavailable_measurement"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idp1\"]/observation",
+        "reason": "unavailable_measurement"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idp2\"]/observation",
+        "reason": "unavailable_measurement"
+      }
+    ],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idn1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idn2\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idp1\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt_mm/1.800V/27C\",\"idp2\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": true,
+    "nothing_checked_reasons": [
+      "characterization_without_limits",
+      "unavailable_measurement"
+    ]
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "idn1",
+      "unit": "A",
+      "limits": null,
+      "status": "error",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C",
+        "value": null,
+        "margin": null
+      }
+    },
+    {
+      "name": "idn2",
+      "unit": "A",
+      "limits": null,
+      "status": "error",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C",
+        "value": null,
+        "margin": null
+      }
+    },
+    {
+      "name": "idp1",
+      "unit": "A",
+      "limits": null,
+      "status": "error",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C",
+        "value": null,
+        "margin": null
+      }
+    },
+    {
+      "name": "idp2",
+      "unit": "A",
+      "limits": null,
+      "status": "error",
+      "worst_case": {
+        "corner_id": "tt_mm/1.800V/27C",
+        "value": null,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt_mm/1.800V/27C",
+      "process": "tt_mm",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "error",
+      "runtime_s": 10.888,
+      "measurements": [
+        {
+          "name": "idn1",
+          "value": null,
+          "unit": "A",
+          "status": "error",
+          "margin": null
+        },
+        {
+          "name": "idn2",
+          "value": null,
+          "unit": "A",
+          "status": "error",
+          "margin": null
+        },
+        {
+          "name": "idp1",
+          "value": null,
+          "unit": "A",
+          "status": "error",
+          "margin": null
+        },
+        {
+          "name": "idp2",
+          "value": null,
+          "unit": "A",
+          "status": "error",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "error",
+          "code": "measurement",
+          "message": "measurement 'idn1' produced no value"
+        },
+        {
+          "severity": "error",
+          "code": "measurement",
+          "message": "measurement 'idn2' produced no value"
+        },
+        {
+          "severity": "error",
+          "code": "measurement",
+          "message": "measurement 'idp1' produced no value"
+        },
+        {
+          "severity": "error",
+          "code": "measurement",
+          "message": "measurement 'idp2' produced no value"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102644-pair-localdbg-artifacts/tt_mm_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-52/sim/offset-capability/records/20261009-102644-pair-localdbg-artifacts/tt_mm_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+* Open-loop input-referred offset probe (issue #52).
+* vd = V(inp) - V(inn), swept DC; V(inn) = VCM fixed. Vos is the vd at which
+* v(out) crosses VREF = VDD/2 (rising crossing; the amplifier is
+* non-inverting from inp, so out rises with vd). Systematic + random offset
+* are both included; nothing is subtracted.
+* Same supply/bias/load conventions as the PSRR/noise benches
+* (../../opamp-characterization/testbench/psrr_vdd.cir): VDD 1.8 V, ideal
+* 5 uA Iref, 2 pF Cload, no bias generator. VCM = 0.9 V (VDD/2, the PSRR
+* benches' input common mode).
+.option scale=1u
+.include "../../../design/netlist/opamp_core.spice"
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Vinn inn 0 dc 0.9
+Vd  inp inn dc 0
+Cload out 0 2p
