@@ -46,6 +46,13 @@ low-headroom trade explicitly; PVT corners on every recorded result.
 [`manifests/integrator.json`](manifests/integrator.json) — top cell, port
 list, netlist/GDS paths, area, maturity rung. Consumer requirement rows
 live in `## Consumers` in [`spec/target-spec.md`](spec/target-spec.md).
+The manifest is a snapshot of the current checkout: `python
+design/bin/integrator_check.py validate` (run in CI) checks its derived
+fields (maturity from the signoff record, top cell and ordered ports from the
+netlist, artifact paths) and `refresh` rewrites only those. `consumers`,
+`spec_status` and the `evaluated_at` stamp are authored and not compared; the
+manifest never embeds its own commit SHA. `gds` stays null until a qualified
+full-core layout exists (`layout/opamp_stage1` is partial and is rejected).
 
 ## Tests
 

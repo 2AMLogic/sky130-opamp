@@ -34,6 +34,9 @@ jobs:
       - name: Validate sizing_check against the committed gm/ID summary
         run: python design/bin/sizing_check.py validate
 
+      - name: Validate integrator manifest against cited sources
+        run: python design/bin/integrator_check.py validate
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 
