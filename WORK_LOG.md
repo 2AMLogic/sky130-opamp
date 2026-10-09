@@ -2,6 +2,38 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-09
+
+- **PR #87**: test: assert sky130 PDK pin is identical across CI, sim and layout configs
+- **PR #89**: spec: check target-spec §2 measured figures against committed PVT records
+- **PR #88**: docs(spec): add prior-art survey of public sky130 op-amps
+- **PR #84**: Reserve unique simulation record namespaces before writing evidence
+- **PR #83**: docs(sim): log second noise-grid re-attempt, fleet runner still klt 0.5.0 (Part of #54)
+- **PR #80**: Keep integrator maturity and port metadata consistent with cited sources
+- **PR #70**: spec: reconcile ICMR/CMRR rows with record 20261009-103006-566b9a5; DR-008 proposes CMRR target (#66)
+- **PR #72**: ci: enforce append-only evidence under sim/ (#67)
+- **PR #69**: refactor(sim): consolidate klt sim wrappers and KLT_CMD into spice_harness (#65)
+- **PR #64**: sim: seeded-mismatch capability probe for offset Monte Carlo (#52)
+- **PR #63**: feat(sim): ICMR and CMRR benches over the PVT grid (issue #53)
+- **PR #62**: docs(sim): log noise-grid re-attempt, fleet runner still klt 0.5.0 (Part of #54)
+- **PR #61**: test: simulator-free unit tests + CI job (#56)
+- **PR #60**: feat(sim): PSRR+/PSRR- and input-referred noise benches as klt sim requests (#54)
+- **PR #58**: feat: guard opamp_core.spice against schematic drift in CI; cite for T1 item 1
+- **PR #51**: feat: layout flow bring-up and stage-1 input pair (DRC/LVS clean)
+- **Issue #81** (closed): tests: assert the sky130 PDK pin is identical across CI, sim and layout configs
+- **Issue #82** (closed): spec: mechanically check target-spec §2 measured figures against the committed PVT records
+- **Issue #76** (closed): docs: add a prior-art survey — cite and honestly compare against public sky130 op-amp art (CLAUDE.md requirement, currently undelivered)
+- **Issue #75** (closed): Reserve unique simulation record namespaces before writing evidence
+- **Issue #74** (closed): Keep integrator maturity and port metadata consistent with cited sources
+- **Issue #73** (closed): Auditor guard review: gh-api-rawfield-body-literal-at should remain blocked
+- **Issue #66** (closed): spec: reconcile the input common-mode range and CMRR rows with the issue #53 PVT records
+- **Issue #67** (closed): CI: enforce append-only evidence under sim/ records, corners and netlist snapshots
+- **Issue #65** (closed): Consolidate four duplicated klt sim wrappers and KLT_CMD into spice_harness.py
+- **Issue #52** (closed): Offset: verify pinned-PDK mismatch and seeded klt sim capability before the Monte Carlo campaign
+- **Issue #53** (closed): Add input common-mode range (ICMR) and CMRR benches to the PVT characterization
+- **Issue #56** (closed): Add simulator-free CI tests for the Python harness and DR-002 sizing check (T1 items 9/10)
+- **Issue #55** (closed): Guard design/netlist/opamp_core.spice against schematic drift in CI and cite it for T1 item 1
+
 ### 2026-10-01
 
 - **PR #44**: manifest: cite the PVT characterization report as T1 item 8 evidence
