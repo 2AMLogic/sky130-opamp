@@ -628,6 +628,13 @@ before any job ran (`batch-fleet-provision.sh`: 8 instances already running,
 No record was written and no local grid was run. The grid remains outstanding
 until the fleet runner image carries a klt that supports `measurements[].expr`.
 
+**Second re-attempt (appended 2026-10-09; earlier text unchanged).**
+`psrr_noise_sweep.py --benches noise` was re-run once more on the batch
+backend: batch job `klt-sim-a4471a54c69d` failed 15/15 corners with the same
+runner/client mismatch (runner klt 0.5.0, client 0.7.0+g4cbdfa769875, request
+not run). No record written, no local grid run. Status unchanged: blocked on
+the fleet runner image (see klayout-tools#2938).
+
 What does exist is evidence that the bench measures the right thing, all
 single-corner and run locally (permitted for one corner / one operating point):
 
