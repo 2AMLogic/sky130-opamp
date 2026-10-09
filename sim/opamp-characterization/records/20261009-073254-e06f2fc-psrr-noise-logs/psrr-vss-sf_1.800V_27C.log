@@ -1,0 +1,59 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * klt sim -- generated corner deck, do not edit
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+No. of Data Rows : 201
+
+  Measurements for AC Analysis
+
+avs_k000            =  -7.89725e+01
+avs_k005            =  -7.89725e+01
+avs_k010            =  -7.89725e+01
+avs_k015            =  -7.89725e+01
+avs_k020            =  -7.89725e+01
+avs_k025            =  -7.89725e+01
+avs_k030            =  -7.89725e+01
+avs_k035            =  -7.89725e+01
+avs_k040            =  -7.89725e+01
+avs_k045            =  -7.89725e+01
+avs_k050            =  -7.89725e+01
+avs_k055            =  -7.89725e+01
+avs_k060            =  -7.89725e+01
+avs_k065            =  -7.89725e+01
+avs_k070            =  -7.89725e+01
+avs_k075            =  -7.89725e+01
+avs_k080            =  -7.89725e+01
+avs_k085            =  -7.89724e+01
+avs_k090            =  -7.89724e+01
+avs_k095            =  -7.89722e+01
+avs_k100            =  -7.89716e+01
+avs_k105            =  -7.89696e+01
+avs_k110            =  -7.89635e+01
+avs_k115            =  -7.89441e+01
+avs_k120            =  -7.88832e+01
+avs_k125            =  -7.86933e+01
+avs_k130            =  -7.81196e+01
+avs_k135            =  -7.65263e+01
+avs_k140            =  -7.28525e+01
+avs_k145            =  -6.64794e+01
+avs_k150            =  -5.80832e+01
+avs_k155            =  -4.87913e+01
+avs_k160            =  -3.94387e+01
+avs_k165            =  -3.09150e+01
+avs_k170            =  -2.53444e+01
+avs_k175            =  -2.54260e+01
+avs_k180            =  -2.82078e+01
+avs_k185            =  -3.04378e+01
+avs_k190            =  -3.12362e+01
+avs_k195            =  -3.09426e+01
+avs_win_max         =  -7.89725e+01 at=  1.00000e+03
+
+ngspice-46 done

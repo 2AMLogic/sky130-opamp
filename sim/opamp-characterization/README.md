@@ -78,6 +78,26 @@ python3 sim/opamp-characterization/bin/pvt_sweep.py --check-env   # tool/PDK che
 python3 sim/opamp-characterization/bin/pvt_sweep.py --corners ss --temps -40,125 --analyses ac
 ```
 
+### PSRR and noise benches (issue #54)
+
+```bash
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --check-env
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py          # all three benches, 15 corners each
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches psrr_vdd,psrr_vss --runner-version-check warn
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --backend local --corners tt --temps 27 --benches noise   # single-corner debug probe only
+python3 sim/opamp-characterization/bin/validate_psrr_noise.py       # four single-corner cross-checks (local)
+```
+
+Unlike `pvt_sweep.py`, this runner never drives `ngspice` itself: it writes
+one `klt sim` corner-matrix request per bench and lets `klt sim` choose the
+backend (`$KLT_SIM_BACKEND=batch` on a fleet dispatch host, so the 15-corner
+grids run on the Spot batch fleet; the job ids are in the record's
+`environment.remote`). It does **not** fall back to a local grid when a batch
+submit fails: it exits non-zero and writes nothing. `KLT_CMD` overrides the
+`klt` launcher (e.g. `uvx --from klayout-tools==X.Y.Z klt`) without touching
+the host install. See "PSRR and input-referred noise" below for the results
+and for why the noise grid is **not** yet recorded.
+
 **PDK pin**: [`pdk.json`](pdk.json) — sky130A, open_pdks commit
 `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, the **same pin** as
 [`../gm-id-characterization/pdk.json`](../gm-id-characterization/pdk.json)
@@ -104,6 +124,10 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `testbench/opamp_tran_sr.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench |
 | `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above |
+| `testbench/psrr_vdd.cir`, `psrr_vss.cir`, `noise.cir` | Circuit-body benches (no `.control`/`.end`) for `klt sim`: PSRR+ , PSRR-, input-referred noise (issue #54) |
+| `bin/psrr_noise_sweep.py` | Writes the three `klt sim` requests, runs them on the configured backend, writes the PSRR/noise records |
+| `bin/validate_psrr_noise.py` | Four independent single-corner cross-checks of those benches (DC finite difference, band-limited noise, negative control) |
+| `records/<id>-psrr-{vdd,vss}.csv`, `<id>-noise.csv` | One row per (corner, T): window figures plus the full curve at 4 points/decade; `.klt.json` is the unmodified `klt sim` response, `.request.json` the request that produced it |
 | `../lib/spice_harness.py` | Shared (not per-experiment) PDK resolution, deck rendering, tool-version and git-SHA helpers `bin/pvt_sweep.py` imports |
 | `netlist-snapshots/<record_id>/` | Every rendered deck for that record (45 files), for provenance |
 | `records/<record_id>-{ac,tran-sr,dc-swing}.csv` | Every measured quantity at every (corner, temperature) point — the primary evidence artifacts |
@@ -417,6 +441,165 @@ across the full grid, bracketing `DR-002`'s 65 µA figure closely at every
 corner except SS (which runs consistently ~2–5 µA lower — the slow corner's
 lower device currents at a fixed `gm/ID` bias point, expected and benign).
 
+## PSRR and input-referred noise (issue #54)
+
+> **Pre-layout.** Every number in this section is from the schematic netlist
+> `design/netlist/opamp_core.spice` (`netlist_source: "schematic"`): no
+> routing parasitics, no layout, supply wiring resistance of zero. Nothing
+> here is a post-layout or silicon claim.
+
+### Benches
+
+- **PSRR+ / PSRR-** (`testbench/psrr_vdd.cir`, `psrr_vss.cir`): a real
+  unity-gain buffer (`inn` tied to `out` through 1 mΩ, as in the slew-rate
+  bench), `ac 1` on the `vdd` source (PSRR+) or the `vss` source (PSRR-, `vss`
+  held at DC 0 V), signal input AC-grounded. The closed-loop gain is 1 to
+  within 1/(1+1/A) < 0.01 dB (open-loop gain is ≥ 61.6 dB at every corner),
+  so the supply-to-output gain `vdb(out)` is also the input-referred supply
+  gain: **PSRR = −vdb(out)**. The input common mode is `VDD/2` from a divider
+  off `vdd` (so `klt sim`'s per-corner `alter vdd=…` moves the bias point
+  with the rail); a 1 F shunt (`Cinp`, corner ≈ 3×10⁻⁷ Hz) makes the input
+  an AC ground so the divider contributes no supply-to-input path. `ibias` is
+  an **ideal** 5 µA current source (AC open): this is the amplifier core's
+  supply rejection under an ideal reference, not a bias generator's.
+  Sweep `dec 20  0.1 Hz … 1 GHz`.
+- **Input-referred noise** (`testbench/noise.cir`): the same buffer,
+  `noise v(out) Vinp dec 20 0.1 1g` with `Vinp` the series source at the
+  non-inverting input, so `inoise_spectrum` is the amplifier's input-referred
+  voltage density. The same `Cinp` shunt removes the divider's own thermal
+  noise (a 250 kΩ divider would otherwise add ≈ 64 nV/√Hz at the input).
+  1/f comes from the PDK BSIM4 `kf`/`af` flicker model of the pinned open_pdks
+  commit; this bench reports what that model produces and makes no claim about
+  silicon flicker noise.
+- **Grid**: the same 5 MOS corners × (−40, 27, 125 °C) as the rest of this
+  experiment, with the same corner-paired `VDD` (tt/sf/fs 1.80 V, ss 1.62 V,
+  ff 1.98 V), expressed as one `klt sim` request per bench with a 3-value
+  supply axis and `exclude` entries keeping only the 5 paired points × 3
+  temperatures = 15 corners. R+C typical (the `tt`/`ss`/… `.lib` section of
+  `sky130.lib.spice` pulls in `res_typical__cap_typical{,__lin}` exactly as
+  the other benches' explicit includes do). The pairing is a methodology
+  choice, as stated under "Methodology" above; the supply axis is not crossed.
+- **Bands**: the consumer-imposed PSRR window is **DC–1 kHz** (the
+  sky130-bandgap ratified PSRR row, `spec/target-spec.md` "Consumers"); the
+  amp has no PSRR row of its own (`[TBD]`, unset), so no pass/fail is graded
+  against a local target and the 60 dB consumer figure is stated as the
+  *consumer's loop-level requirement*, not an allocation to this amplifier.
+  The noise band is the spec row's proposed **100 Hz – 1 MHz** `[P]`; the
+  row states no integrated-noise limit, so only the thermal-floor estimate
+  (≈ 30 nV/√Hz) is a comparison point, and no 1/f corner or integrated figure
+  is in the spec.
+
+### Result: PSRR (full 15-corner grid, batch fleet)
+
+Record `20261009-073254-e06f2fc`
+([`psrr-vdd.csv`](records/20261009-073254-e06f2fc-psrr-vdd.csv),
+[`psrr-vss.csv`](records/20261009-073254-e06f2fc-psrr-vss.csv)), both benches
+`pass` with 15/15 corners, run on the Spot batch fleet
+(`psrr_vdd`: job `klt-sim-9ec838f70172`; `psrr_vss`: job
+`klt-sim-942a6609c696`; ngspice 46). **Worst PSRR over DC–1 kHz, dB**
+(`psrr_window_min_db`; larger is better):
+
+| PSRR+ (vdd) | −40 °C | 27 °C | 125 °C |
+|---|---|---|---|
+| tt | 67.94 | 67.72 | 66.82 |
+| ff | 66.91 | 66.54 | 65.50 |
+| ss | 66.19 | 67.05 | 66.85 |
+| sf | 69.38 | 69.54 | 69.00 |
+| fs | 65.07 | 64.70 | **63.57** |
+
+| PSRR− (vss) | −40 °C | 27 °C | 125 °C |
+|---|---|---|---|
+| tt | 74.38 | 75.17 | 75.15 |
+| ff | 83.69 | 83.64 | 82.88 |
+| ss | **54.90** | 58.65 | 61.49 |
+| sf | 78.12 | 78.97 | 79.21 |
+| fs | 69.05 | 70.08 | 70.07 |
+
+- **PSRR+ is flat across DC–1 kHz** (the window minimum is at 1 kHz, ≤ 0.06 dB
+  below the 0.1 Hz value at every corner) and **≥ 60 dB at every corner with
+  ≥ 3.5 dB of margin** (worst: FS / 125 °C, 63.57 dB). It crosses 60 dB at
+  14.8–28 kHz (FS/125 °C lowest) and decays 20 dB/decade above that to
+  ≈ 26–30 dB at 1 MHz, reaching 0 dB near the 20–30 MHz closed-loop
+  bandwidth.
+- **PSRR− is the weaker side at one corner**: SS / −40 °C reads **54.90 dB
+  (< 60 dB)** and SS / 27 °C 58.65 dB; the other 13 points are ≥ 61.4 dB. PSRR−
+  is flat from DC to well past 1 kHz, so the DC–1 kHz window figure is the DC
+  figure. Whether PSRR− matters depends on a consumer's ground-referencing; the
+  only consumer PSRR row in `spec/target-spec.md` (sky130-bandgap, > 60 dB
+  DC–1 kHz) is a supply (+) rejection requirement on the bandgap loop.
+- **This is not a verdict against the consumer.** The bandgap's 60 dB is a
+  whole-loop requirement (amplifier PSRR is one term, with the core's own
+  supply path); the amplifier numbers above are inputs to that budget, which
+  is the consumer's to evaluate. The bandgap also runs the amp at 3.3 V on
+  thick-oxide devices, a rail this block does not serve (`DR-005`), so the
+  consumer table's verdict for that edge remains "not met (different
+  contract)" regardless of these figures. Consequently
+  `manifests/integrator.json` is **unchanged**: no consumer row moved from
+  unknown to a measured verdict.
+- **Finding, not hidden**: the DC–1 kHz window is flat, but PSRR+ falls
+  steeply above ≈ 20 kHz (≈ 26–30 dB at 1 MHz). A consumer with switching
+  ripple above the window is not covered by the 60 dB figure.
+
+### Result: noise (bench verified; PVT grid NOT recorded)
+
+**The 15-corner noise grid has no record.** `klt sim`'s only route from a
+`.noise` analysis to a number is `measurements[].expr` (ngspice's `.meas`
+has no `noise` analysis type). The Spot batch fleet's runner image ran
+**klt 0.5.0** on 2026-10-09, which rejects any `measurements[].expr`
+(`each request.measurements[] entry requires 'name' and 'spice'`; batch job
+`klt-sim-c911be7c7b93`, 15/15 corners `batch_job_failed`; known upstream as
+klayout-tools#2877, new gap filed as klayout-tools#2938). Per the host
+rule that a failed batch submit is reported and **not** worked around by a
+local ngspice grid, the noise grid was not run elsewhere. The bench itself is
+unchanged and ready: re-running `psrr_noise_sweep.py --benches noise` on a
+fleet image carrying klt ≥ the release that added `expr` produces the 15-corner
+record with no edits.
+
+What does exist is evidence that the bench measures the right thing, all
+single-corner and run locally (permitted for one corner / one operating point):
+
+| Check | Result |
+|---|---|
+| Band-limited vs full-sweep integrated noise, SS/125 °C/1.62 V: ngspice-native `inoise_total` over a 100 Hz–1 MHz sweep vs the bench's trapezoid post-processing of the full 0.1 Hz–1 GHz sweep | 82.177 µV vs 82.191 µV rms, **1.7×10⁻⁴ relative** |
+| Single-corner probe, **TT / 27 °C / 1.80 V** (record `20261009-073753-e06f2fc`, [`noise.csv`](records/20261009-073753-e06f2fc-noise.csv); *not PVT evidence*) | 100 Hz: 1500 nV/√Hz; 1 kHz: 541; 10 kHz: 200; 100 kHz: 79.7; 1 MHz: 42.4; white floor (min over 100 kHz–10 MHz): **35.8 nV/√Hz** (hand estimate ≈ 30: +19%); 1/f corner (psd = 2× floor²) ≈ 442 kHz; integrated 100 Hz–1 MHz: **70.1 µV rms** |
+
+So on the one probed corner the input-referred noise over the proposed band
+is flicker-dominated: the 1/f corner (≈ 440 kHz) lies near the top of the
+proposed 100 Hz – 1 MHz band, which `spec/target-spec.md` §2a does not model
+(it states a thermal floor only). That is a **spec finding** for the
+ratified-target-only noise row, flagged here, not an edit to it. The spec row
+does state a band (100 Hz – 1 MHz), so no missing-band finding applies; what
+it lacks is any flicker or integrated-noise number to compare against. The
+same single-corner data is a preview, not a grid-worst-case claim: other
+corners (ss/−40…) are expected to differ and are not measured.
+
+### Validation of the benches (`bin/validate_psrr_noise.py`)
+
+Record [`20261009-072806-e06f2fc-psrr-noise-validation.json`](records/20261009-072806-e06f2fc-psrr-noise-validation.json)
+(local, single corner each):
+
+| Check | Result |
+|---|---|
+| PSRR+ by DC finite difference (`.op` at vdd 1.79 / 1.81 V, input held at a fixed 0.9 V) vs the AC bench at 0.1 Hz, TT / 27 °C / 1.8 V | 67.7590 dB vs 67.7594 dB (**0.0004 dB**) |
+| Negative control: the PSRR+ bench with the `Cinp` shunt removed | 6.02 dB (the divider passes half the ripple into the input) — the shunt is load-bearing and the bench does notice a supply-to-input leak |
+| Noise integration | see the table above (1.7×10⁻⁴) |
+
+### Limits of this evidence
+
+- Schematic netlist, ideal `ibias`, no layout parasitics or supply
+  resistance.
+- `VDD` is tied to the process corner, not independently crossed (as for the
+  other rows); R+C typical only.
+- PSRR is measured with the unity-buffer connection and referred to the input
+  assuming Acl = 1 (error < 0.01 dB). PSRR with other closed-loop gains, or
+  against a real bias generator, is not measured.
+- The fleet runner was klt 0.5.0 and the client 0.7.0
+  (`runner_version_check: "warn"`); PSRR requests therefore use `.meas` cards
+  only (0.5.0-compatible), and the record's `environment.remote` carries
+  `runner_compatibility: "mismatch"`. The local single-corner PSRR probe on
+  ngspice 42 reproduced the fleet's ngspice 46 value at SS/125 °C
+  (66.9021 dB) to the printed digits.
+
 ## What this experiment does not do
 
 - **Does not touch `spec/target-spec.md` or the gap-to-T1 tracker
@@ -424,10 +607,12 @@ lower device currents at a fixed `gm/ID` bias point, expected and benign).
   testbenches and results only; reconciling the six rows above against the
   spec table (updating `[P]` estimates, binding-corner columns, or Status
   cells) is a follow-on issue.
-- **Does not measure input-referred offset, CMRR, PSRR** (still `[TBD]` in
-  `target-spec.md`, needing a mismatch Monte Carlo pass, a common-mode AC
-  bench, and a supply-AC bench respectively — none of which exist yet), or
-  **flicker (1/f) noise**, or **the input-common-mode range** `DR-002`
+- **Does not measure input-referred offset or CMRR** (still `[TBD]` in
+  `target-spec.md`; mismatch Monte Carlo, issue #52, and common-mode AC,
+  issue #53), **the PSRR/noise rows' spec reconciliation** (PSRR and noise
+  are now benched — see "PSRR and input-referred noise (issue #54)" below
+  for what is and is not recorded; the spec rows themselves are untouched),
+  or **the input-common-mode range** `DR-002`
   separately estimates (a related but distinct measurement from output
   swing — see "Output-swing bench" above). All out of scope per the issue
   body.

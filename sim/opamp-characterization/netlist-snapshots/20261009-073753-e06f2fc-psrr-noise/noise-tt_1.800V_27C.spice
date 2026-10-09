@@ -1,0 +1,95 @@
+* klt sim -- generated corner deck, do not edit
+.lib /home/ubuntu/.volare/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include /home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-54/sim/opamp-characterization/testbench/noise.cir
+.temp 27.0
+.control
+save all
+alter vdd=1.8
+noise v(out) Vinp dec 20 0.1 1e+09
+let en_k000 = noise1.inoise_spectrum[0]
+print en_k000
+let en_k005 = noise1.inoise_spectrum[5]
+print en_k005
+let en_k010 = noise1.inoise_spectrum[10]
+print en_k010
+let en_k015 = noise1.inoise_spectrum[15]
+print en_k015
+let en_k020 = noise1.inoise_spectrum[20]
+print en_k020
+let en_k025 = noise1.inoise_spectrum[25]
+print en_k025
+let en_k030 = noise1.inoise_spectrum[30]
+print en_k030
+let en_k035 = noise1.inoise_spectrum[35]
+print en_k035
+let en_k040 = noise1.inoise_spectrum[40]
+print en_k040
+let en_k045 = noise1.inoise_spectrum[45]
+print en_k045
+let en_k050 = noise1.inoise_spectrum[50]
+print en_k050
+let en_k055 = noise1.inoise_spectrum[55]
+print en_k055
+let en_k060 = noise1.inoise_spectrum[60]
+print en_k060
+let en_k065 = noise1.inoise_spectrum[65]
+print en_k065
+let en_k070 = noise1.inoise_spectrum[70]
+print en_k070
+let en_k075 = noise1.inoise_spectrum[75]
+print en_k075
+let en_k080 = noise1.inoise_spectrum[80]
+print en_k080
+let en_k085 = noise1.inoise_spectrum[85]
+print en_k085
+let en_k090 = noise1.inoise_spectrum[90]
+print en_k090
+let en_k095 = noise1.inoise_spectrum[95]
+print en_k095
+let en_k100 = noise1.inoise_spectrum[100]
+print en_k100
+let en_k105 = noise1.inoise_spectrum[105]
+print en_k105
+let en_k110 = noise1.inoise_spectrum[110]
+print en_k110
+let en_k115 = noise1.inoise_spectrum[115]
+print en_k115
+let en_k120 = noise1.inoise_spectrum[120]
+print en_k120
+let en_k125 = noise1.inoise_spectrum[125]
+print en_k125
+let en_k130 = noise1.inoise_spectrum[130]
+print en_k130
+let en_k135 = noise1.inoise_spectrum[135]
+print en_k135
+let en_k140 = noise1.inoise_spectrum[140]
+print en_k140
+let en_k145 = noise1.inoise_spectrum[145]
+print en_k145
+let en_k150 = noise1.inoise_spectrum[150]
+print en_k150
+let en_k155 = noise1.inoise_spectrum[155]
+print en_k155
+let en_k160 = noise1.inoise_spectrum[160]
+print en_k160
+let en_k165 = noise1.inoise_spectrum[165]
+print en_k165
+let en_k170 = noise1.inoise_spectrum[170]
+print en_k170
+let en_k175 = noise1.inoise_spectrum[175]
+print en_k175
+let en_k180 = noise1.inoise_spectrum[180]
+print en_k180
+let en_k185 = noise1.inoise_spectrum[185]
+print en_k185
+let en_k190 = noise1.inoise_spectrum[190]
+print en_k190
+let en_k195 = noise1.inoise_spectrum[195]
+print en_k195
+let en_k200 = noise1.inoise_spectrum[200]
+print en_k200
+let vn_int_band = sqrt(ln(10) / 20 * (mean(noise1.inoise_spectrum[60,140]^2 * mag(noise1.frequency[60,140])) * 81 - (0.5 * noise1.inoise_spectrum[60]^2 * mag(noise1.frequency[60]) + 0.5 * noise1.inoise_spectrum[140]^2 * mag(noise1.frequency[140]))))
+print vn_int_band
+quit
+.endc
+.end

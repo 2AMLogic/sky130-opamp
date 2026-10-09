@@ -1,0 +1,522 @@
+{
+  "record_id": "20261009-072806-e06f2fc",
+  "summary": {
+    "dc_finite_difference_psrr_db": 67.75896350683598,
+    "ac_bench_psrr_0p1hz_db": 67.75939754,
+    "ac_vs_dc_delta_db": 0.00043403316401224856,
+    "noise_native_inoise_total_uv": 82.17713309999999,
+    "noise_bench_vn_int_band_uv": 82.1908655,
+    "noise_integration_rel_error": 0.00016710731418778657,
+    "negative_control_psrr_1khz_db_without_cinp": 6.015531745,
+    "negative_control_ok": true
+  },
+  "runs": {
+    "dc_fd_psrr": {
+      "status": "pass",
+      "values": [
+        {
+          "tt/1.790V/27C": {
+            "vout": 0.89984535539,
+            "vinp": 0.9
+          }
+        },
+        {
+          "tt/1.810V/27C": {
+            "vout": 0.89985354158,
+            "vinp": 0.9
+          }
+        }
+      ],
+      "request": {
+        "netlist": "/tmp/opamp-psrr-val-81hsrjiy/psrr_vdd_fixed_vcm.cir",
+        "netlist_source": "schematic",
+        "models": {
+          "pdk": "sky130A",
+          "lib": "libs.tech/ngspice/sky130.lib.spice"
+        },
+        "corners": {
+          "process": [
+            "tt"
+          ],
+          "supply_v": {
+            "vdd": [
+              1.79,
+              1.81
+            ]
+          },
+          "temperature_c": [
+            27
+          ]
+        },
+        "analysis": {
+          "kind": "op",
+          "args": ""
+        },
+        "measurements": [
+          {
+            "name": "vout",
+            "expr": "v(out)",
+            "unit": "V"
+          },
+          {
+            "name": "vinp",
+            "expr": "v(inp)",
+            "unit": "V"
+          }
+        ],
+        "options": {
+          "timeout_s": 300,
+          "ngspice_init": [
+            "set numdgt=10"
+          ]
+        }
+      }
+    },
+    "ac_reference": {
+      "status": "pass",
+      "values": [
+        {
+          "tt/1.800V/27C": {
+            "avs_0p1hz_db": -67.75939754,
+            "avs_1khz_db": -67.71961615
+          }
+        }
+      ],
+      "request": {
+        "netlist": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-54/sim/opamp-characterization/testbench/psrr_vdd.cir",
+        "netlist_source": "schematic",
+        "models": {
+          "pdk": "sky130A",
+          "lib": "libs.tech/ngspice/sky130.lib.spice"
+        },
+        "corners": {
+          "process": [
+            "tt"
+          ],
+          "supply_v": {
+            "vdd": [
+              1.8
+            ]
+          },
+          "temperature_c": [
+            27
+          ]
+        },
+        "analysis": {
+          "kind": "ac",
+          "args": "dec 20 0.1 1g"
+        },
+        "measurements": [
+          {
+            "name": "avs_0p1hz_db",
+            "expr": "db(v(out))[0]",
+            "unit": "dB"
+          },
+          {
+            "name": "avs_1khz_db",
+            "expr": "db(v(out))[80]",
+            "unit": "dB"
+          }
+        ],
+        "options": {
+          "timeout_s": 300,
+          "ngspice_init": [
+            "set numdgt=10"
+          ]
+        }
+      }
+    },
+    "noise_bandlimited": {
+      "status": "pass",
+      "values": [
+        {
+          "ss/1.620V/125C": {
+            "inoise_total_100hz_1mhz": 8.21771331e-05
+          }
+        }
+      ],
+      "request": {
+        "netlist": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-54/sim/opamp-characterization/testbench/noise.cir",
+        "netlist_source": "schematic",
+        "models": {
+          "pdk": "sky130A",
+          "lib": "libs.tech/ngspice/sky130.lib.spice"
+        },
+        "corners": {
+          "process": [
+            "ss"
+          ],
+          "supply_v": {
+            "vdd": [
+              1.62
+            ]
+          },
+          "temperature_c": [
+            125
+          ]
+        },
+        "analysis": {
+          "kind": "noise",
+          "args": "v(out) Vinp dec 100 100 1e6"
+        },
+        "measurements": [
+          {
+            "name": "inoise_total_100hz_1mhz",
+            "expr": "noise2.inoise_total",
+            "unit": "V"
+          }
+        ],
+        "options": {
+          "timeout_s": 300,
+          "ngspice_init": [
+            "set numdgt=8"
+          ]
+        }
+      }
+    },
+    "noise_full_sweep_same_corner": {
+      "status": "pass",
+      "values": [
+        {
+          "ss/1.620V/125C": {
+            "en_k000": 4.10248421e-05,
+            "en_k005": 3.12920299e-05,
+            "en_k010": 2.38921147e-05,
+            "en_k015": 1.82607393e-05,
+            "en_k020": 1.39711553e-05,
+            "en_k025": 1.07004511e-05,
+            "en_k030": 8.20411217e-06,
+            "en_k035": 6.29684673e-06,
+            "en_k040": 4.83812993e-06,
+            "en_k045": 3.72129863e-06,
+            "en_k050": 2.86532103e-06,
+            "en_k055": 2.2085815e-06,
+            "en_k060": 1.70418438e-06,
+            "en_k065": 1.31640335e-06,
+            "en_k070": 1.01799504e-06,
+            "en_k075": 7.88165208e-07,
+            "en_k080": 6.11027778e-07,
+            "en_k085": 4.74436498e-07,
+            "en_k090": 3.69098344e-07,
+            "en_k095": 2.87900104e-07,
+            "en_k100": 2.25396112e-07,
+            "en_k105": 1.774174e-07,
+            "en_k110": 1.40771592e-07,
+            "en_k115": 1.13009365e-07,
+            "en_k120": 9.22387397e-08,
+            "en_k125": 7.6974433e-08,
+            "en_k130": 6.60181006e-08,
+            "en_k135": 5.83748271e-08,
+            "en_k140": 5.32141983e-08,
+            "en_k145": 4.9876869e-08,
+            "en_k150": 4.79253137e-08,
+            "en_k155": 4.72526084e-08,
+            "en_k160": 4.81785132e-08,
+            "en_k165": 5.10580021e-08,
+            "en_k170": 5.59861306e-08,
+            "en_k175": 6.57325417e-08,
+            "en_k180": 9.02011921e-08,
+            "en_k185": 1.56033087e-07,
+            "en_k190": 3.68918909e-07,
+            "en_k195": 4.87728416e-07,
+            "en_k200": 1.63593501e-07,
+            "vn_int_band": 8.21908655e-05
+          }
+        }
+      ],
+      "request": {
+        "netlist": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-54/sim/opamp-characterization/testbench/noise.cir",
+        "netlist_source": "schematic",
+        "models": {
+          "pdk": "sky130A",
+          "lib": "libs.tech/ngspice/sky130.lib.spice"
+        },
+        "corners": {
+          "process": [
+            "ss"
+          ],
+          "supply_v": {
+            "vdd": [
+              1.62
+            ]
+          },
+          "temperature_c": [
+            125.0
+          ]
+        },
+        "exclude": [],
+        "analysis": {
+          "kind": "noise",
+          "args": "v(out) Vinp dec 20 0.1 1e+09"
+        },
+        "measurements": [
+          {
+            "name": "en_k000",
+            "expr": "noise1.inoise_spectrum[0]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k005",
+            "expr": "noise1.inoise_spectrum[5]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k010",
+            "expr": "noise1.inoise_spectrum[10]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k015",
+            "expr": "noise1.inoise_spectrum[15]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k020",
+            "expr": "noise1.inoise_spectrum[20]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k025",
+            "expr": "noise1.inoise_spectrum[25]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k030",
+            "expr": "noise1.inoise_spectrum[30]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k035",
+            "expr": "noise1.inoise_spectrum[35]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k040",
+            "expr": "noise1.inoise_spectrum[40]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k045",
+            "expr": "noise1.inoise_spectrum[45]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k050",
+            "expr": "noise1.inoise_spectrum[50]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k055",
+            "expr": "noise1.inoise_spectrum[55]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k060",
+            "expr": "noise1.inoise_spectrum[60]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k065",
+            "expr": "noise1.inoise_spectrum[65]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k070",
+            "expr": "noise1.inoise_spectrum[70]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k075",
+            "expr": "noise1.inoise_spectrum[75]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k080",
+            "expr": "noise1.inoise_spectrum[80]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k085",
+            "expr": "noise1.inoise_spectrum[85]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k090",
+            "expr": "noise1.inoise_spectrum[90]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k095",
+            "expr": "noise1.inoise_spectrum[95]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k100",
+            "expr": "noise1.inoise_spectrum[100]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k105",
+            "expr": "noise1.inoise_spectrum[105]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k110",
+            "expr": "noise1.inoise_spectrum[110]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k115",
+            "expr": "noise1.inoise_spectrum[115]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k120",
+            "expr": "noise1.inoise_spectrum[120]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k125",
+            "expr": "noise1.inoise_spectrum[125]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k130",
+            "expr": "noise1.inoise_spectrum[130]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k135",
+            "expr": "noise1.inoise_spectrum[135]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k140",
+            "expr": "noise1.inoise_spectrum[140]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k145",
+            "expr": "noise1.inoise_spectrum[145]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k150",
+            "expr": "noise1.inoise_spectrum[150]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k155",
+            "expr": "noise1.inoise_spectrum[155]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k160",
+            "expr": "noise1.inoise_spectrum[160]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k165",
+            "expr": "noise1.inoise_spectrum[165]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k170",
+            "expr": "noise1.inoise_spectrum[170]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k175",
+            "expr": "noise1.inoise_spectrum[175]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k180",
+            "expr": "noise1.inoise_spectrum[180]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k185",
+            "expr": "noise1.inoise_spectrum[185]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k190",
+            "expr": "noise1.inoise_spectrum[190]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k195",
+            "expr": "noise1.inoise_spectrum[195]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "en_k200",
+            "expr": "noise1.inoise_spectrum[200]",
+            "unit": "V/rtHz"
+          },
+          {
+            "name": "vn_int_band",
+            "expr": "sqrt(ln(10) / 20 * (mean(noise1.inoise_spectrum[60,140]^2 * mag(noise1.frequency[60,140])) * 81 - (0.5 * noise1.inoise_spectrum[60]^2 * mag(noise1.frequency[60]) + 0.5 * noise1.inoise_spectrum[140]^2 * mag(noise1.frequency[140]))))",
+            "unit": "V"
+          }
+        ],
+        "options": {
+          "timeout_s": 600,
+          "keep_artifacts": false,
+          "ngspice_init": [
+            "set numdgt=8"
+          ]
+        }
+      }
+    },
+    "negative_control_no_cinp": {
+      "status": "pass",
+      "values": [
+        {
+          "tt/1.800V/27C": {
+            "avs_1khz_db": -6.015531745
+          }
+        }
+      ],
+      "request": {
+        "netlist": "/tmp/opamp-psrr-val-81hsrjiy/psrr_vdd_no_cinp.cir",
+        "netlist_source": "schematic",
+        "models": {
+          "pdk": "sky130A",
+          "lib": "libs.tech/ngspice/sky130.lib.spice"
+        },
+        "corners": {
+          "process": [
+            "tt"
+          ],
+          "supply_v": {
+            "vdd": [
+              1.8
+            ]
+          },
+          "temperature_c": [
+            27
+          ]
+        },
+        "analysis": {
+          "kind": "ac",
+          "args": "dec 20 0.1 1g"
+        },
+        "measurements": [
+          {
+            "name": "avs_1khz_db",
+            "expr": "db(v(out))[80]",
+            "unit": "dB"
+          }
+        ],
+        "options": {
+          "timeout_s": 300,
+          "ngspice_init": [
+            "set numdgt=10"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,309 @@
+{
+  "netlist": "../testbench/psrr_vdd.cir",
+  "netlist_source": "schematic",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.62,
+        1.8,
+        1.98
+      ]
+    },
+    "temperature_c": [
+      -40.0,
+      27.0,
+      125.0
+    ]
+  },
+  "exclude": [
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    }
+  ],
+  "analysis": {
+    "kind": "ac",
+    "args": "dec 20 0.1 1e+09"
+  },
+  "measurements": [
+    {
+      "name": "avs_k000",
+      "spice": ".meas ac avs_k000 find vdb(out) at=0.1",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k005",
+      "spice": ".meas ac avs_k005 find vdb(out) at=0.177827941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k010",
+      "spice": ".meas ac avs_k010 find vdb(out) at=0.316227766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k015",
+      "spice": ".meas ac avs_k015 find vdb(out) at=0.5623413252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k020",
+      "spice": ".meas ac avs_k020 find vdb(out) at=1",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k025",
+      "spice": ".meas ac avs_k025 find vdb(out) at=1.77827941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k030",
+      "spice": ".meas ac avs_k030 find vdb(out) at=3.16227766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k035",
+      "spice": ".meas ac avs_k035 find vdb(out) at=5.623413252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k040",
+      "spice": ".meas ac avs_k040 find vdb(out) at=10",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k045",
+      "spice": ".meas ac avs_k045 find vdb(out) at=17.7827941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k050",
+      "spice": ".meas ac avs_k050 find vdb(out) at=31.6227766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k055",
+      "spice": ".meas ac avs_k055 find vdb(out) at=56.23413252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k060",
+      "spice": ".meas ac avs_k060 find vdb(out) at=100",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k065",
+      "spice": ".meas ac avs_k065 find vdb(out) at=177.827941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k070",
+      "spice": ".meas ac avs_k070 find vdb(out) at=316.227766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k075",
+      "spice": ".meas ac avs_k075 find vdb(out) at=562.3413252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k080",
+      "spice": ".meas ac avs_k080 find vdb(out) at=1000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k085",
+      "spice": ".meas ac avs_k085 find vdb(out) at=1778.27941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k090",
+      "spice": ".meas ac avs_k090 find vdb(out) at=3162.27766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k095",
+      "spice": ".meas ac avs_k095 find vdb(out) at=5623.413252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k100",
+      "spice": ".meas ac avs_k100 find vdb(out) at=10000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k105",
+      "spice": ".meas ac avs_k105 find vdb(out) at=17782.7941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k110",
+      "spice": ".meas ac avs_k110 find vdb(out) at=31622.7766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k115",
+      "spice": ".meas ac avs_k115 find vdb(out) at=56234.13252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k120",
+      "spice": ".meas ac avs_k120 find vdb(out) at=100000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k125",
+      "spice": ".meas ac avs_k125 find vdb(out) at=177827.941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k130",
+      "spice": ".meas ac avs_k130 find vdb(out) at=316227.766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k135",
+      "spice": ".meas ac avs_k135 find vdb(out) at=562341.3252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k140",
+      "spice": ".meas ac avs_k140 find vdb(out) at=1000000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k145",
+      "spice": ".meas ac avs_k145 find vdb(out) at=1778279.41",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k150",
+      "spice": ".meas ac avs_k150 find vdb(out) at=3162277.66",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k155",
+      "spice": ".meas ac avs_k155 find vdb(out) at=5623413.252",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k160",
+      "spice": ".meas ac avs_k160 find vdb(out) at=10000000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k165",
+      "spice": ".meas ac avs_k165 find vdb(out) at=17782794.1",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k170",
+      "spice": ".meas ac avs_k170 find vdb(out) at=31622776.6",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k175",
+      "spice": ".meas ac avs_k175 find vdb(out) at=56234132.52",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k180",
+      "spice": ".meas ac avs_k180 find vdb(out) at=100000000",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k185",
+      "spice": ".meas ac avs_k185 find vdb(out) at=177827941",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k190",
+      "spice": ".meas ac avs_k190 find vdb(out) at=316227766",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_k195",
+      "spice": ".meas ac avs_k195 find vdb(out) at=562341325.2",
+      "unit": "dB"
+    },
+    {
+      "name": "avs_win_max",
+      "spice": ".meas ac avs_win_max max vdb(out) from=0.1 to=1k",
+      "unit": "dB"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

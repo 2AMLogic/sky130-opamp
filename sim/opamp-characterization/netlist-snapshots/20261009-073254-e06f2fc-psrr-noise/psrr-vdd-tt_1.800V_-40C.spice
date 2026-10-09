@@ -1,0 +1,51 @@
+* klt sim -- generated corner deck, do not edit
+.lib /opt/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice tt
+.include /var/tmp/eda-job-klt-sim-9ec838f70172/inputs/netlist.cir
+.temp -40.0
+.meas ac avs_k000 find vdb(out) at=0.1
+.meas ac avs_k005 find vdb(out) at=0.177827941
+.meas ac avs_k010 find vdb(out) at=0.316227766
+.meas ac avs_k015 find vdb(out) at=0.5623413252
+.meas ac avs_k020 find vdb(out) at=1
+.meas ac avs_k025 find vdb(out) at=1.77827941
+.meas ac avs_k030 find vdb(out) at=3.16227766
+.meas ac avs_k035 find vdb(out) at=5.623413252
+.meas ac avs_k040 find vdb(out) at=10
+.meas ac avs_k045 find vdb(out) at=17.7827941
+.meas ac avs_k050 find vdb(out) at=31.6227766
+.meas ac avs_k055 find vdb(out) at=56.23413252
+.meas ac avs_k060 find vdb(out) at=100
+.meas ac avs_k065 find vdb(out) at=177.827941
+.meas ac avs_k070 find vdb(out) at=316.227766
+.meas ac avs_k075 find vdb(out) at=562.3413252
+.meas ac avs_k080 find vdb(out) at=1000
+.meas ac avs_k085 find vdb(out) at=1778.27941
+.meas ac avs_k090 find vdb(out) at=3162.27766
+.meas ac avs_k095 find vdb(out) at=5623.413252
+.meas ac avs_k100 find vdb(out) at=10000
+.meas ac avs_k105 find vdb(out) at=17782.7941
+.meas ac avs_k110 find vdb(out) at=31622.7766
+.meas ac avs_k115 find vdb(out) at=56234.13252
+.meas ac avs_k120 find vdb(out) at=100000
+.meas ac avs_k125 find vdb(out) at=177827.941
+.meas ac avs_k130 find vdb(out) at=316227.766
+.meas ac avs_k135 find vdb(out) at=562341.3252
+.meas ac avs_k140 find vdb(out) at=1000000
+.meas ac avs_k145 find vdb(out) at=1778279.41
+.meas ac avs_k150 find vdb(out) at=3162277.66
+.meas ac avs_k155 find vdb(out) at=5623413.252
+.meas ac avs_k160 find vdb(out) at=10000000
+.meas ac avs_k165 find vdb(out) at=17782794.1
+.meas ac avs_k170 find vdb(out) at=31622776.6
+.meas ac avs_k175 find vdb(out) at=56234132.52
+.meas ac avs_k180 find vdb(out) at=100000000
+.meas ac avs_k185 find vdb(out) at=177827941
+.meas ac avs_k190 find vdb(out) at=316227766
+.meas ac avs_k195 find vdb(out) at=562341325.2
+.meas ac avs_win_max max vdb(out) from=0.1 to=1k
+.control
+alter vdd=1.8
+ac dec 20 0.1 1e+09
+quit
+.endc
+.end
