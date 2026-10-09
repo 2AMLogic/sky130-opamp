@@ -4,8 +4,19 @@
   "kind": "analog",
   "tier": null,
   "t1_item_count": 11,
-  "t1_met_count": 1,
+  "build_t1_item_count": 11,
+  "t1_met_count": 2,
   "source_doc": "manifests/design-evidence-tiers.md",
+  "source_doc_content_hash": "sha256:c7a1e7e10627fae396007e0ff951734f37d95028b8f49f2e21e802e9f552f318",
+  "build": {
+    "version": "0.7.0",
+    "package_version": "0.7.0",
+    "git_commit": "0e2362bda7309829398a35d54efaa989d5806065",
+    "git_tag": "v0.7.0",
+    "dirty": false,
+    "is_release": true,
+    "grading_ruleset_id": "sha256:eb8d2ba54d1700c78f1139ac111aee598fd7bc48688ab9654fca22995b6ac25e"
+  },
   "items": [
     {
       "tier": "T1",
@@ -14,9 +25,26 @@
       "partition": null,
       "text": "committed schematic sources (or generator) plus the netlist derived from them, regenerated on design change.",
       "notes": [],
-      "status": "unmet",
-      "reason": "no_evidence",
-      "citation": null
+      "status": "met",
+      "reason": null,
+      "graded_by_build": true,
+      "citation": {
+        "file": "design/netlist/opamp_core.sources.evidence.json",
+        "command": null,
+        "kind": "generic",
+        "check_status": "pass",
+        "content_hash": "sha256:6fd7a3a7bce83722c82fc1408527c6d09ab690a5f4a0843f6c138a096861c340",
+        "input_verified": true,
+        "exit_status": 0,
+        "artifact_binding": {
+          "t1_item": 1,
+          "path": "opamp_core.pair.json",
+          "content_hash": "sha256:6fd7a3a7bce83722c82fc1408527c6d09ab690a5f4a0843f6c138a096861c340",
+          "input_verified": true,
+          "summary": "T1 item 1 (design sources): design/opamp_core.sch is the committed schematic source and design/netlist/opamp_core.spice is the xschem-generated netlist derived from it. The cited input, opamp_core.pair.json, pins the sha256 of both files. CI (.github/workflows/design-sources.yml) re-runs headless xschem on the schematic with design/xschemrc and fails when the regenerated netlist differs from the committed one (design/bin/netlist_check.py; normalised: sch_path line, wrapping, number formatting, xschem-version-dependent evaluation of the PDK symbols' derived ad/as/pd/ps/nrd/nrs formulas, compared within 0.5 %), or when the pair record is stale. Negative controls: design/bin/test_netlist_check.py. LIMITS: klt signoff grades this generic envelope on its status field and never re-hashes the cited input (klayout-tools#2196, #2403); the repo-side re-hash step in .github/workflows/signoff.yml and the design-sources workflow are what keep it honest. It asserts nothing about sizing, spec compliance, or the PDK-symbol library beyond the pin in sim/gm-id-characterization/pdk.json.",
+          "source": "design/bin/netlist_check.py"
+        }
+      }
     },
     {
       "tier": "T1",
@@ -27,6 +55,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -38,6 +67,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -49,6 +79,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -62,6 +93,7 @@
       ],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -73,6 +105,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -86,6 +119,7 @@
       ],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -97,12 +131,14 @@
       "notes": [],
       "status": "met",
       "reason": null,
+      "graded_by_build": true,
       "citation": {
         "file": "sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json",
         "command": null,
         "kind": "generic",
         "check_status": "pass",
         "content_hash": "sha256:79acf2f94a2e45e39937eb448df36e5a1400e1210db936fb0f2f9e4f9c412a92",
+        "input_verified": true,
         "exit_status": 0
       }
     },
@@ -115,6 +151,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -126,6 +163,7 @@
       "notes": [],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {
@@ -139,6 +177,7 @@
       ],
       "status": "unmet",
       "reason": "no_evidence",
+      "graded_by_build": true,
       "citation": null
     },
     {

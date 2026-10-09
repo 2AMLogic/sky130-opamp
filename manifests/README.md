@@ -17,9 +17,31 @@ identified there.
     filing issue: a two-stage Miller-compensated operational amplifier,
     no digital or mixed-signal partition (see the tracker's "Block kind"
     section and `design/`).
-  - `evidence` holds **exactly one citation — item 8 only** (issue
-    [#43](https://github.com/2AMLogic/sky130-opamp/issues/43)). Every
+  - `evidence` holds **two citations — item 8** (issue
+    [#43](https://github.com/2AMLogic/sky130-opamp/issues/43)) **and item 1**
+    (issue [#55](https://github.com/2AMLogic/sky130-opamp/issues/55)). Every
     other item stays deliberately uncited, for a reason per item:
+    - **Item 1 (design sources)** cites
+      [`design/netlist/opamp_core.sources.evidence.json`](../design/netlist/opamp_core.sources.evidence.json)
+      — a generic envelope (`"t1_item": 1`) whose `provenance.input` is
+      [`design/netlist/opamp_core.pair.json`](../design/netlist/opamp_core.pair.json),
+      a record pinning the sha256 of `design/opamp_core.sch` and
+      `design/netlist/opamp_core.spice`. The real gate is
+      [`.github/workflows/design-sources.yml`](../.github/workflows/design-sources.yml):
+      `design/bin/netlist_check.py` re-runs headless xschem and fails when the
+      regenerated netlist differs from the committed one (or the pair record is
+      stale), with negative controls in `design/bin/test_netlist_check.py`.
+      Generic evidence is accepted for item 1 only from klt 0.7.0 (0.5.0
+      renders `wrong_kind`), which is why the pin moved to 0.7.0. Like item 8,
+      `klt signoff` never re-hashes the cited input
+      ([klayout-tools#2196](https://github.com/2AMLogic/klayout-tools/issues/2196)),
+      so `signoff.yml`'s re-hash step plus the design-sources workflow are the
+      real freshness gates; a tool-produced envelope for this item is requested
+      in [klayout-tools#2844](https://github.com/2AMLogic/klayout-tools/issues/2844).
+      To refresh after a design change: regenerate the netlist (design/README.md),
+      run `python3 design/bin/netlist_check.py --write-record`, copy the new
+      record hash into the envelope's `provenance.input.content_hash` and the
+      manifest's item-1 `content_hash`, then regenerate the signoff record.
     - **Item 8 (characterization report)** cites
       [`sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json`](../sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json)
       — a **generic evidence envelope** (`"kind": "generic"`,
@@ -39,9 +61,9 @@ identified there.
       binding corner) lives in that `summary` field and is
       claimant-enforced — the same discipline item 3's DRC-coverage and
       item 4's power-connectivity caveats already carry. The `summary`
-      does **not** appear in `sky130-opamp.signoff.json`'s citation
-      block under the pinned klt, so the envelope file is the only place
-      a reviewer can read it.
+      is quoted in `sky130-opamp.signoff.json`'s citation block under
+      klt 0.7.0 (`artifact_binding.summary`); the envelope file remains
+      the source.
     - **Items 3, 4, 7 and 11 (DRC / LVS / post-layout / ERC supply)**:
       no layout exists, so no `klt drc`/`lvs`/`pex`/`erc` envelope exists
       to cite.
@@ -59,11 +81,11 @@ identified there.
       or be re-run through a real `klt sim` envelope; not tracked yet.
     - **Item 6 (Monte Carlo)**: no `klt yield` run exists; the
       statistical spec rows (offset, matching) are `[TBD]`.
-    - **Items 1, 2, 9 and 10** have *no* kind restriction at all, so any
+    - **Items 2, 9 and 10** have *no* kind restriction at all, so any
       passing envelope would mechanically green them. The grader contract
       is explicit that this is the dishonest-citation failure mode the
       machinery exists to prevent: "The safest default is to leave [items
-      1, 2, 9 and 10] uncited." They stay uncited.
+      2, 9 and 10] uncited (item 1 is cited only because a CI gate re-derives it)." They stay uncited.
 - **`design-evidence-tiers.md`** — the T1-T4 checklist the grader
   parses. Vendored **byte-identical** from
   [`2AMLogic/klayout-tools@31a3e3c`](https://github.com/2AMLogic/klayout-tools/blob/31a3e3c41c08bbd58719e0b99a3b6d19beb9be63/docs/design-evidence-tiers.md)
@@ -85,7 +107,7 @@ identified there.
 ## Regenerate (cold start)
 
 ```console
-pip install klayout-tools==0.5.0        # provides the `klt` command
+pip install klayout-tools==0.7.0        # provides the `klt` command
 klt signoff --manifest manifests/sky130-opamp.json \
             --tiers-doc manifests/design-evidence-tiers.md \
             --format json > manifests/sky130-opamp.signoff.json
@@ -136,7 +158,7 @@ free whenever the pin moves to a release carrying #2403.
 
 ## Current verdict
 
-**Not-T1 — T1 items 1/11 met** as of this record. Every item's `reason`
+**Not-T1 — T1 items 1 and 8 met** as of this record. Every item's `reason`
 is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 
 - **Item 8 (characterization report) — `met`**, on the generic evidence
@@ -147,7 +169,9 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
   spec-compliance claim (that is item 5) and **not** a statement that
   every spec row is characterized (6 of 12 §2 rows are, and the
   envelope's `summary` names the other 6).
-- **The other 10 T1 items — `unmet` / `no_evidence`**, each for the
+- **Item 1 (design sources) — `met`**, on the generic envelope described
+  above; backed by the netlist-drift CI job, not by `klt`.
+- **The other 9 T1 items — `unmet` / `no_evidence`**, each for the
   reason recorded per item above.
 
 Known item-level gates on the path forward:
