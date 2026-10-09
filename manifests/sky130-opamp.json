@@ -2,6 +2,10 @@
   "block": "sky130-opamp",
   "kind": "analog",
   "evidence": {
+    "1": {
+      "file": "design/netlist/opamp_core.sources.evidence.json",
+      "content_hash": "sha256:6fd7a3a7bce83722c82fc1408527c6d09ab690a5f4a0843f6c138a096861c340"
+    },
     "8": {
       "file": "sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json",
       "content_hash": "sha256:79acf2f94a2e45e39937eb448df36e5a1400e1210db936fb0f2f9e4f9c412a92"

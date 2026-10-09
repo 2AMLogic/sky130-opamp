@@ -35,7 +35,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install pinned klt
-        run: pip install klayout-tools==0.5.0
+        run: pip install klayout-tools==0.7.0
 
       # Generic ("kind": "generic") evidence envelopes are hand-written, and
       # `klt signoff` grades their freshness against the hash the envelope

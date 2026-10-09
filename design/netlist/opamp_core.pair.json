@@ -1,0 +1,11 @@
+{
+  "description": "Content pin of the schematic + xschem-generated netlist pair cited for T1 item 1. Refreshed by design/bin/netlist_check.py --write-record; verified by the same script in CI.",
+  "schematic": {
+    "path": "../opamp_core.sch",
+    "content_hash": "sha256:f54fc438f0ce440149b67634245070eefdefae65b3bbeb973a9f659b583548f7"
+  },
+  "netlist": {
+    "path": "opamp_core.spice",
+    "content_hash": "sha256:6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace"
+  }
+}

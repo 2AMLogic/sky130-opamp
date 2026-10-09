@@ -17,6 +17,9 @@ design/
     opamp_core.spice  the xschem-generated SPICE netlist (committed --
                       reviewable in git, regenerated on every design change)
   bin/
+    netlist_check.py  CI drift guard: regenerates the netlist with headless
+                      xschem and compares it with the committed one (issue
+                      #55); test_netlist_check.py holds its negative controls
     sizing_check.py   re-derives every number in DR-002 from the committed
                       gm/ID sweep; no simulation, stdlib only
 ```
@@ -112,6 +115,20 @@ schematic, so the `iopin` instances in `opamp_core.sch` are placed
 top-to-bottom in the same order they are declared — that keeps
 `opamp_core.sym`'s pin order identical to the schematic's `.subckt`
 terminal order (`vdd vss inn inp out ibias`).
+
+**Drift check** (also run in CI by `.github/workflows/design-sources.yml`):
+
+```bash
+python3 design/bin/netlist_check.py             # compare; exit 1 on drift
+python3 design/bin/netlist_check.py --write-record   # refresh opamp_core.pair.json
+```
+
+The check tolerates xschem-version differences in how the PDK symbols' derived
+`ad/as/pd/ps/nrd/nrs` formulas are written (see the script's docstring); any
+change to instances, nets, models, `L`, `W`, `nf`, `mult` fails it. After a
+design change, regenerate the netlist, refresh the pair record, then update the
+hash in `opamp_core.sources.evidence.json` and `manifests/sky130-opamp.json`
+and regenerate `manifests/sky130-opamp.signoff.json` (see `manifests/README.md`).
 
 A resolvable sky130 PDK install is required (`PDK_ROOT`/`PDK` pointing at a
 `sky130A/` open_pdks-shaped directory). This repo does not vendor the PDK;
