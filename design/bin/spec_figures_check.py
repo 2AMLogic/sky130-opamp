@@ -25,6 +25,18 @@ Copies of a figure outside the table rows (e.g. a section 2 summary paragraph)
 are not covered. It also verifies every record id cited anywhere in section 2
 exists under sim/*/records/.
 
+Matrix completeness: every figure names a `matrix` in the mapping's top-level
+`matrices` table. A matrix is authored explicitly (never inferred from the CSV)
+as either `points` (exact list of {corner, temp_c, <supply_key>}) or `axes`
+(`corner` list, `temp_c` list) plus `supply` and optional `exclude`. `supply`
+is either {"mode": "paired_with_corner", "by_corner": {corner: volts}}, the
+repo's methodology (supply moves with the process corner, not an independent
+sweep), or {"mode": "cartesian", "values": [...]}. The expected tuple set is
+compared, after the figure's `where` filter, with the unique
+(corner, temp_c, supply) tuples of the CSV: missing, duplicate and unexpected
+points and nonfinite values of the figure's key are all errors, with dataset
+and point diagnostics. Figures that cite the same matrix share one validation.
+
 Coverage (first increment): gain, GBW, phase margin, rise/fall slew, swing,
 quiescent power (record 20261001-074923-c317ff9) plus CMRR at both common-mode
 points and ICMR width/edges (record 20261009-103006-566b9a5). Not mapped: the
@@ -118,14 +130,111 @@ def record_exists(root, rid):
     return False
 
 
-def worst(fig, rows):
+def filtered(fig, rows):
     for k, v in fig.get("where", {}).items():
         rows = [r for r in rows if r.get(k) == v]
+    return rows
+
+
+def _num(x):
+    return round(float(x), 6)
+
+
+def _fmt(t):
+    return f"{t[0]}/{t[1]:g} C/{t[2]:g} V"
+
+
+def expected_points(m):
+    """Authored expected set of (corner, temp_c, supply) tuples for a matrix."""
+    sk = m.get("supply_key", "vdd_v")
+    if "points" in m:
+        if "axes" in m:
+            raise ValueError("matrix gives both points and axes")
+        pts = [(p["corner"], _num(p["temp_c"]), _num(p[sk])) for p in m["points"]]
+        if len(set(pts)) != len(pts):
+            raise ValueError("matrix points contain duplicates")
+        return set(pts)
+    axes, sup = m["axes"], m["supply"]
+    if sup["mode"] == "paired_with_corner":
+        by = sup["by_corner"]
+        if set(by) != set(axes["corner"]):
+            raise ValueError("supply.by_corner keys must equal axes.corner")
+        pts = [(c, _num(t), _num(by[c])) for c in axes["corner"] for t in axes["temp_c"]]
+    elif sup["mode"] == "cartesian":
+        pts = [(c, _num(t), _num(v)) for c in axes["corner"] for t in axes["temp_c"] for v in sup["values"]]
+    else:
+        raise ValueError(f"unknown supply mode {sup['mode']!r}")
+    if len(set(pts)) != len(pts):
+        raise ValueError("matrix axes contain repeated values")
+    pts = set(pts)
+    for ex in m.get("exclude", []):
+        hit = {p for p in pts if p[0] == ex["corner"] and p[1] == _num(ex["temp_c"])
+               and (sk not in ex or p[2] == _num(ex[sk]))}
+        if not hit:
+            raise ValueError(f"exclusion {ex} matches no expected point")
+        pts -= hit
+    return pts
+
+
+def check_matrix(name, m, rows, keys):
+    """Errors for one matrix against its (already filtered) rows."""
+    sk = m.get("supply_key", "vdd_v")
+    try:
+        want = expected_points(m)
+    except (KeyError, TypeError, ValueError) as e:
+        return [f"matrix {name}: bad matrix definition: {e!r}"]
+    errs, seen = [], {}
+    for i, r in enumerate(rows, 1):
+        try:
+            t = (r["corner"], _num(r["temp_c"]), _num(r[sk]))
+        except (KeyError, TypeError, ValueError) as e:
+            errs.append(f"matrix {name}: row {i} has no usable corner/temp_c/{sk}: {e!r}")
+            continue
+        seen.setdefault(t, []).append(i)
+        for k in keys:
+            try:
+                ok = math.isfinite(float(r[k]))
+            except (KeyError, TypeError, ValueError):
+                ok = False
+            if not ok:
+                errs.append(f"matrix {name}: point {_fmt(t)} has nonfinite or missing {k}: {r.get(k)!r}")
+    for t in sorted(want - set(seen)):
+        errs.append(f"matrix {name}: missing expected point {_fmt(t)}")
+    for t in sorted(set(seen) - want):
+        errs.append(f"matrix {name}: unexpected point {_fmt(t)}")
+    for t, idx in sorted(seen.items()):
+        if len(idx) > 1:
+            errs.append(f"matrix {name}: duplicate point {_fmt(t)} in rows {idx}")
+    return errs
+
+
+def worst(fig, rows):
+    rows = filtered(fig, rows)
     if not rows:
         raise ValueError("no rows after filter")
     pick = min if fig["reduce"] == "min" else max
     r = pick(rows, key=lambda r: float(r[fig["key"]]))
     return float(r[fig["key"]]) * fig.get("scale", 1.0), r, len(rows)
+
+
+def check_figure_matrix(name, fig, matrices, allrows, figures, checked):
+    mname = fig.get("matrix")
+    m = matrices.get(mname)
+    if m is None:
+        return [f"{name}: no authored matrix {mname!r} in mapping `matrices`"]
+    errs = []
+    for k in ("record", "csv"):
+        if m.get(k) != fig[k]:
+            errs.append(f"{name}: matrix {mname} {k} {m.get(k)!r} != figure {k} {fig[k]!r}")
+    if m.get("where", {}) != fig.get("where", {}):
+        errs.append(f"{name}: matrix {mname} where {m.get('where', {})} != figure where {fig.get('where', {})}")
+    if mname in checked:
+        return errs
+    checked.add(mname)
+    keys = sorted({f["key"] for f in figures if f.get("matrix") == mname})
+    ds = f"{m.get('record')}-{m.get('csv')}" + (f" where {m['where']}" if m.get("where") else "")
+    return errs + [e.replace(f"matrix {mname}:", f"matrix {mname} [{ds}]:", 1)
+                   for e in check_matrix(mname, m, filtered(m, allrows), keys)]
 
 
 def check(root):
@@ -139,6 +248,8 @@ def check(root):
     for rid in sorted(set(ID_RE.findall(spec2))):
         if not record_exists(root, rid):
             errs.append(f"section 2 cites record {rid} which does not exist under {RECORDS_GLOB}")
+    matrices = mapping.get("matrices", {})
+    checked = set()
     for fig in mapping["figures"]:
         name = fig["row"]
         rows = table_rows(spec2, fig.get("row_match", name))
@@ -155,7 +266,9 @@ def check(root):
             continue
         try:
             with path.open(newline="", encoding="utf-8") as f:
-                val, row, n = worst(fig, list(csv.DictReader(f)))
+                allrows = list(csv.DictReader(f))
+            errs += check_figure_matrix(name, fig, matrices, allrows, mapping["figures"], checked)
+            val, row, n = worst(fig, allrows)
         except (KeyError, ValueError) as e:
             errs.append(f"{name}: cannot recompute from {path.name}: {e!r}")
             continue
