@@ -151,6 +151,34 @@ class CurrentDesignTests(unittest.TestCase):
         self.assertEqual(di.validate_current(c.tmp, m, "8", require_verified=True), 1)
 
 
+class CommonDutTests(unittest.TestCase):
+    """Chunk-set provenance used by the offset campaign runner (issue #113)."""
+
+    def test_same_hash_verified(self):
+        c = Campaign(self)
+        st, sha, probs = di.common_dut([("a", c.record), ("b", dict(c.record))], c.tmp)
+        self.assertEqual((st, sha, probs), (di.VERIFIED, c.dut["sha256"], []))
+
+    def test_mixed_hashes_name_offenders(self):
+        c = Campaign(self)
+        other = {"dut": dict(c.dut, sha256="sha256:" + "1" * 64)}
+        _, _, probs = di.common_dut([("a", c.record), ("b", other)], c.tmp)
+        self.assertTrue(any("mixed DUT hashes" in p and "b" in p for p in probs))
+        self.assertTrue(any(p.startswith("b: DUT snapshot corrupted") for p in probs))
+
+    def test_missing_snapshot_named(self):
+        c = Campaign(self)
+        (c.tmp / c.dut["snapshot_path"]).unlink()
+        _, _, probs = di.common_dut([("a", c.record)], c.tmp)
+        self.assertEqual(probs, [f"a: DUT snapshot missing: {c.dut['snapshot_path']}"])
+
+    def test_legacy_all_unverified_and_partial_rejected(self):
+        c = Campaign(self)
+        self.assertEqual(di.common_dut([("x", {}), ("y", {})], c.tmp), (di.UNVERIFIED, None, []))
+        _, _, probs = di.common_dut([("x", {}), ("a", c.record)], c.tmp)
+        self.assertTrue(any("mixed provenance" in p for p in probs))
+
+
 class CommittedStateTests(unittest.TestCase):
     def test_committed_records_validate(self):
         self.assertEqual(di.validate_all(REPO), 0)

@@ -37,6 +37,18 @@ compared, after the figure's `where` filter, with the unique
 points and nonfinite values of the figure's key are all errors, with dataset
 and point diagnostics. Figures that cite the same matrix share one validation.
 
+Campaign figures (offset Monte Carlo, `campaign_figures` in the mapping):
+statistics that live in a committed campaign summary JSON rather than a PVT
+CSV (sim/offset-capability, issue #85). Each entry names the summary
+(`campaign_json`), the per-corner `key` (e.g. sigma_v), a `reduce` (min/max)
+over the authored `corners`, a `scale` to the printed unit, and the same
+`expected`/`tol`/`at`/`printed`/`row_match` text rules as above. `at` is
+the binding corner and, since the campaign ran at one temperature, its
+`temp_c` must equal the summary's `temp_c`. Also checked: the summary's
+corner set equals the authored `corners`, every corner has n_ok ==
+n_requested == `n_per_corner` and n_failed == 0, and the cited
+`record_md` file exists and is cited in the row.
+
 Coverage (first increment): gain, GBW, phase margin, rise/fall slew, swing,
 quiescent power (record 20261001-074923-c317ff9) plus CMRR at both common-mode
 points and ICMR width/edges (record 20261009-103006-566b9a5). Not mapped: the
@@ -283,6 +295,55 @@ def check(root):
                 f"{name}: binding corner is {row['corner']}/{row['temp_c']} C, "
                 f"mapping says {at['corner']}/{at['temp_c']} C"
             )
+    errs += check_campaign_figures(root, spec2, mapping)
+    return errs
+
+
+def check_campaign_figures(root, spec2, mapping):
+    errs = []
+    for fig in mapping.get("campaign_figures", []):
+        name = fig["row"]
+        rows = table_rows(spec2, fig.get("row_match", name))
+        if len(rows) != 1:
+            errs.append(f"{name}: expected exactly one section 2 table row starting "
+                        f"{fig.get('row_match', name)!r}, found {len(rows)}")
+        else:
+            errs += check_text(name, fig, rows[0])
+            for cite in (fig["record_md"], fig["campaign_json"]):
+                if Path(cite).name not in rows[0]:
+                    errs.append(f"{name}: {Path(cite).name} is not cited in its section 2 row")
+        for cite in (fig["record_md"], fig["campaign_json"]):
+            if not (root / cite).is_file():
+                errs.append(f"{name}: cited campaign file missing: {cite}")
+        try:
+            data = json.loads((root / fig["campaign_json"]).read_text(encoding="utf-8"))
+            cs = data["corners"]
+            if set(cs) != set(fig["corners"]):
+                errs.append(f"{name}: campaign corners {sorted(cs)} != authored {sorted(fig['corners'])}")
+            for c in fig["corners"]:
+                st = cs[c]
+                n = fig["n_per_corner"]
+                if not (st["n_requested"] == st["n_ok"] == n and st["n_failed"] == 0):
+                    errs.append(f"{name}: corner {c} has n_ok={st['n_ok']} n_failed={st['n_failed']} "
+                                f"of {st['n_requested']}, expected {n} ok / 0 failed")
+            if float(data["temp_c"]) != float(fig["at"]["temp_c"]):
+                errs.append(f"{name}: campaign temp_c {data['temp_c']} != mapping at.temp_c {fig['at']['temp_c']}")
+            vals = {}
+            for c in fig["corners"]:
+                v = float(cs[c][fig["key"]])
+                if not math.isfinite(v):
+                    raise ValueError(f"nonfinite {fig['key']} at {c}")
+                vals[c] = v * fig.get("scale", 1.0)
+        except (OSError, KeyError, TypeError, ValueError) as e:
+            errs.append(f"{name}: cannot recompute from {fig.get('campaign_json')}: {e!r}")
+            continue
+        pick = min if fig["reduce"] == "min" else max
+        c = pick(vals, key=vals.get)
+        if abs(vals[c] - fig["expected"]) > fig["tol"]:
+            errs.append(f"{name}: recomputed {fig['reduce']} {fig['key']} = {vals[c]:.6g} {fig['unit']}, "
+                        f"spec states {fig['expected']} (tol {fig['tol']})")
+        if c != fig["at"]["corner"]:
+            errs.append(f"{name}: binding corner is {c}, mapping says {fig['at']['corner']}")
     return errs
 
 

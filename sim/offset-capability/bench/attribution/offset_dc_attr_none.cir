@@ -12,6 +12,9 @@
 * (../../opamp-characterization/testbench/psrr_vdd.cir): VDD 1.8 V, ideal
 * 5 uA Iref, 2 pF Cload, no bias generator. VCM = 0.9 V (VDD/2, the PSRR
 * benches' input common mode).
+* Template: offset_probe.py renders this per campaign into records/dut-<label>/
+* offset_dc.spice, with the include below rewritten to the captured DUT copy
+* (issue #113). Run directly, it uses the live design netlist.
 .option scale=1u
 * mismatch-off wrappers (issue #107). The local `.param mc_mm_switch=0` shadows
 * the library's global switch for everything instantiated inside, so the PDK

@@ -121,6 +121,43 @@ unchanged. The `.include` of the R+C typical files is satisfied by the
 `.lib <sky130.lib.spice> <corner>` section klt appends, which stages correctly
 on the batch backend (verified by the passing fleet record).
 
+### Independent supply mode (issue #110)
+
+The default **paired** mode is unchanged: one VDD per process (TT/SF/FS 1.80 V,
+SS 1.62 V, FF 1.98 V; 15 points per analysis), so it never tests every process at
+both supply extremes of the spec's 1.8 V +/-10 % range. The opt-in **cartesian**
+mode treats the supply as an independent axis:
+
+```bash
+# 5 processes x 3 temperatures x 3 supplies = 45 tuples per analysis
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses ac,tran_sr,dc_swing
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses icmr,cmrr,tran_step   # klt request(s)
+# cheap probe: any subset of processes / temperatures / supplies
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --supplies 1.98 --corners ss --temps 27 --analyses ac
+```
+
+`--supplies` defaults to `1.62,1.8,1.98`. In cartesian mode the actual point
+voltage drives every stimulus (Vcm = VDD/2, slew step 0.5 VDD +/- 0.2 VDD, swing
+sweep step VDD/360, ICMR mid-supply literals); decks, logs and snapshots are named
+`<analysis>-<corner>-<T>C-<VDD>V` (paired names are unchanged); klt `cmrr` /
+`tran_step` requests carry the full supply axis with no `exclude`, `icmr` is one
+request per (process, supply) (`icmr-<corner>-<VDD>V`), and responses are keyed by
+(process, temperature, supply) so supplies at one process/temperature cannot
+overwrite each other. A missing unit is reported in `errors`, never silently dropped.
+
+The record's `matrix` gains `supply_mode`, `supplies_v`, `expected_tuples` (the
+explicit (corner, temp_c, vdd_v) set) and `n_expected_tuples_per_analysis`. Author
+the matching `supply: {"mode": "cartesian", "values": [...]}` matrix in
+`manifests/spec-section2-figures.json` (already supported by
+`design/bin/spec_figures_check.py`) before any spec figure cites a cartesian record.
+A subset or failed run is coverage evidence only; it supports no "met across the
+supply range" claim.
+
+**Campaign status**: the 45-point baseline campaign record is not yet produced; only a
+single-point probe (`20261009-214831-fba38c0-1e3b78`: SS / 27 C / 1.98 V, ac) exists.
+The local-ngspice analyses (`ac,tran_sr,dc_swing`) are a 135-run grid and are not hand-run
+on shared dispatch hosts.
+
 **PDK pin**: [`pdk.json`](pdk.json) — sky130A, open_pdks commit
 `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, the **same pin** as
 [`../gm-id-characterization/pdk.json`](../gm-id-characterization/pdk.json)

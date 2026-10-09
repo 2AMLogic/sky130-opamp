@@ -59,13 +59,32 @@ full-core layout exists (`layout/opamp_stage1` is partial and is rejected).
 
 ## Tests
 
-Simulator-free checks (stdlib only; no ngspice or PDK needed, run in seconds
-and in CI via `.github/workflows/tests.yml`):
+Simulator-free checks (stdlib only; no ngspice, xschem or PDK needed, run in
+seconds). One runner executes the whole default gate, sequentially, stopping
+at the first failure:
+
+```
+python design/bin/check_ci.py     # also: npm test / npm run check:ci
+```
+
+It runs, in order:
 
 ```
 python design/bin/sizing_check.py validate
-python -m unittest discover -s tests
+python design/bin/integrator_check.py validate
+python design/bin/spec_figures_check.py validate
+python sim/lib/dut_identity.py validate
+python sim/lib/dut_identity.py current
+python -m unittest discover -s tests -v
+python design/bin/test_netlist_check.py CompareUnit -v
+python sim/lib/append_only_check.py --base origin/main   # only if origin/main resolves
 ```
+
+If `origin/main` does not resolve the append-only check is skipped with an
+explicit message. The runner mirrors `.github/workflows/tests.yml` (the source
+of truth); it never runs xschem. The separate xschem + pinned-PDK gate
+(`netlist_check.py` regeneration and the `EndToEnd` netlist tests) runs only in
+`.github/workflows/design-sources.yml`.
 
 ## License
 
