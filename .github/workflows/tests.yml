@@ -1,0 +1,35 @@
+name: unit tests
+
+# Simulator-free checks of the sim harness and the deterministic sizing
+# calculation (stdlib unittest only: no ngspice, no PDK, no pip installs).
+#   - design/bin/sizing_check.py validate: the interpolation must reproduce
+#     the committed gm/ID -summary.csv exactly.
+#   - tests/: template placeholder rendering, PDK pin resolution, corner/CSV
+#     aggregation, and shape validation of the committed sim records.
+# Run locally with the same two commands (see README.md).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Validate sizing_check against the committed gm/ID summary
+        run: python design/bin/sizing_check.py validate
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
