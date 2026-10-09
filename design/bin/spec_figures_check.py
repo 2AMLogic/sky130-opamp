@@ -8,9 +8,22 @@ Stdlib only, simulator-free, report-only (never rewrites the spec or records).
 For each row of manifests/spec-section2-figures.json it recomputes the worst
 case (min/max of one CSV column over the record's matrix), compares it to the
 authored expected value within the printed-precision tolerance, checks the
-argmin/argmax corner matches the binding corner the spec names, and checks the
-printed figure text occurs in section 2. It also verifies every record id cited
-anywhere in section 2 exists under sim/*/records/.
+argmin/argmax corner matches the mapping's `at`, and checks the spec text.
+
+Spec-side checks are scoped to the one section 2 table row whose first cell
+starts with the mapping's `row_match` (default: `row`):
+  - every `printed` string must occur in that row exactly as many times as it
+    is listed (list a string twice if the row prints it twice);
+  - every copy of the figure's number in that row must lie inside a matched
+    `printed` occurrence, so no stray or hand-edited copy goes unaccounted;
+  - the binding corner `at`, rendered as the spec prints it (e.g.
+    "SS / \u221240 \u00b0C"), must appear in at least one `printed` string;
+  - the record id must be cited in that row;
+  - `expected`/`tol` must agree with the number and precision printed in
+    `printed[0]`, so the mapping cannot drift from its own text.
+Copies of a figure outside the table rows (e.g. a section 2 summary paragraph)
+are not covered. It also verifies every record id cited anywhere in section 2
+exists under sim/*/records/.
 
 Coverage (first increment): gain, GBW, phase margin, rise/fall slew, swing,
 quiescent power (record 20261001-074923-c317ff9) plus CMRR at both common-mode
@@ -20,16 +33,18 @@ superseded-sizing figures from record 20260916-032327-edc9f22, and ranges.
 """
 import argparse
 import csv
+import json
+import math
 import re
 import sys
 from pathlib import Path
-import json
 
 REPO = Path(__file__).resolve().parent.parent.parent
 MAPPING = "manifests/spec-section2-figures.json"
 SPEC = "spec/target-spec.md"
 RECORDS_GLOB = "sim/*/records"
 ID_RE = re.compile(r"\b\d{8}-\d{6}-[0-9a-f]{7}\b")
+NUM_RE = re.compile(r"\d+(?:\.\d+)?")
 OPAMP_RECORDS = "sim/opamp-characterization/records"
 
 
@@ -39,6 +54,61 @@ def section2(text):
         raise ValueError("no '## 2.' heading in spec")
     n = re.search(r"^## ", text[m.end():], re.M)
     return text[m.end(): m.end() + n.start()] if n else text[m.end():]
+
+
+def table_rows(spec2, prefix):
+    """Section 2 table rows whose first cell starts with `prefix`."""
+    out = []
+    for line in spec2.splitlines():
+        cells = line.split("|")
+        if line.startswith("|") and len(cells) > 2 and cells[1].strip().startswith(prefix):
+            out.append(line)
+    return out
+
+
+def corner_text(at):
+    t = float(at["temp_c"])
+    t = f"{t:g}".replace("-", "\u2212")
+    return f"{at['corner'].upper()} / {t} \u00b0C"
+
+
+def occurrences(hay, needle):
+    i, out = 0, []
+    while needle and (j := hay.find(needle, i)) >= 0:
+        out.append((j, j + len(needle)))
+        i = j + len(needle)
+    return out
+
+
+def check_text(name, fig, row):
+    errs = []
+    printed = fig["printed"]
+    if not printed:
+        return [f"{name}: mapping lists no printed text"]
+    m = NUM_RE.search(printed[0])
+    if not m:
+        return [f"{name}: printed[0] {printed[0]!r} contains no number"]
+    num = m.group(0)
+    if not math.isclose(float(num), fig["expected"], rel_tol=0, abs_tol=1e-12):
+        errs.append(f"{name}: mapping expected {fig['expected']} disagrees with printed {num!r}")
+    dec = len(num.split(".")[1]) if "." in num else 0
+    if not math.isclose(fig["tol"], 0.5 * 10 ** -dec, rel_tol=1e-9):
+        errs.append(f"{name}: mapping tol {fig['tol']} is not half the printed precision of {num!r}")
+    spans = []
+    for s in sorted(set(printed)):
+        occ = occurrences(row, s)
+        want = printed.count(s)
+        if len(occ) != want:
+            errs.append(f"{name}: printed {s!r} occurs {len(occ)}x in its section 2 row, mapping lists {want}x")
+        spans += occ
+    for n in re.finditer(rf"(?<![\d.]){re.escape(num)}(?!\d)", row):
+        if not any(a <= n.start() and n.end() <= b for a, b in spans):
+            ctx = row[max(0, n.start() - 30): n.end() + 30]
+            errs.append(f"{name}: copy of {num} in its section 2 row not covered by any printed string: ...{ctx}...")
+    ct = corner_text(fig["at"])
+    if not any(ct in s for s in printed):
+        errs.append(f"{name}: binding corner {ct!r} does not appear in any printed string")
+    return errs
 
 
 def record_exists(root, rid):
@@ -71,11 +141,14 @@ def check(root):
             errs.append(f"section 2 cites record {rid} which does not exist under {RECORDS_GLOB}")
     for fig in mapping["figures"]:
         name = fig["row"]
-        for s in fig["printed"]:
-            if s not in spec2:
-                errs.append(f"{name}: printed figure {s!r} not found in section 2")
-        if fig["record"] not in spec2:
-            errs.append(f"{name}: record {fig['record']} is not cited in section 2")
+        rows = table_rows(spec2, fig.get("row_match", name))
+        if len(rows) != 1:
+            errs.append(f"{name}: expected exactly one section 2 table row starting "
+                        f"{fig.get('row_match', name)!r}, found {len(rows)}")
+        else:
+            errs += check_text(name, fig, rows[0])
+            if fig["record"] not in rows[0]:
+                errs.append(f"{name}: record {fig['record']} is not cited in its section 2 row")
         path = root / OPAMP_RECORDS / f"{fig['record']}-{fig['csv']}.csv"
         if not path.is_file():
             errs.append(f"{name}: record CSV missing: {path.relative_to(root)}")
