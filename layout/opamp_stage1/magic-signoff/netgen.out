@@ -1,0 +1,25 @@
+Class opamp_stage1:  Merged 2 devices.
+
+Subcircuit summary:
+Circuit 1: opamp_stage1                    |Circuit 2: opamp_stage1                    
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__nfet_01v8 (2)                |sky130_fd_pr__nfet_01v8 (2)                
+Number of devices: 2                       |Number of devices: 2                       
+Number of nets: 6                          |Number of nets: 6                          
+---------------------------------------------------------------------------------------
+Netlists match uniquely.
+Circuits match correctly.
+
+Subcircuit pins:
+Circuit 1: opamp_stage1                    |Circuit 2: opamp_stage1                    
+-------------------------------------------|-------------------------------------------
+tail                                       |tail                                       
+vss                                        |vss                                        
+d1                                         |d1                                         
+d2                                         |d2                                         
+inn                                        |inn                                        
+inp                                        |inp                                        
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes opamp_stage1 and opamp_stage1 are equivalent.
+Circuits match uniquely.

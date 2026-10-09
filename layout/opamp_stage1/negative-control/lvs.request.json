@@ -1,0 +1,14 @@
+{
+  "layout": {
+    "netlist": "opamp_stage1.spice"
+  },
+  "reference": {
+    "netlist": "opamp_stage1.negctl.ref.spice",
+    "form": "subckt-call",
+    "deck": "sky130",
+    "top": "opamp_stage1"
+  },
+  "options": {
+    "combine_devices": true
+  }
+}

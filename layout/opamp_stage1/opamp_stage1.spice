@@ -1,0 +1,19 @@
+* extracted by klt extract --deck sky130
+
+* cell opamp_stage1
+* pin d1
+* pin d2
+* pin inn
+* pin inp
+* pin tail
+* pin vss
+.SUBCKT opamp_stage1 d1 d2 inn inp tail vss
+* device instance $1 r0 *1 1.02,1.507 nfet
+M$1 d1 inn tail vss nfet L=1.2U W=3.015U AS=1.2663P AD=1.2663P PS=6.87U PD=6.87U
+* device instance $2 r0 *1 3.46,1.507 nfet
+M$2 d2 inp tail vss nfet L=1.2U W=3.015U AS=1.2663P AD=1.2663P PS=6.87U PD=6.87U
+* device instance $3 r0 *1 1.02,5.742 nfet
+M$3 d2 inp tail vss nfet L=1.2U W=3.015U AS=1.2663P AD=1.2663P PS=6.87U PD=6.87U
+* device instance $4 r0 *1 3.46,5.742 nfet
+M$4 d1 inn tail vss nfet L=1.2U W=3.015U AS=1.2663P AD=1.2663P PS=6.87U PD=6.87U
+.ENDS opamp_stage1

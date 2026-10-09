@@ -1,0 +1,602 @@
+{
+  "pdk": {
+    "variant": "sky130A"
+  },
+  "blocks": [
+    {
+      "id": "mn12",
+      "generator_report": "gen/mn12.snapped.gen.json"
+    },
+    {
+      "id": "fe_masks",
+      "cell": {
+        "gds_path": "gen/fe_masks.gds",
+        "cell_name": "stage1_fe_masks",
+        "ports": []
+      }
+    },
+    {
+      "id": "pin_tail",
+      "cell": {
+        "gds_path": "gen/pin_tail.gds",
+        "cell_name": "stub_metal2",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_inn",
+      "cell": {
+        "gds_path": "gen/pin_inn.gds",
+        "cell_name": "stub_metal3",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vss",
+      "cell": {
+        "gds_path": "gen/pin_vss.gds",
+        "cell_name": "stub_metal",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_inp",
+      "cell": {
+        "gds_path": "gen/pin_inp.gds",
+        "cell_name": "stub_metal4",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_d1",
+      "cell": {
+        "gds_path": "gen/pin_d1.gds",
+        "cell_name": "stub_metal3",
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_d2",
+      "cell": {
+        "gds_path": "gen/pin_d2.gds",
+        "cell_name": "stub_metal4",
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    }
+  ],
+  "placement": {
+    "strategy": "explicit",
+    "order": [
+      "mn12",
+      "fe_masks",
+      "pin_tail",
+      "pin_inn",
+      "pin_vss",
+      "pin_inp",
+      "pin_d1",
+      "pin_d2"
+    ],
+    "origins_um": {
+      "mn12": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pin_tail": {
+        "x": -6.0,
+        "y": -2.21
+      },
+      "pin_inn": {
+        "x": -6.0,
+        "y": 3.415
+      },
+      "pin_vss": {
+        "x": -6.0,
+        "y": 3.825
+      },
+      "pin_inp": {
+        "x": -6.0,
+        "y": 7.65
+      },
+      "pin_d1": {
+        "x": 8.0,
+        "y": 5.53
+      },
+      "pin_d2": {
+        "x": 8.0,
+        "y": 10.79
+      },
+      "fe_masks": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "routing": {
+    "layer_role": "metal",
+    "width_um": 0.3
+  },
+  "connectivity": [
+    {
+      "net": "tail",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_1_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_S"
+        },
+        {
+          "block": "pin_tail",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_tail",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q1_1_S"
+          },
+          "waypoints_um": [
+            [
+              0.21,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q1_1_S"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q2_1_S"
+          },
+          "waypoints_um": [
+            [
+              0.21,
+              -2.0
+            ],
+            [
+              2.65,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q1_1_S"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q2_2_S"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_1_S"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q1_2_S"
+          }
+        }
+      ]
+    },
+    {
+      "net": "d1",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_D"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_D"
+        },
+        {
+          "block": "pin_d1",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q1_1_D"
+          },
+          "to_pin": {
+            "block": "pin_d1",
+            "port": "CONN"
+          },
+          "waypoints_um": [
+            [
+              1.83,
+              -3.0
+            ],
+            [
+              7.0,
+              -3.0
+            ],
+            [
+              7.0,
+              5.74
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q1_2_D"
+          },
+          "to_pin": {
+            "block": "pin_d1",
+            "port": "CONN"
+          }
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q2_1_D"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_D"
+        },
+        {
+          "block": "pin_d2",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_1_D"
+          },
+          "to_pin": {
+            "block": "pin_d2",
+            "port": "CONN"
+          },
+          "waypoints_um": [
+            [
+              4.27,
+              11.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_2_D"
+          },
+          "to_pin": {
+            "block": "pin_d2",
+            "port": "CONN"
+          },
+          "waypoints_um": [
+            [
+              1.83,
+              11.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "net": "inn",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_G"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_G"
+        },
+        {
+          "block": "pin_inn",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_inn",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q1_1_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q1_1_G"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q1_2_G"
+          },
+          "waypoints_um": [
+            [
+              -2.5,
+              3.625
+            ],
+            [
+              -2.5,
+              10.0
+            ],
+            [
+              3.46,
+              10.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "net": "inp",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q2_1_G"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_G"
+        },
+        {
+          "block": "pin_inp",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_inp",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q2_2_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_1_G"
+          },
+          "to_pin": {
+            "block": "mn12",
+            "port": "Q2_2_G"
+          },
+          "waypoints_um": [
+            [
+              -3.0,
+              3.625
+            ],
+            [
+              -3.0,
+              7.86
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "layer_role": "metal",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "TAP_W"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "inn",
+      "block": "pin_inn",
+      "port": "PAD"
+    },
+    {
+      "net": "inp",
+      "block": "pin_inp",
+      "port": "PAD"
+    },
+    {
+      "net": "tail",
+      "block": "pin_tail",
+      "port": "PAD"
+    },
+    {
+      "net": "d1",
+      "block": "pin_d1",
+      "port": "PAD"
+    },
+    {
+      "net": "d2",
+      "block": "pin_d2",
+      "port": "PAD"
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    }
+  ],
+  "options": {
+    "cell_name": "opamp_stage1",
+    "output": "opamp_stage1.gds"
+  }
+}

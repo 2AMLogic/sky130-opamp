@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "generator": "draw",
+  "gds_path": "gen/fe_masks.gds",
+  "cell_name": "stage1_fe_masks",
+  "dbu_um": 0.001,
+  "shape_count": 17,
+  "label_count": 0,
+  "layers": [
+    {
+      "layer": 93,
+      "datatype": 44,
+      "name": null,
+      "shapes": 1
+    },
+    {
+      "layer": 94,
+      "datatype": 20,
+      "name": null,
+      "shapes": 4
+    },
+    {
+      "layer": 95,
+      "datatype": 20,
+      "name": null,
+      "shapes": 4
+    },
+    {
+      "layer": 66,
+      "datatype": 20,
+      "name": null,
+      "shapes": 8
+    }
+  ],
+  "bbox_um": {
+    "x0": -1.045,
+    "y0": -1.045,
+    "x1": 5.525,
+    "y1": 9.115
+  },
+  "warnings": [
+    "written verbatim by `klt draw`: no PDK awareness and no rule checking were applied; this cell is not guaranteed to be design-legal"
+  ]
+}
