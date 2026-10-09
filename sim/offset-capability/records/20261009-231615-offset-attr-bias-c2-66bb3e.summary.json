@@ -1,0 +1,1379 @@
+{
+  "record_id": "20261009-231615-offset-attr-bias-c2-66bb3e",
+  "attribution": "attr",
+  "group": "bias",
+  "chunk": 2,
+  "chunk_seed": 20261087,
+  "chunk_n": 100,
+  "global_offset": 200,
+  "attempt": 1,
+  "mismatch_on": [
+    "XM5",
+    "XMB1"
+  ],
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-107/sim/offset-capability/records/20261009-231615-offset-attr-bias-c2-66bb3e.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-107/sim/offset-capability/records/20261009-231615-offset-attr-bias-c2-66bb3e-artifacts",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "client_klt_version": "klt 0.7.0+gb82427b30c96",
+  "git_sha": "6f18704286895e7a3b6c20c6420468466ab033de",
+  "remote": {
+    "provider": "aws-batch-fleet",
+    "job_id": "klt-sim-c99f8bd4210f",
+    "bucket": "2am-batch-jobs-221082181346",
+    "region": "us-east-1",
+    "instance_id": "i-0ae8dd6c56b3bc81f",
+    "instance_type": "c7i.8xlarge",
+    "availability_zone": "us-east-1d",
+    "ami_id": "ami-0e40e3245f1923ac8",
+    "lifecycle": "spot",
+    "spot": true,
+    "state": "done",
+    "exit_code": "0",
+    "concurrency": "2",
+    "physical_cores": "16",
+    "elapsed_seconds": 302,
+    "runner_klt_version": "0.5.0",
+    "client_klt_version": "0.7.0+gb82427b30c96",
+    "runner_compatibility": "mismatch",
+    "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gb82427b30c96; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+  },
+  "monte_carlo_echo": {
+    "n": 100,
+    "seed": 20261087,
+    "vary": "mismatch",
+    "family_mismatch": [
+      {
+        "family": "mosfet",
+        "active": true,
+        "note": "MOS per-instance mismatch is active in any _mm-suffixed process-corner section (e.g. tt_mm) -- select that section via corners.process to sample it (see docs/cli/sim.md's 'Known-good mismatch mechanisms')."
+      },
+      {
+        "family": "resistor",
+        "active": null,
+        "note": "mismatch activity for the 'resistor' family is not independently verified for PDK family 'sky130'; treat any sampled spread for it as unconfirmed."
+      },
+      {
+        "family": "capacitor",
+        "active": null,
+        "note": "mismatch activity for the 'capacitor' family is not independently verified for PDK family 'sky130'; treat any sampled spread for it as unconfirmed."
+      },
+      {
+        "family": "other",
+        "active": null,
+        "note": "mismatch activity for the 'other' family is not independently verified for PDK family 'sky130'; treat any sampled spread for it as unconfirmed."
+      }
+    ]
+  },
+  "echo_problems": [],
+  "samples": [
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc0",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 0,
+        "seed": 333672489,
+        "process_seed": 709464795,
+        "mismatch_seed": 1828285710
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016799999999994597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc1",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 1,
+        "seed": 262330409,
+        "process_seed": 709464795,
+        "mismatch_seed": 382129357
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013699999999994272
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc2",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 2,
+        "seed": 1683356926,
+        "process_seed": 709464795,
+        "mismatch_seed": 1106444294
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016799999999994597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc3",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 3,
+        "seed": 1557608515,
+        "process_seed": 709464795,
+        "mismatch_seed": 1826931685
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014799999999992597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc4",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 4,
+        "seed": 203244060,
+        "process_seed": 709464795,
+        "mismatch_seed": 1063679273
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014799999999992597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc5",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 5,
+        "seed": 1507887252,
+        "process_seed": 709464795,
+        "mismatch_seed": 1116141537
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015199999999992997
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc6",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 6,
+        "seed": 1640248867,
+        "process_seed": 709464795,
+        "mismatch_seed": 662684677
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013799999999997148
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc7",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 7,
+        "seed": 429002345,
+        "process_seed": 709464795,
+        "mismatch_seed": 2013070822
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011899999999998023
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc8",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 8,
+        "seed": 1135993574,
+        "process_seed": 709464795,
+        "mismatch_seed": 200558933
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014799999999992597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc9",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 9,
+        "seed": 1959444343,
+        "process_seed": 709464795,
+        "mismatch_seed": 1457604492
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013499999999999623
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc10",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 10,
+        "seed": 1182295459,
+        "process_seed": 709464795,
+        "mismatch_seed": 1252569871
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014199999999997548
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc11",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 11,
+        "seed": 1985328868,
+        "process_seed": 709464795,
+        "mismatch_seed": 414356468
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016399999999994197
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc12",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 12,
+        "seed": 1626592215,
+        "process_seed": 709464795,
+        "mismatch_seed": 568897722
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00017999999999995797
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc13",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 13,
+        "seed": 1311131706,
+        "process_seed": 709464795,
+        "mismatch_seed": 1800665839
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00017999999999995797
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc14",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 14,
+        "seed": 931899580,
+        "process_seed": 709464795,
+        "mismatch_seed": 1550372725
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018799999999996597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc15",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 15,
+        "seed": 2049709254,
+        "process_seed": 709464795,
+        "mismatch_seed": 1213978669
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00021099999999996122
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc16",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 16,
+        "seed": 807607358,
+        "process_seed": 709464795,
+        "mismatch_seed": 433328
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00010999999999994348
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc17",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 17,
+        "seed": 240021134,
+        "process_seed": 709464795,
+        "mismatch_seed": 953476594
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013099999999999223
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc18",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 18,
+        "seed": 1482791515,
+        "process_seed": 709464795,
+        "mismatch_seed": 227742043
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00010699999999996823
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc19",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 19,
+        "seed": 481394319,
+        "process_seed": 709464795,
+        "mismatch_seed": 938349479
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00019499999999994522
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc20",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 20,
+        "seed": 1736139992,
+        "process_seed": 709464795,
+        "mismatch_seed": 1109690747
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012499999999993072
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc21",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 21,
+        "seed": 140214553,
+        "process_seed": 709464795,
+        "mismatch_seed": 17597424
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018099999999998673
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc22",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 22,
+        "seed": 957948110,
+        "process_seed": 709464795,
+        "mismatch_seed": 796828003
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00022400000000000198
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc23",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 23,
+        "seed": 580458326,
+        "process_seed": 709464795,
+        "mismatch_seed": 133679605
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014999999999998348
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc24",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 24,
+        "seed": 1068301093,
+        "process_seed": 709464795,
+        "mismatch_seed": 2113114101
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013799999999997148
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc25",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 25,
+        "seed": 837064567,
+        "process_seed": 709464795,
+        "mismatch_seed": 1368397034
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012999999999996348
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc26",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 26,
+        "seed": 2119741070,
+        "process_seed": 709464795,
+        "mismatch_seed": 100576175
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015599999999993397
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc27",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 27,
+        "seed": 1403091506,
+        "process_seed": 709464795,
+        "mismatch_seed": 1901907163
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014899999999995472
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc28",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 28,
+        "seed": 1145483548,
+        "process_seed": 709464795,
+        "mismatch_seed": 1240430504
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016799999999994597
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc29",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 29,
+        "seed": 354802925,
+        "process_seed": 709464795,
+        "mismatch_seed": 1717431496
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015500000000001624
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc30",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 30,
+        "seed": 1271126729,
+        "process_seed": 709464795,
+        "mismatch_seed": 1597836971
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 9.799999999993148e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc31",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 31,
+        "seed": 489697134,
+        "process_seed": 709464795,
+        "mismatch_seed": 1727935696
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00010799999999999699
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc32",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 32,
+        "seed": 1547533706,
+        "process_seed": 709464795,
+        "mismatch_seed": 2001565764
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00021899999999996922
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc33",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 33,
+        "seed": 432608730,
+        "process_seed": 709464795,
+        "mismatch_seed": 1473416955
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00022500000000003073
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc34",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 34,
+        "seed": 388866856,
+        "process_seed": 709464795,
+        "mismatch_seed": 291136972
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00020500000000001073
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc35",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 35,
+        "seed": 148517799,
+        "process_seed": 709464795,
+        "mismatch_seed": 575595723
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016399999999994197
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc36",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 36,
+        "seed": 587558853,
+        "process_seed": 709464795,
+        "mismatch_seed": 1528943021
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00017599999999995397
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc37",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 37,
+        "seed": 405616534,
+        "process_seed": 709464795,
+        "mismatch_seed": 516292334
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016099999999996673
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc38",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 38,
+        "seed": 905938111,
+        "process_seed": 709464795,
+        "mismatch_seed": 720240274
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015599999999993397
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc39",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 39,
+        "seed": 2138843327,
+        "process_seed": 709464795,
+        "mismatch_seed": 1932442680
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00019599999999997397
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc40",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 40,
+        "seed": 1855960339,
+        "process_seed": 709464795,
+        "mismatch_seed": 1983587192
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018600000000001948
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc41",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 41,
+        "seed": 1944298879,
+        "process_seed": 709464795,
+        "mismatch_seed": 1334237449
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012599999999995948
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc42",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 42,
+        "seed": 463000617,
+        "process_seed": 709464795,
+        "mismatch_seed": 183569111
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 7.199999999996098e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc43",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 43,
+        "seed": 1668121831,
+        "process_seed": 709464795,
+        "mismatch_seed": 1535404745
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00019000000000002348
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc44",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 44,
+        "seed": 1870764890,
+        "process_seed": 709464795,
+        "mismatch_seed": 284742268
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011300000000002974
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc45",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 45,
+        "seed": 104488923,
+        "process_seed": 709464795,
+        "mismatch_seed": 1971154803
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00017199999999994997
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc46",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 46,
+        "seed": 198594120,
+        "process_seed": 709464795,
+        "mismatch_seed": 1779192952
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014899999999995472
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc47",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 47,
+        "seed": 2018288761,
+        "process_seed": 709464795,
+        "mismatch_seed": 888558705
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 9.700000000001374e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc48",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 48,
+        "seed": 1138927846,
+        "process_seed": 709464795,
+        "mismatch_seed": 234461421
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00019999999999997797
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc49",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 49,
+        "seed": 1148837005,
+        "process_seed": 709464795,
+        "mismatch_seed": 1081977723
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012499999999993072
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc50",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 50,
+        "seed": 481095705,
+        "process_seed": 709464795,
+        "mismatch_seed": 1176706868
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018299999999993322
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc51",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 51,
+        "seed": 2015790706,
+        "process_seed": 709464795,
+        "mismatch_seed": 833518316
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011699999999992272
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc52",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 52,
+        "seed": 817763137,
+        "process_seed": 709464795,
+        "mismatch_seed": 1880531562
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014300000000000423
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc53",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 53,
+        "seed": 1940147637,
+        "process_seed": 709464795,
+        "mismatch_seed": 250545070
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018699999999993722
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc54",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 54,
+        "seed": 2030120065,
+        "process_seed": 709464795,
+        "mismatch_seed": 2066499990
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 9.999999999998899e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc55",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 55,
+        "seed": 745760791,
+        "process_seed": 709464795,
+        "mismatch_seed": 1571993262
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00019000000000002348
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc56",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 56,
+        "seed": 1058872686,
+        "process_seed": 709464795,
+        "mismatch_seed": 497934448
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 6.799999999995698e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc57",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 57,
+        "seed": 431278893,
+        "process_seed": 709464795,
+        "mismatch_seed": 44253640
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015199999999992997
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc58",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 58,
+        "seed": 1823259332,
+        "process_seed": 709464795,
+        "mismatch_seed": 184882438
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00020299999999995322
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc59",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 59,
+        "seed": 437473385,
+        "process_seed": 709464795,
+        "mismatch_seed": 836149038
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014199999999997548
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc60",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 60,
+        "seed": 2062318099,
+        "process_seed": 709464795,
+        "mismatch_seed": 2072403671
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015100000000001224
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc61",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 61,
+        "seed": 1504572805,
+        "process_seed": 709464795,
+        "mismatch_seed": 825875915
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012499999999993072
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc62",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 62,
+        "seed": 570195696,
+        "process_seed": 709464795,
+        "mismatch_seed": 1170491066
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00025200000000003
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc63",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 63,
+        "seed": 2028624499,
+        "process_seed": 709464795,
+        "mismatch_seed": 1416050430
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00010399999999999299
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc64",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 64,
+        "seed": 771200279,
+        "process_seed": 709464795,
+        "mismatch_seed": 548428475
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014599999999997948
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc65",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 65,
+        "seed": 1138682915,
+        "process_seed": 709464795,
+        "mismatch_seed": 1316250758
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016199999999999548
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc66",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 66,
+        "seed": 330464866,
+        "process_seed": 709464795,
+        "mismatch_seed": 1121910061
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016599999999999948
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc67",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 67,
+        "seed": 1508673716,
+        "process_seed": 709464795,
+        "mismatch_seed": 1244036116
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00020900000000001473
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc68",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 68,
+        "seed": 2004533825,
+        "process_seed": 709464795,
+        "mismatch_seed": 1424589557
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 7.499999999993623e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc69",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 69,
+        "seed": 952236929,
+        "process_seed": 709464795,
+        "mismatch_seed": 1177265373
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013699999999994272
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc70",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 70,
+        "seed": 1705579450,
+        "process_seed": 709464795,
+        "mismatch_seed": 536134816
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013799999999997148
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc71",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 71,
+        "seed": 1806746542,
+        "process_seed": 709464795,
+        "mismatch_seed": 2103116528
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011699999999992272
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc72",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 72,
+        "seed": 1387758333,
+        "process_seed": 709464795,
+        "mismatch_seed": 446297325
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 9.399999999992747e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc73",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 73,
+        "seed": 1125750527,
+        "process_seed": 709464795,
+        "mismatch_seed": 1407661295
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011300000000002974
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc74",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 74,
+        "seed": 629293463,
+        "process_seed": 709464795,
+        "mismatch_seed": 993180474
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00011499999999997623
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc75",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 75,
+        "seed": 1614278276,
+        "process_seed": 709464795,
+        "mismatch_seed": 377362279
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.000132000000000021
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc76",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 76,
+        "seed": 1421666290,
+        "process_seed": 709464795,
+        "mismatch_seed": 967561308
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015999999999993797
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc77",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 77,
+        "seed": 1404028214,
+        "process_seed": 709464795,
+        "mismatch_seed": 71181056
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013299999999993872
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc78",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 78,
+        "seed": 1562847559,
+        "process_seed": 709464795,
+        "mismatch_seed": 1424452729
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00017199999999994997
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc79",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 79,
+        "seed": 1994441645,
+        "process_seed": 709464795,
+        "mismatch_seed": 568636219
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 7.299999999998974e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc80",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 80,
+        "seed": 2069576410,
+        "process_seed": 709464795,
+        "mismatch_seed": 1933521604
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012199999999995548
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc81",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 81,
+        "seed": 1322634282,
+        "process_seed": 709464795,
+        "mismatch_seed": 679760631
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 8.999999999992347e-05
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc82",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 82,
+        "seed": 1004678962,
+        "process_seed": 709464795,
+        "mismatch_seed": 648801113
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018299999999993322
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc83",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 83,
+        "seed": 1934342991,
+        "process_seed": 709464795,
+        "mismatch_seed": 277088360
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016499999999997073
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc84",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 84,
+        "seed": 161170515,
+        "process_seed": 709464795,
+        "mismatch_seed": 162885876
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00015299999999995872
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc85",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 85,
+        "seed": 2120832655,
+        "process_seed": 709464795,
+        "mismatch_seed": 1855722529
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.000144000000000033
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc86",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 86,
+        "seed": 2021285346,
+        "process_seed": 709464795,
+        "mismatch_seed": 1283756952
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018099999999998673
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc87",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 87,
+        "seed": 842742417,
+        "process_seed": 709464795,
+        "mismatch_seed": 471637223
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012699999999998823
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc88",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 88,
+        "seed": 1855789953,
+        "process_seed": 709464795,
+        "mismatch_seed": 2120898586
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018200000000001548
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc89",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 89,
+        "seed": 1629225202,
+        "process_seed": 709464795,
+        "mismatch_seed": 269138201
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012599999999995948
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc90",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 90,
+        "seed": 156111694,
+        "process_seed": 709464795,
+        "mismatch_seed": 25985218
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00026399999999993096
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc91",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 91,
+        "seed": 1222421583,
+        "process_seed": 709464795,
+        "mismatch_seed": 937937637
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014499999999995072
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc92",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 92,
+        "seed": 772789133,
+        "process_seed": 709464795,
+        "mismatch_seed": 254665747
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00013099999999999223
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc93",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 93,
+        "seed": 933539827,
+        "process_seed": 709464795,
+        "mismatch_seed": 1554397473
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00018299999999993322
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc94",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 94,
+        "seed": 478834349,
+        "process_seed": 709464795,
+        "mismatch_seed": 962391138
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00010799999999999699
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc95",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 95,
+        "seed": 2007602833,
+        "process_seed": 709464795,
+        "mismatch_seed": 1253340346
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00014700000000000824
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc96",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 96,
+        "seed": 516478651,
+        "process_seed": 709464795,
+        "mismatch_seed": 2008702561
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016300000000002424
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc97",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 97,
+        "seed": 507634983,
+        "process_seed": 709464795,
+        "mismatch_seed": 1140377981
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.000128000000000017
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc98",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 98,
+        "seed": 928458830,
+        "process_seed": 709464795,
+        "mismatch_seed": 1618946040
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00016300000000002424
+    },
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc99",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 99,
+        "seed": 455462702,
+        "process_seed": 709464795,
+        "mismatch_seed": 477904332
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00012599999999995948
+    }
+  ]
+}

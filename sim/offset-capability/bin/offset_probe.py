@@ -117,6 +117,9 @@ def snapshot_netlist(snap_dir: Path) -> str:
 def build_request(bench: str, mismatch: bool, mc: dict | None,
                   corner: str = "tt", keep_artifacts: bool = True,
                   netlist: str | None = None) -> dict:
+    """`netlist` (offset bench only) overrides the bench path: #113 uses it for the
+    per-campaign DUT snapshot, #107 for per-device-group gated variants from
+    bin/attribution.py; analysis and measurements are unchanged."""
     cir = {"pair": "../bench/pair_diag.cir", "offset": netlist or "../bench/offset_dc.cir"}[bench]
     if bench == "pair":
         analysis = {"kind": "dc", "args": "Vg 0.79 0.81 0.01"}
