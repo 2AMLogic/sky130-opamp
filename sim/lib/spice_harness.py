@@ -7,7 +7,9 @@ record with the repo's git SHA, and the shared `--check-env` tool/PDK
 availability report. Extracted from
 `sim/gm-id-characterization/bin/sweep.py` and
 `sim/opamp-characterization/bin/pvt_sweep.py`, which carried near-identical
-copies of all of it (issues #23 and #40).
+copies of all of it (issues #23 and #40). It also holds the one `klt sim`
+client (`KLT_CMD`, `klt_sim` / `run_klt_sim`, `klt_version`) that the
+klt-driven runners share (issue #65).
 
 Stdlib only -- the runners that import this promise "python3 + ngspice and
 nothing else", and this module must not weaken that.
@@ -33,10 +35,12 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 from collections.abc import Callable, Iterable
 from pathlib import Path
+from typing import NamedTuple
 
 
 class HarnessError(RuntimeError):
@@ -210,3 +214,70 @@ def report_pdk(
     for corner in corners:
         print(f"  {corner_label} include: {pdk.corner_include(corner)}")
     return 0, pdk
+
+
+# --------------------------------------------------------------------------
+# `klt sim` client (one copy of the wrapper the klt-driven sweeps share;
+# extracted from offset_probe.py, psrr_noise_sweep.py, pvt_sweep.py and
+# validate_psrr_noise.py, issue #65)
+# --------------------------------------------------------------------------
+
+# `klt` may be overridden (e.g. KLT_CMD='uvx --from klayout-tools==0.5.0 klt') to
+# match the batch fleet runner's klt version without touching the host install.
+# A runner that takes its own override flag (pvt_sweep.py --klt-cmd) mutates
+# this list in place (`KLT_CMD[:] = ...`) so every helper here sees it.
+KLT_CMD: list[str] = shlex.split(os.environ.get("KLT_CMD", "klt"))
+
+
+class KltSimError(HarnessError):
+    """`klt sim` printed no JSON report on stdout. Carries the invocation."""
+
+    def __init__(self, message: str, cmd: list[str], returncode: int, stderr: str):
+        super().__init__(message)
+        self.cmd = cmd
+        self.returncode = returncode
+        self.stderr = stderr
+
+
+class KltSim(NamedTuple):
+    cmd: list[str]
+    returncode: int
+    payload: dict
+    stderr: str
+
+
+def klt_sim(request: Path, outdir: Path, backend: str | None = None) -> KltSim:
+    """Run `klt sim <request> -o <outdir> [--backend B] --format json`.
+
+    `outdir` is made absolute (klt resolves `-o` against each corner's own cwd)
+    and created; klt's stderr is saved to `<outdir>/<request stem>.stderr.txt`.
+    Returns the invocation, exit code, parsed JSON report and stderr -- gate on
+    the report's `status`, not the exit code. Raises `KltSimError` if stdout is
+    not a JSON report.
+    """
+    outdir = Path(outdir).resolve()
+    outdir.mkdir(parents=True, exist_ok=True)
+    cmd = [*KLT_CMD, "sim", str(request), "-o", str(outdir)]
+    if backend:
+        cmd += ["--backend", backend]
+    cmd += ["--format", "json"]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    (outdir / f"{Path(request).stem}.stderr.txt").write_text(proc.stderr)
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        raise KltSimError(
+            f"klt sim exit {proc.returncode}: no JSON report on stdout ({proc.stderr.strip()[:500]})",
+            cmd, proc.returncode, proc.stderr,
+        ) from exc
+    return KltSim(cmd, proc.returncode, payload, proc.stderr)
+
+
+def run_klt_sim(request: Path, outdir: Path, backend: str | None = None) -> dict:
+    """`klt_sim(...)`'s parsed JSON report only."""
+    return klt_sim(request, outdir, backend).payload
+
+
+def klt_version() -> str:
+    """`klt --version` (through KLT_CMD) as a record stamps it."""
+    return first_line([*KLT_CMD, "--version"])

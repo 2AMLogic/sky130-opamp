@@ -48,9 +48,7 @@ import json
 import math
 import os
 import platform
-import shlex
 import shutil
-import subprocess
 import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
@@ -60,7 +58,7 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
-from spice_harness import git_sha  # noqa: E402
+from spice_harness import KLT_CMD, KltSimError, git_sha, klt_sim, klt_version  # noqa: E402
 
 TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
@@ -182,21 +180,13 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
     return req
 
 
-# `klt` may be overridden (e.g. KLT_CMD='uvx --from klayout-tools==0.5.0 klt') to
-# match the batch fleet runner's klt version without touching the host install.
-KLT_CMD = shlex.split(os.environ.get("KLT_CMD", "klt"))
-
-
 def run_klt(request_path: Path, outdir: Path, backend: str | None) -> tuple[int, dict | None, str]:
-    cmd = [*KLT_CMD, "sim", str(request_path), "-o", str(outdir), "--format", "json"]
-    if backend:
-        cmd += ["--backend", backend]
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    """(exit code, JSON report or None if klt printed none, stderr)."""
     try:
-        payload = json.loads(proc.stdout)
-    except json.JSONDecodeError:
-        payload = None
-    return proc.returncode, payload, proc.stderr
+        run = klt_sim(request_path, outdir, backend)
+    except KltSimError as exc:
+        return exc.returncode, None, exc.stderr
+    return run.returncode, run.payload, run.stderr
 
 
 def num(corner: dict, name: str):
@@ -275,7 +265,7 @@ def check_env() -> int:
         print(f"{tool:8}: {'OK   ' + p if p else 'MISSING'}")
         ok |= 0 if p else 1
     print(f"backend : $KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '(unset -> local)')}")
-    print("klt     :", subprocess.run([*KLT_CMD, "--version"], capture_output=True, text=True).stdout.strip())
+    print("klt     :", klt_version())
     return ok
 
 
@@ -430,7 +420,7 @@ def main(argv=None) -> int:
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
             "benches": meta_benches,
             "tools": {
-                "klt": subprocess.run([*KLT_CMD, "--version"], capture_output=True, text=True).stdout.strip(),
+                "klt": klt_version(),
                 "python": platform.python_version(),
                 "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             },

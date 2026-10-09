@@ -23,7 +23,6 @@ import argparse
 import json
 import math
 import os
-import shlex
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -32,7 +31,8 @@ from pathlib import Path
 EXP = Path(__file__).resolve().parent.parent
 REPO = EXP.parent.parent
 RECORDS = EXP / "records"
-KLT_CMD = shlex.split(os.environ.get("KLT_CMD", "klt"))
+sys.path.insert(0, str(REPO / "sim" / "lib"))
+from spice_harness import KltSimError, klt_sim  # noqa: E402
 
 VDD = 1.8
 VREF = VDD / 2          # output reference for the offset crossing
@@ -118,15 +118,11 @@ def extract_samples(payload: dict, bench: str) -> list[dict]:
 
 
 def run_klt(request_path: Path, outdir: Path, backend: str | None):
-    cmd = [*KLT_CMD, "sim", str(request_path), "-o", str(outdir), "--format", "json"]
-    if backend:
-        cmd += ["--backend", backend]
-    p = subprocess.run(cmd, capture_output=True, text=True)
+    """(cmd, exit code, JSON report or None if klt printed none, stderr)."""
     try:
-        payload = json.loads(p.stdout)
-    except json.JSONDecodeError:
-        payload = None
-    return cmd, p.returncode, payload, p.stderr
+        return klt_sim(request_path, outdir, backend)
+    except KltSimError as exc:
+        return exc.cmd, exc.returncode, None, exc.stderr
 
 
 def main(argv=None) -> int:
