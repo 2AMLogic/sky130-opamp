@@ -1,0 +1,58 @@
+* opamp_core unity-gain-follower SMALL-STEP testbench (issue #86)
+*
+* Independent second stability bench: a closed-loop time-domain cross-check of
+* the phase margin that opamp_ac.spice.tmpl reads at the (DC-servo) loop break.
+* A phase margin that is right at the AC break but wrong in the real
+* unity-gain connection shows up here as ringing/overshoot.
+*
+* A `klt sim` circuit BODY (no .control / .end / .lib / .temp -- klt supplies
+* them, as for opamp_icmr/opamp_cmrr.spice.tmpl); bin/pvt_sweep.py renders the
+* placeholders and writes the request JSON (tran card + .meas cards + corners).
+*
+* Wiring reuses opamp_tran_sr.spice.tmpl: `inn` is tied to `out` through
+* Rshort (1 mOhm; a genuine physical unity-gain-buffer connection, not the AC
+* bench's servo), Iref = 5u into `ibias`, Cload = 2p (DR-001).
+*
+* Stimulus: `inp` steps from VDD/2 - 0.02 to VDD/2 + 0.02
+* (+-20 mV; 40 mV total -- far below the slew-limited regime, so the response
+* is the linear one a second-order PM->overshoot approximation describes).
+* One rising step; measured on the rise only (a small-signal linear response
+* is symmetric to first order).
+*
+* Raw quantities (all .meas on v(out); overshoot / 1% settling are derived in
+* bin/pvt_sweep.py `step_metrics`, which also decides failed/non-settling):
+*   v_init   v(out) just before the edge (the pre-step settled level)
+*   v_final  v(out) at the end of the window (the post-step settled level)
+*   v_peak   max v(out) after the edge
+*   v_ofs    the sampled static offset (band centre = ideal level + v_ofs)
+*   t_lo_cross / t_hi_cross  LAST crossing of the lower / upper edge of the
+*            +-1% (of the step) band; settling time is the later of the two,
+*            minus the edge time.  An absent upper crossing means the response
+*            never left the band on the high side (v_peak is checked too).
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-86/design/netlist/opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Xdut vdd vss inn inp out ibias opamp_dut
+Rshort inn out 1m
+* mid-supply follows each corner's own VDD (`alter vdd`); the +-STEP_HALF_V pulse rides on it
+Bmid mid 0 V = 0.5*v(vdd)
+Vinp inp mid pulse(-0.02 0.02 2e-07 1e-09 1e-09 20u 40u)
+Cload out 0 2p
+
+* +-1% settling band, centred on the settled post-step level.  The band centre
+* is the ideal follower output v(inp) plus the follower's static offset, which
+* a track-then-hold node `ofs` samples before the edge (a 1 ns-time-constant
+* tracker that is switched off at T_DELAY; it stays at the sampled value after).
+* The offset is therefore NOT counted as settling error; v_final is still
+* checked against the band in step_metrics so a non-settling run fails.
+Chold ofs 0 1n
+Gtrk 0 ofs cur = 'time < 2e-07 ? (v(out)-v(inp)-v(ofs))*1 : 0'
+Blo lo 0 V = v(inp)+v(ofs)-0.0004
+Bhi hi 0 V = v(inp)+v(ofs)+0.0004

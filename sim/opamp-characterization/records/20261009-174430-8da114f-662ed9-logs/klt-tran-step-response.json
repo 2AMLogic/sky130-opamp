@@ -1,0 +1,244 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 1,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "0957c3103d7ebc9ae0a3ddd6fa70cb08e1dd653f718953e96fd1860926fc4a30",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "0957c3103d7ebc9ae0a3ddd6fa70cb08e1dd653f718953e96fd1860926fc4a30"
+      },
+      {
+        "path": "design/netlist/opamp_core.spice",
+        "scope": "repo",
+        "sha256": "6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace"
+      }
+    ]
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 6,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"v_peak\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+gb82427b30c96",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:0957c3103d7ebc9ae0a3ddd6fa70cb08e1dd653f718953e96fd1860926fc4a30",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "v_init",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 0.879854,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_ofs",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": -0.000146312,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_final",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 0.919844,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_peak",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 0.921417,
+        "margin": null
+      }
+    },
+    {
+      "name": "t_lo_cross",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.15605e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "t_hi_cross",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.32249e-07,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 76.835,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879854,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000146312,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919844,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921417,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15605e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32249e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-86/sim/opamp-characterization/records/20261009-174430-8da114f-662ed9-logs/klt-tran-step/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-86/sim/opamp-characterization/records/20261009-174430-8da114f-662ed9-logs/klt-tran-step/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}
