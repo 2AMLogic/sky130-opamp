@@ -40,8 +40,26 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --check-env        report tool/PDK availability and exit (no simulation)
     --corners C,C       subset of {tt,ff,ss,sf,fs}      (default: all five)
     --temps T,T          temperatures in degC             (default: -40,27,125)
-    --analyses A,A       subset of {ac,tran_sr,dc_swing}  (default: all three)
+    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr}
+                         (default: ac,tran_sr,dc_swing -- icmr/cmrr are opt-in)
+    --backend NAME       `klt sim` backend for icmr/cmrr (default: batch;
+                         `local` for a single-point debug probe)
+    --klt-cmd CMD        the klt invocation for icmr/cmrr (default: `klt`, or
+                         $KLT_CMD). The batch fleet refuses a client whose
+                         `klt --version` differs from the fleet image's
+                         (`batch_runner_version_mismatch`); pin a matching one
+                         without touching the host tool, e.g.
+                         --klt-cmd 'uvx --from klayout-tools==0.5.0 klt'
     --keep-work         do not delete the scratch ngspice decks/outputs
+
+`ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
+decks and drives `ngspice -b` itself, one subprocess per (corner, temperature)
+point. `icmr` and `cmrr` (issue #53) are different by design: their templates
+are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
+`klt sim` request (corner/supply/temperature axes) and submitted with
+`klt sim <request> --backend batch`, and the per-corner measurement values in
+klt's JSON response are mapped into the same CSV/record scheme. No ngspice loop
+is ever run for them. Requires `klt` on PATH.
 """
 
 from __future__ import annotations
@@ -50,14 +68,17 @@ import argparse
 import csv
 import json
 import math
+import os
 import platform
 import re
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
 from collections.abc import Iterable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -87,7 +108,8 @@ DESIGN_NETLIST = REPO_ROOT / "design" / "netlist" / "opamp_core.spice"
 
 DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
 DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
-DEFAULT_ANALYSES = ("ac", "tran_sr", "dc_swing")
+DEFAULT_ANALYSES = ("ac", "tran_sr", "dc_swing")  # icmr/cmrr (issue #53) are opt-in: they go to the klt batch fleet
+DEFAULT_KLT_BACKEND = "batch"
 
 CL_F = "2p"  # DR-001's CL = 2 pF
 IBIAS_A = "5u"  # DR-002 (a): 5 uA external reference into `ibias`
@@ -144,6 +166,15 @@ def check_env() -> int:
     if pdk is not None:
         for inc in pdk.rc_includes():
             print(f"  R+C corner include: {inc}")
+    # klt is only required by the icmr/cmrr analyses -- report it, but a
+    # missing klt must not fail the legacy ac/tran_sr/dc_swing workflow.
+    klt = klt_available()
+    if klt:
+        print(f"klt     : OK   {' '.join(KLT_CMD)} ({first_line([*KLT_CMD, '--version'])})")
+        print(f"  klt sim backend for icmr/cmrr: {DEFAULT_KLT_BACKEND}"
+              f" (env KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '<unset>')}; override with --backend)")
+    else:
+        print("klt     : MISSING (not on PATH) -- needed only for --analyses icmr,cmrr")
     return status | pdk_status
 
 
@@ -321,6 +352,290 @@ def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path):
     return row, deck
 
 
+# --------------------------------------------------------------------------
+# klt-sim analyses (issue #53): ICMR and CMRR.
+#
+# Unlike the three analyses above these are NOT driven through run_ngspice():
+# each is one `klt sim` request that declares the whole corner x supply x
+# temperature grid, submitted on the batch backend. The templates are circuit
+# bodies (see ../testbench/opamp_{icmr,cmrr}.spice.tmpl); the analysis card,
+# `.lib`/`.temp`/`alter vdd` cards and the measurements live in the request.
+# --------------------------------------------------------------------------
+
+KLT_ANALYSES = ("icmr", "cmrr")
+SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
+
+# ICMR bench constants -- fixed before any batch result existed; the README's
+# "ICMR bench" section and ../testbench/opamp_icmr.spice.tmpl's header state the
+# same criterion: ICMR = contiguous Vcm range around VDD/2, output held at
+# mid-rail, over which the local DC CMRR 1/|d vid/d Vcm| stays >= 40 dB.
+ICMR_VSTEP_V = 0.005  # swept-Vcm resolution (edges are interpolated between points)
+ICMR_DV_V = 0.01  # Vcm offset between the two amplifier copies (finite-difference step)
+ICMR_VSWEEP_START_V = -0.02  # below ground so the rail-guard term gives a low-side crossing
+ICMR_VSWEEP_OVERSHOOT_V = 0.02  # sweep to VDD + this, same reason on the high side
+ICMR_CMRR_FLOORS_DB = {"40db": 40.0, "30db": 30.0, "50db": 50.0}  # primary first; the rest = sensitivity band
+ICMR_RLOOP = "100k"  # Rin = Rf of the output-held-at-mid-rail inverting loop
+ICMR_RAIL_EPS_V = 0.03  # an edge within this of 0 V / VDD is a rail edge, not an input-stage limit
+# Ratified ICMR target window (spec/target-spec.md Sec 2 ICMR row; NOT edited
+# or relaxed here) and the sibling-consumer sense point (Sec 5 consumers table).
+TARGET_ICMR_V = (0.888, 1.024)
+CONSUMER_SENSE_V = 0.73
+
+# CMRR bench: spot frequencies at which Adm and Acm are read (.meas ... at=)
+CMRR_SPOTS = (("1hz", "1"), ("10hz", "10"), ("100hz", "100"), ("1khz", "1k"),
+              ("10khz", "10k"), ("100khz", "100k"), ("1mhz", "1meg"))
+CMRR_SPOT_HEADLINE = "1khz"  # the single "stated spot frequency" quoted in the README
+# DC common-mode bias points the CMRR bench is run at: mid-supply (the same
+# point opamp_ac uses, so Adm is directly comparable) and the centre of the
+# ratified ICMR target window (which sits above mid-rail).
+CMRR_CM_POINTS = {
+    "mid": ("0.5*v(vdd)", None),
+    "window": (f"{0.5 * (TARGET_ICMR_V[0] + TARGET_ICMR_V[1]):g}", 0.5 * (TARGET_ICMR_V[0] + TARGET_ICMR_V[1])),
+}
+CROSSCHECK_TOL_GAIN_DB = 0.05  # Adm_dc vs committed ac gain_dc_db at the same point
+CROSSCHECK_TOL_GBW_FRAC = 0.01  # gbw
+CROSSCHECK_TOL_IQ_FRAC = 0.01  # ICMR mid-point supply current vs committed ac iq_a
+
+
+def icmr_measurements(vdd: float) -> list[dict]:
+    """`.meas dc` cards for one VDD group (mid-supply and the sweep's `to`/`from`
+    limits are literal numbers in a .meas card, hence one request per VDD)."""
+    mid = 0.5 * vdd
+    ms = [
+        {"name": "vout_mid_v", "unit": "V", "spice": f".meas dc vout_mid_v find v(out_1) at={mid:g}"},
+        {"name": "vid_mid_v", "unit": "V", "spice": f".meas dc vid_mid_v find v(vid1) at={mid:g}"},
+        {"name": "iq_mid_a", "unit": "A", "spice": f".meas dc iq_mid_a find i(vsense) at={mid:g}"},
+        {"name": "k_mid", "spice": f".meas dc k_mid find v(k) at={mid:g}"},
+    ]
+    for label, db in ICMR_CMRR_FLOORS_DB.items():
+        level = 10 ** (-db / 20.0)
+        ms.append({"name": f"lo_{label}", "unit": "V",
+                   "spice": f".meas dc lo_{label} when v(k)={level:g} cross=last to={mid:g}"})
+        ms.append({"name": f"hi_{label}", "unit": "V",
+                   "spice": f".meas dc hi_{label} when v(k)={level:g} cross=1 from={mid:g}"})
+    return ms
+
+
+def cmrr_measurements() -> list[dict]:
+    ms = []
+    for label, f in CMRR_SPOTS:
+        ms.append({"name": f"adm_{label}_db", "unit": "dB", "spice": f".meas ac adm_{label}_db find vdb(out_d) at={f}"})
+        ms.append({"name": f"acm_{label}_db", "unit": "dB", "spice": f".meas ac acm_{label}_db find vdb(out_c) at={f}"})
+    ms.append({"name": "gbw_hz", "unit": "Hz", "spice": ".meas ac gbw_hz when vdb(out_d)=0 cross=1"})
+    return ms
+
+
+KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 instances at once
+CAPACITY_RETRIES = 30
+CAPACITY_WAIT_S = 60
+RUNNER_VERSION_CHECK = ["warn"]  # set from --batch-runner-check
+KLT_CMD: list[str] = shlex.split(os.environ.get("KLT_CMD", "klt"))
+
+
+def klt_available() -> str | None:
+    return shutil.which(KLT_CMD[0])
+
+
+def vdd_groups(corners: list[str]) -> dict[float, list[str]]:
+    """Corners grouped by their tied VDD (VDD_BY_CORNER)."""
+    groups: dict[float, list[str]] = {}
+    for c in corners:
+        groups.setdefault(VDD_BY_CORNER[c], []).append(c)
+    return dict(sorted(groups.items()))
+
+
+def vdd_pairing(corners: list[str]) -> tuple[list[float], list[dict]]:
+    """Per-corner VDD pairing as one request: supply axis = the distinct VDDs,
+    `exclude` = every (corner, vdd) combination that is not VDD_BY_CORNER's."""
+    vdds = sorted({VDD_BY_CORNER[c] for c in corners})
+    exclude = [{"process": c, "supply_v": {"vdd": v}}
+               for c in corners for v in vdds if v != VDD_BY_CORNER[c]]
+    return vdds, exclude
+
+
+def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | None, pdk: OpampPdk,
+                      corners: list[str], temps: list[float], req_dir: Path, backend: str) -> tuple[Path, str]:
+    """Render the circuit body + write the `klt sim` request JSON into req_dir.
+
+    cmrr: one request for the whole grid (VDD pairing via supply axis + exclude).
+    icmr: one request per VDD group (`.meas ... at=VDD/2` needs a literal mid-supply).
+    """
+    body_subs = {
+        "OPAMP_NETLIST": DESIGN_NETLIST, "VDD_NOM": vdd_group or VDD_BY_CORNER["tt"],
+        "IBIAS_A": IBIAS_A, "CL_F": CL_F,
+    }
+    if analysis == "icmr":
+        assert vdd_group is not None
+        body_subs.update({"RLOOP": ICMR_RLOOP, "DV": ICMR_DV_V, "NS_MID": f"{0.5 * vdd_group:g}"})
+        stop = vdd_group + ICMR_VSWEEP_OVERSHOOT_V
+        analysis_card = {"kind": "dc", "args": f"Vinp {ICMR_VSWEEP_START_V:g} {stop:g} {ICMR_VSTEP_V:g}"}
+        measurements = icmr_measurements(vdd_group)
+        vdds, exclude = [vdd_group], []
+        tag = f"icmr-vdd{vdd_group:g}"
+    else:
+        body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
+        analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
+        measurements = cmrr_measurements()
+        vdds, exclude = vdd_pairing(corners)
+        tag = f"cmrr-{cm_point}"
+    body = render(TESTBENCH_DIR / f"opamp_{analysis}.spice.tmpl", body_subs)
+    req_dir.mkdir(parents=True, exist_ok=True)
+    body_path = req_dir / f"{tag}-body.spice"
+    body_path.write_text(body)
+    request = {
+        "netlist": body_path.name,
+        "engine": "ngspice",
+        "backend": backend,
+        "models": {"pdk": pdk.variant, "lib": SKY130_LIB},
+        "corners": {"process": corners, "supply_v": {"vdd": vdds}, "temperature_c": temps},
+        **({"exclude": exclude} if exclude else {}),
+        "analysis": analysis_card,
+        "measurements": measurements,
+        "options": {"timeout_s": 1200, "keep_artifacts": True},
+    }
+    if backend == "batch":
+        # The fleet image's klt (0.5.0 when this was written) is older than any
+        # client that can submit to it, so the default "enforce" gate refuses
+        # every job (batch_runner_version_mismatch, exit 87). "warn" runs the
+        # job anyway and records the skew in environment.remote; the requests
+        # built here deliberately use only fields klt 0.5.0 understands
+        # (measurements[].spice, no `expr`), and the record carries
+        # runner_compatibility + a same-grid cross-check against the committed
+        # ac record so a silently-ignored option would show up.
+        request["batch"] = {"runner_version_check": RUNNER_VERSION_CHECK[0]}
+    req_path = req_dir / f"{tag}-request.json"
+    req_path.write_text(json.dumps(request, indent=2) + "\n")
+    return req_path, tag
+
+
+def run_klt_sim(req_path: Path, out_dir: Path, backend: str) -> dict:
+    """Submit one request; return klt's parsed JSON report (gate on `status`, not exit code)."""
+    out_dir = out_dir.resolve()  # klt resolves -o against each corner's own cwd: must be absolute
+    out_dir.mkdir(parents=True, exist_ok=True)
+    proc = subprocess.run(
+        [*KLT_CMD, "sim", str(req_path), "-o", str(out_dir), "--backend", backend, "--format", "json"],
+        capture_output=True, text=True,
+    )
+    (out_dir / f"{req_path.stem}.stderr.txt").write_text(proc.stderr)
+    try:
+        return json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        raise HarnessError(
+            f"klt sim exit {proc.returncode}: no JSON report on stdout ({proc.stderr.strip()[:500]})"
+        ) from exc
+
+
+def _corner_values(report: dict) -> dict[tuple[str, float], dict]:
+    out = {}
+    for c in report.get("corners", []):
+        vals = {m["name"]: m["value"] for m in c.get("measurements", [])}
+        out[(c["process"], float(c["temperature_c"]))] = {
+            "values": vals, "status": c.get("status"), "runtime_s": c.get("runtime_s"),
+            "diagnostics": c.get("diagnostics", []), "vdd": (c.get("supply_v") or {}).get("vdd"),
+        }
+    return out
+
+
+def icmr_row(corner: str, temp: float, info: dict) -> dict:
+    v = info["values"]
+    vdd = VDD_BY_CORNER[corner]
+    need = [f"{p}_{label}" for label in ICMR_CMRR_FLOORS_DB for p in ("lo", "hi")] + [
+        "vid_mid_v", "vout_mid_v", "iq_mid_a", "k_mid"]
+    missing = [k for k in need if v.get(k) is None]
+    if missing:
+        raise HarnessError(f"icmr[{corner}/{temp:g}C]: missing measurements {missing} ({info['status']})")
+    row = {"corner": corner, "temp_c": temp, "vdd_v": vdd}
+    for label in ICMR_CMRR_FLOORS_DB:
+        lo, hi = v[f"lo_{label}"], v[f"hi_{label}"]
+        sfx = "" if label == "40db" else f"_{label}"
+        row[f"icmr_low_v{sfx}"] = round(max(lo, 0.0), 4)
+        row[f"icmr_high_v{sfx}"] = round(min(hi, vdd), 4)
+        row[f"icmr_width_v{sfx}"] = round(max(0.0, min(hi, vdd) - max(lo, 0.0)), 4)
+        if label == "40db":
+            tol = 1e-6
+            low_rail, high_rail = lo <= ICMR_RAIL_EPS_V, hi >= vdd - ICMR_RAIL_EPS_V
+            row["low_limiter"] = "rail_0v" if low_rail else "input_stage"
+            row["high_limiter"] = "rail_vdd" if high_rail else "input_stage"
+            ok = row["icmr_low_v"] <= TARGET_ICMR_V[0] + tol and row["icmr_high_v"] >= TARGET_ICMR_V[1] - tol
+            row["covers_target_window"] = int(ok)
+            row["covers_0v73"] = int(row["icmr_low_v"] <= CONSUMER_SENSE_V + tol
+                                     and row["icmr_high_v"] >= CONSUMER_SENSE_V - tol)
+    row.update({
+        "vid_mid_v": v["vid_mid_v"], "cmrr_mid_db": -20.0 * math.log10(max(v["k_mid"], 1e-30)),
+        "vout_mid_v": v["vout_mid_v"],
+        "iq_mid_a": abs(v["iq_mid_a"]), "elapsed_s": round(info["runtime_s"] or 0.0, 2),
+    })
+    return row
+
+
+def cmrr_row(corner: str, temp: float, info: dict, cm_point: str) -> dict:
+    v = info["values"]
+    vdd = VDD_BY_CORNER[corner]
+    need = [f"{p}_{label}_db" for label, _f in CMRR_SPOTS for p in ("adm", "acm")] + ["gbw_hz"]
+    missing = [k for k in need if v.get(k) is None]
+    if missing:
+        raise HarnessError(f"cmrr[{corner}/{temp:g}C/{cm_point}]: missing measurements {missing} ({info['status']})")
+    fixed = CMRR_CM_POINTS[cm_point][1]
+    row = {"corner": corner, "temp_c": temp, "vdd_v": vdd, "cm_point": cm_point,
+           "vcm_v": round(0.5 * vdd if fixed is None else fixed, 4)}
+    for label, _f in CMRR_SPOTS:
+        row[f"adm_{label}_db"] = v[f"adm_{label}_db"]
+        row[f"acm_{label}_db"] = v[f"acm_{label}_db"]
+        row[f"cmrr_{label}_db"] = v[f"adm_{label}_db"] - v[f"acm_{label}_db"]
+    row["gbw_hz"] = v["gbw_hz"]
+    row["elapsed_s"] = round(info["runtime_s"] or 0.0, 2)
+    return row
+
+
+def klt_fieldnames_cmrr() -> list[str]:
+    cols = ["corner", "temp_c", "vdd_v", "cm_point", "vcm_v"]
+    for label, _f in CMRR_SPOTS:
+        cols += [f"adm_{label}_db", f"acm_{label}_db", f"cmrr_{label}_db"]
+    return cols + ["gbw_hz", "elapsed_s"]
+
+
+def latest_ac_csv(before_id: str) -> Path | None:
+    """The newest committed -ac.csv older than this record: the cross-check reference."""
+    cands = sorted(p for p in RECORDS_DIR.glob("*-ac.csv") if p.name.split("-ac.csv")[0] < before_id)
+    return cands[-1] if cands else None
+
+
+def crosscheck(ref_csv: Path, cmrr_mid_rows: list[dict], icmr_rows: list[dict]) -> dict:
+    """Sanity check against the committed open-loop AC record at the same grid points.
+
+    Adm_dc (new CMRR deck instance D) vs gain_dc_db, GBW vs gbw_hz, and the ICMR
+    mid-point supply current vs iq_a. Not a substitute for the CMRR/ICMR
+    figures themselves -- it shows the new decks reproduce the established AC
+    bench's operating point and gain before their numbers are trusted.
+    """
+    ref = {(r["corner"], float(r["temp_c"])): r for r in csv.DictReader(ref_csv.open())}
+    d_gain, d_gbw, d_iq, n = 0.0, 0.0, 0.0, 0
+    for r in cmrr_mid_rows:
+        a = ref.get((r["corner"], float(r["temp_c"])))
+        if a is None:
+            continue
+        n += 1
+        d_gain = max(d_gain, abs(r["adm_1hz_db"] - float(a["gain_dc_db"])))
+        d_gbw = max(d_gbw, abs(r["gbw_hz"] / float(a["gbw_hz"]) - 1.0))
+    n_iq = 0
+    for r in icmr_rows:
+        a = ref.get((r["corner"], float(r["temp_c"])))
+        if a is None:
+            continue
+        n_iq += 1
+        d_iq = max(d_iq, abs(r["iq_mid_a"] / float(a["iq_a"]) - 1.0))
+    return {
+        "reference_csv": f"sim/opamp-characterization/records/{ref_csv.name}",
+        "cmrr_points_compared": n, "max_abs_adm_dc_minus_gain_dc_db": round(d_gain, 4),
+        "max_rel_gbw_error": round(d_gbw, 5), "tolerance_gain_db": CROSSCHECK_TOL_GAIN_DB,
+        "tolerance_gbw_frac": CROSSCHECK_TOL_GBW_FRAC,
+        "icmr_points_compared": n_iq, "max_rel_iq_error": round(d_iq, 5),
+        "tolerance_iq_frac": CROSSCHECK_TOL_IQ_FRAC,
+        "ok": bool(n and d_gain <= CROSSCHECK_TOL_GAIN_DB and d_gbw <= CROSSCHECK_TOL_GBW_FRAC
+                   and (not n_iq or d_iq <= CROSSCHECK_TOL_IQ_FRAC)),
+    }
+
+
 ANALYSES = {"ac": run_ac, "tran_sr": run_tran_sr, "dc_swing": run_dc_swing}
 FIELDNAMES = {
     "ac": ["corner", "temp_c", "vdd_v", "vcm_v", "iq_a", "pq_w", "gain_dc_db",
@@ -329,7 +644,100 @@ FIELDNAMES = {
                 "sr_rise_v_per_us", "sr_fall_v_per_us", "elapsed_s"],
     "dc_swing": ["corner", "temp_c", "vdd_v", "vout_min_v", "vout_max_v", "vpp_v",
                  "vpp_pct_of_vdd", "sweep_vout_min_v", "sweep_vout_max_v", "elapsed_s"],
+    "icmr": ["corner", "temp_c", "vdd_v", "icmr_low_v", "icmr_high_v", "icmr_width_v",
+             "low_limiter", "high_limiter", "covers_target_window", "covers_0v73",
+             "icmr_low_v_30db", "icmr_high_v_30db", "icmr_width_v_30db",
+             "icmr_low_v_50db", "icmr_high_v_50db", "icmr_width_v_50db",
+             "vid_mid_v", "cmrr_mid_db", "vout_mid_v", "iq_mid_a", "elapsed_s"],
+    "cmrr": klt_fieldnames_cmrr(),
 }
+
+
+def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir,
+                     results, errors, klt_jobs) -> None:
+    """Submit one `klt sim` request per (analysis[, CM point]) and fold the
+    responses into `results`/`errors`. A failed submit is reported as errors;
+    there is deliberately NO fallback to a local ngspice loop."""
+    plan = []
+    for a in klt_analyses:
+        if a == "icmr":
+            plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
+        else:
+            plan.extend(("cmrr", cp, None, corners) for cp in CMRR_CM_POINTS)
+    # Build every request first, then submit them concurrently (the jobs are
+    # independent; this process only waits on S3 polls -- the compute is the
+    # fleet's, and the fleet enforces its own concurrency/budget caps).
+    prepared = []
+    for analysis, cm_point, vdd_group, group_corners in plan:
+        req_path, tag = build_klt_request(analysis, cm_point, vdd_group, pdk, group_corners, temps, req_dir, backend)
+        shutil.copy(req_path, snapshot_run_dir / req_path.name)
+        shutil.copy(req_path.with_name(f"{tag}-body.spice"), snapshot_run_dir / f"{tag}-body.spice")
+        prepared.append((analysis, cm_point, group_corners, req_path, tag))
+
+    def submit(item):
+        _analysis, _cm, _gc, req_path, tag = item
+        print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
+        t0 = time.monotonic()
+        # The fleet is shared and capped (BATCH_MAX_CONCURRENT_INSTANCES): a
+        # submit refused for capacity is retried after a wait (still the fleet,
+        # never a local fallback); any other failure is reported at once.
+        exc = None
+        for attempt in range(CAPACITY_RETRIES + 1):
+            try:
+                return run_klt_sim(req_path, log_dir / f"klt-{tag}", backend), time.monotonic() - t0, None
+            except HarnessError as e:
+                exc = e
+                if "BATCH_MAX_CONCURRENT_INSTANCES" not in str(e) or attempt == CAPACITY_RETRIES:
+                    break
+                print(f"klt sim {tag}: fleet at capacity, retry {attempt + 1}/{CAPACITY_RETRIES} in {CAPACITY_WAIT_S}s",
+                      file=sys.stderr)
+                time.sleep(CAPACITY_WAIT_S)
+        return None, time.monotonic() - t0, exc
+
+    with ThreadPoolExecutor(max_workers=max(1, min(len(prepared), KLT_MAX_PARALLEL_SUBMITS))) as pool:
+        outcomes = list(pool.map(submit, prepared))
+
+    for (analysis, cm_point, group_corners, req_path, tag), (report, wall, exc) in zip(prepared, outcomes):
+        if exc is not None:
+            errors.append(f"{tag}: {exc}")
+            print(f"{tag}: FAIL {exc}", file=sys.stderr)
+            continue
+        (log_dir / f"klt-{tag}-response.json").write_text(json.dumps(report, indent=2) + "\n")
+        env = report.get("environment", {})
+        klt_jobs.append({
+            "tag": tag, "backend": backend, "status": report.get("status"),
+            "corner_count": report.get("corner_count"), "wall_s": round(wall, 1),
+            "remote": env.get("remote"),
+            "diagnostic_counts": report.get("diagnostic_counts"),
+            "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
+            "response": f"sim/opamp-characterization/records/{log_dir.name}/klt-{tag}-response.json",
+        })
+        if "error" in report:
+            errors.append(f"{tag}: klt error: {report['error'].get('message')}")
+            continue
+        by_point = _corner_values(report)
+        for corner in group_corners:
+            for temp in temps:
+                label = f"{tag}-{corner}-{temp:g}C"
+                info = by_point.get((corner, float(temp)))
+                if info is None:
+                    errors.append(f"{label}: not in the klt response")
+                    continue
+                bad = [d for d in info["diagnostics"] if d.get("severity") == "error"]
+                try:
+                    if bad:
+                        head = "; ".join(f"{d.get('code')}: {d.get('message')}"[:160] for d in bad[:2])
+                        raise HarnessError(f"{head} (+{len(bad) - 2} more)" if len(bad) > 2 else head)
+                    row = icmr_row(corner, temp, info) if analysis == "icmr" else cmrr_row(corner, temp, info, cm_point)
+                except HarnessError as exc:
+                    errors.append(f"{label}: {exc}")
+                    print(f"{label:<28} FAIL {exc}", file=sys.stderr)
+                    continue
+                results[analysis].append(row)
+
+    order = {c: i for i, c in enumerate(corners)}
+    for a in klt_analyses:
+        results[a].sort(key=lambda r: (r.get("cm_point", ""), order[r["corner"]], r["temp_c"]))
 
 
 def parse_args(argv):
@@ -338,12 +746,23 @@ def parse_args(argv):
     p.add_argument("--corners", default=",".join(DEFAULT_CORNERS))
     p.add_argument("--temps", default=",".join(str(t) for t in DEFAULT_TEMPS_C))
     p.add_argument("--analyses", default=",".join(DEFAULT_ANALYSES))
+    p.add_argument("--backend", default=DEFAULT_KLT_BACKEND,
+                   help="`klt sim` backend for the icmr/cmrr analyses (default: batch; local = single-point probe)")
+    p.add_argument("--batch-runner-check", choices=("warn", "enforce"), default="warn",
+                   help="klt batch.runner_version_check (default: warn -- the fleet image's klt is older than "
+                        "any client that can submit to it; the skew is recorded in the record's klt_jobs)")
+    p.add_argument("--klt-cmd", default=None,
+                   help="klt invocation for icmr/cmrr (default: $KLT_CMD or `klt`); pin the fleet's version "
+                        "with e.g. 'uvx --from klayout-tools==0.5.0 klt'")
     p.add_argument("--keep-work", action="store_true")
     return p.parse_args(argv)
 
 
 def main(argv=None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
+    RUNNER_VERSION_CHECK[0] = args.batch_runner_check
+    if args.klt_cmd:
+        KLT_CMD[:] = shlex.split(args.klt_cmd)
 
     if args.check_env:
         return check_env()
@@ -352,9 +771,14 @@ def main(argv=None) -> int:
     temps = [float(t) for t in args.temps.split(",") if t.strip()]
     analyses = [a.strip() for a in args.analyses.split(",") if a.strip()]
     for a in analyses:
-        if a not in ANALYSES:
-            print(f"ERROR: unknown analysis '{a}' (choices: {sorted(ANALYSES)})", file=sys.stderr)
+        if a not in ANALYSES and a not in KLT_ANALYSES:
+            print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
             return 1
+    klt_analyses = [a for a in analyses if a in KLT_ANALYSES]
+    ngspice_analyses = [a for a in analyses if a in ANALYSES]
+    if klt_analyses and not klt_available():
+        print("ERROR: klt not found on PATH (needed for --analyses icmr,cmrr; see --check-env)", file=sys.stderr)
+        return 1
 
     if not DESIGN_NETLIST.is_file():
         print(f"ERROR: missing netlist under test: {DESIGN_NETLIST}", file=sys.stderr)
@@ -370,7 +794,7 @@ def main(argv=None) -> int:
         )
 
     ngspice = shutil.which("ngspice")
-    if not ngspice:
+    if ngspice_analyses and not ngspice:
         print("ERROR: ngspice not found on PATH", file=sys.stderr)
         return 1
 
@@ -394,7 +818,7 @@ def main(argv=None) -> int:
 
     def do_matrix(workdir: Path):
         nonlocal n_runs
-        for analysis in analyses:
+        for analysis in ngspice_analyses:
             fn = ANALYSES[analysis]
             for corner in corners:
                 for temp in temps:
@@ -419,8 +843,25 @@ def main(argv=None) -> int:
         with tempfile.TemporaryDirectory(prefix="opamp-pvt-") as tmp:
             do_matrix(Path(tmp))
 
+    klt_jobs: list[dict] = []
+    klt_crosscheck = None
+    if klt_analyses:
+        n_klt_errors0 = len(errors)
+        with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
+            run_klt_analyses(
+                klt_analyses, pdk, corners, temps, args.backend, Path(req_tmp),
+                log_dir, snapshot_run_dir, results, errors, klt_jobs,
+            )
+        n_runs += sum(len(results[a]) for a in klt_analyses)
+        if not len(errors) > n_klt_errors0 and "icmr" in klt_analyses and "cmrr" in klt_analyses:
+            ref = latest_ac_csv(record_id)
+            if ref is not None:
+                mid_rows = [r for r in results["cmrr"] if r["cm_point"] == "mid"]
+                klt_crosscheck = crosscheck(ref, mid_rows, results["icmr"])
+                print(f"cross-check vs {ref.name}: {json.dumps(klt_crosscheck)}", file=sys.stderr)
+
     elapsed_total = time.monotonic() - t_start
-    print(f"Completed {n_runs} ngspice runs ({len(errors)} failed) in {elapsed_total:.1f}s", file=sys.stderr)
+    print(f"Completed {n_runs} runs ({len(errors)} failed) in {elapsed_total:.1f}s", file=sys.stderr)
 
     written = []
     for analysis, rows in results.items():
@@ -451,6 +892,11 @@ def main(argv=None) -> int:
             "corners": corners, "temps_c": temps, "analyses": analyses,
             "vdd_by_corner": VDD_BY_CORNER, "cl_f": CL_F, "ibias_a": IBIAS_A,
             "n_runs": n_runs, "n_failed": len(errors),
+            **({"klt_backend": args.backend, "icmr_cmrr_floors_db": ICMR_CMRR_FLOORS_DB, "icmr_dv_v": ICMR_DV_V,
+                "icmr_vstep_v": ICMR_VSTEP_V, "target_icmr_v": list(TARGET_ICMR_V),
+                "consumer_sense_v": CONSUMER_SENSE_V,
+                "cmrr_cm_points": {k: v[0] for k, v in CMRR_CM_POINTS.items()}}
+               if klt_analyses else {}),
         },
         "pdk": {
             "variant": pdk.variant, "root": str(pdk.root),
@@ -463,7 +909,9 @@ def main(argv=None) -> int:
             "ngspice": first_line(["ngspice", "-v"]),
             "python": platform.python_version(),
             "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
+            **({"klt": first_line([*KLT_CMD, "--version"]), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
         },
+        **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
         "links": {
             f"{a}_csv": f"sim/opamp-characterization/records/{record_id}-{a.replace('_', '-')}.csv"
             for a in results if results[a]
@@ -478,7 +926,7 @@ def main(argv=None) -> int:
     for p in written:
         print(f"  {p.relative_to(REPO_ROOT)}")
     print(f"  {json_path.relative_to(REPO_ROOT)}")
-    print(f"  {log_dir.relative_to(REPO_ROOT)}/ ({n_runs} raw ngspice logs)")
+    print(f"  {log_dir.relative_to(REPO_ROOT)}/ (raw ngspice logs / klt responses and per-corner artifacts)")
     print(f"  {snapshot_run_dir.relative_to(REPO_ROOT)}/ (rendered deck snapshots)")
 
     if errors:
