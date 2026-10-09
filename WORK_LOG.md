@@ -4,6 +4,15 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-09
 
+- **PR #115**: sim: bind offset Monte Carlo chunks and resume to one DUT snapshot
+- **PR #114**: sim: opt-in Cartesian supply mode for PVT runner (#110)
+- **PR #111**: Wire package.json test/check:ci to real simulator-free checks
+- **PR #109**: spec: propose offset target via DR-009; reconcile offset row with N=300 MC campaign
+- **PR #106**: Preserve exact DUT netlist per PVT campaign and check current-design identity
+- **Issue #113** (closed): sim: bind offset Monte Carlo chunks and resume to one DUT snapshot
+- **Issue #101** (closed): Wire package.json test/check:ci to the real simulator-free checks
+- **Issue #108** (closed): spec: reconcile the offset row with the N=300 Monte Carlo campaign via a decision record
+- **Issue #104** (closed): Preserve the exact DUT netlist for PVT campaigns and check current-design identity
 - **PR #103**: tests: add unit tests for gm/ID sweep.py derive_points and interp
 - **PR #100**: Make PSRR and noise cross-check disagreements fail validation
 - **PR #99**: Validate PVT matrix completeness before accepting spec figures
