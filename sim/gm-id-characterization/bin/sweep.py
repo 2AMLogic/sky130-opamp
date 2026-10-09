@@ -59,12 +59,15 @@ sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     HarnessError,
     Pdk,
+    allocate_record_id,
     first_line,
     git_sha,
     load_json,
+    make_new_dir,
     render,
     report_pdk,
     report_tool_status,
+    write_new,
 )
 
 PDK_PIN_FILE = EXP_DIR / "pdk.json"
@@ -287,12 +290,12 @@ def main(argv=None) -> int:
             print(f"ERROR: corner '{corner}' not in {MODEL_FILES}", file=sys.stderr)
             return 1
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    record_id = f"{ts}-{git_sha(REPO_ROOT)}"
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    # Atomically reserve a unique record namespace (issue #75) before any write.
+    record_id = allocate_record_id(RECORDS_DIR, git_sha(REPO_ROOT), extra_dirs=[SNAPSHOT_DIR])
     snapshot_run_dir = SNAPSHOT_DIR / record_id
-    snapshot_run_dir.mkdir(parents=True, exist_ok=True)
+    make_new_dir(snapshot_run_dir)
 
     t_start = time.monotonic()
     if args.keep_work:
@@ -317,7 +320,7 @@ def main(argv=None) -> int:
         "overdrive_bias_v", "vov_v", "id_a", "gm_s", "gds_s", "cgg_f", "vth_v",
         "gm_id_per_v", "gm_gds", "ft_hz",
     ]
-    with full_csv_path.open("w", newline="") as f:
+    with full_csv_path.open("x", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         writer.writerows(full_rows)
@@ -350,7 +353,7 @@ def main(argv=None) -> int:
                 }
             )
     summary_csv_path = RECORDS_DIR / f"{record_id}-summary.csv"
-    with summary_csv_path.open("w", newline="") as f:
+    with summary_csv_path.open("x", newline="") as f:
         writer = csv.DictWriter(
             f,
             fieldnames=["device", "corner", "length_um", "temp_c", "gm_id_target_per_v", "vov_v", "gm_gds", "ft_hz"],
@@ -406,7 +409,7 @@ def main(argv=None) -> int:
         "elapsed_s": round(elapsed_total, 1),
     }
     json_path = RECORDS_DIR / f"{record_id}.json"
-    json_path.write_text(json.dumps(record, indent=2) + "\n")
+    write_new(json_path, json.dumps(record, indent=2) + "\n")
 
     # -- Markdown record (human-readable) --
     md_lines = [
@@ -448,7 +451,7 @@ def main(argv=None) -> int:
         "`spec/target-spec.md` rows this study feeds.",
     ]
     md_path = RECORDS_DIR / f"{record_id}.md"
-    md_path.write_text("\n".join(md_lines) + "\n")
+    write_new(md_path, "\n".join(md_lines) + "\n")
 
     print(f"Wrote record {record_id}:")
     print(f"  {full_csv_path.relative_to(REPO_ROOT)}")

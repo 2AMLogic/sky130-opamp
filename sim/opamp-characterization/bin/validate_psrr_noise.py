@@ -23,13 +23,12 @@ import json
 import math
 import sys
 import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
-from spice_harness import git_sha, run_klt_sim  # noqa: E402
+from spice_harness import allocate_record_id, git_sha, run_klt_sim, write_new  # noqa: E402
 
 TB = EXP_DIR / "testbench"
 MODELS = {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"}
@@ -111,9 +110,9 @@ def main() -> int:
         "negative_control_psrr_1khz_db_without_cinp": -neg,
         "negative_control_ok": -neg < 10.0,
     }
-    rid = f"{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-{git_sha(REPO_ROOT)}"
+    rid = allocate_record_id(EXP_DIR / "records", git_sha(REPO_ROOT))
     out = EXP_DIR / "records" / f"{rid}-psrr-noise-validation.json"
-    out.write_text(json.dumps({"record_id": rid, "summary": summary, "runs": res}, indent=2) + "\n")
+    write_new(out, json.dumps({"record_id": rid, "summary": summary, "runs": res}, indent=2) + "\n")
     print(json.dumps(summary, indent=2))
     print(f"wrote {out.relative_to(REPO_ROOT)}")
     return 0 if summary["negative_control_ok"] else 1
