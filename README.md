@@ -5,10 +5,12 @@ A two-stage Miller-compensated operational amplifier on SkyWater sky130 on
 [klayout-tools](https://github.com/2AMLogic/klayout-tools) and the
 open-source xschem + ngspice flow.
 
-**Status: schematic and PVT evidence committed; layout pending.** The
+**Status: schematic and PVT evidence committed; partial layout started.** The
 [gm/ID study](sim/gm-id-characterization/README.md) informs the
 [op-amp schematic](design/README.md), whose resized design has
 [PVT characterization records](sim/opamp-characterization/README.md).
+The [layout flow](layout/README.md) includes the NMOS input pair with
+committed DRC and LVS evidence; the full-core layout remains pending.
 Performance gaps remain, including falling slew rate; the
 [target specification](spec/target-spec.md) is partially ratified.
 The 3.3 V I/O flavor is not served
