@@ -1,9 +1,18 @@
 """Simulator-free tests for sim/offset-capability/bin/offset_probe.py (issues #52, #85)."""
+import argparse
+import contextlib
+import io
+import json
 import math
+import shutil
 import statistics
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
 import _paths
+import dut_identity
 from _paths import REPO
 
 op = _paths.load_module("offset_probe", REPO / "sim" / "offset-capability" / "bin" / "offset_probe.py")
@@ -239,6 +248,157 @@ class CampaignRecords(unittest.TestCase):
         self.assertFalse(used & listed)
         every = {p.name[:-len(".request.json")] for p in self.REC.glob("*mc300*.request.json")}
         self.assertEqual(every, used | listed)
+
+
+class FakeKlt:
+    """Stands in for run_klt: records the submitted bench bytes at submit time."""
+
+    def __init__(self, test, on_submit=None):
+        self.submitted = []
+        self.on_submit = on_submit
+        self.test = test
+
+    def __call__(self, request_path, outdir, backend):
+        req = json.loads(Path(request_path).read_text())
+        bench = (Path(request_path).parent / req["netlist"]).resolve()
+        inc = (bench.parent / "opamp_core.spice")
+        self.submitted.append({"request": req, "bench": bench.read_bytes(), "dut": inc.read_bytes()})
+        if self.on_submit:
+            self.on_submit(len(self.submitted))
+        mc = req["monte_carlo"]
+        payload = mc_payload(mc["n"], mc["seed"], process=req["corners"]["process"][0])
+        for c in payload["corners"]:
+            c["measurements"] = [{"name": "vos_inp", "value": op.VCM + 0.001},
+                                 {"name": "out_lo", "value": 0.0}, {"name": "out_hi", "value": 1.8}]
+        return ["klt", "sim"], 0, payload, ""
+
+
+class DutBinding(unittest.TestCase):
+    """Issue #113: chunks and resume are bound to one captured DUT (mocked klt)."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp(prefix="offset-dut-"))
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+        self.live = self.tmp / "design" / "netlist" / "opamp_core.spice"
+        self.live.parent.mkdir(parents=True)
+        self.live.write_text("* v1 netlist\n.subckt opamp_core a b\n.ends\n")
+        self.rec = self.tmp / "sim" / "offset-capability" / "records"
+        self.rec.mkdir(parents=True)
+        for name, val in (("REPO", self.tmp), ("RECORDS", self.rec), ("DESIGN_NETLIST", self.live),
+                          ("BENCH_TEMPLATE", REPO / "sim" / "offset-capability" / "bench" / "offset_dc.cir"),
+                          ("klt_version", lambda: "test")):
+            p = mock.patch.object(op, name, val)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def args(self, **kw):
+        d = dict(label="c1", base_seed=10, corners="tt", n_total=2, chunk=1, max_attempts=1,
+                 retry_wait_s=0, only=None, resume=False, backend=None, dry_run=False)
+        d.update(kw)
+        return argparse.Namespace(**d)
+
+    def run_campaign(self, klt, **kw):
+        with mock.patch.object(op, "run_klt", klt), contextlib.redirect_stdout(io.StringIO()):
+            return op.campaign(self.args(**kw))
+
+    def summaries(self):
+        return sorted(str(p) for p in self.rec.glob("*.summary.json"))
+
+    def test_live_edit_between_chunks_does_not_change_submitted_dut(self):
+        v1 = self.live.read_bytes()
+        klt = FakeKlt(self, on_submit=lambda n: self.live.write_text("* EDITED\n"))
+        self.run_campaign(klt)
+        self.assertEqual(len(klt.submitted), 2)
+        self.assertTrue(all(s["dut"] == v1 for s in klt.submitted))
+        self.assertEqual(klt.submitted[0]["bench"], klt.submitted[1]["bench"])
+        self.assertIn(b'.include "opamp_core.spice"', klt.submitted[0]["bench"])
+        self.assertNotIn(b"design/netlist", klt.submitted[0]["bench"])
+        sha = dut_identity.sha256_bytes(v1)
+        metas = [json.loads(Path(p).read_text()) for p in self.summaries()]
+        self.assertEqual({m["dut"]["sha256"] for m in metas}, {sha})
+        camp = json.loads(next(self.rec.glob("*.campaign.json")).read_text())
+        self.assertEqual(camp["dut"]["sha256"], sha)
+
+    def test_resume_keeps_original_snapshot_and_plan(self):
+        v1 = self.live.read_bytes()
+        klt1 = FakeKlt(self)
+        self.run_campaign(klt1, only="tt:0")
+        self.live.write_text("* design moved on\n")
+        klt2 = FakeKlt(self)
+        self.run_campaign(klt2, resume=True, only="tt:1", base_seed=None, corners=None,
+                          n_total=None, chunk=None)
+        self.assertEqual(klt2.submitted[0]["dut"], v1)
+        self.assertEqual(klt2.submitted[0]["request"]["monte_carlo"]["seed"], 11)   # original plan seed
+        self.assertEqual(klt2.submitted[0]["request"]["monte_carlo"]["n"], 1)
+        self.assertEqual(op.check_chunk_provenance(self.summaries())[0], dut_identity.VERIFIED)
+
+    def test_resume_rejects_contradicting_plan_and_missing_snapshot(self):
+        self.run_campaign(FakeKlt(self), only="tt:0")
+        with self.assertRaises(op.ProbeError):
+            self.run_campaign(FakeKlt(self), resume=True, base_seed=99, only="tt:1")
+        with self.assertRaises(op.ProbeError):
+            self.run_campaign(FakeKlt(self), resume=True, label="never-captured", only="tt:0")
+        with self.assertRaises(op.ProbeError):   # fresh campaign never silently reuses a label
+            self.run_campaign(FakeKlt(self))
+
+    def test_aggregation_rejects_mixed_hashes_naming_record(self):
+        self.run_campaign(FakeKlt(self))
+        self.live.write_text("* other design\n")
+        self.run_campaign(FakeKlt(self), label="c2")
+        sums = self.summaries()
+        self.assertEqual(len(sums), 4)
+        with self.assertRaises(op.ProbeError) as cm:
+            op.summarize(sums)
+        self.assertIn("mixed DUT hashes", str(cm.exception))
+        self.assertIn(Path(sums[0]).name, str(cm.exception))
+
+    def test_aggregation_rejects_corrupt_and_missing_snapshot(self):
+        self.run_campaign(FakeKlt(self))
+        sums = self.summaries()
+        snap = self.rec / "dut-c1" / "opamp_core.spice"
+        snap.write_text("tampered\n")
+        with self.assertRaises(op.ProbeError) as cm:
+            op.summarize(sums)
+        self.assertIn("corrupted", str(cm.exception))
+        self.assertIn(Path(sums[0]).name, str(cm.exception))
+        snap.unlink()
+        with self.assertRaises(op.ProbeError) as cm:
+            op.summarize(sums)
+        self.assertIn("missing", str(cm.exception))
+
+    def test_historical_valid_after_edit_but_current_check_flags_stale(self):
+        self.run_campaign(FakeKlt(self))
+        self.assertEqual(dut_identity.validate_offset(self.tmp), 0)
+        self.assertEqual(dut_identity.check_current_offset(self.tmp), 0)
+        self.live.write_text("* edited later\n")
+        self.assertEqual(dut_identity.validate_offset(self.tmp), 0)          # still valid history
+        self.assertEqual(dut_identity.check_current_offset(self.tmp), 1)     # but stale vs today
+
+    def test_validator_flags_mixed_chunk_hash_in_campaign(self):
+        self.run_campaign(FakeKlt(self))
+        sp = sorted(self.rec.glob("*.summary.json"))[0]
+        m = json.loads(sp.read_text())
+        m["dut"]["sha256"] = "sha256:" + "0" * 64
+        sp.write_text(json.dumps(m))
+        self.assertEqual(dut_identity.validate_offset(self.tmp), 1)
+
+    def test_legacy_records_unverified_and_unchanged(self):
+        (self.rec / "old.summary.json").write_text(json.dumps({"record_id": "old", "samples": [], "corner": "tt"}))
+        (self.rec / "old.request.json").write_text(json.dumps({"netlist": "../bench/offset_dc.cir"}))
+        before = (self.rec / "old.summary.json").read_bytes()
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            self.assertEqual(dut_identity.validate_offset(self.tmp), 0)
+            self.assertEqual(dut_identity.validate_offset(self.tmp, require_verified=True), 1)
+        self.assertIn("old.summary.json: UNVERIFIED", buf.getvalue())
+        self.assertEqual(op.check_chunk_provenance([str(self.rec / "old.summary.json")]),
+                         (dut_identity.UNVERIFIED, None))
+        self.assertEqual((self.rec / "old.summary.json").read_bytes(), before)
+
+    def test_committed_offset_records_validate(self):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            self.assertEqual(dut_identity.validate_offset(Path(REPO)), 0)
 
 
 if __name__ == "__main__":
