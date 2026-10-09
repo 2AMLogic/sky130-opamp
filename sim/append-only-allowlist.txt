@@ -1,0 +1,6 @@
+# Authorised exceptions to the append-only rule for sim/*/records,
+# sim/*/corners and sim/*/netlist-snapshots (checked by
+# sim/lib/append_only_check.py). One entry per line:
+#   <repo-relative path> | <issue or decision record that authorised it>
+# Example (do not uncomment without authorisation):
+#   sim/opamp-characterization/records/EXAMPLE.md | #123
