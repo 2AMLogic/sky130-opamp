@@ -541,6 +541,17 @@ def parse_rewire(text: str) -> tuple[str, str, str]:
     return device, terminal, net
 
 
+def is_genuine_mismatch(lvs: dict) -> bool:
+    """True only for an LVS that ran cleanly and reported real mismatches."""
+    count = lvs.get("mismatch_count")
+    return (
+        lvs.get("status") == "mismatch"
+        and isinstance(count, int)
+        and count > 0
+        and not lvs.get("error")
+    )
+
+
 def negative_control(
     spec: dict, spec_dir: Path, rewire: str, *, allow_unpinned: bool
 ) -> int:
@@ -602,11 +613,13 @@ def negative_control(
         f"negative control {device}.{terminal}: {original} -> {net}: "
         f"lvs status={status} mismatch_count={lvs.get('mismatch_count')}"
     )
-    if status == "match":
-        print(
-            "error: negative control MATCHED -- LVS is not discriminating",
-            file=sys.stderr,
+    if not is_genuine_mismatch(lvs):
+        reason = (
+            "MATCHED -- LVS is not discriminating"
+            if status == "match"
+            else f"did not yield a genuine mismatch (status={status!r})"
         )
+        print(f"error: negative control {reason}", file=sys.stderr)
         return 1
     return 0
 

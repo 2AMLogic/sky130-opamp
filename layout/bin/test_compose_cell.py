@@ -159,5 +159,26 @@ class Rewire(unittest.TestCase):
             cc.parse_rewire("XM1:x=inp")
 
 
+class NegativeControlVerdict(unittest.TestCase):
+    def test_genuine_mismatch_passes(self):
+        self.assertTrue(
+            cc.is_genuine_mismatch(
+                {"status": "mismatch", "mismatch_count": 3, "error_count": 3}
+            )
+        )
+
+    def test_error_unknown_missing_and_match_fail(self):
+        for lvs in (
+            {"status": "error", "error_count": 1, "mismatch_count": 0},
+            {"status": "unknown"},
+            {},
+            {"status": "match", "mismatch_count": 0},
+            {"status": "mismatch", "mismatch_count": 0},
+            {"status": "mismatch"},
+            {"status": "mismatch", "mismatch_count": 2, "error": "boom"},
+        ):
+            self.assertFalse(cc.is_genuine_mismatch(lvs), lvs)
+
+
 if __name__ == "__main__":
     unittest.main()

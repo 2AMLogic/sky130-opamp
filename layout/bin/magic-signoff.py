@@ -78,6 +78,15 @@ def run(cmd: list[str], cwd: Path) -> str:
     return proc.stdout + proc.stderr
 
 
+def signoff_clean(summary: dict, netgen_match: bool) -> bool:
+    """DRC clean, devices/nets matched AND boundary pins compared equivalent."""
+    return (
+        summary["drc_total"] == 0
+        and netgen_match
+        and summary["netgen"]["pins_matched"] is True
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("spec", type=Path)
@@ -205,7 +214,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    return 0 if summary["drc_total"] == 0 and netgen_match else 3
+    return 0 if signoff_clean(summary, netgen_match) else 3
 
 
 if __name__ == "__main__":
