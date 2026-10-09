@@ -133,6 +133,48 @@ IBIAS_A = "5u"  # DR-002 (a): 5 uA external reference into `ibias`
 # process/supply correlation this repo has not decided.
 VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
 
+# Supply modes (issue #110). "paired" (default, historical methodology) ties one
+# VDD to each process via VDD_BY_CORNER. "cartesian" treats the supply as an
+# independent axis: every process x temperature x supply tuple is evaluated
+# (spec Sec 1: 1.8 V +/-10 %). Paired behaviour, names and requests are unchanged.
+SUPPLY_MODES = ("paired", "cartesian")
+DEFAULT_SUPPLY_MODE = "paired"
+CARTESIAN_SUPPLIES_V = (1.62, 1.80, 1.98)
+
+
+def supply_values(corners: list[str], mode: str = DEFAULT_SUPPLY_MODE,
+                  supplies: Iterable[float] | None = None) -> list[float]:
+    """Distinct supply voltages (sorted) a campaign touches."""
+    if mode == "paired":
+        return sorted({VDD_BY_CORNER[c] for c in corners})
+    if mode == "cartesian":
+        vals = sorted({round(float(v), 6) for v in (CARTESIAN_SUPPLIES_V if supplies is None else supplies)})
+        if not vals:
+            raise ValueError("cartesian supply mode needs at least one supply")
+        return vals
+    raise ValueError(f"unknown supply mode {mode!r} (choices: {SUPPLY_MODES})")
+
+
+def supply_points(corners: list[str], temps: list[float], mode: str = DEFAULT_SUPPLY_MODE,
+                  supplies: Iterable[float] | None = None) -> list[tuple[str, float, float]]:
+    """Explicit expected (process, temperature_c, vdd) tuples of one analysis, in
+    corner-major, temperature, then supply order."""
+    out = []
+    for c in corners:
+        vdds = [VDD_BY_CORNER[c]] if mode == "paired" else supply_values(corners, mode, supplies)
+        for t in temps:
+            out.extend((c, float(t), float(v)) for v in vdds)
+    if len(set(out)) != len(out):
+        raise ValueError("duplicate (process, temperature, supply) tuple requested")
+    return out
+
+
+def point_tag(analysis: str, corner: str, temp: float, vdd: float, mode: str = DEFAULT_SUPPLY_MODE) -> str:
+    """Deck / log / artifact name of one point. Paired names are the historical
+    ones; cartesian names add the supply so points never collide."""
+    base = f"{analysis}-{corner}-{temp:g}C"
+    return base if mode == "paired" else f"{base}-{vdd:g}V"
+
 
 # --------------------------------------------------------------------------
 # PDK resolution -- the MOS-corner resolution itself lives in
@@ -258,8 +300,8 @@ def common_subs(pdk: OpampPdk, corner: str, temp: float, vdd: float) -> dict:
     }
 
 
-def run_ac(pdk, ngspice, corner, temp, workdir, log_path):
-    vdd = VDD_BY_CORNER[corner]
+def run_ac(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     vcm = 0.5 * vdd
     subs = common_subs(pdk, corner, temp, vdd)
     subs.update({
@@ -288,8 +330,8 @@ def run_ac(pdk, ngspice, corner, temp, workdir, log_path):
     return row, deck
 
 
-def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path):
-    vdd = VDD_BY_CORNER[corner]
+def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     v_lo = 0.5 * vdd - 0.2 * vdd
     v_hi = 0.5 * vdd + 0.2 * vdd
     span = v_hi - v_lo
@@ -318,8 +360,8 @@ def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path):
     return row, deck
 
 
-def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path):
-    vdd = VDD_BY_CORNER[corner]
+def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     vstep = vdd / 360.0
     out_path = workdir / "dc_out.txt"
     subs = common_subs(pdk, corner, temp, vdd)
@@ -462,17 +504,23 @@ def vdd_groups(corners: list[str]) -> dict[float, list[str]]:
     return dict(sorted(groups.items()))
 
 
-def vdd_pairing(corners: list[str]) -> tuple[list[float], list[dict]]:
-    """Per-corner VDD pairing as one request: supply axis = the distinct VDDs,
-    `exclude` = every (corner, vdd) combination that is not VDD_BY_CORNER's."""
-    vdds = sorted({VDD_BY_CORNER[c] for c in corners})
+def vdd_pairing(corners: list[str], mode: str = DEFAULT_SUPPLY_MODE,
+                supplies: Iterable[float] | None = None) -> tuple[list[float], list[dict]]:
+    """Supply axis + `exclude` of one request. paired: the distinct VDDs, with
+    every (corner, vdd) combination that is not VDD_BY_CORNER's excluded.
+    cartesian: the independent supplies, nothing excluded."""
+    vdds = supply_values(corners, mode, supplies)
+    if mode == "cartesian":
+        return vdds, []
     exclude = [{"process": c, "supply_v": {"vdd": v}}
                for c in corners for v in vdds if v != VDD_BY_CORNER[c]]
     return vdds, exclude
 
 
 def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | None, pdk: OpampPdk,
-                      corners: list[str], temps: list[float], req_dir: Path, backend: str) -> tuple[Path, str]:
+                      corners: list[str], temps: list[float], req_dir: Path, backend: str,
+                      supply_mode: str = DEFAULT_SUPPLY_MODE,
+                      supplies: Iterable[float] | None = None) -> tuple[Path, str]:
     """Render the circuit body + write the `klt sim` request JSON into req_dir.
 
     cmrr: one request for the whole grid (VDD pairing via supply axis + exclude).
@@ -497,19 +545,21 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         measurements = icmr_measurements(vdd_group)
         vdds, exclude = [vdd_group], []
         tag = f"icmr-{corners[0]}" if len(corners) == 1 else f"icmr-vdd{vdd_group:g}"
+        if supply_mode == "cartesian":
+            tag = f"icmr-{corners[0]}-{vdd_group:g}V"  # one request per (process, supply)
     elif analysis == "tran_step":
         body_subs.update({"STEP_HALF_V": f"{STEP_HALF_V:g}", "TOL_V": f"{STEP_TOL_V:g}",
                           "T_DELAY": f"{STEP_T_DELAY_S:g}", "T_EDGE": f"{STEP_T_EDGE_S:g}",
                           "T_PW": "20u", "T_PER": "40u"})
         analysis_card = {"kind": "tran", "args": f"1n {STEP_T_STOP_S:g}"}
         measurements = tran_step_measurements()
-        vdds, exclude = vdd_pairing(corners)
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = "tran-step"
     else:
         body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
         analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
         measurements = cmrr_measurements()
-        vdds, exclude = vdd_pairing(corners)
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = f"cmrr-{cm_point}"
     body = render(TESTBENCH_DIR / f"opamp_{analysis}.spice.tmpl", body_subs)
     req_dir.mkdir(parents=True, exist_ok=True)
@@ -541,20 +591,26 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
     return req_path, tag
 
 
-def _corner_values(report: dict) -> dict[tuple[str, float], dict]:
+def _corner_values(report: dict, by_supply: bool = False) -> dict[tuple, dict]:
+    """Report units keyed (process, temperature) -- or, with by_supply,
+    (process, temperature, vdd) so independent supplies cannot overwrite each other."""
     out = {}
     for c in report.get("corners", []):
         vals = {m["name"]: m["value"] for m in c.get("measurements", [])}
-        out[(c["process"], float(c["temperature_c"]))] = {
+        key = (c["process"], float(c["temperature_c"]))
+        if by_supply:
+            v = (c.get("supply_v") or {}).get("vdd")
+            key += (None if v is None else round(float(v), 6),)
+        out[key] = {
             "values": vals, "status": c.get("status"), "runtime_s": c.get("runtime_s"),
             "diagnostics": c.get("diagnostics", []), "vdd": (c.get("supply_v") or {}).get("vdd"),
         }
     return out
 
 
-def icmr_row(corner: str, temp: float, info: dict) -> dict:
+def icmr_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
     v = info["values"]
-    vdd = VDD_BY_CORNER[corner]
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     need = [f"{p}_{label}" for label in ICMR_CMRR_FLOORS_DB for p in ("lo", "hi")] + [
         "vid_mid_v", "vout_mid_v", "iq_mid_a", "k_mid"]
     missing = [k for k in need if v.get(k) is None]
@@ -584,9 +640,9 @@ def icmr_row(corner: str, temp: float, info: dict) -> dict:
     return row
 
 
-def cmrr_row(corner: str, temp: float, info: dict, cm_point: str) -> dict:
+def cmrr_row(corner: str, temp: float, info: dict, cm_point: str, vdd: float | None = None) -> dict:
     v = info["values"]
-    vdd = VDD_BY_CORNER[corner]
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     need = [f"{p}_{label}_db" for label, _f in CMRR_SPOTS for p in ("adm", "acm")] + ["gbw_hz"]
     missing = [k for k in need if v.get(k) is None]
     if missing:
@@ -773,8 +829,8 @@ def pm_to_overshoot_pct(pm_deg: float) -> float:
     return 100.0 * math.exp(-math.pi * z / math.sqrt(1 - z * z))
 
 
-def tran_step_row(corner: str, temp: float, info: dict) -> dict:
-    vdd = VDD_BY_CORNER[corner]
+def tran_step_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     m = step_metrics(info["values"], vdd, f"tran_step[{corner}/{temp:g}C]")
     return {"corner": corner, "temp_c": temp, "vdd_v": vdd, "step_v": STEP_V,
             "overshoot_pct": m["overshoot_pct"], "settle_1pct_ns": m["settle_1pct_s"] * 1e9,
@@ -786,13 +842,21 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
     Report only: `agrees` is None when there is no AC reference at the point,
     else whether |measured - AC-PM-implied| <= tol_pp. Nothing here edits or
     gates a spec target."""
-    ac = {(r["corner"], float(r["temp_c"])): float(r["phase_margin_deg"]) for r in ac_rows}
+    def key(r):  # supply joins the key only when the rows carry it (cartesian campaigns)
+        v = r.get("vdd_v")
+        return (r["corner"], float(r["temp_c"]), None if v in (None, "") else round(float(v), 6))
+
+    ac = {key(r): float(r["phase_margin_deg"]) for r in ac_rows}
     out = []
     for r in step_rows:
-        pm = ac.get((r["corner"], float(r["temp_c"])))
+        pm = ac.get(key(r))
+        if pm is None and key(r)[2] is None:
+            pm = ac.get(next((k for k in ac if k[:2] == key(r)[:2]), None))
         row = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "ac_pm_deg": pm,
                "expected_overshoot_pct": None, "measured_overshoot_pct": float(r["overshoot_pct"]),
                "delta_pp": None, "agrees": None, "settle_1pct_ns": float(r["settle_1pct_ns"])}
+        if key(r)[2] is not None:
+            row["vdd_v"] = key(r)[2]
         if pm is not None:
             row["expected_overshoot_pct"] = pm_to_overshoot_pct(pm)
             row["delta_pp"] = row["measured_overshoot_pct"] - row["expected_overshoot_pct"]
@@ -804,7 +868,8 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
 def pm_overshoot_summary(table: list[dict], tol_pp: float = STEP_PM_TOL_PP) -> dict:
     cmp_rows = [r for r in table if r["agrees"] is not None]
     return {"tolerance_pp": tol_pp, "points": len(table), "points_with_ac_reference": len(cmp_rows),
-            "points_disagreeing": [f"{r['corner']}/{r['temp_c']:g}C" for r in cmp_rows if not r["agrees"]],
+            "points_disagreeing": [f"{r['corner']}/{r['temp_c']:g}C" + (f"/{r['vdd_v']:g}V" if "vdd_v" in r else "")
+                                for r in cmp_rows if not r["agrees"]],
             "max_abs_delta_pp": max((abs(r["delta_pp"]) for r in cmp_rows), default=None)}
 
 
@@ -832,14 +897,17 @@ FIELDNAMES = {
 
 
 def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir,
-                     results, errors, klt_jobs) -> None:
+                     results, errors, klt_jobs, supply_mode: str = DEFAULT_SUPPLY_MODE,
+                     supplies: Iterable[float] | None = None) -> None:
     """Submit one `klt sim` request per (analysis[, CM point]) and fold the
     responses into `results`/`errors`. A failed submit is reported as errors;
     there is deliberately NO fallback to a local ngspice loop."""
     plan = []
     for a in klt_analyses:
         if a == "icmr":
-            if ICMR_REQUEST_PER_CORNER:
+            if supply_mode == "cartesian":
+                plan.extend(("icmr", None, v, [c]) for c in corners for v in supply_values(corners, supply_mode, supplies))
+            elif ICMR_REQUEST_PER_CORNER:
                 plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
             else:
                 plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
@@ -852,13 +920,14 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     # fleet's, and the fleet enforces its own concurrency/budget caps).
     prepared = []
     for analysis, cm_point, vdd_group, group_corners in plan:
-        req_path, tag = build_klt_request(analysis, cm_point, vdd_group, pdk, group_corners, temps, req_dir, backend)
+        req_path, tag = build_klt_request(analysis, cm_point, vdd_group, pdk, group_corners, temps, req_dir, backend,
+                                           supply_mode, supplies)
         shutil.copy(req_path, snapshot_run_dir / req_path.name)
         shutil.copy(req_path.with_name(f"{tag}-body.spice"), snapshot_run_dir / f"{tag}-body.spice")
-        prepared.append((analysis, cm_point, group_corners, req_path, tag))
+        prepared.append((analysis, cm_point, group_corners, req_path, tag, vdd_group))
 
     def submit(item):
-        _analysis, _cm, _gc, req_path, tag = item
+        _analysis, _cm, _gc, req_path, tag, _vg = item
         print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
         t0 = time.monotonic()
         # The fleet is shared and capped (BATCH_MAX_CONCURRENT_INSTANCES): a
@@ -880,7 +949,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     with ThreadPoolExecutor(max_workers=max(1, min(len(prepared), KLT_MAX_PARALLEL_SUBMITS))) as pool:
         outcomes = list(pool.map(submit, prepared))
 
-    for (analysis, cm_point, group_corners, req_path, tag), (report, wall, exc) in zip(prepared, outcomes):
+    for (analysis, cm_point, group_corners, req_path, tag, vdd_group), (report, wall, exc) in zip(prepared, outcomes):
         if exc is not None:
             errors.append(f"{tag}: {exc}")
             print(f"{tag}: FAIL {exc}", file=sys.stderr)
@@ -898,11 +967,14 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
         if "error" in report:
             errors.append(f"{tag}: klt error: {report['error'].get('message')}")
             continue
-        by_point = _corner_values(report)
-        for corner in group_corners:
-            for temp in temps:
-                label = f"{tag}-{corner}-{temp:g}C"
-                info = by_point.get((corner, float(temp)))
+        cart = supply_mode == "cartesian"
+        by_point = _corner_values(report, by_supply=cart)
+        group_vdds = ([vdd_group] if vdd_group is not None else supply_values(corners, supply_mode, supplies))
+        for corner, temp, vdd in ((c, t, v) for c in group_corners for t in temps
+                                  for v in (group_vdds if cart else [VDD_BY_CORNER[c]])):
+            if True:
+                label = f"{tag}-{corner}-{temp:g}C" + (f"-{vdd:g}V" if cart else "")
+                info = by_point.get((corner, float(temp), round(vdd, 6)) if cart else (corner, float(temp)))
                 if info is None:
                     errors.append(f"{label}: not in the klt response")
                     continue
@@ -912,11 +984,11 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                         head = "; ".join(f"{d.get('code')}: {d.get('message')}"[:160] for d in bad[:2])
                         raise HarnessError(f"{head} (+{len(bad) - 2} more)" if len(bad) > 2 else head)
                     if analysis == "tran_step":
-                        row = tran_step_row(corner, temp, info)
+                        row = tran_step_row(corner, temp, info, vdd)
                     elif analysis == "icmr":
-                        row = icmr_row(corner, temp, info)
+                        row = icmr_row(corner, temp, info, vdd)
                     else:
-                        row = cmrr_row(corner, temp, info, cm_point)
+                        row = cmrr_row(corner, temp, info, cm_point, vdd)
                 except HarnessError as exc:
                     errors.append(f"{label}: {exc}")
                     print(f"{label:<28} FAIL {exc}", file=sys.stderr)
@@ -925,7 +997,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
 
     order = {c: i for i, c in enumerate(corners)}
     for a in klt_analyses:
-        results[a].sort(key=lambda r: (r.get("cm_point", ""), order[r["corner"]], r["temp_c"]))
+        results[a].sort(key=lambda r: (r.get("cm_point", ""), order[r["corner"]], r["temp_c"], r["vdd_v"]))
 
 
 def parse_args(argv):
@@ -945,6 +1017,11 @@ def parse_args(argv):
     p.add_argument("--timeout-s", type=int, default=1200,
                    help="per-corner ngspice timeout (s) written into the icmr/cmrr klt requests (default 1200; "
                         "healthy points finish in 30-160 s, so a short value makes a stalled point fail fast)")
+    p.add_argument("--supply-mode", choices=SUPPLY_MODES, default=DEFAULT_SUPPLY_MODE,
+                   help="paired (default): one VDD per process (VDD_BY_CORNER); cartesian: every process x "
+                        "temperature x supply tuple (issue #110)")
+    p.add_argument("--supplies", default=",".join(f"{v:g}" for v in CARTESIAN_SUPPLIES_V),
+                   help="supply voltages for --supply-mode cartesian (default: 1.62,1.8,1.98; subsets allowed)")
     p.add_argument("--keep-work", action="store_true")
     return p.parse_args(argv)
 
@@ -962,6 +1039,13 @@ def main(argv=None) -> int:
     corners = [c.strip() for c in args.corners.split(",") if c.strip()]
     temps = [float(t) for t in args.temps.split(",") if t.strip()]
     analyses = [a.strip() for a in args.analyses.split(",") if a.strip()]
+    supply_mode = args.supply_mode
+    supplies = [float(v) for v in args.supplies.split(",") if v.strip()]
+    try:
+        expected = supply_points(corners, temps, supply_mode, supplies)
+    except (ValueError, KeyError) as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
     for a in analyses:
         if a not in ANALYSES and a not in KLT_ANALYSES:
             print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
@@ -1018,12 +1102,12 @@ def main(argv=None) -> int:
         nonlocal n_runs
         for analysis in ngspice_analyses:
             fn = ANALYSES[analysis]
-            for corner in corners:
-                for temp in temps:
-                    tag = f"{analysis}-{corner}-{temp:g}C"
+            for corner, temp, vdd in expected:
+                if True:
+                    tag = point_tag(analysis, corner, temp, vdd, supply_mode)
                     log_path = log_dir / f"{tag}.log"
                     try:
-                        row, deck = fn(pdk, ngspice, corner, temp, workdir, log_path)
+                        row, deck = fn(pdk, ngspice, corner, temp, workdir, log_path, vdd=vdd)
                         # replayable from the repo root: point the saved include at the snapshot
                         (snapshot_run_dir / f"{tag}.spice").write_text(
                             deck.replace(str(ACTIVE_DUT[0]), dut_meta["snapshot_path"]))
@@ -1051,10 +1135,10 @@ def main(argv=None) -> int:
         with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
             run_klt_analyses(
                 klt_analyses, pdk, corners, temps, args.backend, Path(req_tmp),
-                log_dir, snapshot_run_dir, results, errors, klt_jobs,
+                log_dir, snapshot_run_dir, results, errors, klt_jobs, supply_mode, supplies,
             )
         # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
-        n_runs += sum(len(corners) * len(temps) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
+        n_runs += sum(len(expected) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
         if "tran_step" in klt_analyses and results["tran_step"]:
             ref_name, ac_rows = None, None
             if results.get("ac"):
@@ -1106,6 +1190,10 @@ def main(argv=None) -> int:
         "matrix": {
             "corners": corners, "temps_c": temps, "analyses": analyses,
             "vdd_by_corner": VDD_BY_CORNER, "cl_f": CL_F, "ibias_a": IBIAS_A,
+            "supply_mode": supply_mode,
+            "supplies_v": supply_values(corners, supply_mode, supplies),
+            "expected_tuples": [{"corner": c, "temp_c": t, "vdd_v": v} for c, t, v in expected],
+            "n_expected_tuples_per_analysis": len(expected),
             "n_runs": n_runs, "n_failed": len(errors),
             **({"klt_backend": args.backend, "icmr_cmrr_floors_db": ICMR_CMRR_FLOORS_DB, "icmr_dv_v": ICMR_DV_V,
                 "icmr_vstep_v": ICMR_VSTEP_V, "target_icmr_v": list(TARGET_ICMR_V),

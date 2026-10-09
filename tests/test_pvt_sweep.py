@@ -204,7 +204,9 @@ class CommittedRecordShapeTests(unittest.TestCase):
                         self.assertEqual(reader.fieldnames, pvt.FIELDNAMES[analysis])
                         rows = list(reader)
                     per_point = 2 if analysis == "cmrr" else 1
-                    full = len(m["corners"]) * len(m["temps_c"]) * per_point
+                    cart = m.get("supply_mode") == "cartesian"  # absent in pre-#110 (paired) records
+                    n_sup = len(m["supplies_v"]) if cart else 1
+                    full = len(m["corners"]) * len(m["temps_c"]) * n_sup * per_point
                     self.assertLessEqual(len(rows), full)
                     self.assertGreaterEqual(len(rows), full - m["n_failed"])
                     seen = set()
@@ -214,10 +216,13 @@ class CommittedRecordShapeTests(unittest.TestCase):
                                 float(v)
                         self.assertIn(r["corner"], m["corners"])
                         self.assertIn(float(r["temp_c"]), m["temps_c"])
-                        self.assertAlmostEqual(
-                            float(r["vdd_v"]), m["vdd_by_corner"][r["corner"]])
-                        seen.add((r["corner"], float(r["temp_c"]), r.get("cm_point")))
-                    self.assertEqual(len(seen), len(rows))  # no duplicate corner/temp
+                        if cart:
+                            self.assertIn(float(r["vdd_v"]), m["supplies_v"])
+                        else:
+                            self.assertAlmostEqual(
+                                float(r["vdd_v"]), m["vdd_by_corner"][r["corner"]])
+                        seen.add((r["corner"], float(r["temp_c"]), float(r["vdd_v"]), r.get("cm_point")))
+                    self.assertEqual(len(seen), len(rows))  # no duplicate corner/temp/supply
 
     def test_ac_rows_are_self_consistent(self):
         for p, d in pvt_records():
@@ -449,6 +454,188 @@ class StepMetricsTests(unittest.TestCase):
         summ = pvt.pm_overshoot_summary(tab)
         self.assertEqual(summ["points_disagreeing"], ["ss/27C"])
         self.assertEqual(summ["points_with_ac_reference"], 2)
+
+
+class CartesianSupplyTests(unittest.TestCase):
+    """Issue #110: opt-in independent-supply mode; paired stays the default."""
+
+    CORNERS = list(pvt.DEFAULT_CORNERS)
+    TEMPS = [-40.0, 27.0, 125.0]
+
+    def test_paired_is_default_and_reproduces_historical_tuples(self):
+        self.assertEqual(pvt.DEFAULT_SUPPLY_MODE, "paired")
+        pts = pvt.supply_points(self.CORNERS, self.TEMPS)
+        self.assertEqual(len(pts), 15)
+        self.assertEqual({(c, t) for c, t, _ in pts}, {(c, t) for c in self.CORNERS for t in self.TEMPS})
+        for c, _t, v in pts:
+            self.assertEqual(v, pvt.VDD_BY_CORNER[c])
+        self.assertEqual(pvt.parse_args([]).supply_mode, "paired")
+
+    def test_paired_request_exclusions_unchanged(self):
+        vdds, ex = pvt.vdd_pairing(self.CORNERS)
+        self.assertEqual(vdds, [1.62, 1.8, 1.98])
+        self.assertEqual(len(ex), 10)
+        self.assertEqual(ex, pvt.vdd_pairing(self.CORNERS, "paired")[1])
+        req, _b, tag = klt_request("cmrr", "mid")
+        self.assertEqual(tag, "cmrr-mid")
+        self.assertEqual(len(req["exclude"]), 10)
+
+    def test_cartesian_emits_45_unique_tuples_per_analysis(self):
+        pts = pvt.supply_points(self.CORNERS, self.TEMPS, "cartesian")
+        self.assertEqual(len(pts), 45)
+        self.assertEqual(len(set(pts)), 45)
+        self.assertEqual({v for _c, _t, v in pts}, {1.62, 1.8, 1.98})
+        # every process sees both supply extremes at every temperature
+        for c in self.CORNERS:
+            for t in self.TEMPS:
+                self.assertEqual({v for cc, tt, v in pts if (cc, tt) == (c, t)}, {1.62, 1.8, 1.98})
+
+    def test_cartesian_subsets(self):
+        pts = pvt.supply_points(["ss", "ff"], [27.0], "cartesian", [1.98, 1.62])
+        self.assertEqual(pts, [("ss", 27.0, 1.62), ("ss", 27.0, 1.98), ("ff", 27.0, 1.62), ("ff", 27.0, 1.98)])
+        with self.assertRaises(ValueError):
+            pvt.supply_values(self.CORNERS, "cartesian", [])
+        with self.assertRaises(ValueError):
+            pvt.supply_values(self.CORNERS, "bogus")
+
+    def test_artifact_names_unique_per_point(self):
+        for mode, n in (("paired", 15), ("cartesian", 45)):
+            pts = pvt.supply_points(self.CORNERS, self.TEMPS, mode)
+            names = {pvt.point_tag("ac", c, t, v, mode) for c, t, v in pts}
+            self.assertEqual(len(names), n, mode)
+        self.assertEqual(pvt.point_tag("ac", "tt", 27.0, 1.8, "paired"), "ac-tt-27C")
+        self.assertNotEqual(pvt.point_tag("ac", "tt", 27.0, 1.62, "cartesian"),
+                            pvt.point_tag("ac", "tt", 27.0, 1.98, "cartesian"))
+
+    def test_cartesian_request_has_all_supplies_and_no_exclusions(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, tag = pvt.build_klt_request("cmrr", "mid", None, FakeKltPdk(), self.CORNERS, self.TEMPS,
+                                              Path(d), "batch", "cartesian", None)
+            req = json.loads(path.read_text())
+        self.assertEqual(tag, "cmrr-mid")
+        self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
+        self.assertNotIn("exclude", req)
+
+    def test_cartesian_icmr_requests_are_per_process_and_supply(self):
+        with tempfile.TemporaryDirectory() as d:
+            tags = set()
+            for v in (1.62, 1.8, 1.98):
+                path, tag = pvt.build_klt_request("icmr", None, v, FakeKltPdk(), ["tt"], self.TEMPS,
+                                                  Path(d), "batch", "cartesian", None)
+                tags.add(tag)
+                req = json.loads(path.read_text())
+                self.assertEqual(req["corners"]["supply_v"]["vdd"], [v])
+                meas = {m["name"]: m["spice"] for m in req["measurements"]}
+                self.assertIn(f"at={0.5 * v:g}", meas["vid_mid_v"])
+        self.assertEqual(tags, {"icmr-tt-1.62V", "icmr-tt-1.8V", "icmr-tt-1.98V"})
+
+    def test_corner_values_do_not_collide_across_supplies(self):
+        rep = {"corners": [
+            {"process": "tt", "temperature_c": 27, "supply_v": {"vdd": v}, "status": "pass",
+             "runtime_s": 1.0, "measurements": [{"name": "a", "value": v}]} for v in (1.62, 1.8, 1.98)]}
+        got = pvt._corner_values(rep, by_supply=True)
+        self.assertEqual(len(got), 3)
+        self.assertEqual([got[("tt", 27.0, v)]["values"]["a"] for v in (1.62, 1.8, 1.98)], [1.62, 1.8, 1.98])
+        self.assertEqual(len(pvt._corner_values(rep)), 1)  # legacy keying would overwrite
+
+    def test_rows_use_actual_point_voltage(self):
+        vals = {"gbw_hz": 1e7}
+        for label, _f in pvt.CMRR_SPOTS:
+            vals[f"adm_{label}_db"], vals[f"acm_{label}_db"] = 70.0, -3.0
+        row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid", 1.98)
+        self.assertEqual(row["vdd_v"], 1.98)
+        self.assertAlmostEqual(row["vcm_v"], 0.99)
+        row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
+        self.assertEqual(row["vdd_v"], 1.8)  # default still the paired voltage
+
+    def test_local_stimuli_use_point_voltage(self):
+        captured = []
+
+        def fake_run(ngspice, deck_text, workdir, log_path, timeout_s=120):
+            captured.append(deck_text)
+            return "iq_a=1e-5\npq_w=1e-5\ngain_dc_db=60\ngbw_hz=1e6\nphase_at_gbw_rad=-2\n" \
+                   "sr_rise_s=1e-8\nsr_fall_s=1e-8\n", 0.1
+
+        real = pvt.run_ngspice
+        pvt.run_ngspice = fake_run
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                row, deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
+                self.assertEqual((row["vdd_v"], row["vcm_v"]), (1.98, 0.99))
+                self.assertIn("1.98", deck)
+                row, _deck = pvt.run_tran_sr(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
+                self.assertAlmostEqual(row["v_low_v"], 0.3 * 1.98)
+                self.assertAlmostEqual(row["v_high_v"], 0.7 * 1.98)
+                row, _deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l")
+                self.assertEqual(row["vdd_v"], 1.62)  # omitted -> paired mapping
+        finally:
+            pvt.run_ngspice = real
+
+    def test_pm_overshoot_table_distinguishes_supplies(self):
+        ac = [{"corner": "tt", "temp_c": "27", "vdd_v": v, "phase_margin_deg": pm}
+              for v, pm in (("1.62", "50"), ("1.98", "70"))]
+        step = [{"corner": "tt", "temp_c": 27.0, "vdd_v": v,
+                 "overshoot_pct": pvt.pm_to_overshoot_pct(pm), "settle_1pct_ns": 1.0}
+                for v, pm in ((1.62, 50.0), (1.98, 70.0))]
+        tab = pvt.pm_overshoot_table(ac, step)
+        self.assertEqual([r["agrees"] for r in tab], [True, True])
+        self.assertEqual([r["vdd_v"] for r in tab], [1.62, 1.98])
+
+    def test_cli_defaults_and_flags(self):
+        a = pvt.parse_args(["--supply-mode", "cartesian", "--supplies", "1.62,1.98"])
+        self.assertEqual((a.supply_mode, a.supplies), ("cartesian", "1.62,1.98"))
+        self.assertEqual(pvt.parse_args([]).supplies, "1.62,1.8,1.98")
+
+    def _run_cmrr_campaign(self, mode, drop=None):
+        names = ["gbw_hz"] + [f"{p}_{label}_db" for label, _f in pvt.CMRR_SPOTS for p in ("adm", "acm")]
+
+        def fake_klt(req_path, out_dir, backend):
+            req = json.loads(Path(req_path).read_text())
+            excl = {(e["process"], e["supply_v"]["vdd"]) for e in req.get("exclude", [])}
+            units = []
+            for c in req["corners"]["process"]:
+                for t in req["corners"]["temperature_c"]:
+                    for v in req["corners"]["supply_v"]["vdd"]:
+                        if (c, v) in excl or (c, t, v) == drop:
+                            continue
+                        units.append({"process": c, "temperature_c": t, "supply_v": {"vdd": v},
+                                      "status": "pass", "runtime_s": 1.0, "diagnostics": [],
+                                      "measurements": [{"name": n, "value": 1.0} for n in names]})
+            return {"status": "pass", "corner_count": len(units), "corners": units, "environment": {}}
+
+        real = pvt.run_klt_sim
+        pvt.run_klt_sim = fake_klt
+        results, errors, jobs = {"cmrr": []}, [], []
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                snap, logs = Path(d) / "snap", Path(d) / "logs"
+                snap.mkdir()
+                logs.mkdir()
+                pvt.run_klt_analyses(["cmrr"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch",
+                                     Path(d) / "req", logs, snap, results, errors, jobs, mode, None)
+        finally:
+            pvt.run_klt_sim = real
+        return results["cmrr"], errors
+
+    def test_aggregation_completeness_cartesian(self):
+        rows, errors = self._run_cmrr_campaign("cartesian")
+        self.assertEqual(errors, [])
+        for cm in pvt.CMRR_CM_POINTS:
+            keys = [(r["corner"], r["temp_c"], r["vdd_v"]) for r in rows if r["cm_point"] == cm]
+            self.assertEqual(len(keys), 45)
+            self.assertEqual(set(keys), set(pvt.supply_points(self.CORNERS, self.TEMPS, "cartesian")))
+
+    def test_aggregation_reports_missing_point_explicitly(self):
+        rows, errors = self._run_cmrr_campaign("cartesian", drop=("ss", -40.0, 1.62))
+        self.assertEqual(len(rows), 2 * 44)
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("ss-" in e and "1.62V" in e and "not in the klt response" in e for e in errors))
+
+    def test_aggregation_paired_unchanged(self):
+        rows, errors = self._run_cmrr_campaign("paired")
+        self.assertEqual(errors, [])
+        self.assertEqual(len(rows) // len(pvt.CMRR_CM_POINTS), 15)
+        self.assertTrue(all(r["vdd_v"] == pvt.VDD_BY_CORNER[r["corner"]] for r in rows))
 
 
 if __name__ == "__main__":
