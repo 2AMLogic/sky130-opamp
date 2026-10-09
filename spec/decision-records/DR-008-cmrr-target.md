@@ -1,13 +1,24 @@
 # DR-008: Proposed CMRR target
 
 - **Status**: **proposed**. Drafted by the Builder agent for issue #66. It
-  is not ratified. Under the 2026-08-19 canary spec/DR ratification-via-PR
-  standing policy
-  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)), the
-  ratification act is a separate operator approval of this record. Until
-  that approval, `spec/target-spec.md`'s CMRR row stays **OPEN** under
-  [`DR-003`](DR-003-target-spec-ratification.md), and its value is a
-  `[P]` proposal only.
+  is not ratified. **Merging the PR that introduces this record (the
+  issue #66 spec-reconciliation PR) does NOT ratify DR-008 or the CMRR
+  target.** This is a deliberate departure from the "Status-line wart"
+  convention of [`DR-003`](DR-003-target-spec-ratification.md),
+  [`DR-005`](DR-005-io-flavor-not-served.md) and
+  [`DR-007`](DR-007-device-resize-gbw-slew-swing.md), under which
+  approving the PR that carries a record is its ratification
+  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)). The
+  issue #66 PR is a spec *reconciliation* plus a *proposal*, not a
+  ratification PR. A merged copy of this record that reads `proposed`
+  therefore means proposed. It is not a drafting artifact.
+  **Ratification act:** a separate, later operator-approved PR whose only
+  purpose is ratification. That PR flips this Status line to `ratified`,
+  and in `spec/target-spec.md` it removes the "OPEN" note on the CMRR row
+  and in §5. An operator may instead rule on it in place of such a PR, but
+  that ruling must still land as the same Status-line flip. Until that
+  act, `spec/target-spec.md`'s CMRR row stays **OPEN** under DR-003, and
+  its value is a `[P]` proposal only.
 - **Date**: 2026-10-09
 - **Decided by**: Loom Builder agent, issue #66 (proposal only)
 - **Related**: [`DR-003`](DR-003-target-spec-ratification.md) (left CMRR
@@ -132,5 +143,7 @@ the 50 dB sensitivity band already covers the target window at every point.
 - **No consumer imposes a CMRR row.** Neither sky130-ldo nor sky130-bandgap
   does (see the Consumers section of `spec/target-spec.md`), so the 50 dB
   figure is not consumer-driven.
-- **Ratification** of this record, and therefore of the row, is a separate
-  operator step that this record does not perform.
+- **Ratification** of this record, and therefore of the row, is the
+  separate ratification act named in the Status line: an operator-approved
+  PR that flips this Status line to `ratified` and removes the CMRR "OPEN"
+  notes in `spec/target-spec.md`. Merging the issue #66 PR is not that act.
