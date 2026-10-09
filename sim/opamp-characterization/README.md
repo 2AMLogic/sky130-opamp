@@ -671,6 +671,23 @@ Record [`20261009-072806-e06f2fc-psrr-noise-validation.json`](records/20261009-0
 | Negative control: the PSRR+ bench with the `Cinp` shunt removed | 6.02 dB (the divider passes half the ripple into the input) — the shunt is load-bearing and the bench does notice a supply-to-input leak |
 | Noise integration | see the table above (1.7×10⁻⁴) |
 
+**Acceptance criteria (issue #98).** Future validation records carry a
+`criteria` list (name, threshold, observed, verdict, detail) and `passed`;
+`validate_psrr_noise.py` exits nonzero if any criterion fails. The evaluator
+(`evaluate()`) is simulator-free and tested in `tests/test_validate_psrr_noise.py`.
+Criteria: every run status `pass`; exactly the expected corners; required
+measurements present and finite; then
+
+| Criterion | Tolerance | Committed value | Rationale |
+|---|---|---|---|
+| \|AC PSRR(0.1 Hz) - DC finite-difference PSRR\| | 0.05 dB | 0.0004 dB | DC difference resolution (~11 printed digits on ~8 uV, ~1e-5 dB), step curvature and 0.1 Hz-vs-DC are all < 0.01 dB; 0.05 dB is 0.6 % amplitude, still far below a real supply-to-input leak |
+| \|vn_int_band / native inoise_total - 1\| | 1e-3 | 1.7e-4 | trapezoid-in-ln(f) error at 100 pts/dec is ~(0.023)^2/12 of local curvature; native total printed to 8 digits; ~6x margin |
+| Negative control (no Cinp) PSRR | < 10 dB | 6.02 dB | unchanged |
+
+Invalid inputs (zero dvout for the logarithm, non-positive native noise for the
+ratio) become failed criteria rather than exceptions. Tolerances were set from
+bench precision, not tuned to hide disagreement; committed records are unchanged.
+
 ### Limits of this evidence
 
 - Schematic netlist, ideal `ibias`, no layout parasitics or supply
