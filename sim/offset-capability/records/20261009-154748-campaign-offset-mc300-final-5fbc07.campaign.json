@@ -1,0 +1,208 @@
+{
+  "campaign": "offset-mc300",
+  "issue": 85,
+  "base_seed": 20261085,
+  "n_per_corner": 300,
+  "chunk": 100,
+  "chunk_seed_rule": "seed = base_seed + chunk_index (same at every corner); global sample g = chunk*100 + sample_index",
+  "bench": "sim/offset-capability/bench/offset_dc.cir",
+  "vdd_v": 1.8,
+  "temp_c": 27.0,
+  "vos_definition": "V(inp)-V(inn) at first rising v(out)=0.9 V crossing, bracket +/-30 mV, step 20 uV",
+  "corners": {
+    "tt": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-143703-offset-mc300-ttssff-tt-c0-b49127"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-144720-offset-mc300-ttssff-tt-c1-a5027d"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-145535-offset-mc300-ttssff-tt-c2-59dfc8"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005182533333333109,
+      "sigma_v": 0.00858338623777615,
+      "three_sigma_v": 0.025750158713328447,
+      "mean_abs_plus_3sigma_v": 0.02626841204666176,
+      "min_v": -0.027383000000000046,
+      "max_v": 0.027635999999999994
+    },
+    "sf": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-143705-offset-mc300-sffs-sf-c0-532806"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-144943-offset-mc300-sffs-sf-c1-r2-b16302"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-145516-offset-mc300-sffs-sf-c2-3a9252"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005022066666666425,
+      "sigma_v": 0.00838218400455651,
+      "three_sigma_v": 0.025146552013669533,
+      "mean_abs_plus_3sigma_v": 0.025648758680336177,
+      "min_v": -0.026615000000000055,
+      "max_v": 0.02688199999999996
+    },
+    "fs": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-150050-offset-mc300-sffs-fs-c0-c14f42"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-150800-offset-mc300-sffs-fs-c1-e72c7c"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-152035-offset-mc300-sffs-fs-c2-95fd4e"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005555833333333086,
+      "sigma_v": 0.008663965562061688,
+      "three_sigma_v": 0.025991896686185064,
+      "mean_abs_plus_3sigma_v": 0.02654748001951837,
+      "min_v": -0.027596000000000065,
+      "max_v": 0.028098999999999985
+    },
+    "ss": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-150318-offset-mc300-ttssff-ss-c0-e3315c"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-151026-offset-mc300-ttssff-ss-c1-246b19"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-152035-offset-mc300-ttssff-ss-c2-cc3c4c"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005157199999999781,
+      "sigma_v": 0.008691863023791149,
+      "three_sigma_v": 0.026075589071373445,
+      "mean_abs_plus_3sigma_v": 0.02659130907137342,
+      "min_v": -0.027591000000000032,
+      "max_v": 0.027915000000000023
+    },
+    "ff": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-152709-offset-mc300-ttssff-ff-c0-358e62"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-153446-offset-mc300-ttssff-ff-c1-708380"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-154116-offset-mc300-ttssff-ff-c2-ce3e1d"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005309099999999778,
+      "sigma_v": 0.008386069384060746,
+      "three_sigma_v": 0.02515820815218224,
+      "mean_abs_plus_3sigma_v": 0.02568911815218222,
+      "min_v": -0.02681699999999998,
+      "max_v": 0.027135999999999938
+    }
+  },
+  "requests_not_used_in_statistics": [
+    {
+      "record_id": "20261009-144723-offset-mc300-sffs-sf-c1-52fdb1",
+      "status": "batch refusal: batch_no_capacity"
+    },
+    {
+      "record_id": "20261009-151434-offset-mc300-sffs-fs-c2-0d0756",
+      "status": "interrupted: request written, klt run never completed (no klt report or summary; sweep session died)"
+    },
+    {
+      "record_id": "20261009-151558-offset-mc300-ttssff-ss-c2-555353",
+      "status": "interrupted: request written, klt run never completed (no klt report or summary; sweep session died)"
+    }
+  ]
+}

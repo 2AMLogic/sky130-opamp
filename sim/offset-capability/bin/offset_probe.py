@@ -12,6 +12,7 @@ Usage:
   offset_probe.py run --bench pair|offset --label NAME [--mismatch on|off]
                       [--seed N --n N] [--backend NAME] [--dry-run]
   offset_probe.py campaign --label NAME --base-seed N [--corners tt,ss,ff]
+                      [--only corner:chunk,...]
                       [--n-total 300 --chunk 100] [--backend NAME] [--dry-run]
   offset_probe.py summarize CHUNK.summary.json ...
 
@@ -194,7 +195,8 @@ def aggregate(samples: list[dict], n_requested: int) -> dict:
 
 
 def is_capacity_error(err: str) -> bool:
-    return "BATCH_MAX_CONCURRENT_INSTANCES" in (err or "")
+    """Fleet-capacity refusals (shared instance cap, or no Spot capacity)."""
+    return any(t in (err or "") for t in ("BATCH_MAX_CONCURRENT_INSTANCES", "batch_no_capacity"))
 
 
 def run_one(req: dict, label: str, backend: str | None, bench: str = "offset",
@@ -267,6 +269,9 @@ def campaign(a) -> int:
     if bad:
         raise SystemExit(f"unknown corner(s) {bad}; choose from {CORNERS}")
     plan = chunk_plan(corners, a.n_total, a.chunk, a.base_seed)
+    if a.only:   # resume: run only the listed corner:chunk requests (same seeds)
+        want = {(x.split(":")[0], int(x.split(":")[1])) for x in a.only.split(",") if x}
+        plan = [p for p in plan if (p["corner"], p["chunk"]) in want]
     results: dict[str, list[dict]] = {c: [] for c in corners}
     log = []
     for p in plan:
@@ -355,6 +360,7 @@ def main(argv=None) -> int:
     c.add_argument("--chunk", type=int, default=100)
     c.add_argument("--max-attempts", type=int, default=6)
     c.add_argument("--retry-wait-s", type=int, default=300)
+    c.add_argument("--only", help="resume: comma list of corner:chunk to run, e.g. ss:2,ff:0")
     c.add_argument("--backend")
     c.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("summarize")

@@ -1,0 +1,1360 @@
+{
+  "record_id": "20261009-150800-offset-mc300-sffs-fs-c1-e72c7c",
+  "campaign": "mc300-sffs",
+  "corner": "fs",
+  "chunk": 1,
+  "chunk_seed": 20261086,
+  "chunk_n": 100,
+  "global_offset": 100,
+  "attempt": 1,
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-85/sim/offset-capability/records/20261009-150800-offset-mc300-sffs-fs-c1-e72c7c.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-85/sim/offset-capability/records/20261009-150800-offset-mc300-sffs-fs-c1-e72c7c-artifacts",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "client_klt_version": "klt 0.7.0+g6440221f9207",
+  "git_sha": "caa31ba857724372d8302cf416048e42eb85902d",
+  "remote": {
+    "provider": "aws-batch-fleet",
+    "job_id": "klt-sim-d3ca320b22af",
+    "bucket": "2am-batch-jobs-221082181346",
+    "region": "us-east-1",
+    "instance_id": "i-0e244b37cced01f8e",
+    "instance_type": "c7i.8xlarge",
+    "availability_zone": "us-east-1c",
+    "ami_id": "ami-0e40e3245f1923ac8",
+    "lifecycle": "spot",
+    "spot": true,
+    "state": "done",
+    "exit_code": "0",
+    "concurrency": "2",
+    "physical_cores": "16",
+    "elapsed_seconds": 346,
+    "runner_klt_version": "0.5.0",
+    "client_klt_version": "0.7.0+g6440221f9207",
+    "runner_compatibility": "mismatch",
+    "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g6440221f9207; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+  },
+  "monte_carlo_echo": {
+    "n": 100,
+    "seed": 20261086,
+    "vary": "mismatch",
+    "family_mismatch": [
+      {
+        "family": "capacitor",
+        "active": null,
+        "note": "mismatch activity for the 'capacitor' family is not independently verified for PDK family 'sky130'; treat any sampled spread for it as unconfirmed."
+      }
+    ]
+  },
+  "echo_problems": [],
+  "samples": [
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc0",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 0,
+        "seed": 562122881,
+        "process_seed": 1382011936,
+        "mismatch_seed": 166090899
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0005810000000000537
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc1",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 1,
+        "seed": 115452304,
+        "process_seed": 1382011936,
+        "mismatch_seed": 2019426188
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0031729999999999814
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc2",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 2,
+        "seed": 1820982976,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1758921749
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.011521000000000003
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc3",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 3,
+        "seed": 66243749,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1145429469
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0038880000000000026
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc4",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 4,
+        "seed": 1542129848,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1549618084
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0008159999999999279
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc5",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 5,
+        "seed": 743771894,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1348542843
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.006761999999999935
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc6",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 6,
+        "seed": 864624064,
+        "process_seed": 1382011936,
+        "mismatch_seed": 300647957
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0016650000000000276
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc7",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 7,
+        "seed": 147336378,
+        "process_seed": 1382011936,
+        "mismatch_seed": 306828006
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.011827000000000032
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc8",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 8,
+        "seed": 2120095408,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1150158368
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.028098999999999985
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc9",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 9,
+        "seed": 1023189155,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1305465685
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0021700000000000053
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc10",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 10,
+        "seed": 1302360273,
+        "process_seed": 1382011936,
+        "mismatch_seed": 160148864
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.006738000000000022
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc11",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 11,
+        "seed": 368324014,
+        "process_seed": 1382011936,
+        "mismatch_seed": 485464093
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.005141000000000062
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc12",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 12,
+        "seed": 1715481972,
+        "process_seed": 1382011936,
+        "mismatch_seed": 943664386
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0034640000000000226
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc13",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 13,
+        "seed": 525661603,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1293012096
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.018147000000000024
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc14",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 14,
+        "seed": 708149026,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1038959329
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.006537999999999933
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc15",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 15,
+        "seed": 870761840,
+        "process_seed": 1382011936,
+        "mismatch_seed": 61990702
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.006360000000000032
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc16",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 16,
+        "seed": 1644421741,
+        "process_seed": 1382011936,
+        "mismatch_seed": 806263870
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.020299999999999985
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc17",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 17,
+        "seed": 1851380420,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1997224312
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0023410000000000375
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc18",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 18,
+        "seed": 1063584039,
+        "process_seed": 1382011936,
+        "mismatch_seed": 790052075
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.003461999999999965
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc19",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 19,
+        "seed": 1188550823,
+        "process_seed": 1382011936,
+        "mismatch_seed": 485703309
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.011280999999999985
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc20",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 20,
+        "seed": 94363329,
+        "process_seed": 1382011936,
+        "mismatch_seed": 844248007
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00438700000000003
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc21",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 21,
+        "seed": 549456093,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1661924825
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009353999999999973
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc22",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 22,
+        "seed": 1257690757,
+        "process_seed": 1382011936,
+        "mismatch_seed": 596935835
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0014889999999999626
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc23",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 23,
+        "seed": 1486476247,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1074679364
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.004344999999999932
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc24",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 24,
+        "seed": 1029243402,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1752771453
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.02299399999999996
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc25",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 25,
+        "seed": 1907859764,
+        "process_seed": 1382011936,
+        "mismatch_seed": 2037922080
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.004616999999999982
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc26",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 26,
+        "seed": 32162133,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1292394493
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.018036000000000052
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc27",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 27,
+        "seed": 313476025,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1129907911
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.011805999999999983
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc28",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 28,
+        "seed": 466002997,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1208212175
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.027596000000000065
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc29",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 29,
+        "seed": 502768632,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1524123493
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.002454999999999985
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc30",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 30,
+        "seed": 188197550,
+        "process_seed": 1382011936,
+        "mismatch_seed": 286203851
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0016500000000000403
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc31",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 31,
+        "seed": 1866953758,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1183769045
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.012812999999999963
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc32",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 32,
+        "seed": 1565668642,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1321856687
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.007867999999999986
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc33",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 33,
+        "seed": 1152212115,
+        "process_seed": 1382011936,
+        "mismatch_seed": 740820832
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0037129999999999663
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc34",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 34,
+        "seed": 1884276430,
+        "process_seed": 1382011936,
+        "mismatch_seed": 981707930
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.005287999999999959
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc35",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 35,
+        "seed": 12640502,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1049859737
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0030010000000000314
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc36",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 36,
+        "seed": 369956527,
+        "process_seed": 1382011936,
+        "mismatch_seed": 2038761134
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0022699999999999942
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc37",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 37,
+        "seed": 657015646,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1578344920
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.016815000000000024
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc38",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 38,
+        "seed": 2041136688,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1786764276
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.009445000000000037
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc39",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 39,
+        "seed": 1652763586,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1326104890
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.005685999999999969
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc40",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 40,
+        "seed": 966128953,
+        "process_seed": 1382011936,
+        "mismatch_seed": 501558488
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.005093000000000014
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc41",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 41,
+        "seed": 512433160,
+        "process_seed": 1382011936,
+        "mismatch_seed": 25197860
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0019540000000000113
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc42",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 42,
+        "seed": 173002469,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1702969012
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.003170000000000006
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc43",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 43,
+        "seed": 770669365,
+        "process_seed": 1382011936,
+        "mismatch_seed": 57020509
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.006484999999999963
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc44",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 44,
+        "seed": 1900038165,
+        "process_seed": 1382011936,
+        "mismatch_seed": 433815151
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0044039999999999635
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc45",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 45,
+        "seed": 1121448225,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1784690906
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.003009999999999957
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc46",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 46,
+        "seed": 1256141694,
+        "process_seed": 1382011936,
+        "mismatch_seed": 334324206
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.003531000000000062
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc47",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 47,
+        "seed": 656058424,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1384033864
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.003143000000000007
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc48",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 48,
+        "seed": 1550298641,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1899399294
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.02808199999999994
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc49",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 49,
+        "seed": 2004594280,
+        "process_seed": 1382011936,
+        "mismatch_seed": 877156658
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.010579000000000005
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc50",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 50,
+        "seed": 1467027418,
+        "process_seed": 1382011936,
+        "mismatch_seed": 569012269
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0042720000000000535
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc51",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 51,
+        "seed": 1504630466,
+        "process_seed": 1382011936,
+        "mismatch_seed": 76873097
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009278999999999926
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc52",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 52,
+        "seed": 1871657366,
+        "process_seed": 1382011936,
+        "mismatch_seed": 156773099
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.009931000000000023
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc53",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 53,
+        "seed": 539073928,
+        "process_seed": 1382011936,
+        "mismatch_seed": 267238885
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.008067999999999964
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc54",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 54,
+        "seed": 993946302,
+        "process_seed": 1382011936,
+        "mismatch_seed": 284958563
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.006004999999999927
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc55",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 55,
+        "seed": 563062460,
+        "process_seed": 1382011936,
+        "mismatch_seed": 507464494
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00889899999999999
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc56",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 56,
+        "seed": 1556504177,
+        "process_seed": 1382011936,
+        "mismatch_seed": 172703589
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0024060000000000192
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc57",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 57,
+        "seed": 72228893,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1509556191
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.003294000000000019
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc58",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 58,
+        "seed": 277672841,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1245923405
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0030970000000000164
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc59",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 59,
+        "seed": 1441745271,
+        "process_seed": 1382011936,
+        "mismatch_seed": 2125814190
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.015514999999999946
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc60",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 60,
+        "seed": 96057073,
+        "process_seed": 1382011936,
+        "mismatch_seed": 543630885
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009512999999999994
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc61",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 61,
+        "seed": 787455073,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1166825827
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.004767000000000077
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc62",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 62,
+        "seed": 1598916954,
+        "process_seed": 1382011936,
+        "mismatch_seed": 308398490
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -4.000000000004e-06
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc63",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 63,
+        "seed": 1546787818,
+        "process_seed": 1382011936,
+        "mismatch_seed": 96784631
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0017889999999999295
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc64",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 64,
+        "seed": 2089313408,
+        "process_seed": 1382011936,
+        "mismatch_seed": 480437731
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.01035699999999995
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc65",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 65,
+        "seed": 1501036681,
+        "process_seed": 1382011936,
+        "mismatch_seed": 420474543
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0038449999999999873
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc66",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 66,
+        "seed": 1702281242,
+        "process_seed": 1382011936,
+        "mismatch_seed": 7295230
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.005441000000000029
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc67",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 67,
+        "seed": 1279776746,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1271288064
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.008133000000000057
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc68",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 68,
+        "seed": 1652192444,
+        "process_seed": 1382011936,
+        "mismatch_seed": 214604008
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.00813700000000006
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc69",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 69,
+        "seed": 205238056,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1817428153
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00339899999999993
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc70",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 70,
+        "seed": 1606996137,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1483284915
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.013832999999999984
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc71",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 71,
+        "seed": 1841827032,
+        "process_seed": 1382011936,
+        "mismatch_seed": 903361350
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0014220000000000343
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc72",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 72,
+        "seed": 618493323,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1955582694
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009398000000000017
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc73",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 73,
+        "seed": 265917190,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1137289914
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.004178000000000015
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc74",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 74,
+        "seed": 2088461662,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1135871269
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.015324000000000004
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc75",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 75,
+        "seed": 568451863,
+        "process_seed": 1382011936,
+        "mismatch_seed": 2051178432
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0006880000000000219
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc76",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 76,
+        "seed": 1678588820,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1811673050
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.00758100000000006
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc77",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 77,
+        "seed": 588193772,
+        "process_seed": 1382011936,
+        "mismatch_seed": 424369536
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0018930000000000335
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc78",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 78,
+        "seed": 1546342287,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1886979522
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0008110000000000062
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc79",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 79,
+        "seed": 1083913431,
+        "process_seed": 1382011936,
+        "mismatch_seed": 789974072
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.008153999999999995
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc80",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 80,
+        "seed": 1113248107,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1710529785
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.0024939999999999962
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc81",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 81,
+        "seed": 1045297610,
+        "process_seed": 1382011936,
+        "mismatch_seed": 855954443
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0010130000000000416
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc82",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 82,
+        "seed": 530048141,
+        "process_seed": 1382011936,
+        "mismatch_seed": 813426349
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.004902999999999991
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc83",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 83,
+        "seed": 636706460,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1806620571
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.014445999999999959
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc84",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 84,
+        "seed": 184833443,
+        "process_seed": 1382011936,
+        "mismatch_seed": 732598737
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.004677000000000042
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc85",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 85,
+        "seed": 1064466158,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1307029813
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.006500000000000061
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc86",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 86,
+        "seed": 1848473657,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1936880015
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.005263999999999935
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc87",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 87,
+        "seed": 661510585,
+        "process_seed": 1382011936,
+        "mismatch_seed": 620584677
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.00987300000000002
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc88",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 88,
+        "seed": 410076474,
+        "process_seed": 1382011936,
+        "mismatch_seed": 202449584
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.007213999999999943
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc89",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 89,
+        "seed": 1933218014,
+        "process_seed": 1382011936,
+        "mismatch_seed": 419914133
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.0020020000000000593
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc90",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 90,
+        "seed": 2125053085,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1327760564
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.008630999999999944
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc91",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 91,
+        "seed": 544378020,
+        "process_seed": 1382011936,
+        "mismatch_seed": 419716013
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00040799999999996395
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc92",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 92,
+        "seed": 983093291,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1053889938
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009526999999999952
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc93",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 93,
+        "seed": 1864570668,
+        "process_seed": 1382011936,
+        "mismatch_seed": 659131408
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.008746000000000032
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc94",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 94,
+        "seed": 1624164538,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1610141923
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.00022299999999997322
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc95",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 95,
+        "seed": 1646670642,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1724356903
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.00966200000000006
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc96",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 96,
+        "seed": 499420948,
+        "process_seed": 1382011936,
+        "mismatch_seed": 1069723709
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.00045799999999995844
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc97",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 97,
+        "seed": 1153158737,
+        "process_seed": 1382011936,
+        "mismatch_seed": 383567335
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.011554999999999982
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc98",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 98,
+        "seed": 108523679,
+        "process_seed": 1382011936,
+        "mismatch_seed": 638307145
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": 0.009132000000000029
+    },
+    {
+      "corner_id": "fs_mm/1.800V/27C/mc99",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 99,
+        "seed": 84836239,
+        "process_seed": 1382011936,
+        "mismatch_seed": 909904246
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.01529999999999998
+    }
+  ]
+}

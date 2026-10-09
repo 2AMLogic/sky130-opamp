@@ -1,0 +1,122 @@
+{
+  "campaign": "mc300-ttssff",
+  "base_seed": 20261085,
+  "n_total": 300,
+  "chunk": 100,
+  "corners": {
+    "tt": {
+      "chunks": [],
+      "n_requested": 300,
+      "n_returned": 0,
+      "n_ok": 0,
+      "n_failed": 300,
+      "failure_reasons": {
+        "requested but not returned": 300
+      },
+      "mean_v": null,
+      "sigma_v": null,
+      "three_sigma_v": null,
+      "mean_abs_plus_3sigma_v": null,
+      "min_v": null,
+      "max_v": null
+    },
+    "ss": {
+      "chunks": [
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-152035-offset-mc300-ttssff-ss-c2-cc3c4c"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 100,
+      "n_ok": 100,
+      "n_failed": 200,
+      "failure_reasons": {
+        "requested but not returned": 200
+      },
+      "mean_v": -0.00046282000000002376,
+      "sigma_v": 0.00898330673339515,
+      "three_sigma_v": 0.02694992020018545,
+      "mean_abs_plus_3sigma_v": 0.027412740200185474,
+      "min_v": -0.02710100000000004,
+      "max_v": 0.01642699999999997
+    },
+    "ff": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261009-152709-offset-mc300-ttssff-ff-c0-358e62"
+        },
+        {
+          "chunk": 1,
+          "seed": 20261086,
+          "n": 100,
+          "offset": 100,
+          "record_id": "20261009-153446-offset-mc300-ttssff-ff-c1-708380"
+        },
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-154116-offset-mc300-ttssff-ff-c2-ce3e1d"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 300,
+      "n_ok": 300,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0005309099999999778,
+      "sigma_v": 0.008386069384060746,
+      "three_sigma_v": 0.02515820815218224,
+      "mean_abs_plus_3sigma_v": 0.02568911815218222,
+      "min_v": -0.02681699999999998,
+      "max_v": 0.027135999999999938
+    }
+  },
+  "attempts": [
+    {
+      "record_id": "20261009-152035-offset-mc300-ttssff-ss-c2-cc3c4c",
+      "corner": "ss",
+      "chunk": 2,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-c2fb136fb594"
+    },
+    {
+      "record_id": "20261009-152709-offset-mc300-ttssff-ff-c0-358e62",
+      "corner": "ff",
+      "chunk": 0,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-a5575a38106c"
+    },
+    {
+      "record_id": "20261009-153446-offset-mc300-ttssff-ff-c1-708380",
+      "corner": "ff",
+      "chunk": 1,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-c323ecf73be3"
+    },
+    {
+      "record_id": "20261009-154116-offset-mc300-ttssff-ff-c2-ce3e1d",
+      "corner": "ff",
+      "chunk": 2,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-51b3c0d784f2"
+    }
+  ]
+}

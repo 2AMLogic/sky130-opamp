@@ -187,6 +187,12 @@ class Campaign(unittest.TestCase):
         self.assertTrue(op.check_echo(mc_payload(3, 9, process="tt"), mc, "tt_mm"))
         self.assertTrue(op.check_echo({"corners": []}, mc, "tt_mm"))
 
+    def test_capacity_errors_recognised(self):
+        self.assertTrue(op.is_capacity_error("8 instance(s) already running ... BATCH_MAX_CONCURRENT_INSTANCES=8"))
+        self.assertTrue(op.is_capacity_error('{"error": {"code": "batch_no_capacity"}}'))
+        self.assertFalse(op.is_capacity_error("ngspice: singular matrix"))
+        self.assertFalse(op.is_capacity_error(None))
+
     def test_corner_report_global_index_and_stats(self):
         chunks = [{"offset": 0, "samples": [dict(ok(1e-3), monte_carlo={"sample_index": 0}),
                                             dict(ok(3e-3), monte_carlo={"sample_index": 1})]},
@@ -195,6 +201,44 @@ class Campaign(unittest.TestCase):
         a = op.corner_report(chunks, 4)
         self.assertEqual((a["n_ok"], a["n_failed"]), (2, 2))
         self.assertAlmostEqual(a["mean_v"], 2e-3)
+
+
+class CampaignRecords(unittest.TestCase):
+    """Committed #85 campaign record is consistent with its chunk summaries."""
+    REC = REPO / "sim" / "offset-capability" / "records"
+
+    def setUp(self):
+        finals = sorted(self.REC.glob("*campaign-offset-mc300-final-*.campaign.json"))
+        if not finals:
+            self.skipTest("campaign record not present")
+        import json
+        self.json = json
+        self.final = json.loads(finals[-1].read_text())
+
+    def test_each_corner_has_n300_seeds_and_stats(self):
+        for c in ("tt", "ss", "ff"):
+            r = self.final["corners"][c]
+            self.assertEqual(r["n_requested"], 300)
+            self.assertEqual(r["n_ok"] + r["n_failed"], 300)
+            self.assertEqual([ch["seed"] for ch in r["chunks"]],
+                             [self.final["base_seed"] + k for k in range(3)])
+            self.assertEqual([ch["offset"] for ch in r["chunks"]], [0, 100, 200])
+            self.assertIsNotNone(r["mean_v"])
+            self.assertIsNotNone(r["sigma_v"])
+
+    def test_reaggregation_from_chunk_summaries_matches(self):
+        for c, r in self.final["corners"].items():
+            paths = [str(self.REC / f"{ch['record_id']}.summary.json") for ch in r["chunks"]]
+            again = op.summarize(paths)[c]
+            for k in ("n_ok", "n_failed", "mean_v", "sigma_v"):
+                self.assertEqual(again[k], r[k], (c, k))
+
+    def test_unused_requests_are_all_listed_and_none_used(self):
+        used = {ch["record_id"] for r in self.final["corners"].values() for ch in r["chunks"]}
+        listed = {u["record_id"] for u in self.final["requests_not_used_in_statistics"]}
+        self.assertFalse(used & listed)
+        every = {p.name[:-len(".request.json")] for p in self.REC.glob("*mc300*.request.json")}
+        self.assertEqual(every, used | listed)
 
 
 if __name__ == "__main__":
