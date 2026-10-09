@@ -68,8 +68,12 @@ CORNERS = ("tt", "ss", "ff", "sf", "fs")
 
 
 def build_request(bench: str, mismatch: bool, mc: dict | None,
-                  corner: str = "tt", keep_artifacts: bool = True) -> dict:
-    cir = {"pair": "../bench/pair_diag.cir", "offset": "../bench/offset_dc.cir"}[bench]
+                  corner: str = "tt", keep_artifacts: bool = True,
+                  netlist: str | None = None) -> dict:
+    """`netlist` (offset bench only, issue #107) overrides the bench path, e.g. a
+    per-device-group gated variant from bin/attribution.py; the analysis and
+    measurements are unchanged so the same extractor applies."""
+    cir = netlist or {"pair": "../bench/pair_diag.cir", "offset": "../bench/offset_dc.cir"}[bench]
     if bench == "pair":
         analysis = {"kind": "dc", "args": "Vg 0.79 0.81 0.01"}
         meas = [
