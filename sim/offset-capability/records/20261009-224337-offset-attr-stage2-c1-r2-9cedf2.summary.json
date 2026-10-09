@@ -1,0 +1,28 @@
+{
+  "record_id": "20261009-224337-offset-attr-stage2-c1-r2-9cedf2",
+  "attribution": "attr",
+  "group": "stage2",
+  "chunk": 1,
+  "chunk_seed": 20261086,
+  "chunk_n": 100,
+  "global_offset": 100,
+  "attempt": 2,
+  "mismatch_on": [
+    "XM6",
+    "XM7"
+  ],
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-107/sim/offset-capability/records/20261009-224337-offset-attr-stage2-c1-r2-9cedf2.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-107/sim/offset-capability/records/20261009-224337-offset-attr-stage2-c1-r2-9cedf2-artifacts",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "{\n  \"schema_version\": 1,\n  \"error\": {\n    \"command\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: no capacity in any of the 30 pools after 3 attempt(s) \\u2014 this is the capacity-refusal case, and it is now visible instead of silent\",\n    \"code\": \"batch_no_capacity\"\n  }\n}\n",
+  "env_KLT_SIM_BACKEND": "batch",
+  "client_klt_version": "klt 0.7.0+gb82427b30c96",
+  "git_sha": "6f18704286895e7a3b6c20c6420468466ab033de"
+}

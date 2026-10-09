@@ -1,0 +1,54 @@
+{
+  "netlist": "../bench/attribution/offset_dc_attr_pair.cir",
+  "netlist_source": "schematic",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt_mm"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      27.0
+    ]
+  },
+  "analysis": {
+    "kind": "dc",
+    "args": "Vd -0.03 0.03 2e-05"
+  },
+  "measurements": [
+    {
+      "name": "vos_inp",
+      "spice": ".meas dc vos_inp find v(inp) when v(out)=0.9 rise=1",
+      "unit": "V"
+    },
+    {
+      "name": "out_lo",
+      "spice": ".meas dc out_lo find v(out) at=-0.03",
+      "unit": "V"
+    },
+    {
+      "name": "out_hi",
+      "spice": ".meas dc out_hi find v(out) at=0.029980",
+      "unit": "V"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": false
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  },
+  "monte_carlo": {
+    "n": 100,
+    "seed": 20261087,
+    "vary": "mismatch"
+  }
+}
