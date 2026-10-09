@@ -36,9 +36,11 @@ from __future__ import annotations
 import json
 import os
 import shlex
+import secrets
 import shutil
 import subprocess
 from collections.abc import Callable, Iterable
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import NamedTuple
 
@@ -162,6 +164,90 @@ def git_sha(repo_root: Path) -> str:
         ).stdout.strip()
     except (subprocess.SubprocessError, OSError):
         return "unknown"
+
+
+# --------------------------------------------------------------------------
+# Record-namespace allocation (issue #75). A record ID is
+# `<UTC YYYYmmdd-HHMMSS>-<revision or label>-<token>`: the historical
+# timestamp/revision prefix is preserved (so IDs still sort chronologically and
+# readers that compare on the prefix keep working) and a random token makes two
+# same-second, same-revision runs distinct. The namespace is *reserved*
+# atomically (os.mkdir of a marker) before any artifact is written, and every
+# artifact writer uses exclusive creation, so nothing is ever truncated.
+# --------------------------------------------------------------------------
+
+RESERVATIONS_DIRNAME = ".reservations"
+
+
+class RecordCollisionError(HarnessError):
+    """A record namespace is already reserved or occupied; it is never reused."""
+
+
+def _namespace_occupied(record_id: str, dirs: Iterable[Path]) -> Path | None:
+    """First existing entry in `dirs` that belongs to `record_id` (exact or `<id>-*`/`<id>.*`)."""
+    for d in dirs:
+        if not d.is_dir():
+            continue
+        for entry in d.iterdir():
+            n = entry.name
+            if n == record_id or (n.startswith(record_id) and n[len(record_id)] in "-."):
+                return entry
+    return None
+
+
+def allocate_record_id(
+    records_dir: Path,
+    label: str,
+    *,
+    extra_dirs: Iterable[Path] = (),
+    now: datetime | None = None,
+    token: str | None = None,
+    max_attempts: int = 32,
+) -> str:
+    """Reserve and return a fresh, exclusively-owned record ID.
+
+    `label` is the git revision (or `<bench>-<label>` for probes). The ID is
+    reserved by atomically creating `records_dir/.reservations/<id>`; an ID
+    whose name is already taken in `records_dir` or `extra_dirs` (e.g. a
+    committed historical record) is skipped. With a random token a collision
+    simply retries; with an explicit `token` (tests) it raises
+    RecordCollisionError instead of reusing the namespace.
+    """
+    stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%d-%H%M%S")
+    resv = records_dir / RESERVATIONS_DIRNAME
+    resv.mkdir(parents=True, exist_ok=True)
+    dirs = [records_dir, *extra_dirs]
+    for _ in range(1 if token is not None else max_attempts):
+        rid = f"{stamp}-{label}-{token if token is not None else secrets.token_hex(3)}"
+        if _namespace_occupied(rid, dirs) is not None:
+            continue
+        try:
+            os.mkdir(resv / rid)
+        except FileExistsError:
+            continue
+        return rid
+    raise RecordCollisionError(
+        f"could not reserve a unique record namespace for {stamp}-{label} under {records_dir}"
+    )
+
+
+def write_new(path: Path, text: str) -> Path:
+    """Write `text` to a path that must not exist (exclusive create; never truncates)."""
+    try:
+        with open(path, "x") as f:
+            f.write(text)
+    except FileExistsError:
+        raise RecordCollisionError(f"refusing to overwrite append-only artifact {path}") from None
+    return path
+
+
+def make_new_dir(path: Path) -> Path:
+    """Create a directory that must not already exist."""
+    try:
+        path.mkdir(parents=True)
+    except FileExistsError:
+        raise RecordCollisionError(f"refusing to reuse existing record directory {path}") from None
+    return path
 
 
 # --------------------------------------------------------------------------

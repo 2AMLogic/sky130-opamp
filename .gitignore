@@ -97,3 +97,6 @@ flow/build/
 .loom/gh-config-by-owner-*/
 .loom-local/
 # <<< loom-managed <<<
+
+# sim/ harness: atomic record-namespace reservation markers (issue #75), local only.
+sim/*/records/.reservations/

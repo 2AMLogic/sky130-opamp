@@ -90,14 +90,17 @@ from spice_harness import (  # noqa: E402  -- import follows the sys.path bootst
     KLT_CMD,
     HarnessError,
     Pdk,
+    allocate_record_id,
     first_line,
     git_sha,
     klt_version,
     load_json,
+    make_new_dir,
     render,
     report_pdk,
     report_tool_status,
     run_klt_sim,
+    write_new,
 )
 
 GMID_DIR = EXP_DIR.parent / "gm-id-characterization"
@@ -805,12 +808,12 @@ def main(argv=None) -> int:
             print(f"ERROR: corner '{corner}' not in {GMID_MODEL_FILES}", file=sys.stderr)
             return 1
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    record_id = f"{ts}-{git_sha(REPO_ROOT)}"
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
+    # Atomically reserve a unique record namespace (issue #75) before any write.
+    record_id = allocate_record_id(RECORDS_DIR, git_sha(REPO_ROOT), extra_dirs=[SNAPSHOT_DIR])
     log_dir = RECORDS_DIR / f"{record_id}-logs"
     snapshot_run_dir = SNAPSHOT_DIR / record_id
-    snapshot_run_dir.mkdir(parents=True, exist_ok=True)
+    make_new_dir(snapshot_run_dir)
 
     results: dict[str, list[dict]] = {a: [] for a in analyses}
     errors: list[str] = []
@@ -870,7 +873,7 @@ def main(argv=None) -> int:
         if not rows:
             continue
         csv_path = RECORDS_DIR / f"{record_id}-{analysis.replace('_', '-')}.csv"
-        with csv_path.open("w", newline="") as f:
+        with csv_path.open("x", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=FIELDNAMES[analysis], lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
@@ -922,7 +925,7 @@ def main(argv=None) -> int:
         "elapsed_s": round(elapsed_total, 1),
     }
     json_path = RECORDS_DIR / f"{record_id}.json"
-    json_path.write_text(json.dumps(record, indent=2) + "\n")
+    write_new(json_path, json.dumps(record, indent=2) + "\n")
 
     print(f"Wrote record {record_id}:")
     for p in written:

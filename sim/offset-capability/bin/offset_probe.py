@@ -25,14 +25,13 @@ import math
 import os
 import subprocess
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 EXP = Path(__file__).resolve().parent.parent
 REPO = EXP.parent.parent
 RECORDS = EXP / "records"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
-from spice_harness import KltSimError, klt_sim  # noqa: E402
+from spice_harness import KltSimError, allocate_record_id, klt_sim, write_new  # noqa: E402
 
 VDD = 1.8
 VREF = VDD / 2          # output reference for the offset crossing
@@ -138,19 +137,17 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     mc = {"n": a.n, "seed": a.seed} if a.seed is not None else None
     req = build_request(a.bench, a.mismatch == "on", mc)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    rid = f"{stamp}-{a.bench}-{a.label}"
     RECORDS.mkdir(exist_ok=True)
+    # Atomically reserve a unique record namespace (issue #75) before any write.
+    rid = allocate_record_id(RECORDS, f"{a.bench}-{a.label}")
     req_path = RECORDS / f"{rid}.request.json"
-    if req_path.exists():
-        raise SystemExit(f"refusing to overwrite append-only record {req_path}")
-    req_path.write_text(json.dumps(req, indent=2) + "\n")
+    write_new(req_path, json.dumps(req, indent=2) + "\n")
     if a.dry_run:
         print(req_path)
         return 0
     outdir = RECORDS / f"{rid}-artifacts"
     cmd, rc, payload, err = run_klt(req_path, outdir, a.backend)
-    (RECORDS / f"{rid}.klt.json").write_text(json.dumps(payload, indent=2) + "\n" if payload else "null\n")
+    write_new(RECORDS / f"{rid}.klt.json", json.dumps(payload, indent=2) + "\n" if payload else "null\n")
     meta = {"record_id": rid, "command": cmd, "exit_code": rc, "stderr": err[-4000:],
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
             "git_sha": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
@@ -160,7 +157,7 @@ def main(argv=None) -> int:
         meta["remote"] = env.get("remote")
         meta["monte_carlo_echo"] = env.get("monte_carlo")
         meta["samples"] = extract_samples(payload, a.bench)
-    (RECORDS / f"{rid}.summary.json").write_text(json.dumps(meta, indent=2) + "\n")
+    write_new(RECORDS / f"{rid}.summary.json", json.dumps(meta, indent=2) + "\n")
     print(json.dumps({k: meta.get(k) for k in ("record_id", "exit_code", "samples")}, indent=2))
     return 0 if payload and all(s["ok"] for s in meta["samples"]) else 1
 

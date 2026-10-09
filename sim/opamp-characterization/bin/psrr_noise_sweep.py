@@ -58,7 +58,15 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
-from spice_harness import KLT_CMD, KltSimError, git_sha, klt_sim, klt_version  # noqa: E402
+from spice_harness import (  # noqa: E402
+    KLT_CMD,
+    KltSimError,
+    allocate_record_id,
+    git_sha,
+    klt_sim,
+    klt_version,
+    write_new,
+)
 
 TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
@@ -251,7 +259,7 @@ def write_csv(path: Path, rows: list[dict], fields: list[str]) -> None:
             return f"{v:.6g}"
         return "" if v is None else v
 
-    with path.open("w", newline="") as f:
+    with path.open("x", newline="") as f:
         w = csv.writer(f, lineterminator="\n")
         w.writerow(fields)
         for r in rows:
@@ -302,9 +310,10 @@ def main(argv=None) -> int:
         print(f"ERROR: {KLT_CMD[0]} not found on PATH", file=sys.stderr)
         return 1
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
     sha = git_sha(REPO_ROOT)
-    record_id = f"{ts}-{sha}"
+    RECORDS_DIR.mkdir(parents=True, exist_ok=True)
+    # Atomically reserve a unique record namespace (issue #75) before any write.
+    record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=[SNAPSHOT_DIR])
 
     # Requests live in a scratch dir during the run but reference the committed
     # testbench by relative path; the request JSON itself is committed as the
@@ -376,8 +385,8 @@ def main(argv=None) -> int:
             written.append(csv_path)
             req_rec = dict(res["request"])
             req_rec["netlist"] = f"../testbench/{BENCHES[bench]['netlist']}"
-            (RECORDS_DIR / f"{record_id}-{tag}.request.json").write_text(json.dumps(req_rec, indent=2) + "\n")
-            (RECORDS_DIR / f"{record_id}-{tag}.klt.json").write_text(json.dumps(payload, indent=2) + "\n")
+            write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
+            write_new(RECORDS_DIR / f"{record_id}-{tag}.klt.json", json.dumps(payload, indent=2) + "\n")
             n_art = 0
             for c in payload["corners"]:
                 art = c.get("artifacts") or {}
@@ -425,7 +434,7 @@ def main(argv=None) -> int:
                 "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             },
         }
-        (RECORDS_DIR / f"{record_id}-psrr-noise.json").write_text(json.dumps(meta, indent=2) + "\n")
+        write_new(RECORDS_DIR / f"{record_id}-psrr-noise.json", json.dumps(meta, indent=2) + "\n")
         print(f"Wrote record {record_id}-psrr-noise:")
         for w in written:
             print(f"  {w.relative_to(REPO_ROOT)}")
