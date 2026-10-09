@@ -555,6 +555,15 @@ unchanged and ready: re-running `psrr_noise_sweep.py --benches noise` on a
 fleet image carrying klt ≥ the release that added `expr` produces the 15-corner
 record with no edits.
 
+**Re-attempt log (appended 2026-10-09, after the above; earlier text unchanged).**
+`psrr_noise_sweep.py --benches noise` was re-run. The first submit was refused
+before any job ran (`batch-fleet-provision.sh`: 8 instances already running,
+`BATCH_MAX_CONCURRENT_INSTANCES=8`); the second submit ran as batch job
+`klt-sim-b1c3b34522bc` and failed 15/15 corners: the runner still reports klt
+0.5.0 against client 0.7.0 (`runner_version_check: enforce`, request not run).
+No record was written and no local grid was run. The grid remains outstanding
+until the fleet runner image carries a klt that supports `measurements[].expr`.
+
 What does exist is evidence that the bench measures the right thing, all
 single-corner and run locally (permitted for one corner / one operating point):
 

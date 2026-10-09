@@ -47,6 +47,16 @@ low-headroom trade explicitly; PVT corners on every recorded result.
 list, netlist/GDS paths, area, maturity rung. Consumer requirement rows
 live in `## Consumers` in [`spec/target-spec.md`](spec/target-spec.md).
 
+## Tests
+
+Simulator-free checks (stdlib only; no ngspice or PDK needed, run in seconds
+and in CI via `.github/workflows/tests.yml`):
+
+```
+python design/bin/sizing_check.py validate
+python -m unittest discover -s tests
+```
+
 ## License
 
 Apache-2.0.
