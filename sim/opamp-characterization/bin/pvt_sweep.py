@@ -369,9 +369,15 @@ SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
 # "ICMR bench" section and ../testbench/opamp_icmr.spice.tmpl's header state the
 # same criterion: ICMR = contiguous Vcm range around VDD/2, output held at
 # mid-rail, over which the local DC CMRR 1/|d vid/d Vcm| stays >= 40 dB.
+# One icmr request per corner (3 units each: the temperatures), not per VDD group.
+# Observed on the fleet (ngspice-46): the 9-unit tt/sf/fs 1.8 V group request had 7 of
+# 9 units sit in gmin/source stepping until the per-corner timeout (twice, with
+# different sets of units each time), while the 3-unit 1.62 V / 1.98 V group
+# requests and a 1-unit tt/27 C request of the same deck converged in 40-150 s.
+ICMR_REQUEST_PER_CORNER = True
 ICMR_VSTEP_V = 0.005  # swept-Vcm resolution (edges are interpolated between points)
 ICMR_DV_V = 0.01  # Vcm offset between the two amplifier copies (finite-difference step)
-ICMR_VSWEEP_START_V = -0.02  # below ground so the rail-guard term gives a low-side crossing
+ICMR_VSWEEP_START_V = 0.0  # NOT below ground: the fleet's ngspice-46 stalled in source stepping from -0.02 V (README)
 ICMR_VSWEEP_OVERSHOOT_V = 0.02  # sweep to VDD + this, same reason on the high side
 ICMR_CMRR_FLOORS_DB = {"40db": 40.0, "30db": 30.0, "50db": 50.0}  # primary first; the rest = sensitivity band
 ICMR_RLOOP = "100k"  # Rin = Rf of the output-held-at-mid-rail inverting loop
@@ -399,7 +405,8 @@ CROSSCHECK_TOL_IQ_FRAC = 0.01  # ICMR mid-point supply current vs committed ac i
 
 def icmr_measurements(vdd: float) -> list[dict]:
     """`.meas dc` cards for one VDD group (mid-supply and the sweep's `to`/`from`
-    limits are literal numbers in a .meas card, hence one request per VDD)."""
+    limits are literal numbers in a .meas card, hence one request per VDD; and see
+    ICMR_REQUEST_PER_CORNER for why each corner is its own request)."""
     mid = 0.5 * vdd
     ms = [
         {"name": "vout_mid_v", "unit": "V", "spice": f".meas dc vout_mid_v find v(out_1) at={mid:g}"},
@@ -429,6 +436,7 @@ KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 in
 CAPACITY_RETRIES = 30
 CAPACITY_WAIT_S = 60
 RUNNER_VERSION_CHECK = ["warn"]  # set from --batch-runner-check
+KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set from --timeout-s
 KLT_CMD: list[str] = shlex.split(os.environ.get("KLT_CMD", "klt"))
 
 
@@ -458,7 +466,8 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
     """Render the circuit body + write the `klt sim` request JSON into req_dir.
 
     cmrr: one request for the whole grid (VDD pairing via supply axis + exclude).
-    icmr: one request per VDD group (`.meas ... at=VDD/2` needs a literal mid-supply).
+    icmr: one request per corner (`.meas ... at=VDD/2` needs a literal mid-supply,
+    and the 9-unit tt/sf/fs 1.8 V request stalled on the fleet; see ICMR_REQUEST_PER_CORNER).
     """
     body_subs = {
         "OPAMP_NETLIST": DESIGN_NETLIST, "VDD_NOM": vdd_group or VDD_BY_CORNER["tt"],
@@ -471,7 +480,7 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         analysis_card = {"kind": "dc", "args": f"Vinp {ICMR_VSWEEP_START_V:g} {stop:g} {ICMR_VSTEP_V:g}"}
         measurements = icmr_measurements(vdd_group)
         vdds, exclude = [vdd_group], []
-        tag = f"icmr-vdd{vdd_group:g}"
+        tag = f"icmr-{corners[0]}" if len(corners) == 1 else f"icmr-vdd{vdd_group:g}"
     else:
         body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
         analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
@@ -491,7 +500,7 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         **({"exclude": exclude} if exclude else {}),
         "analysis": analysis_card,
         "measurements": measurements,
-        "options": {"timeout_s": 1200, "keep_artifacts": True},
+        "options": {"timeout_s": KLT_TIMEOUT_S[0], "keep_artifacts": True},
     }
     if backend == "batch":
         # The fleet image's klt (0.5.0 when this was written) is older than any
@@ -661,7 +670,10 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     plan = []
     for a in klt_analyses:
         if a == "icmr":
-            plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
+            if ICMR_REQUEST_PER_CORNER:
+                plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
+            else:
+                plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
         else:
             plan.extend(("cmrr", cp, None, corners) for cp in CMRR_CM_POINTS)
     # Build every request first, then submit them concurrently (the jobs are
@@ -754,6 +766,9 @@ def parse_args(argv):
     p.add_argument("--klt-cmd", default=None,
                    help="klt invocation for icmr/cmrr (default: $KLT_CMD or `klt`); pin the fleet's version "
                         "with e.g. 'uvx --from klayout-tools==0.5.0 klt'")
+    p.add_argument("--timeout-s", type=int, default=1200,
+                   help="per-corner ngspice timeout (s) written into the icmr/cmrr klt requests (default 1200; "
+                        "healthy points finish in 30-160 s, so a short value makes a stalled point fail fast)")
     p.add_argument("--keep-work", action="store_true")
     return p.parse_args(argv)
 
@@ -761,6 +776,7 @@ def parse_args(argv):
 def main(argv=None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
     RUNNER_VERSION_CHECK[0] = args.batch_runner_check
+    KLT_TIMEOUT_S[0] = args.timeout_s
     if args.klt_cmd:
         KLT_CMD[:] = shlex.split(args.klt_cmd)
 
@@ -852,7 +868,8 @@ def main(argv=None) -> int:
                 klt_analyses, pdk, corners, temps, args.backend, Path(req_tmp),
                 log_dir, snapshot_run_dir, results, errors, klt_jobs,
             )
-        n_runs += sum(len(results[a]) for a in klt_analyses)
+        # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
+        n_runs += sum(len(corners) * len(temps) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
         if not len(errors) > n_klt_errors0 and "icmr" in klt_analyses and "cmrr" in klt_analyses:
             ref = latest_ac_csv(record_id)
             if ref is not None:

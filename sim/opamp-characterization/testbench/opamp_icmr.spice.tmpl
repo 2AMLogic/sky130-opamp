@@ -5,7 +5,7 @@
 * analysis card; the `.meas` cards live in the request -- see klayout-tools
 * docs/cli/sim.md "Netlist convention"). bin/pvt_sweep.py renders the few
 * placeholders below, writes the request JSON beside it and submits the grid
-* (one request per VDD group, `--backend batch` by default). Never run
+* (one request per corner, `--backend batch` by default). Never run
 * directly. Measurements are `.meas` cards only -- the fleet's klt (0.5.0) has
 * no `measurements[].expr`, so no device-parameter (@m.x..[vdsat]) probing is
 * possible; see the README for what that costs.
