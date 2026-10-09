@@ -1,0 +1,86 @@
+{
+  "netlist": "icmr-ss-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "ss"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.62
+      ]
+    },
+    "temperature_c": [
+      -40.0,
+      27.0,
+      125.0
+    ]
+  },
+  "analysis": {
+    "kind": "dc",
+    "args": "Vinp 0 1.64 0.005"
+  },
+  "measurements": [
+    {
+      "name": "vout_mid_v",
+      "unit": "V",
+      "spice": ".meas dc vout_mid_v find v(out_1) at=0.81"
+    },
+    {
+      "name": "vid_mid_v",
+      "unit": "V",
+      "spice": ".meas dc vid_mid_v find v(vid1) at=0.81"
+    },
+    {
+      "name": "iq_mid_a",
+      "unit": "A",
+      "spice": ".meas dc iq_mid_a find i(vsense) at=0.81"
+    },
+    {
+      "name": "k_mid",
+      "spice": ".meas dc k_mid find v(k) at=0.81"
+    },
+    {
+      "name": "lo_40db",
+      "unit": "V",
+      "spice": ".meas dc lo_40db when v(k)=0.01 cross=last to=0.81"
+    },
+    {
+      "name": "hi_40db",
+      "unit": "V",
+      "spice": ".meas dc hi_40db when v(k)=0.01 cross=1 from=0.81"
+    },
+    {
+      "name": "lo_30db",
+      "unit": "V",
+      "spice": ".meas dc lo_30db when v(k)=0.0316228 cross=last to=0.81"
+    },
+    {
+      "name": "hi_30db",
+      "unit": "V",
+      "spice": ".meas dc hi_30db when v(k)=0.0316228 cross=1 from=0.81"
+    },
+    {
+      "name": "lo_50db",
+      "unit": "V",
+      "spice": ".meas dc lo_50db when v(k)=0.00316228 cross=last to=0.81"
+    },
+    {
+      "name": "hi_50db",
+      "unit": "V",
+      "spice": ".meas dc hi_50db when v(k)=0.00316228 cross=1 from=0.81"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

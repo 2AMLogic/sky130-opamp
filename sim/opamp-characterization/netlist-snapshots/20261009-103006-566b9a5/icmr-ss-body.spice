@@ -1,0 +1,110 @@
+* opamp_core input common-mode range (ICMR) testbench -- circuit BODY for `klt sim` (issue #53)
+*
+* A `klt sim` circuit body (no .control, no .end, no .lib/.temp: klt generates
+* the wrapper, the per-corner `.lib` / `.temp` / `alter vdd` cards and the
+* analysis card; the `.meas` cards live in the request -- see klayout-tools
+* docs/cli/sim.md "Netlist convention"). bin/pvt_sweep.py renders the few
+* placeholders below, writes the request JSON beside it and submits the grid
+* (one request per corner, `--backend batch` by default). Never run
+* directly. Measurements are `.meas` cards only -- the fleet's klt (0.5.0) has
+* no `measurements[].expr`, so no device-parameter (@m.x..[vdsat]) probing is
+* possible; see the README for what that costs.
+*
+* ------------------------------------------------------------- topology
+* Why not the unity-gain follower of opamp_dc_swing.spice.tmpl: there the
+* output equals the input, so the swept common-mode voltage IS the output
+* voltage and an edge can be an input-stage limit or an output-compliance
+* limit with no way to tell which (that bench's own header says it is "not
+* an independent measurement of the input-common-mode range"). This bench
+* holds the OUTPUT at mid-rail while the input common mode is swept:
+*
+*   inverting unity-gain loop (Rin = Rf), both amplifier inputs at the
+*   swept common-mode voltage Vcm = v(inp):
+*       Bsrc forces  v(src) = 2*Vcm - VDD/2
+*       inn  = (src + out)/2
+*   => out - VDD/2 = 2*(inn - Vcm) = 2*vid, with vid = v(inn) - v(inp).
+*   While the loop has gain, out stays within a few vid of VDD/2 for EVERY
+*   Vcm, so the output stage never moves and a change of vid can only come
+*   from the INPUT stage: vid(Vcm) is the input-referred offset shift caused
+*   by the common-mode voltage (= the CM-induced output shift divided by the
+*   loop's open-loop gain). Rin = Rf = 100 k keeps the
+*   resistor current (< ~ +-10 uA) far below the class-A output sink.
+*
+*   Two copies of the amplifier share the deck (the flat xschem netlist is
+*   wrapped in a local .subckt, as in opamp_cmrr.spice.tmpl):
+*     S1  at the swept common mode  Vcm      (inp1 = Vinp, the DC sweep variable)
+*     S2  at                        Vcm + dV (inp2 = v(inp1) + dV, dV = 0.01 V)
+*   so v(k) = |vid2 - vid1| / dV = |d vid / d Vcm| is the LOCAL common-mode
+*   sensitivity (input-referred shift per volt of common mode) at every Vcm
+*   of one DC sweep, i.e. 1 / (local DC CMRR). Inside the input stage's
+*   operating range it is small (1/CMRR, ~ -55 to -71 dB at mid-supply,
+*   measured by opamp_cmrr.spice.tmpl); at the ends of the range the tail
+*   current source / input pair leave saturation and it rises by orders of
+*   magnitude within a few tens of mV -- a sharp knee, so the edge is not very
+*   sensitive to the threshold (checked by the 30 / 40 / 50 dB band below).
+*
+* ------------------------------------------------------- ICMR criterion
+* Fixed in this file's first commit, before any batch result existed (the
+* README "ICMR bench" section carries the same statement and its caveat).
+* ICMR at one (corner, temperature) point is the contiguous range of Vcm
+* containing Vcm = VDD/2 over which
+*       local DC CMRR  =  1 / |d vid / d Vcm|   >=  40 dB   (primary),   0 <= Vcm <= VDD
+* with the output held at mid-rail the whole time (so output-stage limits
+* are excluded by construction). 30 dB and 50 dB are reported as a
+* sensitivity band, measured in the same run as other `v(k)` crossing levels.
+* v(k) below adds 1 (= 0 dB CMRR) outside [0, VDD] so a crossing always
+* exists at the rails: an edge at <= 0 V / >= VDD means "no input-stage
+* limit before the rail", and the edge value is then the rail.
+* Edges are `.meas dc ... when v(k)=LEVEL` crossings (linearly interpolated
+* between 5 mV sweep points), the nearest crossing below and above mid-supply.
+* Honest caveat (README): this is a CMRR-degradation definition of the range,
+* not a device-saturation one -- the fleet's klt (0.5.0) cannot probe
+* @m.x..[vdsat], so which device leaves saturation is not recorded.
+*
+* ------------------------------------------------------ shared conventions
+* ibias / Iref = 5 uA reference and CL = 2 pF as opamp_ac.spice.tmpl; the
+* netlist under test is the same flat xschem netlist. The MOS process corner
+* AND the typical R+C corner both come from the `.lib <sky130.lib.spice>
+* <corner>` section klt appends (that section itself includes corners/<c>.spice
+* plus r+c/res_typical__cap_typical.spice and its __lin sibling -- the
+* identical files the ngspice-loop benches include by hand).
+
+.option scale=1u
+.option reltol=1e-6 vntol=1e-9 abstol=1e-14
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/design/netlist/opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.62
+Vss vss 0 dc 0
+* supply-current sense for copy S1 only (0 V source)
+Vsense vdd vdd_1 dc 0
+
+* S1: swept copy at Vcm
+Iref_1 vdd_1 ibias_1 dc 5u
+Vinp inp_1 0 dc 0
+Bsrc_1 src_1 0 V = 2*v(inp_1) - 0.5*v(vdd)
+Rin_1 src_1 inn_1 100k
+Rf_1 inn_1 out_1 100k
+Cload_1 out_1 0 2p
+X1 vdd_1 vss inn_1 inp_1 out_1 ibias_1 opamp_dut
+
+* S2: copy at Vcm + dV
+Iref_2 vdd ibias_2 dc 5u
+Binp_2 inp_2 0 V = v(inp_1) + 0.01
+Bsrc_2 src_2 0 V = 2*v(inp_2) - 0.5*v(vdd)
+Rin_2 src_2 inn_2 100k
+Rf_2 inn_2 out_2 100k
+Cload_2 out_2 0 2p
+X2 vdd vss inn_2 inp_2 out_2 ibias_2 opamp_dut
+
+* convergence aid (added after the first fleet attempt, before any ICMR figure
+* was accepted): the fleet's ngspice-46 stalled for >600 s in gmin/source
+* stepping at some sweep points of the tt/sf/fs 1.8 V group. Seed the loop
+* nodes at mid-rail; a .nodeset only guides the first iteration, it does not
+* change the converged solution.
+.nodeset v(out_1)=0.81 v(inn_1)=0.81 v(out_2)=0.81 v(inn_2)=0.81
+
+Bvid1 vid1 0 V = v(inn_1) - v(inp_1)
+Bk k 0 V = abs((v(inn_2) - v(inp_2)) - v(vid1)) / 0.01 + u(-v(inp_1)) + u(v(inp_2) - v(vdd))

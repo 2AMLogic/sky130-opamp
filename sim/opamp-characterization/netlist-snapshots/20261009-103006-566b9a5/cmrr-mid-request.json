@@ -1,0 +1,180 @@
+{
+  "netlist": "cmrr-mid-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.62,
+        1.8,
+        1.98
+      ]
+    },
+    "temperature_c": [
+      -40.0,
+      27.0,
+      125.0
+    ]
+  },
+  "exclude": [
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    }
+  ],
+  "analysis": {
+    "kind": "ac",
+    "args": "dec 20 1 1g"
+  },
+  "measurements": [
+    {
+      "name": "adm_1hz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_1hz_db find vdb(out_d) at=1"
+    },
+    {
+      "name": "acm_1hz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_1hz_db find vdb(out_c) at=1"
+    },
+    {
+      "name": "adm_10hz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_10hz_db find vdb(out_d) at=10"
+    },
+    {
+      "name": "acm_10hz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_10hz_db find vdb(out_c) at=10"
+    },
+    {
+      "name": "adm_100hz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_100hz_db find vdb(out_d) at=100"
+    },
+    {
+      "name": "acm_100hz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_100hz_db find vdb(out_c) at=100"
+    },
+    {
+      "name": "adm_1khz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_1khz_db find vdb(out_d) at=1k"
+    },
+    {
+      "name": "acm_1khz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_1khz_db find vdb(out_c) at=1k"
+    },
+    {
+      "name": "adm_10khz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_10khz_db find vdb(out_d) at=10k"
+    },
+    {
+      "name": "acm_10khz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_10khz_db find vdb(out_c) at=10k"
+    },
+    {
+      "name": "adm_100khz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_100khz_db find vdb(out_d) at=100k"
+    },
+    {
+      "name": "acm_100khz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_100khz_db find vdb(out_c) at=100k"
+    },
+    {
+      "name": "adm_1mhz_db",
+      "unit": "dB",
+      "spice": ".meas ac adm_1mhz_db find vdb(out_d) at=1meg"
+    },
+    {
+      "name": "acm_1mhz_db",
+      "unit": "dB",
+      "spice": ".meas ac acm_1mhz_db find vdb(out_c) at=1meg"
+    },
+    {
+      "name": "gbw_hz",
+      "unit": "Hz",
+      "spice": ".meas ac gbw_hz when vdb(out_d)=0 cross=1"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

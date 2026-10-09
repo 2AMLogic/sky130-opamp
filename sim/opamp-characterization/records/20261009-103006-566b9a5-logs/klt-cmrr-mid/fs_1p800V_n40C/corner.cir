@@ -1,0 +1,25 @@
+* klt sim -- generated corner deck, do not edit
+.lib /opt/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice fs
+.include /var/tmp/eda-job-klt-sim-b9bcaf9ddc1a/inputs/netlist.cir
+.temp -40.0
+.meas ac adm_1hz_db find vdb(out_d) at=1
+.meas ac acm_1hz_db find vdb(out_c) at=1
+.meas ac adm_10hz_db find vdb(out_d) at=10
+.meas ac acm_10hz_db find vdb(out_c) at=10
+.meas ac adm_100hz_db find vdb(out_d) at=100
+.meas ac acm_100hz_db find vdb(out_c) at=100
+.meas ac adm_1khz_db find vdb(out_d) at=1k
+.meas ac acm_1khz_db find vdb(out_c) at=1k
+.meas ac adm_10khz_db find vdb(out_d) at=10k
+.meas ac acm_10khz_db find vdb(out_c) at=10k
+.meas ac adm_100khz_db find vdb(out_d) at=100k
+.meas ac acm_100khz_db find vdb(out_c) at=100k
+.meas ac adm_1mhz_db find vdb(out_d) at=1meg
+.meas ac acm_1mhz_db find vdb(out_c) at=1meg
+.meas ac gbw_hz when vdb(out_d)=0 cross=1
+.control
+alter vdd=1.8
+ac dec 20 1 1g
+quit
+.endc
+.end

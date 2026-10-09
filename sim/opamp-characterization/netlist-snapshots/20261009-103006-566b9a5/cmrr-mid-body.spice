@@ -1,0 +1,58 @@
+* opamp_core CMRR testbench -- circuit BODY for `klt sim` (issue #53)
+*
+* A `klt sim` circuit body (no .control / .end / .lib / .temp -- klt supplies
+* them; see opamp_icmr.spice.tmpl's header and klayout-tools docs/cli/sim.md
+* "Netlist convention"). bin/pvt_sweep.py renders the placeholders, writes the
+* request JSON and submits the 15-point grid in one `klt sim` request.
+*
+* ------------------------------------------------------------- topology
+* ONE deck, TWO instances of the same op-amp, so that the differential gain
+* Adm and the common-mode gain Acm come from the same deck, the same corner
+* solve, the same temperature and the same klt/ngspice versions (the
+* acceptance criteria rule out reading Adm from a separately committed
+* record). The flat xschem netlist is wrapped in a local `.subckt` so it can be
+* instantiated twice (its internal nodes d1/d2/tail/cz become local).
+*
+*   Instance D ("differential"): exactly opamp_ac.spice.tmpl's open-loop
+*     DC-servo bench -- Rfb = 1e12 from out to inn, Cfb = 1 F from inn to
+*     ground, AC 1 on inp only.  vdb(out_d) = Adm.
+*   Instance C ("common mode"): identical servo Rfb, but Cfb returns to the
+*     AC-driven inp node instead of ground, so at every swept frequency
+*     (>= 1 Hz, where 1 F is 0.16 ohm against Rfb = 1e12) the SAME unit
+*     AC drives inn and inp together; the DC servo still sets the bias
+*     because Cfb is open at DC.  vdb(out_c) = Acm.
+*   CMRR(f) = Adm(f) - Acm(f) in dB (computed in bin/pvt_sweep.py from the
+*   .meas values below, both read at the same frequency).
+*
+* DC common-mode bias point: v(cmdc) = 0.5*v(vdd)
+*   (a B-source so a per-corner mid-supply 0.5*VDD can follow the corner's
+*   `alter vdd`).  bin/pvt_sweep.py runs this deck at two bias points: 0.5*VDD
+*   and a fixed point at the centre of the ratified ICMR target window.
+*
+* IBIAS / CL / R+C corner conventions as opamp_ac.spice.tmpl.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/design/netlist/opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Bcm cmdc 0 V = 0.5*v(vdd)
+
+* instance D: differential drive
+Iref_d vdd ibias_d dc 5u
+Vd inp_d cmdc dc 0 ac 1
+Xd vdd vss inn_d inp_d out_d ibias_d opamp_dut
+Rfb_d out_d inn_d 1e12
+Cfb_d inn_d 0 1
+Cload_d out_d 0 2p
+
+* instance C: common-mode drive (same AC on inn and inp)
+Iref_c vdd ibias_c dc 5u
+Vc inp_c cmdc dc 0 ac 1
+Xc vdd vss inn_c inp_c out_c ibias_c opamp_dut
+Rfb_c out_c inn_c 1e12
+Cfb_c inn_c inp_c 1
+Cload_c out_c 0 2p

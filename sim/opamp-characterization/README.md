@@ -98,6 +98,29 @@ submit fails: it exits non-zero and writes nothing. `KLT_CMD` overrides the
 the host install. See "PSRR and input-referred noise" below for the results
 and for why the noise grid is **not** yet recorded.
 
+### ICMR and CMRR benches (issue #53)
+
+```bash
+python3 sim/opamp-characterization/bin/pvt_sweep.py --check-env --analyses icmr,cmrr   # also reports klt + backend
+python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses icmr,cmrr --timeout-s 600  # 15 points each, batch fleet
+python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses icmr,cmrr --backend local --corners tt --temps 27   # single-corner debug probe only
+```
+
+`icmr` and `cmrr` are **opt-in**: the default analysis set stays
+`ac,tran_sr,dc_swing` (so a bare run is unchanged in output and runtime).
+Their templates are `klt sim` circuit **bodies** (`testbench/opamp_icmr.spice.tmpl`,
+`opamp_cmrr.spice.tmpl`); the runner writes `klt sim` requests (one per corner
+for ICMR, because VDD is tied to the corner and `klt` sweeps arrays together by
+index; one per CM bias point for CMRR), submits them with `--backend batch`
+(default; `$KLT_SIM_BACKEND`) and maps the response into
+`records/<id>-{icmr,cmrr}.csv`. It never loops `ngspice` for these points and
+does not fall back to a local grid if a batch submit fails. Expected wall-clock
+on the fleet: about 11 min for both analyses (record below: 639 s). The three
+legacy analyses were not retrofitted and their records and CSV columns are
+unchanged. The `.include` of the R+C typical files is satisfied by the
+`.lib <sky130.lib.spice> <corner>` section klt appends, which stages correctly
+on the batch backend (verified by the passing fleet record).
+
 **PDK pin**: [`pdk.json`](pdk.json) — sky130A, open_pdks commit
 `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, the **same pin** as
 [`../gm-id-characterization/pdk.json`](../gm-id-characterization/pdk.json)
@@ -123,7 +146,9 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `testbench/opamp_ac.spice.tmpl` | Open-loop AC gain/phase/Iq testbench (DC-servo bias) |
 | `testbench/opamp_tran_sr.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench |
 | `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
-| `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above |
+| `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (and the `icmr,cmrr` `klt sim` path) |
+| `testbench/opamp_icmr.spice.tmpl`, `opamp_cmrr.spice.tmpl` | `klt sim` circuit-body benches: input common-mode range (output held at mid-rail) and CMRR (Adm and Acm in one deck) (issue #53) |
+| `records/<id>-{icmr,cmrr}.csv` | Per-point ICMR edges / CMRR(f) for the issue #53 benches; `<id>-logs/` holds the klt requests, responses and per-corner decks |
 | `testbench/psrr_vdd.cir`, `psrr_vss.cir`, `noise.cir` | Circuit-body benches (no `.control`/`.end`) for `klt sim`: PSRR+ , PSRR-, input-referred noise (issue #54) |
 | `bin/psrr_noise_sweep.py` | Writes the three `klt sim` requests, runs them on the configured backend, writes the PSRR/noise records |
 | `bin/validate_psrr_noise.py` | Four independent single-corner cross-checks of those benches (DC finite difference, band-limited noise, negative control) |
@@ -256,6 +281,45 @@ practice for a slew-rate measurement (see, e.g., any two-stage-Miller-OTA
 slew-rate testbench in the literature) and is not evidence about the
 closed-loop small-signal common-mode range, which the dc-swing bench above
 addresses on its own terms.
+
+### ICMR bench (`opamp_icmr.spice.tmpl`, issue #53)
+
+Question: over what input common-mode range does the *input stage* work?
+The unity-gain follower of the dc-swing bench cannot answer it (output equals
+input, so input and output limits are inseparable). This bench instead holds
+the output at mid-rail with an inverting unity-gain loop (`Rin = Rf = 100 k`)
+whose summing source is forced to `2*Vcm - VDD/2`, while both amplifier inputs
+sit at the swept `Vcm` (DC sweep 0..VDD, 5 mV steps). Two copies of the
+amplifier at `Vcm` and `Vcm + 10 mV` give the local common-mode sensitivity
+`|d vid / d Vcm|` (= 1/local DC CMRR) at every `Vcm` in one sweep.
+
+**Criterion (fixed before any result existed)**: ICMR = contiguous range of
+`Vcm` containing `VDD/2` over which local DC CMRR >= **40 dB**; 30 dB and 50 dB
+are recorded as a sensitivity band (`*_30db`, `*_50db` columns). The knee is
+sharp (tail source / input pair leave saturation), so the edge moves by tens of
+mV across that band. 40 dB was chosen as 1 percent input-referred shift per volt of
+CM, small against the ~0.14 V target-window scale. `low_limiter`/`high_limiter`
+record `input_stage` when the edge is a real crossing and `rail` when the
+criterion held to 0 or VDD; the output is held at mid-rail so an output-stage
+limit is excluded by construction.
+
+**Caveat, stated**: this is a CMRR-degradation definition, not a
+device-saturation one. The fleet runner (klt 0.5.0) has no
+`measurements[].expr`, so `@m.x[vdsat]` was not probed and which device leaves
+saturation is not recorded. The 40 dB edge is therefore a proxy for
+saturation, not a proof of it.
+
+### CMRR bench (`opamp_cmrr.spice.tmpl`, issue #53)
+
+One deck, two instances of the op-amp with the `opamp_ac` DC servo
+(`Rfb = 1e12`, `Cfb = 1 F`). Instance D drives AC on `inp` only
+(`vdb(out) = Adm`); instance C returns `Cfb` to the AC-driven `inp` node so the
+same AC reaches `inn` and `inp` together (`vdb(out) = Acm`). Both share the
+corner solve, temperature and tool versions, so `CMRR(f) = Adm(f) - Acm(f)` is
+a same-deck quantity. Run at two DC common-mode points: `0.5*VDD` and
+`0.956 V` (centre of the 0.888..1.024 V target window). Reported at 1 Hz, 10 Hz,
+100 Hz, 1 kHz, 10 kHz, 100 kHz and 1 MHz plus GBW; the spot frequency named for
+comparison is 1 kHz.
 
 ## Results by row
 
@@ -609,6 +673,54 @@ Record [`20261009-072806-e06f2fc-psrr-noise-validation.json`](records/20261009-0
   ngspice 42 reproduced the fleet's ngspice 46 value at SS/125 °C
   (66.9021 dB) to the printed digits.
 
+## ICMR and CMrecords/20261009-103006-566b9a5 (issue #53)
+
+> **Pre-layout**, schematic netlist, R+C typical, `VDD` tied to corner; fleet
+> runner klt 0.5.0 vs client 0.7.0 (`runner_compatibility: "mismatch"`, benches
+> use `.meas` only). Record:
+> [`records/20261009-103006-566b9a5.md`](records/20261009-103006-566b9a5.md) (data `-icmr.csv`, `-cmrr.csv`; batch job ids in the
+> record, e.g. `klt-sim-f41e6e881853`; 45 units passed, 0 failed, 0 `batch_*`
+> diagnostics, 639 s).
+
+**ICMR (40 dB criterion), 15 points**
+
+| Quantity | Value | Binding corner |
+|---|---|---|
+| Highest low edge | 0.7388 V | FS / -40 C |
+| Lowest high edge | 1.1686 V | SS / -40 C |
+| Narrowest window | 0.452 V (0.717 .. 1.169 V) | SS / -40 C |
+| Widest window | 1.178 V (0.619 .. 1.797 V) | FF / 125 C |
+
+- **Target window 0.888 .. 1.024 V: met at all 15 points** (the highest
+  low edge is 0.739 V against 0.888 V; the lowest high edge 1.169 V against
+  1.024 V). The ratified target was not edited.
+- **Consumer sense point 0.73 V: not met at FS / -40 C** (low edge 0.7388 V, 8.8 mV
+  above 0.73 V, so 0.73 V lies outside the range); covered at the other 14 points. With the 50 dB criterion the low edge
+  rises to 0.80 V at the worst point, so the 0.73 V sense point is
+  criterion-sensitive. Not relaxed.
+- Every edge is input-stage limited; none is rail-limited.
+
+**CMrecords/20261009-103006-566b9a5 (Adm - Acm), 30 points**
+
+| CM point | Worst CMrecords/20261009-103006-566b9a5 @ 1 Hz (= 1 kHz) | Best |
+|---|---|---|
+| 0.5*VDD | 55.11 dB SS / -40 C | 75.22 dB SF / -40 C |
+| 0.956 V | 69.34 dB FS / 125 C | 81.76 dB SS / 27 C |
+
+CMrecords/20261009-103006-566b9a5 is flat from 1 Hz to ~100 kHz and falls <= 0.4 dB by 1 MHz. The spec CMrecords/20261009-103006-566b9a5
+row is `[TBD]`, so there is no target to grade against.
+
+**Cross-checks (pass)**: Adm(1 Hz) from the CMrecords/20261009-103006-566b9a5 deck equals `gain_dc_db` in the
+committed `20261001-074923-c317ff9-ac.csv` to 0.0000 dB at 15 points (tolerance
+0.05 dB; GBW identical); the ICMR bench's mid-point quiescent current agrees with
+the committed `iq_a` to 7e-5 relative (tolerance 1 percent), confirming the held-at-mid-rail
+loop is at the same operating point as the open-loop servo bench.
+
+Two earlier fleet attempts (`20261009-095419-72db8ef`, `20261009-101813-72db8ef`)
+each had 7 failed units (fleet-side non-convergence in the per-supply-group
+layout) and are not committed; the per-corner layout with `.nodeset` seeding at
+566b9a5 passed 45 / 45.
+
 ## What this experiment does not do
 
 - **Does not touch `spec/target-spec.md` or the gap-to-T1 tracker
@@ -616,15 +728,12 @@ Record [`20261009-072806-e06f2fc-psrr-noise-validation.json`](records/20261009-0
   testbenches and results only; reconciling the six rows above against the
   spec table (updating `[P]` estimates, binding-corner columns, or Status
   cells) is a follow-on issue.
-- **Does not measure input-referred offset or CMRR** (still `[TBD]` in
-  `target-spec.md`; mismatch Monte Carlo, issue #52, and common-mode AC,
-  issue #53), **the PSRR/noise rows' spec reconciliation** (PSRR and noise
-  are now benched — see "PSRR and input-referred noise (issue #54)" below
-  for what is and is not recorded; the spec rows themselves are untouched),
-  or **the input-common-mode range** `DR-002`
-  separately estimates (a related but distinct measurement from output
-  swing — see "Output-swing bench" above). All out of scope per the issue
-  body.
+- **Does not measure input-referred offset** (still `[TBD]`; mismatch Monte
+  Carlo, issue #52) and **does not reconcile the spec**: ICMR and CMRR are now
+  measured (see "ICMR and CMRR (issue #53)") and PSRR/noise are benched (issue
+  #54), but `spec/target-spec.md` is untouched; reconciling those rows is a
+  follow-on issue. The ICMR figure is a CMRR-degradation (40 dB) range, not a
+  device-saturation one.
 - **Does not diagnose the fall-slew-rate collapse's root cause** beyond the
   qualitative hypothesis in "Slew rate" above (a fixed-current, non-signal
   -modulated `M7` sink) — a dedicated bench probing `M7`'s actual bias

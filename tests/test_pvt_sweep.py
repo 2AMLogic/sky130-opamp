@@ -117,8 +117,10 @@ class TemplateTests(unittest.TestCase):
 
 class AggregationTests(unittest.TestCase):
     def test_analyses_and_fieldnames_agree(self):
-        self.assertEqual(set(pvt.ANALYSES), set(pvt.FIELDNAMES))
+        self.assertEqual(set(pvt.ANALYSES) | set(pvt.KLT_ANALYSES), set(pvt.FIELDNAMES))
+        # the legacy ngspice-loop analyses are the default set; icmr/cmrr are opt-in
         self.assertEqual(set(pvt.ANALYSES), set(pvt.DEFAULT_ANALYSES))
+        self.assertFalse(set(pvt.KLT_ANALYSES) & set(pvt.DEFAULT_ANALYSES))
 
     def test_csv_roundtrip_with_runner_fieldnames(self):
         row = dict.fromkeys(pvt.FIELDNAMES["tran_sr"], 1.0)
@@ -138,6 +140,9 @@ class AggregationTests(unittest.TestCase):
         w = csv.DictWriter(io.StringIO(), fieldnames=pvt.FIELDNAMES["ac"])
         with self.assertRaises(ValueError):
             w.writerow({"bogus": 1})
+
+
+TEXT_COLUMNS = {"corner", "cm_point", "low_limiter", "high_limiter"}
 
 
 def pvt_records():
@@ -176,8 +181,12 @@ class CommittedRecordShapeTests(unittest.TestCase):
                 self.assertIsInstance(d["errors"], list)
                 self.assertEqual(d["matrix"]["n_failed"], len(d["errors"]))
                 m = d["matrix"]
-                self.assertEqual(
-                    m["n_runs"], len(m["corners"]) * len(m["temps_c"]) * len(m["analyses"]))
+                grid = len(m["corners"]) * len(m["temps_c"])
+                # the cmrr bench is run at two CM bias points -> two rows per grid point
+                units = sum(2 if a == "cmrr" else 1 for a in m["analyses"])
+                if m["n_runs"] != grid * units:
+                    # the first icmr/cmrr records (095419, 101813) counted passed units only
+                    self.assertEqual(m["n_runs"], grid * units - m["n_failed"])
                 for c in m["corners"]:
                     self.assertIn(c, m["vdd_by_corner"])
 
@@ -193,16 +202,20 @@ class CommittedRecordShapeTests(unittest.TestCase):
                         reader = csv.DictReader(f)
                         self.assertEqual(reader.fieldnames, pvt.FIELDNAMES[analysis])
                         rows = list(reader)
-                    self.assertEqual(len(rows), len(m["corners"]) * len(m["temps_c"]) - m["n_failed"])
+                    per_point = 2 if analysis == "cmrr" else 1
+                    full = len(m["corners"]) * len(m["temps_c"]) * per_point
+                    self.assertLessEqual(len(rows), full)
+                    self.assertGreaterEqual(len(rows), full - m["n_failed"])
                     seen = set()
                     for r in rows:
                         for k, v in r.items():
-                            float(v) if k != "corner" else None
+                            if k not in TEXT_COLUMNS:
+                                float(v)
                         self.assertIn(r["corner"], m["corners"])
                         self.assertIn(float(r["temp_c"]), m["temps_c"])
                         self.assertAlmostEqual(
                             float(r["vdd_v"]), m["vdd_by_corner"][r["corner"]])
-                        seen.add((r["corner"], float(r["temp_c"])))
+                        seen.add((r["corner"], float(r["temp_c"]), r.get("cm_point")))
                     self.assertEqual(len(seen), len(rows))  # no duplicate corner/temp
 
     def test_ac_rows_are_self_consistent(self):
@@ -216,6 +229,110 @@ class CommittedRecordShapeTests(unittest.TestCase):
                         180.0 + float(r["phase_at_gbw_deg"]), places=6)
                     self.assertAlmostEqual(
                         float(r["vcm_v"]), 0.5 * float(r["vdd_v"]), places=6)
+
+
+class FakeKltPdk(FakePdk):
+    variant = "sky130A"
+
+
+def klt_request(analysis, cm_point=None, vdd=None, corners=None, temps=(27.0,)):
+    corners = corners or list(pvt.DEFAULT_CORNERS)
+    with tempfile.TemporaryDirectory() as d:
+        path, tag = pvt.build_klt_request(
+            analysis, cm_point, vdd, FakeKltPdk(), corners, list(temps), Path(d), "batch")
+        body = (Path(d) / f"{tag}-body.spice").read_text()
+        return json.loads(path.read_text()), body, tag
+
+
+class KltBenchTests(unittest.TestCase):
+    def test_bodies_are_klt_circuit_bodies_with_no_unrendered_placeholders(self):
+        for analysis, cm, vdd in (("icmr", None, 1.8), ("cmrr", "mid", None), ("cmrr", "window", None)):
+            with self.subTest(analysis=analysis, cm=cm):
+                _req, body, _tag = klt_request(analysis, cm, vdd)
+                live = "\n".join(ln for ln in body.splitlines() if not ln.lstrip().startswith("*")) + "\n"
+                self.assertNotRegex(live, r"\{[A-Za-z_]")
+                for forbidden in (".control", ".end\n", ".lib", ".temp"):
+                    self.assertNotIn(forbidden, live)
+
+    def test_cmrr_request_pairs_vdd_with_corner_via_exclude(self):
+        req, _b, _t = klt_request("cmrr", "mid")
+        self.assertEqual(req["analysis"]["kind"], "ac")
+        self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
+        keep = {(c, v) for c in req["corners"]["process"] for v in req["corners"]["supply_v"]["vdd"]}
+        for ex in req["exclude"]:
+            keep.discard((ex["process"], ex["supply_v"]["vdd"]))
+        self.assertEqual(keep, {(c, pvt.VDD_BY_CORNER[c]) for c in pvt.DEFAULT_CORNERS})
+        self.assertEqual(req["batch"]["runner_version_check"], pvt.RUNNER_VERSION_CHECK[0])
+
+    def test_icmr_request_is_one_per_corner_with_literal_midpoint(self):
+        groups = pvt.vdd_groups(list(pvt.DEFAULT_CORNERS))
+        self.assertEqual(sorted(groups), [1.62, 1.8, 1.98])
+        self.assertEqual(sorted(groups[1.8]), ["fs", "sf", "tt"])
+        req, _b, tag = klt_request("icmr", None, 1.62, ["ss"])
+        self.assertEqual(tag, "icmr-ss")
+        self.assertEqual(req["corners"]["process"], ["ss"])
+        self.assertEqual(req["analysis"]["kind"], "dc")
+        self.assertNotIn("exclude", req)
+        meas = {m["name"]: m["spice"] for m in req["measurements"]}
+        self.assertIn("at=0.81", meas["vid_mid_v"])
+        # primary 40 dB level is 10**-2; 30/50 dB form the sensitivity band
+        self.assertIn("v(k)=0.01 ", meas["lo_40db"] + " ")
+        self.assertEqual(set(pvt.ICMR_CMRR_FLOORS_DB), {"40db", "30db", "50db"})
+
+    def test_measurement_names_cover_the_row_builders(self):
+        names = {m["name"] for m in pvt.icmr_measurements(1.8)}
+        for label in pvt.ICMR_CMRR_FLOORS_DB:
+            self.assertLessEqual({f"lo_{label}", f"hi_{label}"}, names)
+        cn = {m["name"] for m in pvt.cmrr_measurements()}
+        for label, _f in pvt.CMRR_SPOTS:
+            self.assertLessEqual({f"adm_{label}_db", f"acm_{label}_db"}, cn)
+
+    def test_target_window_is_the_ratified_one(self):
+        self.assertEqual(pvt.TARGET_ICMR_V, (0.888, 1.024))
+        self.assertEqual(pvt.CONSUMER_SENSE_V, 0.73)
+
+    def test_cmrr_row_is_adm_minus_acm_from_the_same_response(self):
+        vals = {"gbw_hz": 1e7}
+        for label, _f in pvt.CMRR_SPOTS:
+            vals[f"adm_{label}_db"], vals[f"acm_{label}_db"] = 70.0, -3.0
+        row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
+        self.assertAlmostEqual(row["cmrr_1khz_db"], 73.0)
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["cmrr"]))
+        self.assertAlmostEqual(row["vcm_v"], 0.9)
+        vals.pop("acm_1khz_db")
+        with self.assertRaises(sh.HarnessError):
+            pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
+
+    def test_icmr_row_flags_rail_vs_input_stage_and_target_coverage(self):
+        vals = {"vid_mid_v": 1e-4, "vout_mid_v": 0.9, "iq_mid_a": -6e-5, "k_mid": 1e-3}
+        for label in pvt.ICMR_CMRR_FLOORS_DB:
+            vals[f"lo_{label}"], vals[f"hi_{label}"] = 0.6, 1.3
+        vals["lo_40db"], vals["hi_40db"] = 0.0, 1.5  # rail-limited at 0 V, input-limited at 1.5 V
+        row = pvt.icmr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0})
+        self.assertEqual((row["low_limiter"], row["high_limiter"]), ("rail_0v", "input_stage"))
+        self.assertEqual((row["covers_target_window"], row["covers_0v73"]), (1, 1))
+        self.assertAlmostEqual(row["cmrr_mid_db"], 60.0)
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["icmr"]))
+        vals["lo_40db"] = 0.95  # misses 0.73 V and the low end of the target window
+        row = pvt.icmr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0})
+        self.assertEqual((row["covers_target_window"], row["covers_0v73"]), (0, 0))
+
+    def test_corner_values_maps_report_by_corner_and_temp(self):
+        rep = {"corners": [{"process": "ss", "temperature_c": -40, "supply_v": {"vdd": 1.62},
+                            "status": "pass", "runtime_s": 2.0,
+                            "measurements": [{"name": "a", "value": 1.5}]}]}
+        got = pvt._corner_values(rep)
+        self.assertEqual(got[("ss", -40.0)]["values"], {"a": 1.5})
+        self.assertEqual(got[("ss", -40.0)]["vdd"], 1.62)
+
+    def test_crosscheck_agreement_and_disagreement(self):
+        ref = RECORDS / "20261001-074923-c317ff9-ac.csv"
+        r = next(csv.DictReader(ref.open()))
+        cm = {"corner": r["corner"], "temp_c": float(r["temp_c"]),
+              "adm_1hz_db": float(r["gain_dc_db"]), "gbw_hz": float(r["gbw_hz"])}
+        ic = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "iq_mid_a": float(r["iq_a"])}
+        self.assertTrue(pvt.crosscheck(ref, [cm], [ic])["ok"])
+        self.assertFalse(pvt.crosscheck(ref, [dict(cm, adm_1hz_db=cm["adm_1hz_db"] + 1.0)], [ic])["ok"])
 
 
 if __name__ == "__main__":
