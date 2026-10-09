@@ -43,11 +43,13 @@ identified there.
       record hash into the envelope's `provenance.input.content_hash` and the
       manifest's item-1 `content_hash`, then regenerate the signoff record.
     - **Item 8 (characterization report)** cites
-      [`sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json`](../sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json)
+      [`sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json`](../sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json)
       — a **generic evidence envelope** (`"kind": "generic"`,
       [klayout-tools#1152](https://github.com/2AMLogic/klayout-tools/issues/1152))
-      wrapping the committed PVT characterization record
-      [`20261001-074923-c317ff9.md`](../sim/opamp-characterization/records/20261001-074923-c317ff9.md).
+      wrapping the committed ICMR/CMRR characterization record
+      [`20261009-103006-566b9a5.md`](../sim/opamp-characterization/records/20261009-103006-566b9a5.md)
+      (issue #53; it carries the six earlier rows forward from record
+      `20261001-074923-c317ff9`).
       Item 8 is the **only** T1 item the generic kind may satisfy
       (`_ITEMS_ACCEPTING_GENERIC_EVIDENCE == {8}`; a generic citation on
       any other item renders `wrong_kind`), and the only T1 item whose
@@ -55,8 +57,8 @@ identified there.
       reachable with no layout and no `klt sim` port.
       **Read that envelope's `summary`, not just the `met` row**: `klt
       signoff` grades item 8 on the envelope's `status` alone and cannot
-      check coverage, so the coverage disclosure (6 of
-      `spec/target-spec.md` §2's 12 rows characterized, 6 uncharacterized
+      check coverage, so the coverage disclosure (8 of
+      `spec/target-spec.md` §2's 12 rows characterized, 4 uncharacterized
       and named, 2 of the characterized 6 measuring below target at their
       binding corner) lives in that `summary` field and is
       claimant-enforced — the same discipline item 3's DRC-coverage and
@@ -167,8 +169,8 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
   pinned). `met` here means *an aggregated, current characterization
   report exists and states honestly what it measured* — it is **not** a
   spec-compliance claim (that is item 5) and **not** a statement that
-  every spec row is characterized (6 of 12 §2 rows are, and the
-  envelope's `summary` names the other 6).
+  every spec row is characterized (8 of 12 §2 rows are, and the
+  envelope's `summary` names the other 4).
 - **Item 1 (design sources) — `met`**, on the generic envelope described
   above; backed by the netlist-drift CI job, not by `klt`.
 - **The other 9 T1 items — `unmet` / `no_evidence`**, each for the

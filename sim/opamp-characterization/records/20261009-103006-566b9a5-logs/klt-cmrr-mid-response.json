@@ -1,0 +1,3348 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 15,
+  "passed": 15,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 12
+    },
+    "by_severity": {
+      "warning": 12
+    },
+    "corners_with_diagnostics": 12
+  },
+  "metrics": {
+    "sim__corner__count": 15,
+    "sim__corner__passed_count": 15,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/usr/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "beb2dac6ad4929d99f4625ffa84b16c83e1e2ed481e0c6d423371f566f05a1ad",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "beb2dac6ad4929d99f4625ffa84b16c83e1e2ed481e0c6d423371f566f05a1ad"
+      },
+      {
+        "path": "design/netlist/opamp_core.spice",
+        "scope": "repo",
+        "sha256": "6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-b9bcaf9ddc1a",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-0e48d5870bf74ea55",
+      "instance_type": "m7i.4xlarge",
+      "availability_zone": "us-east-1a",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 78,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g4cbdfa769875",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g4cbdfa769875; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 15,
+    "measurements_declared": 15,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_100hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_100khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_10hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_10khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_1hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_1khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_100hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_100khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_10hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_10khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_1hz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_1khz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_100hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_100khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_10hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_10khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_1hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_1khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_100hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_100khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_10hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_10khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_1hz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_1khz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_100hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_100khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_10hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_10khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_1hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_1khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_100hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_100khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_10hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_10khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_1hz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_1khz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_100hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_100khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_10hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_10khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_1hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_1khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_100hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_100khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_10hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_10khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_1hz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_1khz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_100hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_100khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_10hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_10khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_1hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_1khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_100hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_100khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_10hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_10khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_1hz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_1khz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_100hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_100khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_10hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_10khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_1hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_1khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_100hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_100khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_10hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_10khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_1hz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_1khz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_100hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_100khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_10hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_10khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_1hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_1khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_100hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_100khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_10hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_10khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_1hz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_1khz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_100hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_100khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_10hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_10khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_1hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_1khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_100hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_100khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_10hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_10khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_1hz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_1khz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_100hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_100khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_10hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_10khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_1hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_1khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_100hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_100khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_10hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_10khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_1hz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_1khz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_100hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_100khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_10hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_10khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_1hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_1khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_100hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_100khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_10hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_10khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_1hz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_1khz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_100hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_100khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_10hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_10khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_1hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_1khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_100hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_100khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_10hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_10khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_1hz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_1khz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_100hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_100khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_10hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_10khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_1hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_1khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_100hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_100khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_10hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_10khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_1hz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_1khz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_100hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_100khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_10hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_10khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_1hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_1khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_100hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_100khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_10hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_10khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_1hz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_1khz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_100hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_100khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_10hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_10khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_1hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_1khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_100hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_100khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_10hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_10khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_1hz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_1khz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_100hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_100khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_10hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_10khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_1hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_1khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"acm_1mhz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_100hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_100khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_10hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_10khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_1hz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_1khz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"adm_1mhz_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"gbw_hz\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"acm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_100hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_100khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_10hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_10khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_1hz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_1khz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"adm_1mhz_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:beb2dac6ad4929d99f4625ffa84b16c83e1e2ed481e0c6d423371f566f05a1ad",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "adm_1hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 66.3477,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_1hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -4.92003,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_10hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 66.3477,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_10hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -4.92003,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_100hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 66.3474,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_100hz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -4.92025,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_1khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 66.3249,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_1khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -4.94275,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_10khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 64.5161,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_10khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -6.75151,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_100khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 49.0674,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_100khz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -22.1934,
+        "margin": null
+      }
+    },
+    {
+      "name": "adm_1mhz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 29.1468,
+        "margin": null
+      }
+    },
+    {
+      "name": "acm_1mhz_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -41.4627,
+        "margin": null
+      }
+    },
+    {
+      "name": "gbw_hz",
+      "unit": "Hz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 25958700.0,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 35.714,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 66.3477,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -4.92003,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 66.3477,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -4.92003,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 66.3474,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -4.92025,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 66.3249,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -4.94275,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 64.5161,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -6.75151,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 49.0674,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -22.1934,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 29.1468,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -41.4627,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 25958700.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 35.211,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 65.8153,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -5.33471,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 65.8153,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -5.33471,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 65.8151,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -5.33497,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 65.7892,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -5.3608,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 63.767,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -7.38302,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 47.9432,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -23.1989,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 28.0113,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -42.3879,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 22514000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 36.465,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 64.6321,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -5.6003,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 64.6321,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -5.60031,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 64.6318,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -5.60059,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 64.6037,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -5.62871,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 62.4405,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -7.79184,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 46.3947,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -23.8283,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 26.4559,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -42.908,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 18776800.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/tt_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 35.763,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 64.9295,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -9.85753,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 64.9295,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -9.85753,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 64.9293,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -9.85768,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 64.9143,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -9.87268,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 63.6279,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -11.159,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 49.3732,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -25.4084,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 29.4928,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -44.7783,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 27069800.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 35.211,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 64.4484,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -9.73126,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 64.4484,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -9.73126,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 64.4482,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -9.73144,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 64.4307,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -9.74893,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 62.9633,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -11.2162,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 48.2399,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -25.933,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 28.3416,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -45.2055,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 23410500.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 36.565,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 63.2836,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -9.56211,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 63.2836,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -9.56211,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 63.2835,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -9.56231,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 63.2642,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -9.58152,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 61.6761,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -11.1696,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 46.6754,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -26.1621,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 26.7665,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -45.3025,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 19369500.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 36.161,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 66.9763,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": 11.8662,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 66.9763,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": 11.8662,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 66.976,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": 11.8659,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 66.9453,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": 11.8352,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 64.6299,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": 9.51977,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 48.3639,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -6.74213,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 28.4216,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -26.2882,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 24010300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 35.812,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 66.4479,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": 8.04577,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 66.4479,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": 8.04576,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 66.4476,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": 8.04542,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 66.4135,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": 8.01135,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 63.9056,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": 5.50351,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 47.3862,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -11.0097,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 27.4372,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -30.3716,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 21216100.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 33.634,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 65.2587,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": 4.6858,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 65.2587,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": 4.6858,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 65.2584,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": 4.68543,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 65.2221,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": 4.64915,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 62.5929,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": 2.02009,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 45.9265,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -14.6379,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 25.9731,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -33.7909,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 17923300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/ss_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 33.683,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 68.2454,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -6.97874,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 68.2454,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -6.97874,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 68.245,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -6.97907,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 68.2126,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -7.01152,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 65.7958,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -9.42822,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 49.3932,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -25.822,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 29.4475,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -44.9335,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 26473600.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 34.286,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 67.7734,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -6.66023,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 67.7734,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -6.66023,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 67.773,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -6.66061,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 67.7354,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -6.69828,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 65.0316,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -9.40192,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 48.2791,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -26.145,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 28.3248,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -45.2119,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 23097300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 34.335,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 66.752,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -6.50178,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 66.752,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -6.50179,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 66.7515,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -6.50221,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 66.7092,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -6.54459,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 63.7622,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -9.49144,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 46.7495,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -26.4937,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 26.7889,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -45.4891,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 19463700.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/sf_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 34.334,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 63.4889,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -3.15737,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 63.4889,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -3.15737,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 63.4888,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -3.1575,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 63.476,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -3.17021,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 62.362,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -4.28418,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 48.6282,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -18.0126,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 28.7692,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -37.3489,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 25107000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 34.635,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 62.9451,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -4.0908,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 62.9451,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -4.0908,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 62.945,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -4.09095,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 62.9304,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -4.10555,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 61.6733,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -5.36251,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 47.5016,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -19.5277,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 27.6236,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -38.7867,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 21759900.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 34.936,
+      "measurements": [
+        {
+          "name": "adm_1hz_db",
+          "value": 61.6392,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1hz_db",
+          "value": -4.71855,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10hz_db",
+          "value": 61.6392,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10hz_db",
+          "value": -4.71856,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100hz_db",
+          "value": 61.639,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100hz_db",
+          "value": -4.71871,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1khz_db",
+          "value": 61.6235,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1khz_db",
+          "value": -4.73423,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_10khz_db",
+          "value": 60.2983,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_10khz_db",
+          "value": -6.05938,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_100khz_db",
+          "value": 45.9369,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_100khz_db",
+          "value": -20.4129,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "adm_1mhz_db",
+          "value": 26.0501,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "acm_1mhz_db",
+          "value": -39.5577,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 17989000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-53/sim/opamp-characterization/records/20261009-103006-566b9a5-logs/klt-cmrr-mid/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

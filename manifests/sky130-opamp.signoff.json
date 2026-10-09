@@ -133,11 +133,11 @@
       "reason": null,
       "graded_by_build": true,
       "citation": {
-        "file": "sim/opamp-characterization/records/20261001-074923-c317ff9.characterization.json",
+        "file": "sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json",
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:79acf2f94a2e45e39937eb448df36e5a1400e1210db936fb0f2f9e4f9c412a92",
+        "content_hash": "sha256:7fa0dc2c984212c03867ce673a0b96f87d2b7b361f89d73611c170312d9394f4",
         "input_verified": true,
         "exit_status": 0
       }
