@@ -1,0 +1,7 @@
+* NEGATIVE CONTROL -- scratch reference for opamp_stage1: XM1.g rewired inn -> inp
+* Must NOT match the layout. Not a design artifact.
+.subckt opamp_stage1 inn inp tail d1 d2 vss
+XM1 d1 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137 nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137 nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+.ends opamp_stage1
+.end

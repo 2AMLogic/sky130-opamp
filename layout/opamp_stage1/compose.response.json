@@ -1,0 +1,697 @@
+{
+  "schema_version": 1,
+  "generator": "gen-compose",
+  "cell_name": "opamp_stage1",
+  "gds_path": "opamp_stage1.gds",
+  "pdk": {
+    "name": "sky130A",
+    "variant": "sky130A",
+    "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+  },
+  "dbu_um": 0.001,
+  "bbox_um": {
+    "x0": -6.0,
+    "y0": -2.21,
+    "x1": 9.5,
+    "y1": 11.209999999999999
+  },
+  "ports": [
+    {
+      "name": "inn",
+      "net": "inn",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 3.625,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_inn",
+      "port": "PAD"
+    },
+    {
+      "name": "inp",
+      "net": "inp",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 7.86,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_inp",
+      "port": "PAD"
+    },
+    {
+      "name": "tail",
+      "net": "tail",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": -2.0,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_tail",
+      "port": "PAD"
+    },
+    {
+      "name": "d1",
+      "net": "d1",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": 9.5,
+      "y_um": 5.74,
+      "width_um": 0.42,
+      "direction_deg": 0,
+      "block": "pin_d1",
+      "port": "PAD"
+    },
+    {
+      "name": "d2",
+      "net": "d2",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": 9.5,
+      "y_um": 11.0,
+      "width_um": 0.42,
+      "direction_deg": 0,
+      "block": "pin_d2",
+      "port": "PAD"
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 4.035,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_vss",
+      "port": "PAD"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "mn12",
+      "source": "generator_report",
+      "generator": "diff_pair",
+      "cell_name": "stage1_input_pair",
+      "source_path": "gen/mn12.gds",
+      "source_digest": "sha256:ceb903c8f24c5e88105f9c6a0149802e174abb1c836314243ad008f63e9e3c4a",
+      "offset_um": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "bbox_um": {
+        "x0": -0.92,
+        "y0": -0.92,
+        "x1": 5.4,
+        "y1": 8.99
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "fe_masks",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stage1_fe_masks",
+      "source_path": "gen/fe_masks.gds",
+      "source_digest": "sha256:6ad763ce6f93ee33f560acbb8705c5450003a3dd05c7991a191ca93d23581d06",
+      "offset_um": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "bbox_um": {
+        "x0": -1.045,
+        "y0": -1.045,
+        "x1": 5.525,
+        "y1": 9.115
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_tail",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal2",
+      "source_path": "gen/pin_tail.gds",
+      "source_digest": "sha256:ad2ceb8bab425428a691e6edd1215d2e5dfbd320c0a3356b1845bf3eefcfea2d",
+      "offset_um": {
+        "x": -6.0,
+        "y": -2.21
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": -2.21,
+        "x1": -4.5,
+        "y1": -1.79
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_inn",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal3",
+      "source_path": "gen/pin_inn.gds",
+      "source_digest": "sha256:7c77dcc795adfd6316de931cd9e5edaa9cf720407a178bd14c6f1b900c7862fb",
+      "offset_um": {
+        "x": -6.0,
+        "y": 3.415
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": 3.415,
+        "x1": -4.5,
+        "y1": 3.835
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_vss",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal",
+      "source_path": "gen/pin_vss.gds",
+      "source_digest": "sha256:d2aa49a6ccaf3196c2191d7a232f7335774a4a07b391ceab861e0e49c61546a8",
+      "offset_um": {
+        "x": -6.0,
+        "y": 3.825
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": 3.825,
+        "x1": -4.5,
+        "y1": 4.245
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_inp",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal4",
+      "source_path": "gen/pin_inp.gds",
+      "source_digest": "sha256:c364760d13215061a2b104dc2f08b65f593bfd597bfefed89f03c56ba602f8ba",
+      "offset_um": {
+        "x": -6.0,
+        "y": 7.65
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": 7.65,
+        "x1": -4.5,
+        "y1": 8.07
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_d1",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal3",
+      "source_path": "gen/pin_d1.gds",
+      "source_digest": "sha256:7c77dcc795adfd6316de931cd9e5edaa9cf720407a178bd14c6f1b900c7862fb",
+      "offset_um": {
+        "x": 8.0,
+        "y": 5.53
+      },
+      "bbox_um": {
+        "x0": 8.0,
+        "y0": 5.53,
+        "x1": 9.5,
+        "y1": 5.95
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_d2",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal4",
+      "source_path": "gen/pin_d2.gds",
+      "source_digest": "sha256:c364760d13215061a2b104dc2f08b65f593bfd597bfefed89f03c56ba602f8ba",
+      "offset_um": {
+        "x": 8.0,
+        "y": 10.79
+      },
+      "bbox_um": {
+        "x0": 8.0,
+        "y0": 10.79,
+        "x1": 9.5,
+        "y1": 11.209999999999999
+      },
+      "orientation": "none",
+      "abuts": []
+    }
+  ],
+  "nets": [
+    {
+      "net": "tail",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_1_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_S"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_S"
+        },
+        {
+          "block": "pin_tail",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 27.335,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "pin_tail",
+              "port": "CONN"
+            },
+            {
+              "block": "mn12",
+              "port": "Q1_1_S"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 8.215,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q1_1_S"
+            },
+            {
+              "block": "mn12",
+              "port": "Q2_1_S"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 9.45,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q1_1_S"
+            },
+            {
+              "block": "mn12",
+              "port": "Q2_2_S"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 4.835,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q2_1_S"
+            },
+            {
+              "block": "mn12",
+              "port": "Q1_2_S"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 4.835,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "d1",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_D"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_D"
+        },
+        {
+          "block": "pin_d1",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 23.145,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q1_1_D"
+            },
+            {
+              "block": "pin_d1",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 19.415,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q1_2_D"
+            },
+            {
+              "block": "pin_d1",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 3.7300000000000004,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q2_1_D"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_D"
+        },
+        {
+          "block": "pin_d2",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 24.655,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q2_1_D"
+            },
+            {
+              "block": "pin_d2",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 13.225000000000001,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q2_2_D"
+            },
+            {
+              "block": "pin_d2",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 11.43,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "inn",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q1_1_G"
+        },
+        {
+          "block": "mn12",
+          "port": "Q1_2_G"
+        },
+        {
+          "block": "pin_inn",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 23.515,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "pin_inn",
+              "port": "CONN"
+            },
+            {
+              "block": "mn12",
+              "port": "Q1_1_G"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 5.52,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q1_1_G"
+            },
+            {
+              "block": "mn12",
+              "port": "Q1_2_G"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 17.995,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "inp",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "Q2_1_G"
+        },
+        {
+          "block": "mn12",
+          "port": "Q2_2_G"
+        },
+        {
+          "block": "pin_inp",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 20.235,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "pin_inp",
+              "port": "CONN"
+            },
+            {
+              "block": "mn12",
+              "port": "Q2_2_G"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 5.52,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "Q2_1_G"
+            },
+            {
+              "block": "mn12",
+              "port": "Q2_2_G"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 14.715,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "pins": [
+        {
+          "block": "mn12",
+          "port": "TAP_W"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 3.79,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "mn12",
+              "port": "TAP_W"
+            },
+            {
+              "block": "pin_vss",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 3.79,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "inn",
+      "block": "pin_inn",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "inp",
+      "block": "pin_inp",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "tail",
+      "block": "pin_tail",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "d1",
+      "block": "pin_d1",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "d2",
+      "block": "pin_d2",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD",
+      "labelled": true
+    }
+  ],
+  "unrouted_nets": [],
+  "drc_hints": {
+    "min_spacing_um": null,
+    "matched_groups": [
+      {
+        "matched_group_id": "diff_pair:pair:2",
+        "blocks": [
+          "mn12"
+        ],
+        "placement_symmetric": null
+      }
+    ],
+    "notes": []
+  },
+  "warnings": [
+    "block 'fe_masks' is placed 0.00um from block 'mn12' (strategy: explicit), closer than mn12's own declared drc_hints.min_spacing_um of 0.40um"
+  ],
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": null,
+    "input": null
+  }
+}

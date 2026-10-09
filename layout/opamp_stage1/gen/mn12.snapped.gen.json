@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "generator": "diff_pair",
+  "cell_name": "stage1_input_pair",
+  "gds_path": "gen/mn12.gds",
+  "pdk": {
+    "name": "sky130A",
+    "variant": "sky130A",
+    "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+  },
+  "dbu_um": 0.001,
+  "bbox_um": {
+    "x0": -0.92,
+    "y0": -0.92,
+    "x1": 5.4,
+    "y1": 8.99
+  },
+  "device_count": 4,
+  "ports": [
+    {
+      "name": "Q1_1_S",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 0.21,
+      "y_um": 1.505,
+      "width_um": 3.015,
+      "direction_deg": 180
+    },
+    {
+      "name": "Q1_1_D",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 1.83,
+      "y_um": 1.505,
+      "width_um": 3.015,
+      "direction_deg": 0
+    },
+    {
+      "name": "Q1_1_G",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 1.02,
+      "y_um": 3.625,
+      "width_um": 0.42000000000000004,
+      "direction_deg": 90
+    },
+    {
+      "name": "Q2_1_S",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 2.65,
+      "y_um": 1.505,
+      "width_um": 3.015,
+      "direction_deg": 180
+    },
+    {
+      "name": "Q2_1_D",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 4.27,
+      "y_um": 1.505,
+      "width_um": 3.015,
+      "direction_deg": 0
+    },
+    {
+      "name": "Q2_1_G",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 3.46,
+      "y_um": 3.625,
+      "width_um": 0.42000000000000004,
+      "direction_deg": 90
+    },
+    {
+      "name": "Q2_2_S",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 0.21,
+      "y_um": 5.74,
+      "width_um": 3.015,
+      "direction_deg": 180
+    },
+    {
+      "name": "Q2_2_D",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 1.83,
+      "y_um": 5.74,
+      "width_um": 3.015,
+      "direction_deg": 0
+    },
+    {
+      "name": "Q2_2_G",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 1.02,
+      "y_um": 7.86,
+      "width_um": 0.42000000000000004,
+      "direction_deg": 90
+    },
+    {
+      "name": "Q1_2_S",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 2.65,
+      "y_um": 5.74,
+      "width_um": 3.015,
+      "direction_deg": 180
+    },
+    {
+      "name": "Q1_2_D",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 4.27,
+      "y_um": 5.74,
+      "width_um": 3.015,
+      "direction_deg": 0
+    },
+    {
+      "name": "Q1_2_G",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 3.46,
+      "y_um": 7.86,
+      "width_um": 0.42000000000000004,
+      "direction_deg": 90
+    },
+    {
+      "name": "TAP_N",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 2.24,
+      "y_um": 8.78,
+      "width_um": 0.42,
+      "direction_deg": 90
+    },
+    {
+      "name": "TAP_S",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 2.24,
+      "y_um": -0.71,
+      "width_um": 0.42,
+      "direction_deg": 270
+    },
+    {
+      "name": "TAP_E",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": 5.19,
+      "y_um": 4.035,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "TAP_W",
+      "net": null,
+      "layer": {
+        "layer": 67,
+        "datatype": 20,
+        "name": null
+      },
+      "x_um": -0.71,
+      "y_um": 4.035,
+      "width_um": 0.42,
+      "direction_deg": 180
+    }
+  ],
+  "navigable_regions": [],
+  "drc_hints": {
+    "min_spacing_um": 0.4,
+    "matched_group_id": "diff_pair:pair:2",
+    "snapped_to_grid": false,
+    "notes": [],
+    "voltage_flavor": null,
+    "voltage_flavor_mark_present": false
+  },
+  "warnings": [],
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": null,
+    "input": null
+  },
+  "_snapped_ports": {
+    "grid_um": 0.005,
+    "moves": [
+      {
+        "port": "Q1_1_S",
+        "axis": "y_um",
+        "from": 1.5075,
+        "to": 1.505
+      },
+      {
+        "port": "Q1_1_D",
+        "axis": "y_um",
+        "from": 1.5075,
+        "to": 1.505
+      },
+      {
+        "port": "Q2_1_S",
+        "axis": "y_um",
+        "from": 1.5075,
+        "to": 1.505
+      },
+      {
+        "port": "Q2_1_D",
+        "axis": "y_um",
+        "from": 1.5075,
+        "to": 1.505
+      },
+      {
+        "port": "Q2_2_S",
+        "axis": "y_um",
+        "from": 5.742500000000001,
+        "to": 5.74
+      },
+      {
+        "port": "Q2_2_D",
+        "axis": "y_um",
+        "from": 5.742500000000001,
+        "to": 5.74
+      },
+      {
+        "port": "Q1_2_S",
+        "axis": "y_um",
+        "from": 5.742500000000001,
+        "to": 5.74
+      },
+      {
+        "port": "Q1_2_D",
+        "axis": "y_um",
+        "from": 5.742500000000001,
+        "to": 5.74
+      }
+    ]
+  }
+}

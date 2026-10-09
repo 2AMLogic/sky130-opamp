@@ -1,0 +1,9 @@
+* NGSPICE file created from opamp_stage1.ext - technology: sky130A
+
+.subckt opamp_stage1 tail d1 inn d2 inp vss
+X0 d2 inp tail vss sky130_fd_pr__nfet_01v8 ad=1.2663 pd=6.87 as=1.2663 ps=6.87 w=3.015 l=1.2
+X1 d2 inp tail vss sky130_fd_pr__nfet_01v8 ad=1.2663 pd=6.87 as=1.2663 ps=6.87 w=3.015 l=1.2
+X2 d1 inn tail vss sky130_fd_pr__nfet_01v8 ad=1.2663 pd=6.87 as=1.2663 ps=6.87 w=3.015 l=1.2
+X3 d1 inn tail vss sky130_fd_pr__nfet_01v8 ad=1.2663 pd=6.87 as=1.2663 ps=6.87 w=3.015 l=1.2
+.ends
+
