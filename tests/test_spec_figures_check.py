@@ -252,6 +252,49 @@ class MatrixTests(FixtureTests):
         self.assertEqual(len(self.errs()), 1)
 
 
+class CampaignFigureTests(unittest.TestCase):
+    CJ = "sim/x/records/camp.campaign.json"
+    MD = "sim/x/records/camp.md"
+    SPEC = ("# spec\n## 2. Targets\n| P | T |\n|---|---|\n"
+            "| Input-referred offset | sigma 8.69 mV @ SS / 27 °C camp.md camp.campaign.json |\n## 3. x\n")
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        (self.tmp / "spec").mkdir()
+        (self.tmp / "manifests").mkdir()
+        (self.tmp / "sim/x/records").mkdir(parents=True)
+        (self.tmp / self.MD).write_text("x")
+        self.write_json(n_ok_ss=300)
+        (self.tmp / sf.SPEC).write_text(self.SPEC, encoding="utf-8")
+        fig = {"row": "Input-referred offset", "campaign_json": self.CJ, "record_md": self.MD,
+               "corners": ["tt", "ss"], "n_per_corner": 300, "key": "sigma_v", "reduce": "max",
+               "scale": 1000.0, "expected": 8.69, "tol": 0.005, "unit": "mV",
+               "at": {"corner": "ss", "temp_c": 27}, "printed": ["8.69 mV @ SS / 27 °C"]}
+        (self.tmp / sf.MAPPING).write_text(json.dumps({"figures": [], "campaign_figures": [fig]}))
+
+    def write_json(self, n_ok_ss):
+        def st(sig, n_ok):
+            return {"n_requested": 300, "n_ok": n_ok, "n_failed": 300 - n_ok, "sigma_v": sig}
+        (self.tmp / self.CJ).write_text(json.dumps(
+            {"temp_c": 27.0, "corners": {"tt": st(0.0085, 300), "ss": st(0.0086919, n_ok_ss)}}))
+
+    def test_passes(self):
+        self.assertEqual(sf.check(self.tmp), [])
+
+    def test_altered_summary_fails(self):
+        (self.tmp / self.CJ).write_text((self.tmp / self.CJ).read_text().replace("0.0086919", "0.0087919"))
+        self.assertTrue(any("recomputed" in e for e in sf.check(self.tmp)))
+
+    def test_failed_samples_fail(self):
+        self.write_json(n_ok_ss=299)
+        self.assertTrue(any("expected 300 ok / 0 failed" in e for e in sf.check(self.tmp)))
+
+    def test_altered_spec_copy_fails(self):
+        (self.tmp / sf.SPEC).write_text(self.SPEC.replace("8.69", "8.68"), encoding="utf-8")
+        self.assertTrue(any("occurs 0x" in e for e in sf.check(self.tmp)))
+
+
 class CommittedTests(unittest.TestCase):
     def test_committed_spec_agrees_with_records(self):
         self.assertEqual(sf.check(_paths.REPO), [])
