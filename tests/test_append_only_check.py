@@ -8,8 +8,17 @@ C = "sim/gm-id-characterization/corners/tt.log"
 N = "sim/opamp-characterization/netlist-snapshots/a.cir"
 
 
+def z(text):
+    """Convert readable tab/newline name-status lines to `-z` format."""
+    out = []
+    for line in text.splitlines():
+        if line:
+            out += line.split("\t")
+    return "".join(f + "\0" for f in out)
+
+
 def check(text, allow=None):
-    return ao.find_violations(text, allow or {})
+    return ao.find_violations(z(text), allow or {})
 
 
 class AppendOnlyTests(unittest.TestCase):
@@ -62,12 +71,36 @@ class AppendOnlyTests(unittest.TestCase):
             ao.parse_allowlist(f"{R}\n")
 
     def test_committed_allowlist_parses(self):
-        ao.parse_allowlist(_paths.REPO.joinpath(ao.DEFAULT_ALLOWLIST).read_text())
+        ao.parse_allowlist(
+            _paths.REPO.joinpath(ao.DEFAULT_ALLOWLIST).read_text(encoding="utf-8"))
+
+    def test_special_char_paths_are_guarded(self):
+        # git C-quotes these without -z; with -z they arrive verbatim
+        for name in ('t"q.md', "back\\slash.md", "tab\there.md", "new\nline.md"):
+            p = f"sim/x/records/{name}"
+            v, _ = ao.find_violations(f"D\0{p}\0", {})
+            self.assertEqual(v, [("D", p)], name)
+
+    def test_special_char_rename_old_path(self):
+        old, new = "sim/x/corners/a\tb\n.log", "sim/x/corners/c.log"
+        v, _ = ao.find_violations(f"R100\0{old}\0{new}\0M\0sim/x/records/\"q\0", {})
+        self.assertEqual(v, [("R100", old), ("M", 'sim/x/records/"q')])
+
+    def test_copy_consumes_two_paths(self):
+        # C record must consume both paths so the next record parses correctly
+        v, _ = ao.find_violations(f"C075\0{R}\0sim/x/records/c.md\0D\0{C}\0", {})
+        self.assertEqual(v, [("D", C)])
+
+    def test_malformed_input_fails_closed(self):
+        for bad in (f"R100\0{R}\0", "M\0", f"\0{R}\0", f"M\t{R}\n"):
+            with self.assertRaises(ValueError, msg=repr(bad)):
+                ao.find_violations(bad, {})
 
     def test_main_stdin_exit_codes(self):
         import io, contextlib
         from unittest import mock
-        for text, rc in ((f"A\t{R}\n", 0), (f"M\t{R}\n", 1)):
+        for text, rc in ((z(f"A\t{R}\n"), 0), (z(f"M\t{R}\n"), 1),
+                         (f'D\0sim/x/records/t"q.md\0', 1)):
             with mock.patch("sys.stdin", io.StringIO(text)), \
                  contextlib.redirect_stdout(io.StringIO()), \
                  contextlib.redirect_stderr(io.StringIO()):

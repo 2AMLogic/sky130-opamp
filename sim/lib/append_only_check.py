@@ -10,8 +10,11 @@ for a rename/copy the OLD path is the one checked (the new path is an add).
 Escape hatch: sim/append-only-allowlist.txt, one `path | authority` per line
 (authority = issue or decision record), so a correction is visible in review.
 
+Paths are read from `git diff --name-status -z` (NUL-separated, never
+C-quoted), so names containing `"`, backslash, tab or newline are still seen.
+
 Usage: append_only_check.py [--base origin/main] [--allowlist FILE]
-       git diff --name-status A...B | append_only_check.py --stdin
+       git diff --name-status -z -M A...B | append_only_check.py --stdin
 Stdlib only.
 """
 
@@ -43,25 +46,41 @@ def parse_allowlist(text: str) -> dict:
     return out
 
 
-def find_violations(name_status: str, allowlist: dict):
-    """Return (violations, allowed) as lists of (status, path)."""
+def parse_name_status_z(data: str):
+    """Parse `git diff --name-status -z` output into [(status, [paths])].
+
+    Each record is STATUS NUL PATH NUL, or STATUS NUL OLD NUL NEW NUL for
+    R*/C*. Malformed/truncated input raises ValueError (fail closed).
+    """
+    fields = data.split("\0")
+    if fields and fields[-1] == "":
+        fields.pop()
+    records, i = [], 0
+    while i < len(fields):
+        status = fields[i].strip()
+        if not status or not status[0].isalpha():
+            raise ValueError(f"unexpected name-status field {fields[i]!r}")
+        n = 2 if status[0] in "RC" else 1
+        paths = fields[i + 1:i + 1 + n]
+        if len(paths) != n or any(not p for p in paths):
+            raise ValueError(f"truncated name-status record for {status!r}")
+        records.append((status, paths))
+        i += 1 + n
+    return records
+
+
+def find_violations(name_status_z: str, allowlist: dict):
+    """Return (violations, allowed) as lists of (status, path).
+
+    `name_status_z` is `git diff --name-status -z` output.
+    """
     violations, allowed = [], []
-    for raw in name_status.splitlines():
-        if not raw.strip():
+    for status, paths in parse_name_status_z(name_status_z):
+        if status == "A" or status[0] == "C":
+            # adds are fine; a copy leaves its source untouched
             continue
-        fields = raw.split("\t")
-        status, paths = fields[0].strip(), fields[1:]
-        if not paths:
-            continue
-        if status[0] in "RC":
-            # old path is the pre-existing evidence; new path is just an add
-            checked = paths[:1] if status[0] == "R" else []
-            if status[0] == "C":
-                continue
-        else:
-            checked = paths
-        if status == "A":
-            continue
+        # for a rename the OLD path is the pre-existing evidence; new is an add
+        checked = paths[:1] if status[0] == "R" else paths
         for p in checked:
             if not is_guarded(p):
                 continue
@@ -91,14 +110,16 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     if args.stdin:
-        data = sys.stdin.read()
+        buf = getattr(sys.stdin, "buffer", None)
+        data = (buf.read().decode("utf-8", "surrogateescape")
+                if buf is not None else sys.stdin.read())
     else:
         data = subprocess.run(
-            ["git", "-c", "core.quotepath=off", "diff", "--name-status", "-M",
+            ["git", "diff", "--name-status", "-z", "-M",
              f"{args.base}...HEAD", "--", "sim/"],
-            check=True, capture_output=True, text=True).stdout
+            check=True, capture_output=True).stdout.decode("utf-8", "surrogateescape")
     al_path = Path(args.allowlist)
-    allow = parse_allowlist(al_path.read_text()) if al_path.exists() else {}
+    allow = parse_allowlist(al_path.read_text(encoding="utf-8")) if al_path.exists() else {}
     violations, allowed = find_violations(data, allow)
     for s, p in allowed:
         print(f"allowlisted ({allow[p]}): {s}\t{p}")
