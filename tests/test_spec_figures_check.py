@@ -21,9 +21,14 @@ cites 20200101-000000-0000000 outside section 2
 Summary: gain fell to 61.64 dB @ FS / 125 °C.
 ## 3. Other
 """
-CSV = "corner,temp_c,gain_dc_db\ntt,27.0,66.0\nfs,125.0,61.6392\nss,-40.0,68.0\n"
-MAPPING = {"figures": [{
-    "row": "Open-loop DC gain", "record": RID, "csv": "ac", "key": "gain_dc_db", "reduce": "min",
+CSV = ("corner,temp_c,vdd_v,gain_dc_db\n"
+       "tt,27.0,1.8,66.0\nfs,125.0,1.8,61.6392\nss,-40.0,1.62,68.0\n")
+MATRIX = {"record": RID, "csv": "ac", "supply_key": "vdd_v", "points": [
+    {"corner": "tt", "temp_c": 27, "vdd_v": 1.8},
+    {"corner": "fs", "temp_c": 125, "vdd_v": 1.8},
+    {"corner": "ss", "temp_c": -40, "vdd_v": 1.62}]}
+MAPPING = {"matrices": {"m": MATRIX}, "figures": [{
+    "matrix": "m", "row": "Open-loop DC gain", "record": RID, "csv": "ac", "key": "gain_dc_db", "reduce": "min",
     "expected": 61.64, "tol": 0.005, "unit": "dB",
     "at": {"corner": "fs", "temp_c": 125}, "printed": ["61.64 dB @ FS / 125 °C"],
 }]}
@@ -148,6 +153,103 @@ class FixtureTests(unittest.TestCase):
     def test_unknown_key_fails(self):
         self.fig(key="nope")
         self.assertTrue(any("cannot recompute" in e for e in sf.check(self.tmp)))
+
+
+class MatrixTests(FixtureTests):
+    def csv(self, text):
+        (self.tmp / sf.OPAMP_RECORDS / f"{RID}-ac.csv").write_text(text)
+
+    def matrix(self, **kw):
+        m = json.loads(json.dumps(MAPPING))
+        m["matrices"]["m"].update(kw)
+        self.write_map(m)
+
+    def errs(self):
+        return [e for e in sf.check(self.tmp) if "matrix" in e]
+
+    def test_removed_non_binding_corner_fails(self):
+        self.csv("corner,temp_c,vdd_v,gain_dc_db\nfs,125.0,1.8,61.6392\nss,-40.0,1.62,68.0\n")
+        e = self.errs()
+        self.assertEqual(len(e), 1)
+        self.assertIn("missing expected point tt/27 C/1.8 V", e[0])
+        self.assertIn(f"{RID}-ac", e[0])
+
+    def test_duplicate_tuple_fails(self):
+        self.csv(CSV + "tt,27.0,1.8,67.0\n")
+        self.assertTrue(any("duplicate point tt/27 C/1.8 V in rows [1, 4]" in e for e in self.errs()))
+
+    def test_unexpected_supply_fails(self):
+        self.csv(CSV.replace("ss,-40.0,1.62", "ss,-40.0,1.98"))
+        e = "\n".join(self.errs())
+        self.assertIn("unexpected point ss/-40 C/1.98 V", e)
+        self.assertIn("missing expected point ss/-40 C/1.62 V", e)
+
+    def test_nonfinite_metric_fails(self):
+        for bad in ("nan", "inf", ""):
+            self.csv(CSV.replace("66.0", bad))
+            self.assertTrue(any("point tt/27 C/1.8 V has nonfinite" in e for e in self.errs()), bad)
+
+    def test_axes_paired_supply_and_exclusion(self):
+        self.matrix(points=None)
+        m = json.loads((self.tmp / sf.MAPPING).read_text())
+        del m["matrices"]["m"]["points"]
+        m["matrices"]["m"].update(
+            axes={"corner": ["tt", "fs", "ss"], "temp_c": [-40, 27, 125]},
+            supply={"mode": "paired_with_corner", "by_corner": {"tt": 1.8, "fs": 1.8, "ss": 1.62}},
+            exclude=[{"corner": "tt", "temp_c": -40}, {"corner": "tt", "temp_c": 125},
+                     {"corner": "fs", "temp_c": -40}, {"corner": "fs", "temp_c": 27},
+                     {"corner": "ss", "temp_c": 27}, {"corner": "ss", "temp_c": 125}])
+        self.write_map(m)
+        self.assertEqual(sf.check(self.tmp), [])
+        m["matrices"]["m"]["exclude"].append({"corner": "ff", "temp_c": 27})
+        self.write_map(m)
+        self.assertTrue(any("matches no expected point" in e for e in self.errs()))
+
+    def test_paired_supply_is_not_cartesian(self):
+        m = json.loads((self.tmp / sf.MAPPING).read_text())
+        del m["matrices"]["m"]["points"]
+        m["matrices"]["m"].update(
+            axes={"corner": ["tt", "ss"], "temp_c": [27]},
+            supply={"mode": "cartesian", "values": [1.62, 1.8]})
+        self.write_map(m)
+        self.assertTrue(any("missing expected point" in e for e in self.errs()))
+
+    def test_missing_matrix_fails(self):
+        m = json.loads((self.tmp / sf.MAPPING).read_text())
+        m["figures"][0]["matrix"] = "nope"
+        self.write_map(m)
+        self.assertTrue(any("no authored matrix 'nope'" in e for e in sf.check(self.tmp)))
+
+    def test_matrix_dataset_mismatch_fails(self):
+        self.matrix(csv="other")
+        self.assertTrue(any("matrix m csv" in e for e in self.errs()))
+
+    def test_where_filtered_datasets_checked_independently(self):
+        rows = ["corner,temp_c,vdd_v,cm_point,gain_dc_db"]
+        for cm in ("mid", "window"):
+            rows += [f"tt,27.0,1.8,{cm},66.0", f"fs,125.0,1.8,{cm},61.6392", f"ss,-40.0,1.62,{cm},68.0"]
+        full = "\n".join(rows) + "\n"
+        m = json.loads(json.dumps(MAPPING))
+        base = m["matrices"]["m"]
+        m["matrices"] = {"mid": dict(base, where={"cm_point": "mid"}),
+                         "win": dict(base, where={"cm_point": "window"})}
+        f0 = m["figures"][0]
+        m["figures"] = [dict(f0, matrix="mid", where={"cm_point": "mid"}),
+                        dict(f0, row="Other row", matrix="win", where={"cm_point": "window"})]
+        self.write_map(m)
+        self.csv(full)
+        self.assertEqual(self.errs(), [])
+        self.csv(full.replace("tt,27.0,1.8,window,66.0\n", ""))
+        e = self.errs()
+        self.assertEqual(len(e), 1)
+        self.assertIn("matrix win", e[0])
+
+    def test_shared_matrix_reported_once(self):
+        m = json.loads(json.dumps(MAPPING))
+        m["figures"].append(dict(m["figures"][0], row="Other row", key="gain_dc_db"))
+        self.write_map(m)
+        self.csv("corner,temp_c,vdd_v,gain_dc_db\nfs,125.0,1.8,61.6392\nss,-40.0,1.62,68.0\n")
+        self.assertEqual(len(self.errs()), 1)
 
 
 class CommittedTests(unittest.TestCase):
