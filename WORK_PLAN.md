@@ -25,7 +25,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#107**: sim: attribute the 8.6 mV offset Monte Carlo sigma to device groups
 
 ## PRs Awaiting Review
 
@@ -51,8 +51,7 @@ Issues carrying `loom:curated`.
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
-- **#101**: Wire package.json test/check:ci to the real simulator-free checks *(architect)*
-- **#104**: Preserve the exact DUT netlist for PVT campaigns and check current-design identity *(architect)*
+- **#116**: Reject aliased partial-layout paths and directories in integrator GDS validation *(architect)*
 
 ## Epics
 
@@ -65,10 +64,10 @@ _None._
 | Operator merge-risk holds | 1 |
 | Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 4 |
-| Architect / Hermit proposals | 3 |
+| Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
