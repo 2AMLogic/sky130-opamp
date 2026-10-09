@@ -1,0 +1,59 @@
+{
+  "campaign": "mc300-sffs",
+  "base_seed": 20261085,
+  "n_total": 300,
+  "chunk": 100,
+  "corners": {
+    "sf": {
+      "chunks": [],
+      "n_requested": 300,
+      "n_returned": 0,
+      "n_ok": 0,
+      "n_failed": 300,
+      "failure_reasons": {
+        "requested but not returned": 300
+      },
+      "mean_v": null,
+      "sigma_v": null,
+      "three_sigma_v": null,
+      "mean_abs_plus_3sigma_v": null,
+      "min_v": null,
+      "max_v": null
+    },
+    "fs": {
+      "chunks": [
+        {
+          "chunk": 2,
+          "seed": 20261087,
+          "n": 100,
+          "offset": 200,
+          "record_id": "20261009-152035-offset-mc300-sffs-fs-c2-95fd4e"
+        }
+      ],
+      "n_requested": 300,
+      "n_returned": 100,
+      "n_ok": 100,
+      "n_failed": 200,
+      "failure_reasons": {
+        "requested but not returned": 200
+      },
+      "mean_v": -0.0004835500000000237,
+      "sigma_v": 0.00891468064132803,
+      "three_sigma_v": 0.02674404192398409,
+      "mean_abs_plus_3sigma_v": 0.027227591923984114,
+      "min_v": -0.02736000000000005,
+      "max_v": 0.016037999999999997
+    }
+  },
+  "attempts": [
+    {
+      "record_id": "20261009-152035-offset-mc300-sffs-fs-c2-95fd4e",
+      "corner": "fs",
+      "chunk": 2,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-d04f7af1d23b"
+    }
+  ]
+}

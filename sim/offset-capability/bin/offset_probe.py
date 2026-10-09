@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Seeded-mismatch capability probe for issue #52 (NOT a Monte Carlo campaign).
+"""Seeded-mismatch offset probe (#52) and offset Monte Carlo campaign (#85).
 
 Builds `klt sim` requests for two small benches, runs them through the actual
 backend, and extracts results with explicit failure semantics.
@@ -11,11 +11,25 @@ backend, and extracts results with explicit failure semantics.
 Usage:
   offset_probe.py run --bench pair|offset --label NAME [--mismatch on|off]
                       [--seed N --n N] [--backend NAME] [--dry-run]
+  offset_probe.py campaign --label NAME --base-seed N [--corners tt,ss,ff]
+                      [--only corner:chunk,...]
+                      [--n-total 300 --chunk 100] [--backend NAME] [--dry-run]
+  offset_probe.py summarize CHUNK.summary.json ...
+
+`campaign` submits the offset bench once per (corner, chunk) as a seeded
+`monte_carlo` `klt sim` request (`<corner>_mm` library section, chunk seed =
+base seed + chunk index), sequentially, retrying fleet-capacity failures as
+new records, then aggregates per corner (mean, sigma, failed count) with the
+same extractor as `run`. `summarize` re-aggregates committed chunk records.
 
 `--mismatch on` selects `.lib tt_mm` (mc_mm_switch=1), `off` selects `.lib tt`
 (mc_mm_switch=0). Multi-sample requests (`--n` > 1) are submitted through
-`klt sim` only; this script never launches ngspice itself and has no loop over
-simulator invocations. Stdlib only.
+`klt sim` only; this script never launches ngspice itself. Its only loop is
+`campaign`'s sequential series of `klt sim` requests (one at a time, each
+expanded and executed by klt on its backend -- the batch fleet on dispatch
+hosts). Campaign requests set `keep_artifacts: false`: every per-sample value
+and seed is in the committed klt report, and 1500 per-sample deck/log
+directories would bloat the evidence tree. Stdlib only.
 """
 from __future__ import annotations
 
@@ -25,13 +39,15 @@ import math
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 EXP = Path(__file__).resolve().parent.parent
 REPO = EXP.parent.parent
 RECORDS = EXP / "records"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
-from spice_harness import KltSimError, allocate_record_id, klt_sim, write_new  # noqa: E402
+from spice_harness import (KltSimError, allocate_record_id, klt_sim,  # noqa: E402
+                           klt_version, write_new)
 
 VDD = 1.8
 VREF = VDD / 2          # output reference for the offset crossing
@@ -48,7 +64,11 @@ class ProbeError(RuntimeError):
     pass
 
 
-def build_request(bench: str, mismatch: bool, mc: dict | None) -> dict:
+CORNERS = ("tt", "ss", "ff", "sf", "fs")
+
+
+def build_request(bench: str, mismatch: bool, mc: dict | None,
+                  corner: str = "tt", keep_artifacts: bool = True) -> dict:
     cir = {"pair": "../bench/pair_diag.cir", "offset": "../bench/offset_dc.cir"}[bench]
     if bench == "pair":
         analysis = {"kind": "dc", "args": "Vg 0.79 0.81 0.01"}
@@ -68,13 +88,13 @@ def build_request(bench: str, mismatch: bool, mc: dict | None) -> dict:
         "netlist_source": "schematic",
         "models": {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"},
         "corners": {
-            "process": ["tt_mm" if mismatch else "tt"],
+            "process": [f"{corner}_mm" if mismatch else corner],
             "supply_v": {"vdd": [VDD]},
             "temperature_c": [27.0],
         },
         "analysis": analysis,
         "measurements": meas,
-        "options": {"timeout_s": 600, "keep_artifacts": True},
+        "options": {"timeout_s": 600, "keep_artifacts": keep_artifacts},
         "batch": {"runner_version_check": "warn"},
     }
     if mc:
@@ -124,42 +144,244 @@ def run_klt(request_path: Path, outdir: Path, backend: str | None):
         return exc.cmd, exc.returncode, None, exc.stderr
 
 
-def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("cmd", choices=["run"])
-    ap.add_argument("--bench", choices=["pair", "offset"], required=True)
-    ap.add_argument("--label", required=True)
-    ap.add_argument("--mismatch", choices=["on", "off"], default="on")
-    ap.add_argument("--seed", type=int)
-    ap.add_argument("--n", type=int, default=1)
-    ap.add_argument("--backend")
-    ap.add_argument("--dry-run", action="store_true")
-    a = ap.parse_args(argv)
-    mc = {"n": a.n, "seed": a.seed} if a.seed is not None else None
-    req = build_request(a.bench, a.mismatch == "on", mc)
+# ---------------------------------------------------------------- campaign --
+
+def check_echo(payload: dict, mc: dict, process: str) -> list[str]:
+    """Problems with klt's echo of the monte_carlo request (the fleet runner
+    may run an older klt that silently drops unknown options), [] if none."""
+    probs = []
+    echo = (payload.get("environment") or {}).get("monte_carlo") or {}
+    for k in ("n", "seed"):
+        if echo.get(k) != mc[k]:
+            probs.append(f"monte_carlo.{k} echo {echo.get(k)!r} != requested {mc[k]!r}")
+    if echo.get("vary") != "mismatch":
+        probs.append(f"monte_carlo.vary echo {echo.get('vary')!r} != 'mismatch'")
+    corners = payload.get("corners") or []
+    if len(corners) != mc["n"]:
+        probs.append(f"{len(corners)} sample(s) returned, {mc['n']} requested")
+    idx = sorted(c.get("monte_carlo", {}).get("sample_index", -1) for c in corners
+                 if isinstance(c.get("monte_carlo"), dict))
+    if idx != list(range(len(corners))):
+        probs.append("sample_index set is not 0..n-1")
+    if any(c.get("process") not in (None, process) for c in corners):
+        probs.append(f"corner process differs from requested {process!r}")
+    return probs
+
+
+def aggregate(samples: list[dict], n_requested: int) -> dict:
+    """Per-corner statistics over ok samples only. Failed samples (and samples
+    requested but never returned) are counted, never treated as Vos = 0."""
+    vals = [s["vos_v"] for s in samples if s.get("ok") and _num(s.get("vos_v"))]
+    n_ok = len(vals)
+    reasons: dict[str, int] = {}
+    for s in samples:
+        if not (s.get("ok") and _num(s.get("vos_v"))):
+            r = s.get("reason") or "ok flag without finite vos_v"
+            reasons[r] = reasons.get(r, 0) + 1
+    n_missing = max(0, n_requested - len(samples))
+    if n_missing:
+        reasons["requested but not returned"] = n_missing
+    agg = {"n_requested": n_requested, "n_returned": len(samples), "n_ok": n_ok,
+           "n_failed": n_requested - n_ok, "failure_reasons": reasons,
+           "mean_v": None, "sigma_v": None, "three_sigma_v": None,
+           "mean_abs_plus_3sigma_v": None, "min_v": None, "max_v": None}
+    if n_ok:
+        mean = math.fsum(vals) / n_ok
+        agg.update(mean_v=mean, min_v=min(vals), max_v=max(vals))
+    if n_ok >= 2:
+        sd = math.sqrt(math.fsum((v - mean) ** 2 for v in vals) / (n_ok - 1))
+        agg.update(sigma_v=sd, three_sigma_v=3 * sd, mean_abs_plus_3sigma_v=abs(mean) + 3 * sd)
+    return agg
+
+
+def is_capacity_error(err: str) -> bool:
+    """Fleet-capacity refusals (shared instance cap, or no Spot capacity)."""
+    return any(t in (err or "") for t in ("BATCH_MAX_CONCURRENT_INSTANCES", "batch_no_capacity"))
+
+
+def run_one(req: dict, label: str, backend: str | None, bench: str = "offset",
+            mc: dict | None = None, extra: dict | None = None) -> dict:
+    """Write one request record, run it through klt sim, write the klt report
+    and summary records (never overwriting), return the summary dict."""
     RECORDS.mkdir(exist_ok=True)
     # Atomically reserve a unique record namespace (issue #75) before any write.
-    rid = allocate_record_id(RECORDS, f"{a.bench}-{a.label}")
+    rid = allocate_record_id(RECORDS, f"{bench}-{label}")
     req_path = RECORDS / f"{rid}.request.json"
     write_new(req_path, json.dumps(req, indent=2) + "\n")
-    if a.dry_run:
-        print(req_path)
-        return 0
     outdir = RECORDS / f"{rid}-artifacts"
-    cmd, rc, payload, err = run_klt(req_path, outdir, a.backend)
+    cmd, rc, payload, err = run_klt(req_path, outdir, backend)
     write_new(RECORDS / f"{rid}.klt.json", json.dumps(payload, indent=2) + "\n" if payload else "null\n")
-    meta = {"record_id": rid, "command": cmd, "exit_code": rc, "stderr": err[-4000:],
+    meta = {"record_id": rid, **(extra or {}), "command": cmd, "exit_code": rc, "stderr": err[-4000:],
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
+            "client_klt_version": klt_version(),
             "git_sha": subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
                                       capture_output=True, text=True).stdout.strip()}
-    if payload:
+    if payload and isinstance(payload.get("corners"), list):
         env = payload.get("environment", {})
         meta["remote"] = env.get("remote")
         meta["monte_carlo_echo"] = env.get("monte_carlo")
-        meta["samples"] = extract_samples(payload, a.bench)
+        samples = extract_samples(payload, bench)
+        if mc:
+            probs = check_echo(payload, mc, req["corners"]["process"][0])
+            meta["echo_problems"] = probs
+            if probs:   # unverifiable sampling: count as failed, never as data
+                for s in samples:
+                    if s["ok"]:
+                        s.update(ok=False, reason="monte_carlo echo mismatch")
+                        s.pop("vos_v", None)
+        meta["samples"] = samples
+    elif payload:
+        meta["payload_error"] = payload.get("error") or "klt report has no corners[]"
     write_new(RECORDS / f"{rid}.summary.json", json.dumps(meta, indent=2) + "\n")
+    return meta
+
+
+def chunk_plan(corners: list[str], n_total: int, chunk: int, base_seed: int) -> list[dict]:
+    """(corner, chunk index, seed, n, global sample offset) for every request.
+    Chunk k uses seed base+k at every corner, so sample g = k*chunk + i draws
+    the same mismatch seed at each corner (paired across corners)."""
+    plan, k, done = [], 0, 0
+    sizes = []
+    while done < n_total:
+        sizes.append(min(chunk, n_total - done))
+        done += sizes[-1]
+    for c in corners:
+        off = 0
+        for k, n in enumerate(sizes):
+            plan.append({"corner": c, "chunk": k, "seed": base_seed + k, "n": n, "offset": off})
+            off += n
+    return plan
+
+
+def corner_report(chunks: list[dict], n_requested: int) -> dict:
+    samples = []
+    for ch in chunks:
+        for s in ch.get("samples") or []:
+            s = dict(s)
+            s["global_index"] = ch["offset"] + (s.get("monte_carlo") or {}).get("sample_index", 0)
+            samples.append(s)
+    return aggregate(samples, n_requested)
+
+
+def campaign(a) -> int:
+    corners = [c.strip() for c in a.corners.split(",") if c.strip()]
+    bad = [c for c in corners if c not in CORNERS]
+    if bad:
+        raise SystemExit(f"unknown corner(s) {bad}; choose from {CORNERS}")
+    plan = chunk_plan(corners, a.n_total, a.chunk, a.base_seed)
+    if a.only:   # resume: run only the listed corner:chunk requests (same seeds)
+        want = {(x.split(":")[0], int(x.split(":")[1])) for x in a.only.split(",") if x}
+        plan = [p for p in plan if (p["corner"], p["chunk"]) in want]
+    results: dict[str, list[dict]] = {c: [] for c in corners}
+    log = []
+    for p in plan:
+        mc = {"n": p["n"], "seed": p["seed"]}
+        req = build_request("offset", True, mc, corner=p["corner"], keep_artifacts=False)
+        label = f"{a.label}-{p['corner']}-c{p['chunk']}"
+        if a.dry_run:
+            RECORDS.mkdir(exist_ok=True)
+            rid = allocate_record_id(RECORDS, f"offset-{label}")
+            write_new(RECORDS / f"{rid}.request.json", json.dumps(req, indent=2) + "\n")
+            print(rid)
+            continue
+        for attempt in range(1, a.max_attempts + 1):
+            meta = run_one(req, label if attempt == 1 else f"{label}-r{attempt}", a.backend, mc=mc,
+                           extra={"campaign": a.label, "corner": p["corner"], "chunk": p["chunk"],
+                                  "chunk_seed": p["seed"], "chunk_n": p["n"],
+                                  "global_offset": p["offset"], "attempt": attempt})
+            ok_payload = "samples" in meta
+            log.append({"record_id": meta["record_id"], "corner": p["corner"], "chunk": p["chunk"],
+                        "attempt": attempt, "exit_code": meta["exit_code"], "got_samples": ok_payload,
+                        "job_id": (meta.get("remote") or {}).get("job_id")})
+            print(json.dumps(log[-1]), flush=True)
+            if ok_payload or attempt == a.max_attempts:
+                break
+            time.sleep(a.retry_wait_s if is_capacity_error(meta.get("stderr", "")) else 30)
+        results[p["corner"]].append({**p, "record_id": meta["record_id"], "samples": meta.get("samples")})
+    if a.dry_run:
+        return 0
+    report = {"campaign": a.label, "base_seed": a.base_seed, "n_total": a.n_total, "chunk": a.chunk,
+              "corners": {c: {"chunks": [{k: ch[k] for k in ("chunk", "seed", "n", "offset", "record_id")}
+                                         for ch in results[c]],
+                              **corner_report(results[c], a.n_total)} for c in corners},
+              "attempts": log}
+    rid = allocate_record_id(RECORDS, f"campaign-{a.label}")
+    write_new(RECORDS / f"{rid}.campaign.json", json.dumps(report, indent=2) + "\n")
+    print(json.dumps({c: {k: v for k, v in r.items() if k != "chunks"}
+                      for c, r in report["corners"].items()}, indent=2))
+    return 0 if all(r["n_failed"] == 0 for r in report["corners"].values()) else 1
+
+
+def summarize(paths: list[str]) -> dict:
+    """Re-aggregate committed chunk summaries (one successful attempt per
+    (corner, chunk)) from their klt reports via the same extractor."""
+    by_corner: dict[str, dict[int, dict]] = {}
+    for path in paths:
+        meta = json.loads(Path(path).read_text())
+        if "samples" not in meta:
+            continue
+        rid = meta["record_id"]
+        payload = json.loads((Path(path).parent / f"{rid}.klt.json").read_text())
+        samples = extract_samples(payload, "offset")
+        mc = {"n": meta["chunk_n"], "seed": meta["chunk_seed"]}
+        probs = check_echo(payload, mc, f"{meta['corner']}_mm")
+        if probs:
+            for s in samples:
+                s.update(ok=False, reason="monte_carlo echo mismatch")
+                s.pop("vos_v", None)
+        by_corner.setdefault(meta["corner"], {})[meta["chunk"]] = {
+            "chunk": meta["chunk"], "seed": meta["chunk_seed"], "n": meta["chunk_n"],
+            "offset": meta["global_offset"], "record_id": rid, "samples": samples}
+    out = {}
+    for c, chunks in by_corner.items():
+        ordered = [chunks[k] for k in sorted(chunks)]
+        n_req = sum(ch["n"] for ch in ordered)
+        out[c] = {"chunks": [{k: ch[k] for k in ("chunk", "seed", "n", "offset", "record_id")} for ch in ordered],
+                  **corner_report(ordered, n_req)}
+    return out
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    r = sub.add_parser("run")
+    r.add_argument("--bench", choices=["pair", "offset"], required=True)
+    r.add_argument("--label", required=True)
+    r.add_argument("--mismatch", choices=["on", "off"], default="on")
+    r.add_argument("--seed", type=int)
+    r.add_argument("--n", type=int, default=1)
+    r.add_argument("--backend")
+    r.add_argument("--dry-run", action="store_true")
+    c = sub.add_parser("campaign")
+    c.add_argument("--label", required=True)
+    c.add_argument("--base-seed", type=int, required=True)
+    c.add_argument("--corners", default="tt,ss,ff")
+    c.add_argument("--n-total", type=int, default=300)
+    c.add_argument("--chunk", type=int, default=100)
+    c.add_argument("--max-attempts", type=int, default=6)
+    c.add_argument("--retry-wait-s", type=int, default=300)
+    c.add_argument("--only", help="resume: comma list of corner:chunk to run, e.g. ss:2,ff:0")
+    c.add_argument("--backend")
+    c.add_argument("--dry-run", action="store_true")
+    s = sub.add_parser("summarize")
+    s.add_argument("summaries", nargs="+")
+    a = ap.parse_args(argv)
+    if a.cmd == "campaign":
+        return campaign(a)
+    if a.cmd == "summarize":
+        print(json.dumps(summarize(a.summaries), indent=2))
+        return 0
+    mc = {"n": a.n, "seed": a.seed} if a.seed is not None else None
+    req = build_request(a.bench, a.mismatch == "on", mc)
+    if a.dry_run:
+        RECORDS.mkdir(exist_ok=True)
+        rid = allocate_record_id(RECORDS, f"{a.bench}-{a.label}")
+        req_path = write_new(RECORDS / f"{rid}.request.json", json.dumps(req, indent=2) + "\n")
+        print(req_path)
+        return 0
+    meta = run_one(req, a.label, a.backend, bench=a.bench)
     print(json.dumps({k: meta.get(k) for k in ("record_id", "exit_code", "samples")}, indent=2))
-    return 0 if payload and all(s["ok"] for s in meta["samples"]) else 1
+    return 0 if meta.get("samples") and all(s["ok"] for s in meta["samples"]) else 1
 
 
 if __name__ == "__main__":

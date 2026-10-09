@@ -1,6 +1,9 @@
 # offset-capability — seeded-mismatch capability probe (issue #52)
 
-**This is a capability probe, not the offset Monte Carlo campaign.** A handful
+**This directory holds the #52 capability probe and, since #85, the offset Monte
+Carlo campaign (`records/campaign-20261009-offset-mc300.md`; measured data only,
+no limit, no ratification).** The probe text below is the original #52 scope:
+**this is a capability probe, not the offset Monte Carlo campaign.** A handful
 of samples (n=4 per request) establish whether the pinned PDK's mismatch models
 and `klt sim`'s seeded `monte_carlo` path work end to end. They **do not
 satisfy T1 item 6**, give no offset distribution, no yield/pass claim and no
@@ -27,8 +30,8 @@ Full evidence index: [`records/capability-20261009.md`](records/capability-20261
 | Different seed changes results | **supported** |
 | Mismatch-off control returns the systematic baseline | **supported** |
 | Op-amp Vos extraction (DC crossing, failure-safe) | **supported** (tt/27C/1.8 V only) |
-| Distribution/yield statistics, N>=300, SS/FF corners | **unverified** (not attempted; out of scope) |
-| Fleet capacity for a 300-sample campaign | **unverified** (see "Observed friction") |
+| Distribution statistics, N=300 per corner, TT/SS/FF (+SF/FS) | **measured in #85**, see [`records/campaign-20261009-offset-mc300.md`](records/campaign-20261009-offset-mc300.md): sigma 8.4-8.7 mV, 0 failed of 300 at every corner; no yield/pass claim |
+| Fleet capacity for a 300-sample campaign | **supported with retry** (3 x 100 chunks per corner completed; one `batch_no_capacity` refusal, retried) |
 
 ## Reproduce
 
@@ -134,3 +137,15 @@ itself is likewise unratified. Prerequisites to resolve first: a batch runner
 at a klt matching the client, fleet capacity for 3+ sequential requests of 300
 samples, and a decision on whether Rz/Cc mismatch (also enabled by `tt_mm`)
 belongs in the offset budget.
+
+## Campaign results (#85)
+
+The campaign outlined above was run: `offset_probe.py campaign` (resume with
+`--only corner:chunk`, re-aggregate with `summarize`), N=300 per corner
+(3 x 100, base seed 20261085) for TT, SS, FF and additionally SF, FS. Result,
+seeds, failed counts, interrupted-request ledger and the resolution of the
+version-mismatch and Rz/Cc prerequisites are in
+[`records/campaign-20261009-offset-mc300.md`](records/campaign-20261009-offset-mc300.md)
+and its `*-campaign-offset-mc300-final-*.campaign.json`. These are measured
+values only: N>=300 and any offset limit remain unratified, and
+`spec/target-spec.md` is unchanged.
