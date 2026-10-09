@@ -1,0 +1,25 @@
+* opamp_core input-referred noise testbench (circuit body for `klt sim`; issue #54)
+*
+* Same unity-gain-buffer connection and supply-tracking Vcm as psrr_vdd.cir.
+* `.noise v(out) Vinp` refers the output noise to the series source Vinp (the
+* non-inverting input), dividing by the Vinp->out closed-loop gain (~1), so
+* inoise_spectrum is the amplifier's input-referred noise voltage density in
+* V/sqrt(Hz). Cinp = 1 F shorts the Vcm divider's own thermal noise at every
+* swept frequency (a 250 kohm divider would otherwise add ~64 nV/rtHz at
+* the input and swamp the amplifier).
+*
+* Models: the PDK's sky130 BSIM4 flicker-noise model (kf/af parameters in the
+* corner files) is what supplies the 1/f term; this bench reports whatever the
+* pinned PDK models produce and makes no claim about silicon flicker noise.
+.option scale=1u
+.include "../../../design/netlist/opamp_core.spice"
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Rdiv1 vdd vcm 500k
+Rdiv2 vcm 0 500k
+Cinp vcm 0 1
+Vinp inp vcm dc 0 ac 1
+Rshort inn out 1m
+Cload out 0 2p

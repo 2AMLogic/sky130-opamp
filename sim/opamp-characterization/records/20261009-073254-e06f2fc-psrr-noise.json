@@ -1,0 +1,125 @@
+{
+  "record_id": "20261009-073254-e06f2fc",
+  "timestamp": "2026-10-09T07:36:28.281576+00:00",
+  "git": {
+    "sha": "e06f2fc"
+  },
+  "label": "full 5x3 PVT grid, pre-layout schematic netlist",
+  "experiment": {
+    "slug": "opamp-characterization/psrr-noise",
+    "claim": "Pre-layout (schematic netlist) PSRR+/PSRR- and input-referred noise of design/netlist/opamp_core.spice over the 5-corner x 3-temperature grid (corner-paired VDD), via klt sim corner requests.",
+    "netlist_source": "schematic (pre-layout)"
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "benches": [
+      "psrr_vdd",
+      "psrr_vss"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "grid": {
+      "ppd": 20,
+      "f0_hz": 0.1,
+      "f1_hz": 1000000000.0,
+      "curve_step": 5
+    },
+    "psrr_window_hz": [
+      0.1,
+      1000.0
+    ],
+    "noise_band_hz": [
+      100.0,
+      1000000.0
+    ]
+  },
+  "backend_arg": null,
+  "env_KLT_SIM_BACKEND": "batch",
+  "benches": {
+    "psrr_vdd": {
+      "status": "pass",
+      "corner_count": 15,
+      "passed": 15,
+      "failed": 0,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "46",
+      "backend_remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-9ec838f70172",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0067f63ff3c505933",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 80,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g4cbdfa769875",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g4cbdfa769875; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "artifacts_copied": 30,
+      "csv": "sim/opamp-characterization/records/20261009-073254-e06f2fc-psrr-vdd.csv"
+    },
+    "psrr_vss": {
+      "status": "pass",
+      "corner_count": 15,
+      "passed": 15,
+      "failed": 0,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "46",
+      "backend_remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-942a6609c696",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0a85f4cbdcb80a617",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 82,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g4cbdfa769875",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g4cbdfa769875; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "artifacts_copied": 30,
+      "csv": "sim/opamp-characterization/records/20261009-073254-e06f2fc-psrr-vss.csv"
+    }
+  },
+  "tools": {
+    "klt": "klt 0.7.0+g4cbdfa769875",
+    "python": "3.12.3",
+    "platform": "Linux 6.17.0-1019-aws x86_64"
+  }
+}

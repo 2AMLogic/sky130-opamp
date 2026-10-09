@@ -1,0 +1,62 @@
+{
+  "record_id": "20261009-073753-e06f2fc",
+  "timestamp": "2026-10-09T07:38:14.060461+00:00",
+  "git": {
+    "sha": "e06f2fc"
+  },
+  "label": "SINGLE-CORNER LOCAL PROBE (tt/27C/1.80V) -- not PVT evidence; the 15-corner noise grid is unrecorded because the batch fleet runner (klt 0.5.0) rejects measurements[].expr",
+  "experiment": {
+    "slug": "opamp-characterization/psrr-noise",
+    "claim": "Pre-layout (schematic netlist) PSRR+/PSRR- and input-referred noise of design/netlist/opamp_core.spice over the 5-corner x 3-temperature grid (corner-paired VDD), via klt sim corner requests.",
+    "netlist_source": "schematic (pre-layout)"
+  },
+  "matrix": {
+    "corners": [
+      "tt"
+    ],
+    "temps_c": [
+      27.0
+    ],
+    "benches": [
+      "noise"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8
+    },
+    "grid": {
+      "ppd": 20,
+      "f0_hz": 0.1,
+      "f1_hz": 1000000000.0,
+      "curve_step": 5
+    },
+    "psrr_window_hz": [
+      0.1,
+      1000.0
+    ],
+    "noise_band_hz": [
+      100.0,
+      1000000.0
+    ]
+  },
+  "backend_arg": "local",
+  "env_KLT_SIM_BACKEND": "batch",
+  "benches": {
+    "noise": {
+      "status": "pass",
+      "corner_count": 1,
+      "passed": 1,
+      "failed": 0,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "42",
+      "backend_remote": null,
+      "artifacts_copied": 2,
+      "csv": "sim/opamp-characterization/records/20261009-073753-e06f2fc-noise.csv"
+    }
+  },
+  "tools": {
+    "klt": "klt 0.7.0+g4cbdfa769875",
+    "python": "3.12.3",
+    "platform": "Linux 6.17.0-1019-aws x86_64"
+  }
+}

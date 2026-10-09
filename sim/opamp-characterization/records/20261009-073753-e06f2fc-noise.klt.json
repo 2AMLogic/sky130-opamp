@@ -1,0 +1,1073 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": "sim/opamp-characterization/testbench/noise.cir",
+    "scope": "repo"
+  },
+  "status": "pass",
+  "corner_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 1,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "42",
+    "ngspice_binary": "/usr/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "54d1ced078e85ce24d3e7d091ecf3c451f05383a06d3a6d7d0402a5adfca9c5b",
+    "netlist_closure": [
+      {
+        "path": "sim/opamp-characterization/testbench/noise.cir",
+        "scope": "repo",
+        "sha256": "54d1ced078e85ce24d3e7d091ecf3c451f05383a06d3a6d7d0402a5adfca9c5b"
+      },
+      {
+        "path": "design/netlist/opamp_core.spice",
+        "scope": "repo",
+        "sha256": "6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace"
+      }
+    ],
+    "netlist_source": "schematic"
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 42,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k000\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k005\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k010\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k015\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k020\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k025\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k030\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k035\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k040\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k045\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k050\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k055\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k060\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k065\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k070\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k075\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k080\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k085\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k090\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k095\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k100\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k105\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k110\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k115\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k120\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k125\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k130\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k135\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k140\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k145\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k150\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k155\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k160\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k165\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k170\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k175\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k180\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k185\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k190\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k195\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"en_k200\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"vn_int_band\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k000\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k005\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k010\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k015\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k020\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k025\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k030\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k035\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k040\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k045\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k050\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k055\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k060\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k065\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k070\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k075\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k080\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k085\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k090\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k095\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k100\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k105\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k110\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k115\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k120\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k125\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k130\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k135\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k140\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k145\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k150\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k155\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k160\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k165\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k170\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k175\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k180\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k185\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k190\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k195\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"en_k200\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"vn_int_band\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:54d1ced078e85ce24d3e7d091ecf3c451f05383a06d3a6d7d0402a5adfca9c5b",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "en_k000",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.53037041e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k005",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.69783033e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k010",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.06375398e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k015",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.58035935e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k020",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.21146901e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k025",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 9.29671174e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k030",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 7.14179294e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k035",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 5.49217652e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k040",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.22802947e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k045",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.25824315e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k050",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.5134823e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k055",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.94093004e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k060",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.5003122e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k065",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.16088749e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k070",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 8.99167068e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k075",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 6.97185376e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k080",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 5.41187951e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k085",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.20634784e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k090",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.27442698e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k095",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.55408887e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k100",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.99771767e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k105",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.5687582e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k110",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.23914816e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k115",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 9.87335009e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k120",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 7.96719854e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k125",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 6.54407732e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k130",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 5.50190041e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k135",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.75751547e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k140",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.24160798e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k145",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.89715626e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k150",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.68184656e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k155",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.57536206e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k160",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.59041609e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k165",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 3.76063121e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k170",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.08346457e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k175",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.63276551e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k180",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 5.8575957e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k185",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 8.79598666e-08,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k190",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.65235678e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k195",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 4.15290858e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "en_k200",
+      "unit": "V/rtHz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.52483765e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "vn_int_band",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 7.01068821e-05,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 19.743,
+      "measurements": [
+        {
+          "name": "en_k000",
+          "value": 3.53037041e-05,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k005",
+          "value": 2.69783033e-05,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k010",
+          "value": 2.06375398e-05,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k015",
+          "value": 1.58035935e-05,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k020",
+          "value": 1.21146901e-05,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k025",
+          "value": 9.29671174e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k030",
+          "value": 7.14179294e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k035",
+          "value": 5.49217652e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k040",
+          "value": 4.22802947e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k045",
+          "value": 3.25824315e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k050",
+          "value": 2.5134823e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k055",
+          "value": 1.94093004e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k060",
+          "value": 1.5003122e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k065",
+          "value": 1.16088749e-06,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k070",
+          "value": 8.99167068e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k075",
+          "value": 6.97185376e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k080",
+          "value": 5.41187951e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k085",
+          "value": 4.20634784e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k090",
+          "value": 3.27442698e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k095",
+          "value": 2.55408887e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k100",
+          "value": 1.99771767e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k105",
+          "value": 1.5687582e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k110",
+          "value": 1.23914816e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k115",
+          "value": 9.87335009e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k120",
+          "value": 7.96719854e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k125",
+          "value": 6.54407732e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k130",
+          "value": 5.50190041e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k135",
+          "value": 4.75751547e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k140",
+          "value": 4.24160798e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k145",
+          "value": 3.89715626e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k150",
+          "value": 3.68184656e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k155",
+          "value": 3.57536206e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k160",
+          "value": 3.59041609e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k165",
+          "value": 3.76063121e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k170",
+          "value": 4.08346457e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k175",
+          "value": 4.63276551e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k180",
+          "value": 5.8575957e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k185",
+          "value": 8.79598666e-08,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k190",
+          "value": 1.65235678e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k195",
+          "value": 4.15290858e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "en_k200",
+          "value": 1.52483765e-07,
+          "unit": "V/rtHz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vn_int_band",
+          "value": 7.01068821e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/tmp/opamp-psrr-noise-oluaxlqi/out-noise/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/tmp/opamp-psrr-noise-oluaxlqi/out-noise/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

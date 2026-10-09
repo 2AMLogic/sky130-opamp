@@ -1,0 +1,29 @@
+* opamp_core PSRR- testbench (circuit body for `klt sim`; issue #54)
+*
+* Unity-gain buffer (real closed loop: inn tied to out through 1 mohm, as in
+* opamp_tran_sr.spice.tmpl). The AC stimulus is on the vss source (vss held at DC 0 V); the signal
+* input is AC-grounded. Closed-loop gain Acl is ~1 (open-loop gain >= 60 dB at
+* every corner), so the supply-to-output gain Avs = vdb(out) read directly is
+* the output-referred supply gain AND (to within 1/(1+1/A) < 0.01 dB) the
+* input-referred one: PSRR- = -vdb(out).
+*
+* The input common mode tracks the supply: a divider off vdd sets it
+* (Vcm = VDD/2) so `klt sim`'s per-corner `alter vdd=...` moves the bias point
+* with the rail. Cinp = 1 F shunts the divider's ripple and thermal noise to
+* ground at every swept frequency (corner ~3e-7 Hz), so the input is an AC
+* ground and the divider contributes no supply-to-input path.
+*
+* ibias is an ideal 5 uA current source (AC open, zero ripple): this bench
+* measures the amplifier core's supply rejection under an ideal reference, not
+* a bias generator's. The block has no bias generator in scope.
+.option scale=1u
+.include "../../../design/netlist/opamp_core.spice"
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0 ac 1
+Iref vdd ibias dc 5u
+Rdiv1 vdd inp 500k
+Rdiv2 inp 0 500k
+Cinp inp 0 1
+Rshort inn out 1m
+Cload out 0 2p

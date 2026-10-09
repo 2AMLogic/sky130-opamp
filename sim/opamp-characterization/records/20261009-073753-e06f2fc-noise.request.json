@@ -1,0 +1,245 @@
+{
+  "netlist": "../testbench/noise.cir",
+  "netlist_source": "schematic",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      27.0
+    ]
+  },
+  "exclude": [],
+  "analysis": {
+    "kind": "noise",
+    "args": "v(out) Vinp dec 20 0.1 1e+09"
+  },
+  "measurements": [
+    {
+      "name": "en_k000",
+      "expr": "noise1.inoise_spectrum[0]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k005",
+      "expr": "noise1.inoise_spectrum[5]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k010",
+      "expr": "noise1.inoise_spectrum[10]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k015",
+      "expr": "noise1.inoise_spectrum[15]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k020",
+      "expr": "noise1.inoise_spectrum[20]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k025",
+      "expr": "noise1.inoise_spectrum[25]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k030",
+      "expr": "noise1.inoise_spectrum[30]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k035",
+      "expr": "noise1.inoise_spectrum[35]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k040",
+      "expr": "noise1.inoise_spectrum[40]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k045",
+      "expr": "noise1.inoise_spectrum[45]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k050",
+      "expr": "noise1.inoise_spectrum[50]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k055",
+      "expr": "noise1.inoise_spectrum[55]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k060",
+      "expr": "noise1.inoise_spectrum[60]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k065",
+      "expr": "noise1.inoise_spectrum[65]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k070",
+      "expr": "noise1.inoise_spectrum[70]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k075",
+      "expr": "noise1.inoise_spectrum[75]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k080",
+      "expr": "noise1.inoise_spectrum[80]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k085",
+      "expr": "noise1.inoise_spectrum[85]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k090",
+      "expr": "noise1.inoise_spectrum[90]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k095",
+      "expr": "noise1.inoise_spectrum[95]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k100",
+      "expr": "noise1.inoise_spectrum[100]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k105",
+      "expr": "noise1.inoise_spectrum[105]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k110",
+      "expr": "noise1.inoise_spectrum[110]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k115",
+      "expr": "noise1.inoise_spectrum[115]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k120",
+      "expr": "noise1.inoise_spectrum[120]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k125",
+      "expr": "noise1.inoise_spectrum[125]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k130",
+      "expr": "noise1.inoise_spectrum[130]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k135",
+      "expr": "noise1.inoise_spectrum[135]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k140",
+      "expr": "noise1.inoise_spectrum[140]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k145",
+      "expr": "noise1.inoise_spectrum[145]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k150",
+      "expr": "noise1.inoise_spectrum[150]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k155",
+      "expr": "noise1.inoise_spectrum[155]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k160",
+      "expr": "noise1.inoise_spectrum[160]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k165",
+      "expr": "noise1.inoise_spectrum[165]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k170",
+      "expr": "noise1.inoise_spectrum[170]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k175",
+      "expr": "noise1.inoise_spectrum[175]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k180",
+      "expr": "noise1.inoise_spectrum[180]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k185",
+      "expr": "noise1.inoise_spectrum[185]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k190",
+      "expr": "noise1.inoise_spectrum[190]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k195",
+      "expr": "noise1.inoise_spectrum[195]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "en_k200",
+      "expr": "noise1.inoise_spectrum[200]",
+      "unit": "V/rtHz"
+    },
+    {
+      "name": "vn_int_band",
+      "expr": "sqrt(ln(10) / 20 * (mean(noise1.inoise_spectrum[60,140]^2 * mag(noise1.frequency[60,140])) * 81 - (0.5 * noise1.inoise_spectrum[60]^2 * mag(noise1.frequency[60]) + 0.5 * noise1.inoise_spectrum[140]^2 * mag(noise1.frequency[140]))))",
+      "unit": "V"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true,
+    "ngspice_init": [
+      "set numdgt=8"
+    ]
+  }
+}

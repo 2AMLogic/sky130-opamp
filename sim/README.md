@@ -13,6 +13,10 @@ ngspice testbenches and append-only results.
   over the same 5-corner grid at 3 temperatures, checked against
   `DR-002`'s hand sizing estimates. This block's first **circuit-level**
   `sim/` evidence (issue #17).
+  Issue #54 added PSRR+/PSRR- and input-referred-noise benches, run as
+  `klt sim` corner requests (`bin/psrr_noise_sweep.py`); PSRR is recorded over
+  the full grid, the noise PVT grid is pending a fleet runner that supports
+  `measurements[].expr`.
 - [`lib/spice_harness.py`](lib/spice_harness.py) — the PDK-resolution and
   ngspice-harness helpers both runners above share (pin resolution against a
   committed `pdk.json`, `.spice.tmpl` rendering, tool-version and git-SHA
