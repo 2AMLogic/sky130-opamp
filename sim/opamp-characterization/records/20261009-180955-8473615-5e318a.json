@@ -1,0 +1,277 @@
+{
+  "record_id": "20261009-180955-8473615-5e318a",
+  "timestamp": "2026-10-09T18:16:18.423786+00:00",
+  "git": {
+    "sha": "8473615"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "tran_step"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "n_runs": 15,
+    "n_failed": 0,
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "ngspice-46 : Circuit level simulation program",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+g86740f86d44f",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "tran-step",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 383.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-8688c62b0000",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0d9991d35f7943329",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 209,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g86740f86d44f",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g86740f86d44f; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261009-180955-8473615-5e318a/tran-step-request.json",
+      "response": "sim/opamp-characterization/records/20261009-180955-8473615-5e318a-logs/klt-tran-step-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "tran_step_pm_crosscheck": {
+    "ac_reference": "sim/opamp-characterization/records/20261001-074923-c317ff9-ac.csv",
+    "summary": {
+      "tolerance_pp": 5.0,
+      "points": 15,
+      "points_with_ac_reference": 15,
+      "points_disagreeing": [],
+      "max_abs_delta_pp": 0.6632235557556871
+    },
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "ac_pm_deg": 67.48082931882354,
+        "expected_overshoot_pct": 2.9518350185265967,
+        "measured_overshoot_pct": 2.825565113022799,
+        "delta_pp": -0.1262699055037979,
+        "agrees": true,
+        "settle_1pct_ns": 27.25599999999999
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.42734858107467,
+        "expected_overshoot_pct": 4.397288942584657,
+        "measured_overshoot_pct": 3.93348337084283,
+        "delta_pp": -0.463805571741827,
+        "agrees": true,
+        "settle_1pct_ns": 31.749000000000002
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.28143299081302,
+        "expected_overshoot_pct": 5.263949754553385,
+        "measured_overshoot_pct": 4.6687839155766575,
+        "delta_pp": -0.5951658389767278,
+        "agrees": true,
+        "settle_1pct_ns": 38.06500000000002
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.4021454533939,
+        "expected_overshoot_pct": 2.359790596362522,
+        "measured_overshoot_pct": 2.350646427768047,
+        "delta_pp": -0.009144168594474866,
+        "agrees": true,
+        "settle_1pct_ns": 25.64499999999999
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.96134524613659,
+        "expected_overshoot_pct": 4.006921319710422,
+        "measured_overshoot_pct": 3.6015306505261893,
+        "delta_pp": -0.4053906691842326,
+        "agrees": true,
+        "settle_1pct_ns": 30.350000000000005
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.09865945416628,
+        "expected_overshoot_pct": 5.405514701171567,
+        "measured_overshoot_pct": 4.752138462308075,
+        "delta_pp": -0.6533762388634923,
+        "agrees": true,
+        "settle_1pct_ns": 36.852999999999994
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "ac_pm_deg": 66.25240780606305,
+        "expected_overshoot_pct": 3.7981422082568375,
+        "measured_overshoot_pct": 3.692422918487095,
+        "delta_pp": -0.10571928976974254,
+        "agrees": true,
+        "settle_1pct_ns": 31.150999999999986
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "ac_pm_deg": 64.62635358348177,
+        "expected_overshoot_pct": 4.999198426338102,
+        "measured_overshoot_pct": 4.5714571207314245,
+        "delta_pp": -0.4277413056066779,
+        "agrees": true,
+        "settle_1pct_ns": 34.824
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.55759864806608,
+        "expected_overshoot_pct": 5.051716756054593,
+        "measured_overshoot_pct": 4.608041582327407,
+        "delta_pp": -0.44367517372718623,
+        "agrees": true,
+        "settle_1pct_ns": 40.546
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "ac_pm_deg": 65.39526294454734,
+        "expected_overshoot_pct": 4.421033301626355,
+        "measured_overshoot_pct": 3.9482896579315767,
+        "delta_pp": -0.4727436436947787,
+        "agrees": true,
+        "settle_1pct_ns": 27.266000000000002
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "ac_pm_deg": 63.936512398144274,
+        "expected_overshoot_pct": 5.531818989728412,
+        "measured_overshoot_pct": 4.868595433972724,
+        "delta_pp": -0.6632235557556871,
+        "agrees": true,
+        "settle_1pct_ns": 31.27199999999999
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.14449607777675,
+        "expected_overshoot_pct": 5.369931487375287,
+        "measured_overshoot_pct": 4.7811952988247715,
+        "delta_pp": -0.5887361885505156,
+        "agrees": true,
+        "settle_1pct_ns": 36.765
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.84676070241542,
+        "expected_overshoot_pct": 2.089382255144452,
+        "measured_overshoot_pct": 2.2004400880175816,
+        "delta_pp": 0.11105783287312976,
+        "agrees": true,
+        "settle_1pct_ns": 27.542999999999996
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "ac_pm_deg": 66.5377407880382,
+        "expected_overshoot_pct": 3.5963793468059397,
+        "measured_overshoot_pct": 3.303408437320309,
+        "delta_pp": -0.29297090948563076,
+        "agrees": true,
+        "settle_1pct_ns": 32.499
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.63380203481847,
+        "expected_overshoot_pct": 4.993516721458932,
+        "measured_overshoot_pct": 4.436441843599026,
+        "delta_pp": -0.5570748778599066,
+        "agrees": true,
+        "settle_1pct_ns": 39.52099999999997
+      }
+    ]
+  },
+  "links": {
+    "tran_step_csv": "sim/opamp-characterization/records/20261009-180955-8473615-5e318a-tran-step.csv"
+  },
+  "errors": [],
+  "elapsed_s": 383.1
+}
