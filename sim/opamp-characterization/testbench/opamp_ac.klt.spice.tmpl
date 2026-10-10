@@ -1,0 +1,30 @@
+* opamp_core open-loop AC testbench, `klt sim` circuit BODY (issue #77)
+*
+* Fleet-executable twin of opamp_ac.spice.tmpl: same DC-servo open-loop
+* technique (Rfb out->inn, Cfb inn->gnd) and the same measurement definitions
+* (DC gain at 1 Hz, unity-gain frequency, phase at unity gain, Iq/Pq at the
+* operating point). klt supplies the .lib/.temp/alter-vdd cards and the
+* .control block; the analysis and the `.meas` cards live in the request
+* (bin/pvt_sweep.py build_klt_request). The same body serves two requests:
+* `ac` (the sweep and gain/GBW/phase measurements) and `ac-iq` (a zero-offset
+* `dc` point of Vinp = the AC bias point, measuring Iq -- the fleet runner takes
+* `.meas` cards only, and `.meas` has no operating-point type).
+* The DUT is wrapped in a subckt so a candidate netlist selected with
+* --netlist is included unmodified (ports: vdd vss inn inp out ibias).
+* The common-mode level follows each corner's own VDD (`alter vdd`): VDD/2.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "{OPAMP_NETLIST}"
+.ends opamp_dut
+
+Vdd vdd 0 dc {VDD_NOM}
+Vss vss 0 dc 0
+Iref vdd ibias dc {IBIAS_A}
+Bcm cm 0 V = 0.5*v(vdd)
+Vinp inp cm dc 0 ac 1
+Xdut vdd vss inn inp out ibias opamp_dut
+Rfb out inn {RFB}
+Cfb inn 0 {CFB}
+Cload out 0 {CL_F}

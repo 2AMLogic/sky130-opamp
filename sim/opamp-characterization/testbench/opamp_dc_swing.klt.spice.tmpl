@@ -1,0 +1,25 @@
+* opamp_core unity-gain-buffer DC transfer testbench, `klt sim` circuit BODY (issue #77)
+*
+* Fleet-executable twin of opamp_dc_swing.spice.tmpl. Same follower
+* connection (Rshort 1 mOhm out->inn) and the same input grid: the swept
+* source Vsw runs 0 -> 1 in 1/360 steps and Bin scales it by each corner's own
+* VDD (`alter vdd`), so v(inp) = VDD * k/360 exactly as the original's
+* `dc Vinp 0 VDD VDD/360`. The sweep itself is returned as a waveform artifact
+* (options.waveforms) and bin/pvt_sweep.py applies the unchanged slope-window
+* rule (largest contiguous run around mid-supply with 0.8 <= dVout/dVin <= 1.2)
+* to it -- a contiguous-run search cannot be expressed as a .meas card.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "{OPAMP_NETLIST}"
+.ends opamp_dut
+
+Vdd vdd 0 dc {VDD_NOM}
+Vss vss 0 dc 0
+Iref vdd ibias dc {IBIAS_A}
+Xdut vdd vss inn inp out ibias opamp_dut
+Rshort inn out 1m
+Vsw sw 0 dc 0
+Bin inp 0 V = v(vdd)*v(sw)
+Cload out 0 {CL_F}

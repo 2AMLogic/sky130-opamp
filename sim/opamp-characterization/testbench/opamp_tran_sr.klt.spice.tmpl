@@ -1,0 +1,30 @@
+* opamp_core unity-gain-buffer slew-rate testbench, `klt sim` circuit BODY (issue #77)
+*
+* Fleet-executable twin of opamp_tran_sr.spice.tmpl. Same real unity-gain
+* connection (Rshort 1 mOhm out->inn), same 20 %-80 % slew definition on a
+* step between 0.3*VDD and 0.7*VDD (the original's V_LOW/V_HIGH = VDD/2 -/+
+* 0.2*VDD). The stimulus levels and the 20/80 % trigger levels scale with each
+* corner's own VDD (`alter vdd`) through behavioural sources, so one request
+* carries the whole supply axis:
+*   Vp      unit pulse (0 -> 1), the only explicit transient source
+*   Bin     inp = VDD * (0.3 + 0.4 * Vp)
+*   Bl20/80 trigger levels  V_LOW + 0.2*span, V_LOW + 0.8*span
+* The crossing times are measured with `.meas ... when v(out)=v(level)`; the
+* slew rate itself (0.6*span / (t80 - t20)) is derived in bin/pvt_sweep.py.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "{OPAMP_NETLIST}"
+.ends opamp_dut
+
+Vdd vdd 0 dc {VDD_NOM}
+Vss vss 0 dc 0
+Iref vdd ibias dc {IBIAS_A}
+Xdut vdd vss inn inp out ibias opamp_dut
+Rshort inn out 1m
+Vp p 0 pulse(0 1 {T_DELAY} {T_EDGE} {T_EDGE} {T_PW} {T_PER})
+Bin inp 0 V = v(vdd)*(0.3+0.4*v(p))
+Bl20 l20 0 V = v(vdd)*(0.3+0.4*0.2)
+Bl80 l80 0 V = v(vdd)*(0.3+0.4*0.8)
+Cload out 0 {CL_F}

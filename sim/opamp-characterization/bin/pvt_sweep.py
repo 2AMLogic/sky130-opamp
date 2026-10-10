@@ -50,6 +50,12 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
                          (`batch_runner_version_mismatch`); pin a matching one
                          without touching the host tool, e.g.
                          --klt-cmd 'uvx --from klayout-tools==0.5.0 klt'
+    --fleet             run ac,tran_sr,dc_swing as `klt sim` requests on --backend
+                        (default batch) too -- no local ngspice subprocess at all
+                        (issue #77); default off, the local path is unchanged
+    --netlist PATH      characterize this flat DUT netlist (ports vdd vss inn inp
+                        out ibias) instead of design/netlist/opamp_core.spice; the
+                        record snapshots it, the canonical design is not touched
     --keep-work         do not delete the scratch ngspice decks/outputs
 
 `ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
@@ -257,7 +263,12 @@ def parse_meas(stdout: str) -> dict[str, float]:
     return out
 
 
+LOCAL_SIM_FORBIDDEN = [False]  # set by main() for --fleet on the batch backend: no local simulator, ever
+
+
 def run_ngspice(ngspice: str, deck_text: str, workdir: Path, log_path: Path, timeout_s: int = 120):
+    if LOCAL_SIM_FORBIDDEN[0]:
+        raise HarnessError("local ngspice is forbidden for a batch/fleet campaign (no silent local fallback)")
     deck_path = workdir / "tb.spice"
     deck_path.write_text(deck_text)
     start = time.monotonic()
@@ -360,6 +371,33 @@ def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
     return row, deck
 
 
+def swing_row(corner: str, temp: float, vdd: float, vin: list[float], vout: list[float]) -> dict:
+    """Output-swing metrics from a unity-gain-buffer DC transfer sweep (shared by
+    the local-ngspice and the klt-waveform paths so the rule cannot diverge).
+
+    Finds the largest contiguous run around mid-supply where the local slope
+    d(vout)/d(vin) stays within [0.8, 1.2] of unity -- see
+    ../testbench/opamp_dc_swing.spice.tmpl's header for the rationale."""
+    n = len(vin)
+    slopes = [(vout[i + 1] - vout[i]) / (vin[i + 1] - vin[i]) if vin[i + 1] != vin[i] else 0.0
+              for i in range(n - 1)]
+    center = min(range(n), key=lambda i: abs(vin[i] - 0.5 * vdd))
+    lo = center
+    while lo > 0 and 0.8 <= slopes[min(lo - 1, len(slopes) - 1)] <= 1.2:
+        lo -= 1
+    hi = center
+    while hi < n - 1 and 0.8 <= slopes[min(hi, len(slopes) - 1)] <= 1.2:
+        hi += 1
+    vout_min, vout_max = vout[lo], vout[hi]
+    return {
+        "corner": corner, "temp_c": temp, "vdd_v": vdd,
+        "vout_min_v": vout_min, "vout_max_v": vout_max,
+        "vpp_v": vout_max - vout_min,
+        "vpp_pct_of_vdd": 100.0 * (vout_max - vout_min) / vdd,
+        "sweep_vout_min_v": min(vout), "sweep_vout_max_v": max(vout),
+    }
+
+
 def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
     vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     vstep = vdd / 360.0
@@ -379,29 +417,8 @@ def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
         vout.append(float(parts[3]))
     if len(vin) < 3:
         raise HarnessError(f"dc_swing[{corner}/{temp}C]: too few sweep points -- see {log_path}")
-
-    # Find the largest contiguous run around mid-supply where the local
-    # slope d(vout)/d(vin) stays within [0.8, 1.2] of unity -- see
-    # ../testbench/opamp_dc_swing.spice.tmpl's header for the rationale.
-    n = len(vin)
-    slopes = [(vout[i + 1] - vout[i]) / (vin[i + 1] - vin[i]) if vin[i + 1] != vin[i] else 0.0
-              for i in range(n - 1)]
-    center = min(range(n), key=lambda i: abs(vin[i] - 0.5 * vdd))
-    lo = center
-    while lo > 0 and 0.8 <= slopes[min(lo - 1, len(slopes) - 1)] <= 1.2:
-        lo -= 1
-    hi = center
-    while hi < n - 1 and 0.8 <= slopes[min(hi, len(slopes) - 1)] <= 1.2:
-        hi += 1
-    vout_min, vout_max = vout[lo], vout[hi]
-    row = {
-        "corner": corner, "temp_c": temp, "vdd_v": vdd,
-        "vout_min_v": vout_min, "vout_max_v": vout_max,
-        "vpp_v": vout_max - vout_min,
-        "vpp_pct_of_vdd": 100.0 * (vout_max - vout_min) / vdd,
-        "sweep_vout_min_v": min(vout), "sweep_vout_max_v": max(vout),
-        "elapsed_s": round(elapsed, 2),
-    }
+    row = swing_row(corner, temp, vdd, vin, vout)
+    row["elapsed_s"] = round(elapsed, 2)
     return row, deck
 
 
@@ -485,6 +502,68 @@ def cmrr_measurements() -> list[dict]:
     return ms
 
 
+# --------------------------------------------------------------------------
+# Fleet (klt sim) twins of the three local analyses (issue #77): ac, tran_sr,
+# dc_swing. Same stimulus, same measurement definitions, same row/CSV schema as
+# run_ac/run_tran_sr/run_dc_swing; only the executor differs. Opt-in with
+# --fleet; the bodies are ../testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl.
+# --------------------------------------------------------------------------
+
+FLEET_ANALYSES = ("ac", "tran_sr", "dc_swing")
+AC_ARGS = "dec 20 1 1g"  # PTS_PER_DEC=20, FSTART=1, FSTOP=1g of run_ac
+AC_RFB, AC_CFB = "1e12", "1"
+SR_TIMING = {"T_DELAY": "200n", "T_EDGE": "1n", "T_PW": "1u", "T_PER": "2u"}  # run_tran_sr
+SR_TRAN_ARGS = "2n 2.2u"  # T_STEP T_STOP of run_tran_sr
+SR_FRAC_LOW, SR_FRAC_HIGH = 0.3, 0.7  # V_LOW/V_HIGH = VDD/2 -/+ 0.2*VDD
+SWING_POINTS = 360  # run_dc_swing: VSTEP = VDD/360
+SWING_END = 1.000001  # sweep end (x VDD): a hair past 1.0 so float step accumulation keeps the k=360 point
+# Solver settings written into every fleet record (DR-006: ngspice defaults,
+# no reltol/abstol/vntol override anywhere; the bodies' only .option is scale).
+SOLVER_SETTINGS = {"policy": "DR-006", "option_scale": "1u", "reltol": "default", "abstol": "default",
+                   "vntol": "default", "overrides": "none"}
+
+
+def body_template(analysis: str) -> Path:
+    """Circuit-body template of a klt analysis. The fleet twins of ac/tran_sr/dc_swing
+    live next to the full local decks as `.klt.spice.tmpl`."""
+    analysis = "ac" if analysis == "ac_iq" else analysis
+    suffix = ".klt.spice.tmpl" if analysis in FLEET_ANALYSES else ".spice.tmpl"
+    return TESTBENCH_DIR / f"opamp_{analysis}{suffix}"
+
+
+def ac_measurements() -> list[dict]:
+    """`.meas ac` cards of the fleet AC request: the unchanged DC-servo open-loop sweep
+    (gain at FSTART=1 Hz, unity-gain frequency, phase there)."""
+    return [
+        {"name": "gain_dc_db", "unit": "dB", "spice": ".meas ac gain_dc_db find vdb(out) at=1"},
+        {"name": "gbw_hz", "unit": "Hz", "spice": ".meas ac gbw_hz when vdb(out)=0 cross=1"},
+        {"name": "phase_at_gbw_rad", "unit": "rad",
+         "spice": ".meas ac phase_at_gbw_rad find vp(out) when vdb(out)=0 cross=1"},
+    ]
+
+
+def ac_iq_measurements() -> list[dict]:
+    """Quiescent supply current of the AC bench at its operating point. The runner image's
+    klt (0.5.0) takes only `.meas` cards (no `expr`, no `analysis_steps`), and a `.meas`
+    has no `op` type, so Iq comes from a companion zero-offset `dc` request of the SAME
+    body (the sweep point at Vinp = 0 is exactly the AC bias point). Pq = Iq * VDD."""
+    return [{"name": "i_vdd_a", "unit": "A", "spice": ".meas dc i_vdd_a find i(vdd) at=0"}]
+
+
+def tran_sr_measurements() -> list[dict]:
+    """Crossing times of the 20 %/80 % levels (behavioural nodes l20/l80 in the body,
+    which follow each corner's VDD); SR = 0.6*span/(t80-t20) is derived in tran_sr_row."""
+    cards = [("t20_rise", "l20", "rise"), ("t80_rise", "l80", "rise"),
+             ("t80_fall", "l80", "fall"), ("t20_fall", "l20", "fall")]
+    return [{"name": n, "unit": "s", "spice": f".meas tran {n} when v(out)=v({lvl}) {edge}=1"}
+            for n, lvl, edge in cards]
+
+
+def swing_measurements() -> list[dict]:
+    """One sanity `.meas` (mid-sweep output); the sweep itself is the waveform artifact."""
+    return [{"name": "vout_mid_v", "unit": "V", "spice": ".meas dc vout_mid_v find v(out) at=0.5"}]
+
+
 KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 instances at once
 CAPACITY_RETRIES = 30
 CAPACITY_WAIT_S = 60
@@ -555,13 +634,31 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         measurements = tran_step_measurements()
         vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = "tran-step"
+    elif analysis in ("ac", "ac_iq"):
+        body_subs.update({"RFB": AC_RFB, "CFB": AC_CFB})
+        if analysis == "ac":
+            analysis_card, measurements, tag = {"kind": "ac", "args": AC_ARGS}, ac_measurements(), "ac"
+        else:
+            analysis_card, measurements, tag = {"kind": "dc", "args": "Vinp 0 1m 1m"}, ac_iq_measurements(), "ac-iq"
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
+    elif analysis == "tran_sr":
+        body_subs.update(SR_TIMING)
+        analysis_card = {"kind": "tran", "args": SR_TRAN_ARGS}
+        measurements = tran_sr_measurements()
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
+        tag = "tran-sr"
+    elif analysis == "dc_swing":
+        analysis_card = {"kind": "dc", "args": f"Vsw 0 {SWING_END:.8g} {1.0 / SWING_POINTS:.12g}"}
+        measurements = swing_measurements()
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
+        tag = "dc-swing"
     else:
         body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
         analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
         measurements = cmrr_measurements()
         vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = f"cmrr-{cm_point}"
-    body = render(TESTBENCH_DIR / f"opamp_{analysis}.spice.tmpl", body_subs)
+    body = render(body_template(analysis), body_subs)
     req_dir.mkdir(parents=True, exist_ok=True)
     body_path = req_dir / f"{tag}-body.spice"
     body_path.write_text(body)
@@ -574,7 +671,8 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         **({"exclude": exclude} if exclude else {}),
         "analysis": analysis_card,
         "measurements": measurements,
-        "options": {"timeout_s": KLT_TIMEOUT_S[0], "keep_artifacts": True},
+        "options": {"timeout_s": KLT_TIMEOUT_S[0], "keep_artifacts": True,
+                    **({"waveforms": True} if analysis == "dc_swing" else {})},
     }
     if backend == "batch":
         # The fleet image's klt (0.5.0 when this was written) is older than any
@@ -604,6 +702,7 @@ def _corner_values(report: dict, by_supply: bool = False) -> dict[tuple, dict]:
         out[key] = {
             "values": vals, "status": c.get("status"), "runtime_s": c.get("runtime_s"),
             "diagnostics": c.get("diagnostics", []), "vdd": (c.get("supply_v") or {}).get("vdd"),
+            "artifacts": c.get("artifacts") or {},
         }
     return out
 
@@ -655,6 +754,87 @@ def cmrr_row(corner: str, temp: float, info: dict, cm_point: str, vdd: float | N
         row[f"acm_{label}_db"] = v[f"acm_{label}_db"]
         row[f"cmrr_{label}_db"] = v[f"adm_{label}_db"] - v[f"acm_{label}_db"]
     row["gbw_hz"] = v["gbw_hz"]
+    row["elapsed_s"] = round(info["runtime_s"] or 0.0, 2)
+    return row
+
+
+def _need(v: dict, label: str, names: Iterable[str], status) -> dict[str, float]:
+    """Every named measurement as a finite float, or HarnessError -- a partial or
+    missing remote output is a FAILED unit, never a passing zero."""
+    missing = [k for k in names if v.get(k) is None]
+    if missing:
+        raise HarnessError(f"{label}: missing measurements {missing} ({status})")
+    bad = [k for k in names if not math.isfinite(v[k])]
+    if bad:
+        raise HarnessError(f"{label}: non-finite measurements {bad} ({status})")
+    return {k: float(v[k]) for k in names}
+
+
+def ac_row(corner: str, temp: float, info: dict, vdd: float | None = None,
+           iq_info: dict | None = None) -> dict:
+    """AC row from a fleet response; same columns/definitions as run_ac. `info` is the
+    `ac` request's unit, `iq_info` the companion `ac_iq` request's unit at the same point
+    (a missing companion is a failure, not a zero)."""
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
+    label = f"ac[{corner}/{temp:g}C]"
+    m = _need(info["values"], label, ["gain_dc_db", "gbw_hz", "phase_at_gbw_rad"], info["status"])
+    if iq_info is None:
+        raise HarnessError(f"{label}: missing Iq companion unit (ac-iq request)")
+    iq_a = -_need(iq_info["values"], f"{label} iq", ["i_vdd_a"], iq_info["status"])["i_vdd_a"]
+    phase_at_gbw_deg = math.degrees(m["phase_at_gbw_rad"])
+    return {
+        "corner": corner, "temp_c": temp, "vdd_v": vdd, "vcm_v": 0.5 * vdd,
+        "iq_a": iq_a, "pq_w": iq_a * vdd,
+        "gain_dc_db": m["gain_dc_db"], "gbw_hz": m["gbw_hz"],
+        "phase_at_gbw_deg": phase_at_gbw_deg, "phase_margin_deg": 180.0 + phase_at_gbw_deg,
+        "elapsed_s": round((info["runtime_s"] or 0.0) + (iq_info["runtime_s"] or 0.0), 2),
+    }
+
+
+def tran_sr_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
+    """Slew row from a fleet response; same columns/definitions as run_tran_sr
+    (SR = 0.6 * span / 20-80 % transit time)."""
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
+    label = f"tran_sr[{corner}/{temp:g}C]"
+    m = _need(info["values"], label, ["t20_rise", "t80_rise", "t80_fall", "t20_fall"], info["status"])
+    t_rise, t_fall = m["t80_rise"] - m["t20_rise"], m["t20_fall"] - m["t80_fall"]
+    if t_rise <= 0 or t_fall <= 0:
+        raise HarnessError(f"{label}: inconsistent crossings (rise {t_rise:g}s, fall {t_fall:g}s)")
+    v_lo, v_hi = SR_FRAC_LOW * vdd, SR_FRAC_HIGH * vdd
+    span = v_hi - v_lo
+    return {
+        "corner": corner, "temp_c": temp, "vdd_v": vdd, "v_low_v": v_lo, "v_high_v": v_hi,
+        "sr_rise_v_per_us": 0.6 * span / t_rise / 1e6, "sr_fall_v_per_us": 0.6 * span / t_fall / 1e6,
+        "elapsed_s": round(info["runtime_s"] or 0.0, 2),
+    }
+
+
+def load_sweep(info: dict, label: str) -> tuple[list[float], list[float]]:
+    """(v(inp), v(out)) columns of a unit's waveform artifact. A missing or
+    malformed artifact raises HarnessError (never an empty-sweep success)."""
+    wf = (info.get("artifacts") or {}).get("waveform")
+    if not wf or not Path(wf).is_file():
+        raise HarnessError(f"{label}: missing waveform artifact ({wf!r})")
+    try:
+        doc = json.loads(Path(wf).read_text())
+        names = [str(v["name"]).lower() for v in doc["variables"]]
+        i_in, i_out = names.index("v(inp)"), names.index("v(out)")
+        vin = [float(pt[i_in]) for pt in doc["points"]]
+        vout = [float(pt[i_out]) for pt in doc["points"]]
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as exc:
+        raise HarnessError(f"{label}: unreadable waveform artifact {wf}: {exc}") from exc
+    if len(vin) < SWING_POINTS // 2 or not all(math.isfinite(x) for x in vin + vout):
+        raise HarnessError(f"{label}: incomplete sweep ({len(vin)} of ~{SWING_POINTS + 1} points)")
+    return vin, vout
+
+
+def dc_swing_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
+    label = f"dc_swing[{corner}/{temp:g}C]"
+    vin, vout = load_sweep(info, label)
+    if abs(max(vin) - vdd) > 1e-3 * vdd:  # the sweep must really cover 0..VDD of this corner
+        raise HarnessError(f"{label}: sweep ends at {max(vin):g} V, expected {vdd:g} V")
+    row = swing_row(corner, temp, vdd, vin, vout)
     row["elapsed_s"] = round(info["runtime_s"] or 0.0, 2)
     return row
 
@@ -911,8 +1091,10 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                 plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
             else:
                 plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
-        elif a == "tran_step":
-            plan.append(("tran_step", None, None, corners))
+        elif a == "ac":
+            plan.extend([("ac_iq", None, None, corners), ("ac", None, None, corners)])  # companion first
+        elif a in ("tran_step", *FLEET_ANALYSES):
+            plan.append((a, None, None, corners))
         else:
             plan.extend(("cmrr", cp, None, corners) for cp in CMRR_CM_POINTS)
     # Build every request first, then submit them concurrently (the jobs are
@@ -949,6 +1131,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     with ThreadPoolExecutor(max_workers=max(1, min(len(prepared), KLT_MAX_PARALLEL_SUBMITS))) as pool:
         outcomes = list(pool.map(submit, prepared))
 
+    iq_units: dict[tuple, dict] = {}  # ac-iq companion units by (process, temperature, vdd)
     for (analysis, cm_point, group_corners, req_path, tag, vdd_group), (report, wall, exc) in zip(prepared, outcomes):
         if exc is not None:
             errors.append(f"{tag}: {exc}")
@@ -967,6 +1150,11 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
         if "error" in report:
             errors.append(f"{tag}: klt error: {report['error'].get('message')}")
             continue
+        if (analysis in FLEET_ANALYSES or analysis == "ac_iq") and backend == "batch" and not env.get("remote"):
+            # A batch response with no remote provenance did not run on the fleet:
+            # refuse it rather than accept numbers of unknown origin (no silent local fallback).
+            errors.append(f"{tag}: batch response carries no environment.remote provenance -- refusing")
+            continue
         cart = supply_mode == "cartesian"
         by_point = _corner_values(report, by_supply=cart)
         group_vdds = ([vdd_group] if vdd_group is not None else supply_values(corners, supply_mode, supplies))
@@ -983,8 +1171,17 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                     if bad:
                         head = "; ".join(f"{d.get('code')}: {d.get('message')}"[:160] for d in bad[:2])
                         raise HarnessError(f"{head} (+{len(bad) - 2} more)" if len(bad) > 2 else head)
+                    if info.get("status") not in ("pass", "fail"):
+                        raise HarnessError(f"unit status {info.get('status')!r} (timeout / error / incomplete)")
                     if analysis == "tran_step":
                         row = tran_step_row(corner, temp, info, vdd)
+                    elif analysis == "ac_iq":
+                        iq_units[(corner, float(temp), round(vdd, 6))] = info  # joined into the ac row below
+                        continue
+                    elif analysis == "ac":
+                        row = ac_row(corner, temp, info, vdd, iq_units.get((corner, float(temp), round(vdd, 6))))
+                    elif analysis in FLEET_ANALYSES:
+                        row = {"tran_sr": tran_sr_row, "dc_swing": dc_swing_row}[analysis](corner, temp, info, vdd)
                     elif analysis == "icmr":
                         row = icmr_row(corner, temp, info, vdd)
                     else:
@@ -1022,6 +1219,14 @@ def parse_args(argv):
                         "temperature x supply tuple (issue #110)")
     p.add_argument("--supplies", default=",".join(f"{v:g}" for v in CARTESIAN_SUPPLIES_V),
                    help="supply voltages for --supply-mode cartesian (default: 1.62,1.8,1.98; subsets allowed)")
+    p.add_argument("--fleet", action="store_true",
+                   help="run ac,tran_sr,dc_swing as `klt sim` requests on --backend (default batch) instead of "
+                        "local ngspice subprocesses; with the batch backend NO local simulator is ever invoked "
+                        "(issue #77). Default off: the local-ngspice path is unchanged")
+    p.add_argument("--netlist", default=None,
+                   help="DUT netlist to characterize (default: design/netlist/opamp_core.spice). A flat netlist "
+                        "with ports vdd vss inn inp out ibias; snapshotted into the record, the canonical design "
+                        "is never edited")
     p.add_argument("--keep-work", action="store_true")
     return p.parse_args(argv)
 
@@ -1029,6 +1234,7 @@ def parse_args(argv):
 def main(argv=None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
     RUNNER_VERSION_CHECK[0] = args.batch_runner_check
+    LOCAL_SIM_FORBIDDEN[0] = bool(args.fleet and args.backend == "batch")
     KLT_TIMEOUT_S[0] = args.timeout_s
     if args.klt_cmd:
         KLT_CMD[:] = shlex.split(args.klt_cmd)
@@ -1050,14 +1256,16 @@ def main(argv=None) -> int:
         if a not in ANALYSES and a not in KLT_ANALYSES:
             print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
             return 1
-    klt_analyses = [a for a in analyses if a in KLT_ANALYSES]
-    ngspice_analyses = [a for a in analyses if a in ANALYSES]
+    # --fleet routes the three formerly-local analyses through `klt sim` (issue #77)
+    klt_analyses = [a for a in analyses if a in KLT_ANALYSES or (args.fleet and a in ANALYSES)]
+    ngspice_analyses = [a for a in analyses if a in ANALYSES and a not in klt_analyses]
     if klt_analyses and not klt_available():
-        print("ERROR: klt not found on PATH (needed for --analyses icmr,cmrr; see --check-env)", file=sys.stderr)
+        print("ERROR: klt not found on PATH (needed for the klt analyses and --fleet; see --check-env)", file=sys.stderr)
         return 1
 
-    if not DESIGN_NETLIST.is_file():
-        print(f"ERROR: missing netlist under test: {DESIGN_NETLIST}", file=sys.stderr)
+    dut_src = Path(args.netlist).resolve() if args.netlist else DESIGN_NETLIST
+    if not dut_src.is_file():
+        print(f"ERROR: missing netlist under test: {dut_src}", file=sys.stderr)
         return 1
 
     pdk = resolve_pdk()
@@ -1089,7 +1297,7 @@ def main(argv=None) -> int:
     # Capture the DUT bytes ONCE, before any analysis is scheduled; every local
     # and klt analysis below uses this copy, so editing the working tree
     # mid-campaign cannot change later points (issue #104).
-    dut_meta = dut_identity.capture_dut(DESIGN_NETLIST, snapshot_run_dir, REPO_ROOT)
+    dut_meta = dut_identity.capture_dut(dut_src, snapshot_run_dir, REPO_ROOT)
     ACTIVE_DUT[0] = REPO_ROOT / dut_meta["snapshot_path"]
     print(f"DUT snapshot: {dut_meta['snapshot_path']} ({dut_meta['sha256']})", file=sys.stderr)
 
@@ -1195,6 +1403,9 @@ def main(argv=None) -> int:
             "expected_tuples": [{"corner": c, "temp_c": t, "vdd_v": v} for c, t, v in expected],
             "n_expected_tuples_per_analysis": len(expected),
             "n_runs": n_runs, "n_failed": len(errors),
+            "execution": {"klt_analyses": klt_analyses, "local_ngspice_analyses": ngspice_analyses,
+                          "fleet_flag": bool(args.fleet), "backend": args.backend if klt_analyses else None,
+                          "solver_settings": SOLVER_SETTINGS},
             **({"klt_backend": args.backend, "icmr_cmrr_floors_db": ICMR_CMRR_FLOORS_DB, "icmr_dv_v": ICMR_DV_V,
                 "icmr_vstep_v": ICMR_VSTEP_V, "target_icmr_v": list(TARGET_ICMR_V),
                 "consumer_sense_v": CONSUMER_SENSE_V,
@@ -1209,7 +1420,9 @@ def main(argv=None) -> int:
             "rc_corner": pdk.own_pin["rc_corner"]["choice"],
         },
         "tools": {
-            "ngspice": first_line(["ngspice", "-v"]),
+            # not probed when every analysis ran through klt: a fleet campaign must not
+            # invoke any local simulator, not even for a version string
+            "ngspice": first_line(["ngspice", "-v"]) if ngspice_analyses else "not invoked (klt/fleet execution)",
             "python": platform.python_version(),
             "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),

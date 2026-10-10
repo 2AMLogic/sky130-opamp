@@ -1,0 +1,1056 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 15,
+  "passed": 15,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 12
+    },
+    "by_severity": {
+      "warning": 12
+    },
+    "corners_with_diagnostics": 12
+  },
+  "metrics": {
+    "sim__corner__count": 15,
+    "sim__corner__passed_count": 15,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-1b4543f131da",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-0896ed4dd666732db",
+      "instance_type": "c7i.4xlarge",
+      "availability_zone": "us-east-1a",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 77,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g5e5b55992a7f",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g5e5b55992a7f; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 15,
+    "measurements_declared": 3,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/-40C\",\"gain_dc_db\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[0,\"tt/1.800V/-40C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"gain_dc_db\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"gain_dc_db\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"gain_dc_db\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"gain_dc_db\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"gain_dc_db\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"gain_dc_db\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"gain_dc_db\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"gain_dc_db\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"gain_dc_db\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"gain_dc_db\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"gain_dc_db\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"gain_dc_db\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"gbw_hz\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"gain_dc_db\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"gbw_hz\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"phase_at_gbw_rad\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"gain_dc_db\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"gbw_hz\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"phase_at_gbw_rad\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"gain_dc_db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"gbw_hz\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"phase_at_gbw_rad\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g5e5b55992a7f",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "gain_dc_db",
+      "unit": "dB",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 66.3477,
+        "margin": null
+      }
+    },
+    {
+      "name": "gbw_hz",
+      "unit": "Hz",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 25958700.0,
+        "margin": null
+      }
+    },
+    {
+      "name": "phase_at_gbw_rad",
+      "unit": "rad",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": -1.96383,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 35.98,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 66.3477,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 25958700.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.96383,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.334,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 65.8153,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 22514000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.99967,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 36.379,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 64.6321,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 18776800.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.01967,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/tt_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 36.127,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 64.9295,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 27069800.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.94775,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 36.677,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 64.4484,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 23410500.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.99035,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 36.677,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 63.2836,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 19369500.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.02286,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 36.477,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 66.9763,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 24010300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.98527,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 35.925,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 66.4479,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 21216100.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.01365,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 34.185,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 65.2587,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 17923300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.01485,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/ss_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 33.834,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 68.2454,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 26473600.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.00023,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 34.235,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 67.7734,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 23097300.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.02569,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 34.586,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 66.752,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 19463700.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.02206,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/sf_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 34.536,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 63.4889,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 25107000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.93999,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 34.837,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 62.9451,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 21759900.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -1.98029,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 34.737,
+      "measurements": [
+        {
+          "name": "gain_dc_db",
+          "value": 61.6392,
+          "unit": "dB",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "gbw_hz",
+          "value": 17989000.0,
+          "unit": "Hz",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "phase_at_gbw_rad",
+          "value": -2.01352,
+          "unit": "rad",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-77/sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-ac/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}
