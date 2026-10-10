@@ -1,0 +1,33 @@
+1. Bias diode MB1: J0 = 0.639468 uA/um, Vgs(MB1) = V(ibias) = 0.6355 V (gm/ID rows 18.973791 / 17.662394)
+2. Follower MF1/MF2 (L = 1.2): J = J0 for I_F = 1.0 uA -> W = 1.5638 um -> drawn 1.565 um (grid-legal: True); actual I_F at J0 = 1.0008 uA, ratio to MB1 0.2002
+3. Boost sink MS (L = 1.2), tt/27C: Vgs = 0.800 V -> J = 5.2266 uA/um -> W_total for 100 uA = 19.13 um -> m = 4 x 4.785 um (drawn total 19.140 um; grid-legal: True)
+
+4. MS current vs gate voltage at the drawn size (Vds = 0.9 V sweep, Vsb = 0), tt/27C:
+   Vg = 0.20 V  I =     0.0002 uA
+   Vg = 0.30 V  I =     0.0038 uA
+   Vg = 0.40 V  I =     0.0557 uA
+   Vg = 0.50 V  I =     0.6764 uA
+   Vg = 0.60 V  I =     6.2270 uA
+   Vg = 0.70 V  I =    33.8860 uA
+   Vg = 0.80 V  I =   100.0373 uA
+   Vg = 0.90 V  I =   202.6983 uA
+   Vg = 1.00 V  I =   336.3613 uA
+
+5. MS current at Vg = V(ibias)-referenced corner spread (I at the Vgs that gives 100 uA at tt/27C, per corner/T):
+   ff   -40.0  I =    111.299 uA at Vg = 0.80 V
+   ff    27.0  I =    129.114 uA at Vg = 0.80 V
+   ff   125.0  I =    144.001 uA at Vg = 0.80 V
+   fs   -40.0  I =     53.193 uA at Vg = 0.80 V
+   fs    27.0  I =     69.019 uA at Vg = 0.80 V
+   fs   125.0  I =     83.736 uA at Vg = 0.80 V
+   sf   -40.0  I =    122.587 uA at Vg = 0.80 V
+   sf    27.0  I =    139.471 uA at Vg = 0.80 V
+   sf   125.0  I =    153.156 uA at Vg = 0.80 V
+   ss   -40.0  I =     60.044 uA at Vg = 0.80 V
+   ss    27.0  I =     75.916 uA at Vg = 0.80 V
+   ss   125.0  I =     90.294 uA at Vg = 0.80 V
+   tt   -40.0  I =     82.754 uA at Vg = 0.80 V
+   tt    27.0  I =    100.037 uA at Vg = 0.80 V
+   tt   125.0  I =    115.103 uA at Vg = 0.80 V
+
+6. Drawn gate area added (W*L, not layout area): MF1+MF2 = 3.756 um^2, MS = 22.97 um^2, total = 26.72 um^2
