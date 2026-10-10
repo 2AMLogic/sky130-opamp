@@ -16,8 +16,12 @@ Normalisation (what is deliberately NOT treated as drift):
   xschem >= 3.4.5 evaluates those while netlisting; older releases (Ubuntu's
   3.4.4) emit the ``expr(...)`` text verbatim. This script evaluates the
   formulas itself (restricted grammar, @W/@nf substituted from the same
-  instance) and compares the numbers within a 0.5 % tolerance, so either
-  xschem generation compares equal to the committed netlist.
+  instance) and compares the numbers with parameter-specific tolerances (below), so either
+  xschem generation compares equal to the committed netlist. Newer xschem
+  rounds the evaluated pd/ps to 0.01 um (9.848 -> 9.85), so pd/ps get an
+  absolute bound of 0.005 um (half the grid) plus 1e-9 for floating point;
+  ad/as/nrd/nrs are not rounded and get a tight relative bound of 1e-6
+  (symmetric in operand order, with a 1e-12 absolute floor near zero).
 
 Everything schematic-driven (instance names, nodes, models, L, W, nf, mult,
 m, sa/sb/sd, ...) is compared exactly (numerically exact, not textually).
@@ -49,7 +53,10 @@ from pathlib import Path
 
 DESIGN = Path(__file__).resolve().parent.parent
 DERIVED = {"ad", "as", "pd", "ps", "nrd", "nrs"}
-DERIVED_RTOL = 5e-3
+PERIM = {"pd", "ps"}
+PERIM_ATOL = 0.005 + 1e-9  # half the 0.01 um rounding grid + FP allowance
+DERIVED_RTOL = 1e-6  # ad/as/nrd/nrs: relative
+DERIVED_AFLOOR = 1e-12  # ad/as/nrd/nrs: absolute floor near zero
 EXPR_RE = re.compile(r"""^expr\('(?P<body>.*)'\)$""")
 SAFE_BODY_RE = re.compile(r"^[0-9@A-Za-z_ .+\-*/()]*$")
 
@@ -122,6 +129,14 @@ def value(v: str, params: dict[str, str]) -> float | str:
     return n if n is not None else v
 
 
+def derived_equal(key: str, a: float, b: float) -> bool:
+    """Parameter-specific comparison of a derived key (symmetric in a, b)."""
+    d = abs(a - b)
+    if key in PERIM:
+        return d <= PERIM_ATOL
+    return d <= max(DERIVED_RTOL * max(abs(a), abs(b)), DERIVED_AFLOOR)
+
+
 def compare(fresh_text: str, committed_text: str) -> list[str]:
     problems: list[str] = []
     fresh = parse(logical_lines(fresh_text))
@@ -143,7 +158,7 @@ def compare(fresh_text: str, committed_text: str) -> list[str]:
                 fv, cv = value(fkv[k], fkv), value(ckv[k], ckv)
                 if isinstance(fv, float) and isinstance(cv, float):
                     if k in DERIVED:
-                        ok = abs(fv - cv) <= DERIVED_RTOL * max(abs(fv), abs(cv), 1e-12)
+                        ok = derived_equal(k, fv, cv)
                     else:
                         ok = fv == cv
                 else:
