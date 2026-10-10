@@ -27,6 +27,8 @@ def default_checks(py=None):
         ("dut_identity validate", [py, "sim/lib/dut_identity.py", "validate"]),
         ("dut_identity current", [py, "sim/lib/dut_identity.py", "current"]),
         ("passive grid legality", [py, "design/bin/grid_check.py"]),
+        ("generic evidence artifact hashes (signoff.yml)",
+         [py, "design/bin/generic_evidence_check.py"]),
         ("unit tests", [py, "-m", "unittest", "discover", "-s", "tests", "-v"]),
         ("layout flow unit tests",
          [py, "-m", "unittest", "discover", "-s", "layout/bin", "-p", "test_*.py", "-v"]),

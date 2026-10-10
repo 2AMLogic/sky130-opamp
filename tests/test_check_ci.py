@@ -22,8 +22,9 @@ def fake_run(fail_on=None, log=None):
     return run
 
 
-# Intentional local-only addition: tool-free CompareUnit controls (not in tests.yml).
-LOCAL_ONLY = ("test_netlist_check",)
+# Intentional local-only additions vs tests.yml: tool-free CompareUnit controls, and
+# the generic-evidence hash gate (its workflow home is signoff.yml; see test_generic_evidence_check).
+LOCAL_ONLY = ("test_netlist_check", "generic_evidence_check")
 
 
 def workflow_commands(text):

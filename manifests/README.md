@@ -181,6 +181,26 @@ the file, and fails on any mismatch, missing file, or envelope that omits
 either `provenance.input.path` or `provenance.input.content_hash`. Verified
 to fail on all three, 2026-10-01 (historical).
 
+The check is the stdlib-only
+[`design/bin/generic_evidence_check.py`](../design/bin/generic_evidence_check.py)
+(unit-tested in `tests/test_generic_evidence_check.py`). `signoff.yml`
+and the local simulator-free runner both call it, so there is a single
+implementation. Run it locally, with no `klt` needed:
+
+```console
+python3 design/bin/generic_evidence_check.py     # exit 0 = fresh, 1 = drift/malformed
+python3 design/bin/check_ci.py                   # default gate; includes the above
+```
+
+It aggregates every item-specific failure (malformed or unreadable
+envelope, missing `provenance.input.path`/`content_hash`, unresolvable
+file, hash disagreement). It skips `{"command": [...]}` entries and
+non-generic envelopes. The `klt signoff` render-and-byte-compare step
+stays separate. On a hash failure, regenerate in the same PR: re-hash the
+artifact (`sha256sum`, prefixed `sha256:`), write it into the envelope's
+`provenance.input.content_hash` and the manifest's pinned `content_hash`,
+then rerun the `klt signoff` regeneration command above.
+
 ## Current verdict
 
 **Not-T1 — T1 items 1 and 8 met** as of this record. Every item's `reason`
