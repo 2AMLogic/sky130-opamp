@@ -78,6 +78,7 @@ python design/bin/integrator_check.py validate
 python design/bin/spec_figures_check.py validate
 python sim/lib/dut_identity.py validate
 python sim/lib/dut_identity.py current
+python design/bin/grid_check.py              # compensation-passive grid legality (#131)
 python -m unittest discover -s tests -v
 python -m unittest discover -s layout/bin -p 'test_*.py' -v
 python design/bin/test_netlist_check.py CompareUnit -v

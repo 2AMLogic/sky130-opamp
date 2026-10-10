@@ -1,4 +1,5 @@
 import os
+import re
 import shlex
 import stat
 import subprocess
@@ -21,14 +22,104 @@ def fake_run(fail_on=None, log=None):
     return run
 
 
+# Intentional local-only addition: tool-free CompareUnit controls (not in tests.yml).
+LOCAL_ONLY = ("test_netlist_check",)
+
+
+def workflow_commands(text):
+    """Return (unconditional, conditional) run commands from a workflow (no YAML dep).
+
+    Each is a list of shlex-split token lists. A step is conditional if it has
+    an `if:` line. Handles `run: cmd` and `run: |` block scalars.
+    """
+    steps, cur = [], None
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = re.match(r"^(\s*)- (?:name|uses):", line)
+        if m:
+            cur = {"indent": len(m.group(1)), "if": False, "cmds": []}
+            steps.append(cur)
+        elif cur is not None:
+            st = line.strip()
+            if st.startswith("if:"):
+                cur["if"] = True
+            elif st.startswith("run:"):
+                rest = st[4:].strip()
+                if rest in ("|", "|-", ">", ">-"):
+                    ind = len(line) - len(line.lstrip())
+                    i += 1
+                    while i < len(lines) and (not lines[i].strip()
+                                              or len(lines[i]) - len(lines[i].lstrip()) > ind):
+                        if lines[i].strip():
+                            cur["cmds"].append(lines[i].strip())
+                        i += 1
+                    continue
+                cur["cmds"].append(rest)
+        i += 1
+    uncond = [shlex.split(c) for s in steps if not s["if"] for c in s["cmds"]]
+    cond = [shlex.split(c) for s in steps if s["if"] for c in s["cmds"]]
+    return uncond, cond
+
+
+def inventory_problems(workflow_text, checks):
+    """Compare workflow and local inventories; return a list of problem strings.
+
+    - every local check (except LOCAL_ONLY) must appear as a workflow command;
+    - every unconditional workflow command must be a local check, same order;
+    - conditional workflow commands must be exactly the PR-only append-only
+      check, which the local runner appends separately (base ref differs).
+    """
+    uncond, cond = workflow_commands(workflow_text)
+    local = [["python"] + c[1:] for _, c in checks
+             if not any(t in " ".join(c) for t in LOCAL_ONLY)]
+    problems = []
+    for cmd in local:
+        if cmd not in uncond:
+            problems.append("local check not in workflow: " + shlex.join(cmd))
+    for cmd in uncond:
+        if cmd not in local:
+            problems.append("workflow command missing locally: " + shlex.join(cmd))
+    if not problems and local != uncond:
+        problems.append("local check order differs from workflow")
+    ao = check_ci.append_only_check("python")[1]
+    if [c[:3] for c in cond] != [ao[:2] + ["--base"]]:
+        problems.append("unexpected conditional workflow commands: %r" % (cond,))
+    return problems
+
+
 class CheckCiTests(unittest.TestCase):
     def test_inventory_matches_workflow(self):
         text = (_paths.REPO / ".github/workflows/tests.yml").read_text()
-        for name, cmd in check_ci.default_checks("python"):
-            if "test_netlist_check" in " ".join(cmd):
-                continue
-            # shell-quoted, as written in the workflow (e.g. -p 'test_*.py')
-            self.assertIn(shlex.join(["python"] + cmd[1:]), text, name)
+        self.assertEqual(inventory_problems(text, check_ci.default_checks("python")), [])
+
+    def test_grid_check_in_local_gate(self):
+        joined = [" ".join(c) for _, c in check_ci.default_checks()]
+        self.assertTrue(any(j.endswith("design/bin/grid_check.py") for j in joined))
+
+    def test_workflow_omission_is_detected(self):
+        """Negative control: an unconditional workflow command absent locally fails."""
+        text = (_paths.REPO / ".github/workflows/tests.yml").read_text()
+        text += ("\n      - name: New check\n"
+                 "        run: python design/bin/new_check.py\n")
+        problems = inventory_problems(text, check_ci.default_checks("python"))
+        self.assertTrue(any("new_check.py" in p and "missing locally" in p
+                            for p in problems), problems)
+
+    def test_local_omission_of_existing_check_is_detected(self):
+        text = (_paths.REPO / ".github/workflows/tests.yml").read_text()
+        checks = [c for c in check_ci.default_checks("python") if "grid_check" not in " ".join(c[1])]
+        problems = inventory_problems(text, checks)
+        self.assertTrue(any("grid_check.py" in p for p in problems), problems)
+
+    def test_grid_failure_stops_later_checks(self):
+        log = []
+        rc = check_ci.main(resolves=lambda *a: True, run=fake_run("grid_check", log))
+        self.assertNotEqual(rc, 0)
+        joined = [" ".join(c) for c in log]
+        self.assertTrue(any("grid_check" in j for j in joined))
+        self.assertFalse(any("unittest" in j or "append_only" in j for j in joined))
 
     def test_netlist_selects_compareunit_not_endtoend(self):
         joined = [" ".join(c) for _, c in check_ci.default_checks()]

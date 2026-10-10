@@ -26,6 +26,7 @@ def default_checks(py=None):
         ("spec_figures_check validate", [py, "design/bin/spec_figures_check.py", "validate"]),
         ("dut_identity validate", [py, "sim/lib/dut_identity.py", "validate"]),
         ("dut_identity current", [py, "sim/lib/dut_identity.py", "current"]),
+        ("passive grid legality", [py, "design/bin/grid_check.py"]),
         ("unit tests", [py, "-m", "unittest", "discover", "-s", "tests", "-v"]),
         ("layout flow unit tests",
          [py, "-m", "unittest", "discover", "-s", "layout/bin", "-p", "test_*.py", "-v"]),
