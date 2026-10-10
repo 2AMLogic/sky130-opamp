@@ -22,10 +22,12 @@ effect makes the real clamp level somewhat LOWER than printed here (the
 45-unit fleet record is the measurement; this script is only the design input).
 
 Usage:
-    python3 sim/opamp-characterization/variants/tail_clamp_sizing.py
+    python3 sim/opamp-characterization/variants/tail_clamp_sizing.py                      # tail-clamp.spice
+    python3 sim/opamp-characterization/variants/tail_clamp_sizing.py --vclamp 0.05 --m 4  # tail-clamp-vc050.spice
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import math
 import os
@@ -84,6 +86,13 @@ def snap(w):
 
 
 def main():
+    global V_CLAMP_DESIGN, MCL_M
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--vclamp", type=float, default=V_CLAMP_DESIGN,
+                    help="design clamp level of V(tail) at tt/27C (V); default %(default)s")
+    ap.add_argument("--m", type=int, default=MCL_M, help="MCL unit count; default %(default)s")
+    args = ap.parse_args()
+    V_CLAMP_DESIGN, MCL_M = args.vclamp, args.m
     rows = load()
     tt = rows[("tt", 27.0)]
     j0 = I_UNIT_A / W_MIRROR_UM * 1e6
