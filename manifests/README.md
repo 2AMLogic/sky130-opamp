@@ -31,8 +31,9 @@ identified there.
       `design/bin/netlist_check.py` re-runs headless xschem and fails when the
       regenerated netlist differs from the committed one (or the pair record is
       stale), with negative controls in `design/bin/test_netlist_check.py`.
-      Generic evidence is accepted for item 1 only from klt 0.7.0 (0.5.0
-      renders `wrong_kind`), which is why the pin moved to 0.7.0. Like item 8,
+      Under the pinned klt 0.7.0 this generic citation grades item 1 `met`.
+      (Historical: klt 0.5.0 rendered a generic item-1 citation
+      `wrong_kind`, which is why the pin moved to 0.7.0.) Like item 8,
       `klt signoff` never re-hashes the cited input
       ([klayout-tools#2196](https://github.com/2AMLogic/klayout-tools/issues/2196)),
       so `signoff.yml`'s re-hash step plus the design-sources workflow are the
@@ -50,11 +51,13 @@ identified there.
       [`20261009-103006-566b9a5.md`](../sim/opamp-characterization/records/20261009-103006-566b9a5.md)
       (issue #53; it carries the six earlier rows forward from record
       `20261001-074923-c317ff9`).
-      Item 8 is the **only** T1 item the generic kind may satisfy
-      (`_ITEMS_ACCEPTING_GENERIC_EVIDENCE == {8}`; a generic citation on
-      any other item renders `wrong_kind`), and the only T1 item whose
-      checklist text names no `klt` verb — so it is the one item
-      reachable with no layout and no `klt sim` port.
+      Generic evidence is currently cited on exactly two items, 1 and 8,
+      and nowhere else. Item 8's checklist text names no `klt` verb, so it
+      is reachable with no layout and no `klt sim` port. (Historical, klt
+      0.5.0: item 8 was the only item accepting generic evidence; that no
+      longer describes the pinned 0.7.0, which grades the item-1 generic
+      citation `met`. Re-check the pinned klt's behavior for an item before
+      citing generic evidence on it.)
       **Read that envelope's `summary`, not just the `met` row**: `klt
       signoff` grades item 8 on the envelope's `status` alone and cannot
       check coverage, so the coverage disclosure (8 of
@@ -66,23 +69,44 @@ identified there.
       is quoted in `sky130-opamp.signoff.json`'s citation block under
       klt 0.7.0 (`artifact_binding.summary`); the envelope file remains
       the source.
-    - **Items 3, 4, 7 and 11 (DRC / LVS / post-layout / ERC supply)**:
-      no layout exists, so no `klt drc`/`lvs`/`pex`/`erc` envelope exists
-      to cite.
+    - **Items 2, 3, 4, 7 and 11 (layout / DRC / LVS / post-layout / ERC
+      supply)**: a **partial** layout is committed —
+      [`layout/opamp_stage1/`](../layout/opamp_stage1/README.md), the NMOS
+      input pair `XM1`/`XM2` only (DRC clean on klt's curated sky130 deck and
+      Magic `drc(full)`; LVS match against a reference generated from the
+      netlist's own device cards, in `klt lvs` and netgen). The PMOS mirror
+      `XM3`/`XM4` is not drawn (tracked in #50), and there is no full-core
+      layout, so no qualified full-core `klt drc`/`lvs`/`pex`/`erc`
+      envelope exists. The manifest cites **no** layout evidence: that
+      sub-block's README states item 2 stays `unmet` and that no manifest
+      cites it, and this guide does not promote it to a full-core claim.
     - **Item 5 (corner verification vs a ratified spec)**: `spec/target-spec.md`
       is now **RATIFIED (partial)** (DR-003,
       [#26](https://github.com/2AMLogic/sky130-opamp/issues/26)), so that
-      gate has cleared — but item 5 is kind-restricted to a `klt sim`
-      envelope (`_ITEM_ALLOWED_KINDS[5]["analog"] == {"sim"}`), and the
+      gate has cleared — but item 5 has been kind-restricted to a `klt sim`
+      envelope (a klt 0.5.0 internal, `_ITEM_ALLOWED_KINDS[5]["analog"] ==
+      {"sim"}`; not re-checked against 0.7.0), and the
       corner sweeps under `sim/opamp-characterization/` are this repo's
-      own ngspice harness output. Measured, 2026-10-01 under the pinned
-      klt: citing `20261001-074923-c317ff9.json` on item 5 renders
+      own ngspice harness output. Historical (measured 2026-10-01 under
+      klt 0.5.0, the pin at that time; not re-measured under 0.7.0): citing
+      `20261001-074923-c317ff9.json` on item 5 rendered
       `unmet` / **`unrecognized_envelope`** (that record carries no
       `schema_version`, `status`, or `provenance` — it is not a `klt`
       envelope of any kind). Closing item 5 needs the PVT bench to emit
       or be re-run through a real `klt sim` envelope; not tracked yet.
-    - **Item 6 (Monte Carlo)**: no `klt yield` run exists; the
-      statistical spec rows (offset, matching) are `[TBD]`.
+    - **Item 6 (Monte Carlo)**: uncited. The offset row now has measured
+      mismatch Monte Carlo data (issue #85, N = 300 per corner, sigma about
+      8.4-8.7 mV at 27 C / 1.8 V, open-loop; record
+      [`campaign-20261009-offset-mc300.md`](../sim/offset-capability/records/campaign-20261009-offset-mc300.md))
+      and a numeric target (sigma <= 0.275 mV) **proposed** by
+      [DR-009](../spec/decision-records/DR-009-offset-target.md). The row is
+      **OPEN**: DR-009 is not ratified, and the measurement does not meet
+      the proposed target. Those are `klt sim` and campaign records, not
+      the `klt yield` report the item's checklist text names as its
+      machine-checkable evidence, so the remaining item-6 gap is an
+      evidence-kind one: no `klt yield` report (and no item-6 citation)
+      exists. Matching and any other statistical rows are not covered by
+      that campaign.
     - **Items 2, 9 and 10** have *no* kind restriction at all, so any
       passing envelope would mechanically green them. The grader contract
       is explicit that this is the dishonest-citation failure mode the
@@ -94,8 +118,8 @@ identified there.
   `docs/design-evidence-tiers.md` (2026-09-21; upstream is
   [MIT-licensed](https://github.com/2AMLogic/klayout-tools/blob/main/LICENSE)
   — this repo's Apache-2.0 `LICENSE` does not relicense the vendored
-  copy). The installed release,
-  klt 0.5.0, bundles a copy that predates checklist item 11 ("Power
+  copy). Historical (klt 0.5.0): that
+  release bundled a copy that predated checklist item 11 ("Power
   delivery (structural)",
   [klayout-tools#2025](https://github.com/2AMLogic/klayout-tools/issues/2025),
   2026-09-17) — passing `--tiers-doc` at this vendored copy is how the
@@ -134,29 +158,28 @@ generic envelope's cited artifact"** — because `klt signoff`'s staleness
 gate is *nominal* for a generic citation. The gate compares the
 manifest's pinned `content_hash` against the envelope's own
 **self-declared** `provenance.input.content_hash`; nothing in any
-released `klt` ever re-hashes the artifact that string names. Measured
-2026-10-01 under the pinned 0.5.0: corrupting the manifest's pin flips
+released `klt` ever re-hashes the artifact that string names. Historical
+observation, measured 2026-10-01 under klt 0.5.0 (the pin at that time):
+corrupting the manifest's pin flips
 item 8 to `unmet` / `stale_evidence`, but **appending a line to the
 cited `.md` record leaves item 8 `met`**. The committed pin therefore
 proves the manifest and the envelope agree with each other, and nothing
 about whether either still describes the record on disk.
 
-Upstream knows
+Upstream tracked this
 ([klayout-tools#2196](https://github.com/2AMLogic/klayout-tools/issues/2196),
-[#2403](https://github.com/2AMLogic/klayout-tools/issues/2403), the
-latter's fix on `main` but in no release as of 2026-10-01) and has
-settled the contract the other way on purpose: once released, a generic
-envelope that declares `provenance.input.path` gets an `input_verified`
-field, but that field is **disclosure, never grading** — item 8 still
-renders `met` when the input drifted. So no `klt` version will ever fail
-the build on this, and the gate has to be ours. The CI step resolves the
-envelope's `provenance.input.path` (relative to the envelope's own
-directory, matching the upstream resolution order), re-hashes the file,
-and fails on any mismatch, missing file, or envelope that omits either
-`provenance.input.path` or `provenance.input.content_hash`. Verified to
-fail on all three, 2026-10-01. Setting `provenance.input.path` also
-means this repo's envelope starts reporting `input_verified: true` for
-free whenever the pin moves to a release carrying #2403.
+[#2403](https://github.com/2AMLogic/klayout-tools/issues/2403)) and settled
+the contract on purpose: a generic envelope that declares
+`provenance.input.path` gets an `input_verified` field, but that field is
+**disclosure, never grading**. The committed record shows
+`input_verified: true` on both generic citations under the pinned 0.7.0.
+Whether a given klt release grades a drifted input as `met` is not
+re-measured here; the gate does not rely on it, and has to be ours. The CI
+step resolves the envelope's `provenance.input.path` (relative to the
+envelope's own directory, matching the upstream resolution order), re-hashes
+the file, and fails on any mismatch, missing file, or envelope that omits
+either `provenance.input.path` or `provenance.input.content_hash`. Verified
+to fail on all three, 2026-10-01 (historical).
 
 ## Current verdict
 
@@ -176,19 +199,27 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 - **The other 9 T1 items — `unmet` / `no_evidence`**, each for the
   reason recorded per item above.
 
-Known item-level gates on the path forward:
+Known item-level gates on the path forward (partial layout and measured
+offset exist, but neither earns an additional item; nothing here claims
+full-core signoff or ratification):
 
 - Item 5 (corner verification vs a ratified spec): the DRAFT-spec gate
   has cleared ([#26](https://github.com/2AMLogic/sky130-opamp/issues/26),
-  DR-003), but the item is kind-restricted to a `klt sim` envelope and
-  this repo's ngspice harness does not emit one — see the per-item
-  rationale above.
+  DR-003), but the item was found kind-restricted to a `klt sim` envelope
+  (historical, klt 0.5.0) and this repo's ngspice harness does not emit
+  one — see the per-item rationale above. Several §2 rows (offset, CMRR)
+  stay OPEN or proposed in `spec/target-spec.md`.
+- Item 6 (Monte Carlo): measured offset data exists against a proposed
+  (DR-009), OPEN target, and does not meet it; the remaining gate is a
+  `klt yield` report and citation — see the per-item rationale above.
 - Item 11 (power delivery, structural): the
   [companion item-11 issue](https://github.com/2AMLogic/sky130-opamp/issues/27)
   — ERC supply evidence plus an LVS report whose reference carries the
-  supplies; gated on this block having a layout at all.
-- Items 3/4/7 (DRC/LVS/post-layout) and 2 (layout): gated on layout
-  work that has not started.
+  supplies; gated on a qualified full-core layout.
+- Items 3/4/7 (DRC/LVS/post-layout) and 2 (layout): only the input-pair
+  sub-block is laid out (`layout/opamp_stage1/`); the PMOS mirror
+  (#50) and the assembled full-core layout (#46, #120, #121) remain
+  pending, so these stay uncited.
 
 As evidence lands, the manifest's `evidence` map grows one item at a
 time — every citation must pin the `content_hash` of the artifact it
