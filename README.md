@@ -73,7 +73,7 @@ python design/bin/check_ci.py     # also: npm test / npm run check:ci
 It runs, in order:
 
 ```
-python design/bin/sizing_check.py validate
+python design/bin/sizing_check.py validate   # historical DR-002 interpolation reproducibility only, not current-design sizing
 python design/bin/integrator_check.py validate
 python design/bin/spec_figures_check.py validate
 python sim/lib/dut_identity.py validate
@@ -83,6 +83,11 @@ python -m unittest discover -s layout/bin -p 'test_*.py' -v
 python design/bin/test_netlist_check.py CompareUnit -v
 python sim/lib/append_only_check.py --base origin/main   # only if origin/main resolves
 ```
+
+Of these, `sizing_check.py` is a historical DR-002 replay: it checks that
+interpolation reproduces the historical sweep summary and says nothing about the
+current schematic sizing. The current design is covered by the DUT identity
+checks (`dut_identity.py`) and the netlist checks.
 
 If `origin/main` does not resolve the append-only check is skipped with an
 explicit message. The runner mirrors `.github/workflows/tests.yml` (the source
