@@ -9,12 +9,12 @@
   "source_doc": "manifests/design-evidence-tiers.md",
   "source_doc_content_hash": "sha256:c7a1e7e10627fae396007e0ff951734f37d95028b8f49f2e21e802e9f552f318",
   "build": {
-    "version": "0.7.0+g8eec069c7576",
+    "version": "0.7.0",
     "package_version": "0.7.0",
-    "git_commit": "8eec069c7576438d52bafea665828be56686ac07",
-    "git_tag": null,
+    "git_commit": "0e2362bda7309829398a35d54efaa989d5806065",
+    "git_tag": "v0.7.0",
     "dirty": false,
-    "is_release": false,
+    "is_release": true,
     "grading_ruleset_id": "sha256:eb8d2ba54d1700c78f1139ac111aee598fd7bc48688ab9654fca22995b6ac25e"
   },
   "items": [

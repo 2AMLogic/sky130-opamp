@@ -87,6 +87,15 @@ class DerivedTolerance(unittest.TestCase):
             for f in (1 + 1e-4, 1 - 1e-4, 1.002, 0.998, 1.0005):
                 self.assertFalse(self.agree(k, v, v * f), (k, f))
 
+    def test_relative_bound_edges(self):
+        # Just inside / just outside the 1e-6 relative bound, both signs.
+        for k in ("ad", "as", "nrd", "nrs"):
+            v = 1.7487 if k in ("ad", "as") else 0.048
+            for f in (1 + 5e-7, 1 - 5e-7, 1 + 9e-7, 1 - 9e-7):
+                self.assertTrue(self.agree(k, v, v * f), (k, f))
+            for f in (1 + 1.1e-6, 1 - 1.1e-6, 1 + 2e-6, 1 - 2e-6):
+                self.assertFalse(self.agree(k, v, v * f), (k, f))
+
     def test_perimeter_allowance_not_applied_to_others(self):
         for k in ("ad", "as", "nrd", "nrs"):
             self.assertFalse(self.agree(k, 0.048, 0.052))
