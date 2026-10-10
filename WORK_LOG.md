@@ -4,6 +4,13 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-09
 
+- **PR #118**: sim: attribute the offset Monte Carlo sigma to device groups (#107)
+- **PR #115**: sim: bind offset Monte Carlo chunks and resume to one DUT snapshot
+- **PR #114**: sim: opt-in Cartesian supply mode for PVT runner (#110)
+- **PR #111**: Wire package.json test/check:ci to real simulator-free checks
+- **PR #109**: spec: propose offset target via DR-009; reconcile offset row with N=300 MC campaign
+- **PR #106**: Preserve exact DUT netlist per PVT campaign and check current-design identity
+- **Issue #107** (closed): sim: attribute the 8.6 mV offset Monte Carlo sigma to device groups
 - **PR #115**: sim: bind offset Monte Carlo chunks and resume to one DUT snapshot
 - **PR #114**: sim: opt-in Cartesian supply mode for PVT runner (#110)
 - **PR #111**: Wire package.json test/check:ci to real simulator-free checks
