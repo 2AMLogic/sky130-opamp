@@ -1,0 +1,53 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * klt sim -- generated corner deck, do not edit
+
+Doing analysis at TEMP = 125.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                       1.98
+vss                                          0
+ibias                                 0.550233
+xdut.d1                                1.27222
+xdut.d2                                1.24132
+inn                                   0.593276
+xdut.tail                            0.0501544
+inp                                      0.594
+out                                   0.593276
+xdut.na                               0.551134
+xdut.nx                              0.0669963
+xdut.cz                                1.24132
+xdut.xrz.ra                            1.24132
+xdut.xcc.a                            0.593276
+xdut.xcc.b1                           0.593276
+p                                            0
+l20                                     0.7524
+l80                                     1.2276
+bl80#branch                                  0
+bl20#branch                                  0
+bin#branch                                   0
+vp#branch                                    0
+vss#branch                         6.97577e-05
+vdd#branch                        -6.97577e-05
+
+
+No. of Data Rows : 1124
+
+  Measurements for Transient Analysis
+
+t20_rise            =   2.09385e-07
+t80_rise            =   2.32291e-07
+t80_fall            =   1.21645e-06
+t20_fall            =   1.23865e-06
+
+ngspice-46 done

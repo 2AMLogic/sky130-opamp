@@ -19,6 +19,8 @@ the exact bytes it measured.
 | `tail-clamp.spice` | Candidate A: clamp sized for a 0.10 V tail clamp level (MCL = 8 × 15.495 µm / 1.2 µm) |
 | `tail-clamp-vc050.spice` | Candidate B: the same circuit, sized for a 0.05 V clamp level (MCL = 4 × 10.370 µm / 1.2 µm) |
 | `tail_clamp_sizing.py` | Simulator-free gm/ID sizing replay from the committed sweep (all sizing numbers below) |
+| `signal-dependent-sink.spice` | Output-stage candidate (issue #79): replica-subtraction class-AB boost sink, six added devices (section at the end) |
+| `sink_sizing.py` | Simulator-free gm/ID sizing replay for that candidate (`sink_sizing.out.txt` is its committed output) |
 | `compare.py` | Simulator-free comparison: worst value and binding corner per metric, the named points, and per-point deltas (all comparison numbers below) |
 
 ## Starting point (base-drift guard, #120)
@@ -285,4 +287,153 @@ python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --an
     --netlist sim/opamp-characterization/variants/tail-clamp-vc050.spice                 # 45 units
 python3 sim/opamp-characterization/variants/compare.py 20261010-162948-521c306-f0abf9 \
     20261010-103340-ba1dfa8-0241c1 20261001-074923-c317ff9
+```
+
+---
+
+# Output-stage candidate: signal-dependent boost sink (issue #79)
+
+**Result: partial, with a clear cost.** The candidate improves fall slew rate at
+**all 15** PVT points (+1.0 to +6.4 V/us; worst 11.03 -> 12.03 V/us at
+SS/-40 C, TT/27 C 14.64 -> 18.63 V/us) and keeps gain, GBW, rise SR, phase margin
+(>= 60 deg) and TT swing met. It still **does not meet the ~20 V/us fall target**:
+12 of 15 points remain below it (3 points reach >= 20: FF/27, FF/125, SF/125).
+It costs **+17 % quiescent power** (154.9 uW worst vs 131.9 uW) and about +81 %
+drawn gate area. The canonical design (`design/`) and `spec/target-spec.md` are
+untouched. This does not close T1 item 5.
+
+## Starting point (base-drift guard, same as the tail-clamp variants)
+
+Built from `design/netlist/opamp_core.spice` at `9fb5db6` (`sha256:feb7cff4...`),
+the same base as #78 (#120 has still not landed). No existing device, width,
+length, multiplicity or ratio changed
+(`diff <(git show 9fb5db6:design/netlist/opamp_core.spice) variants/signal-dependent-sink.spice`
+shows the header comment and six added devices only). Port order unchanged
+(`vdd vss inn inp out ibias`). Inherited off-grid dimensions are the same six as
+in the tail-clamp section (`XM3`, `XM4`, `XM6`, `XMB1`, `XM5`, `XM7`); all six
+new devices are on the 0.005 um grid (nf = 1, so finger width = W).
+
+## Why this candidate (rationale)
+
+#78 showed that no first-stage fix can reach 20 V/us: where nothing starves
+(TT/27 C), the fall edge is set by the class-A sink, `M7`'s fixed 50 uA into
+CL + Cc (14.6 V/us). So the output sink itself must become signal-dependent.
+
+Probing the baseline (single-corner local `ngspice-42` op points, not records)
+showed a constraint that rules out the obvious "level-shift `d2` onto an extra
+NMOS sink" idea: `d2` sits at 0.82 V (TT/27 C) and 0.47 V (SS/-40 C), because
+the `L = 0.3` PMOS group runs at |Vgs| about 0.98-1.15 V, and during a fall `M6`
+only loses about 36 uA, so `d2` moves just ~0.1 V. A follower-driven
+sink (first draft, simulated locally: `XMF1`/`XMF2`/`XMS`, not committed) never
+turned on (peak gate 0.26 V at TT; fall SR identical to baseline to 0.1 %). Any
+fixed level shift also carries the 0.35 V `d2` spread across PVT.
+
+The committed candidate senses `M6`'s *current* instead of `d2`'s level, which
+tracks PVT by construction:
+
+| Device | Type | W (um) | L (um) | m | Role |
+|---|---|---|---|---|---|
+| `XMP6C` | pfet | 4.635 | 0.3 | 1 | gate = `d2`: 1/10 replica of `M6`, `I_6c = I(M6)/10` |
+| `XMA` | nfet | 7.820 | 1.2 | 1 | diode on `na`, mirror input |
+| `XMA2` | nfet | 7.820 | 1.2 | 1 | draws `I_6c` out of node `nx` |
+| `XMC` | pfet | 4.170 | 0.3 | 1 | gate = `d1` (the `M3` diode): `I_C` = 0.9 x 5 uA into `nx` |
+| `XMD` | nfet | 7.820 | 1.2 | 1 | diode on `nx` |
+| `XMS` | nfet | 7.820 | 1.2 | 10 | output sink, drain = `out`, gate = `nx` |
+
+Added sink `I_S = 10 x max(0, I_C - I_6c) = max(0, 45 uA - I(M6))`. At quiescent
+`I(M6)` = 50 uA, so `I_6c` (5 uA) is above `I_C` (4.5 uA): `nx` is pulled to
+vss and `XMS` is off. On a falling edge `M6` current falls, `XMS` turns on and
+adds sink current in proportion to the shortfall. `M7` and all existing
+ratios are unchanged. New unit ratios: `XMP6C : M6 = 1 : 10` (replica), `XMC :
+M3 = 0.900`, `XMA : XMA2 : XMD = 1 : 1 : 1`, `XMS : XMD = 10 : 1`.
+
+### gm/ID sizing (committed sweep, tt/27 C, no simulation)
+
+`python3 sim/opamp-characterization/variants/sink_sizing.py` (output committed as
+`sink_sizing.out.txt`; committed together with the netlist and before any fleet
+run; the work's first commit held the sizing of the discarded follower draft
+below, replaced once local probes showed it never turns on) reads the same bare-device sweep and interpolation DR-007 cites:
+
+- nfet L = 1.2, gm/ID 18: J = 0.639474 uA/um; 5 uA -> 7.8189 um -> **7.820**
+  (DR-007 unit 7.819, ratio 1.0001).
+- pfet L = 0.3, gm/ID 14: J = 1.078993 uA/um; 5 uA -> 4.6340 um -> **4.635**
+  (DR-007 4.634, ratio 1.0002); 4.5 uA -> 4.1706 um -> **4.170**.
+
+Mirror devices are the same gm/ID as the DR-007 group they replicate, so they
+track `M6`/`M3` over PVT. The 10 % `I_C` margin is a design choice. The sweep is
+at |Vds| = 0.9 V, whereas `XMP6C` runs at about 1.2 V.
+
+## Records (append-only; fleet, `--fleet --backend batch`, DR-006 solver settings)
+
+| Record | Scope | Units | Failed | klt job ids |
+|---|---|---|---|---|
+| `20261010-234414-b96590d-ea93d0` | FS/125 C `ac` gain screen | 1 | 0 | `klt-sim-3fde3bdfc46b` (ac-iq), `klt-sim-8678f5f121cd` (ac) |
+| `20261010-234542-1d6c918-7dfe83` | full matrix (ac, tran_sr, dc_swing x 5 corners x 3 T) | **45** | **0** | `klt-sim-9709e33b3e54` (ac-iq), `klt-sim-18b7e2ffca64` (ac), `klt-sim-3ca3f0cc4d49` (tran-sr), `klt-sim-500e76f1b51f` (dc-swing) |
+
+Screen result: FS/125 C gain 62.53 dB (baseline 61.64), PM 62.19 deg, so the
+full matrix was run. Both records have the sha256 of their DUT snapshot equal to
+the committed variant (`7fe48494...`), `tools.ngspice: not invoked`, remote
+provenance in `klt_jobs[].remote` (m6i.4xlarge spot; runner klt 0.5.0 vs client
+0.7.0 `mismatch`, accepted with `warn`, as in #77/#78). The `nonconvergence`
+warnings in the klt diagnostics (10 corners in `ac`/`ac-iq`, 5 in `dc-swing`)
+are warnings at the dynamic-gmin step; the baseline record has the same kind
+(12/12/3). No unit failed. No local grid was run.
+
+## Comparison (produced by `compare.py`; no hand transcription)
+
+```bash
+python3 sim/opamp-characterization/variants/compare.py 20261010-234542-1d6c918-7dfe83 20261010-103340-ba1dfa8-0241c1 20261001-074923-c317ff9
+python3 sim/opamp-characterization/variants/compare.py 20261010-234542-1d6c918-7dfe83 20261010-162948-521c306-f0abf9
+```
+
+| Metric (target) | Baseline worst @ corner | Sink (`...7dfe83`) worst @ corner | Per point vs baseline |
+|---|---|---|---|
+| DC gain (>= 60 dB) | 61.64 dB @ FS/125 | 62.53 dB @ FS/125 (met) | 12 better, 3 equal |
+| GBW (~16 MHz) | 17.92 MHz @ SS/125 | 17.77 MHz @ SS/125 (met) | 15 worse (-0.03...-0.25) |
+| Phase margin (>= 60 deg) | 63.94 deg @ SF/27 | 61.41 deg @ FF/125 (met) | 15 worse (-1.56...-2.69 deg) |
+| Rise SR (~20 V/us) | 19.88 @ SS/-40 | 19.87 @ SS/-40 | 15 worse by <= 0.064 V/us |
+| **Fall SR (~20 V/us)** | 11.03 @ SS/-40 | **12.03 @ SS/-40 (missed at 12 of 15)** | **15 better (+1.00...+6.44)** |
+| Output swing (~1.39 Vpp est.) | 0.9485 Vpp @ SS/-40 | 0.9252 Vpp @ SS/-40 | 4 better, 11 worse; all but SF/-40 (+0.015) and SS/-40 (-0.023) within 0.03 mV |
+| Quiescent power (~128.7 uW) | 131.92 uW @ FF/125 | **154.9 uW @ FF/125** | 15 worse (+15.6...+23.0 uW) |
+
+Named points: FS/125 C gain 61.64 -> 62.53 dB. SS/-40 C fall SR 11.03 -> 12.03
+V/us. SS/-40 C swing 0.9485 -> 0.9252 Vpp. FS/125 C phase margin 64.63 -> 62.19
+deg. TT/27 C fall SR 14.64 -> 18.63 V/us. TT/27 C swing 1.431 -> 1.431 Vpp.
+
+Fall SR by point (V/us): TT 17.15 / 18.63 / 19.87 (-40/27/125 C); FF 19.05 / 20.35
+/ 21.41; SS 12.03 / 15.09 / 16.79; SF 18.20 / 19.26 / 20.32; FS 15.36 / 17.66 /
+19.33. As #78 documented, the SS/-40 C bench's low level (0.486 V) lies below the
+input pair's ICMR low edge at that corner (0.717 V), so the cold-SS fall number
+mixes slewing with an input-range limit that a pure output-stage change does not
+address. That residual is the second remaining structural gap.
+
+### Cost
+
+- **Quiescent power**: +19.0 uW at TT/27 C (+10.6 uA); worst 154.9 uW at FF/125 C
+  (baseline 131.92, +23.0 uW, +17.4 %). Design expected ~9.5 uA: the replica leg
+  `I_6c` (5 uA) **plus** the `I_C` leg (4.5 uA, which conducts through `XMA2`
+  even while `nx` is clipped to vss). The netlist header and the first sizing
+  draft wrongly said no static current; the measurement corrected that. The
+  netlist comment is left as committed because the record snapshots are
+  byte-identical to the file.
+- **Drawn gate area estimate** (sum of W x L of MOS gates, `sink_sizing.py` item 4):
+  124.63 um^2 added (nfet 121.99 + pfet 2.64), on the baseline's 153.13 um^2,
+  about +81 %. `XMS` alone is 93.8 um^2. Not a layout area; no layout was done.
+
+## What did not work (preserved)
+
+- A source-follower level-shift sink (`XMF1`, `XMF2`, `XMS`; single-corner local
+  probes, not records) never turned on: peak gate 0.26 V (TT/27) and 5 mV
+  (SS/-40); fall SR identical to the baseline. Reason: `d2` moves ~0.1 V during
+  the fall and sits at a PVT-dependent level (0.47-0.82 V). It was not committed
+  as a netlist or a record.
+
+## Reproduce
+
+```bash
+python3 sim/opamp-characterization/variants/sink_sizing.py
+python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --corners fs --temps 125 --analyses ac \
+    --netlist sim/opamp-characterization/variants/signal-dependent-sink.spice
+python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses ac,tran_sr,dc_swing \
+    --netlist sim/opamp-characterization/variants/signal-dependent-sink.spice
 ```

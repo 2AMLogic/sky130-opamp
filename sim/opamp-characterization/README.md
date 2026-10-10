@@ -178,6 +178,18 @@ are also worse at all 15 points (PM misses >= 60 deg; worst 56.37 deg @ SS/27 C)
 Gain and GBW change slightly and Pq is unchanged. See the variants README for
 the mechanism and costs.
 
+#### Signal-dependent output sink (issue #79): partial
+
+[`variants/signal-dependent-sink.spice`](variants/README.md) adds a
+replica-subtraction boost sink (six devices, all on the 0.005 um grid;
+canonical design untouched). Fleet records `20261010-234414-b96590d-ea93d0`
+(FS/125 C gain screen) and `20261010-234542-1d6c918-7dfe83` (45/45, 0 failed).
+Fall SR improves at all 15 points (worst 11.03 -> 12.03 V/us @ SS/-40 C; TT/27 C
+14.64 -> 18.63), but remains below ~20 V/us at 12 of 15 points, and quiescent
+power rises 17 % (worst 154.9 uW). Gain, GBW, rise SR and PM >= 60 deg stay met.
+The topology comparison against the #78 tail-clamp result is the proposed
+[DR-012](../../spec/decision-records/DR-012-output-topology-comparison.md).
+
 ### PSRR and noise benches (issue #54)
 
 ```bash

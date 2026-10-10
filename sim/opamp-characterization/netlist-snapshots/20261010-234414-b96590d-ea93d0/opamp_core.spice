@@ -1,0 +1,57 @@
+** EXPERIMENTAL VARIANT (issue #79) -- NOT the canonical design.
+** Base: design/netlist/opamp_core.spice @ 9fb5db6 (DR-007 sizing, unchanged),
+**       plus SIX added devices: a replica-subtraction class-AB boost sink on the output.
+** Flat netlist, same port order as the canonical file (vdd vss inn inp out ibias);
+** sim/opamp-characterization/bin/pvt_sweep.py --netlist wraps it in its own .subckt.
+**
+** M7 (the fixed 50 uA sink) is untouched. Extra output sink I_S = 10 * max(0, I_C - I_6c):
+**   XMP6C (pfet, gate d2) is a 1/10 replica of M6: I_6c ~ I(M6)/10 (5 uA at quiescent).
+**   XMA / XMA2 (nfet 1:1 mirror) turn I_6c into a current DRAWN from node nx.
+**   XMC (pfet, gate d1) feeds I_C ~ 0.9 * 5 uA = 4.5 uA into nx (mirror of the M3 diode,
+**   drawn 0.9 x the M3 width so I_C < I_6c at quiescent, margin for mirror error).
+**   XMD (diode on nx) / XMS (x10) mirror (I_C - I_6c) to the output as a sink.
+** Quiescent I_6c > I_C: nx is pulled to vss, XMS is off, no added static current.
+** Falling edge: M6 current falls, I_6c < I_C, XMS turns on and adds ~10 x the deficit,
+** tracking M6 at every corner (no fixed level shift, so no d2-level PVT dependence).
+** All new widths are on the 0.005 um grid (nf = 1, so finger width = W).
+** Sizing: variants/sink_sizing.py.
+** sch_path: /Users/rwalters/GitHub/sky130-opamp/.loom/worktrees/issue-13/design/opamp_core.sch
+**.subckt opamp_core vdd vss inn inp out ibias
+*.iopin vdd
+*.iopin vss
+*.iopin inn
+*.iopin inp
+*.iopin out
+*.iopin ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137
++ nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137
++ nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=2 m=2
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=10 m=10
+XM7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=10 m=10
+XMP6C na d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.06256742179072276
++ nrs=0.06256742179072276 sa=0 sb=0 sd=0 mult=1 m=1
+XMA na na vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.82 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMA2 nx na vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.82 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMC nx d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.17 nf=1 ad=1.2093 as=1.2093 pd=8.92 ps=8.92 nrd=0.06954436450839328
++ nrs=0.06954436450839328 sa=0 sb=0 sd=0 mult=1 m=1
+XMD nx nx vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.82 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMS out nx vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.82 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=10 m=10
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+**.ends
+.end

@@ -1,0 +1,343 @@
+{
+  "record_id": "20261010-234542-1d6c918-7dfe83",
+  "timestamp": "2026-10-10T23:50:30.469792+00:00",
+  "git": {
+    "sha": "1d6c918"
+  },
+  "dut": {
+    "source_path": "sim/opamp-characterization/variants/signal-dependent-sink.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261010-234542-1d6c918-7dfe83/opamp_core.spice",
+    "sha256": "sha256:7fe48494026d002fafe6258bfb090f897552497fbbfad7dab15cecd63366a0e2"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "ac",
+      "tran_sr",
+      "dc_swing"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 45,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "ac",
+        "tran_sr",
+        "dc_swing"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+g25cdecc24018",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "ac-iq",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 143.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-9709e33b3e54",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0c0d44452b661c071",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 102,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g25cdecc24018",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g25cdecc24018; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 10
+        },
+        "by_severity": {
+          "warning": 10
+        },
+        "corners_with_diagnostics": 10
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261010-234542-1d6c918-7dfe83/ac-iq-request.json",
+      "response": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-logs/klt-ac-iq-response.json"
+    },
+    {
+      "tag": "ac",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 143.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-18b7e2ffca64",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0d799e0b973349de1",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 105,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g25cdecc24018",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g25cdecc24018; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 10
+        },
+        "by_severity": {
+          "warning": 10
+        },
+        "corners_with_diagnostics": 10
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261010-234542-1d6c918-7dfe83/ac-request.json",
+      "response": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-logs/klt-ac-response.json"
+    },
+    {
+      "tag": "tran-sr",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 144.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-3ca3f0cc4d49",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0e75ce1bd419e505d",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 110,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g25cdecc24018",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g25cdecc24018; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261010-234542-1d6c918-7dfe83/tran-sr-request.json",
+      "response": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-logs/klt-tran-sr-response.json"
+    },
+    {
+      "tag": "dc-swing",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 143.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-500e76f1b51f",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00feb5c9a2568186b",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 101,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g25cdecc24018",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g25cdecc24018; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 5
+        },
+        "by_severity": {
+          "warning": 5
+        },
+        "corners_with_diagnostics": 5
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261010-234542-1d6c918-7dfe83/dc-swing-request.json",
+      "response": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-logs/klt-dc-swing-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "links": {
+    "ac_csv": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-ac.csv",
+    "tran_sr_csv": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-tran-sr.csv",
+    "dc_swing_csv": "sim/opamp-characterization/records/20261010-234542-1d6c918-7dfe83-dc-swing.csv"
+  },
+  "errors": [],
+  "elapsed_s": 287.6
+}

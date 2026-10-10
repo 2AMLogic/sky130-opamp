@@ -1,0 +1,13 @@
+1. nfet L=1.2 mirror unit (DR-007, gm/ID 18), tt/27C:
+   rows gm/ID 17.662394 @ J 0.694325 and 18.973791 @ J 0.481260 uA/um -> J = 0.639474 uA/um
+   5 uA -> W = 7.8189 um -> drawn 7.820 um (grid-legal True; DR-007 unit 7.819 um, ratio 1.00013)
+2. pfet L=0.3 M3/M4/M6 unit (DR-007, gm/ID 14), tt/27C:
+   rows gm/ID 13.316481 @ J 1.357395 and 14.116302 @ J 1.031622 uA/um -> J = 1.078993 uA/um
+   XMP6C: 5 uA -> W = 4.6340 um -> drawn 4.635 um (grid-legal True; DR-007 unit 4.634 um, ratio 1.00022)
+   XMC:   4.5 uA -> W = 4.1706 um -> drawn 4.170 um (grid-legal True; I_C/I_unit = 0.8999)
+3. Drawn devices (all nf = 1, so finger width = W):
+   XMA, XMA2, XMD: nfet 7.820/1.2 m=1;  XMS: nfet 7.820/1.2 m=10;  XMP6C: pfet 4.635/0.3 m=1;  XMC: pfet 4.170/0.3 m=1
+4. Drawn gate area added (W*L, NOT layout area): nfet 121.99 um^2 + pfet 2.641 um^2 = 124.63 um^2  (baseline MOS gate area 153.13 um^2, +81 %)
+5. Quiescent current added (design): replica leg I_6c = I(M6)/10 = 5 uA from vdd (XMP6C -> XMA) PLUS the I_C = 4.5 uA leg (XMC -> XMA2 triode, because I_C < I_6c clips nx to vss but XMC still conducts); XMS itself ~ 0. Design ~ +9.5 uA ~ +17 uW at 1.8 V. (An earlier draft of this script said ~5 uA: it forgot that XMC conducts while clipped.)
+6. Boost law: I_S = 10 x max(0, I_C - I_6c). I_C = 4.5 uA, so I_S = 10 x (4.5 uA - I(M6)/10) = 45 uA - I(M6) for I(M6) < 45 uA; e.g. I(M6) = 14 uA -> 31 uA extra sink.
+   Caveat: XMP6C has |Vds| ~ 1.2 V vs M6's ~ 0.9 V; the sweep is at |Vds| = 0.9 V, so the 10 % I_C margin is a design choice, not a computed tolerance. The fleet record measures it.
