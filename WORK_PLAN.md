@@ -25,7 +25,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-- **#107**: sim: attribute the 8.6 mV offset Monte Carlo sigma to device groups
+- **#116**: Reject aliased partial-layout paths and directories in integrator GDS validation
 
 ## PRs Awaiting Review
 
@@ -51,7 +51,6 @@ Issues carrying `loom:curated`.
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
-- **#116**: Reject aliased partial-layout paths and directories in integrator GDS validation *(architect)*
 
 ## Epics
 
@@ -68,6 +67,6 @@ _None._
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 4 |
-| Architect / Hermit proposals | 2 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->

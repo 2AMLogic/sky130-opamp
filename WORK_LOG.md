@@ -2,6 +2,10 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-10
+
+- **Issue #112** (closed): Auditor guard review: worktree-write-confinement should remain enforced
+
 ### 2026-10-09
 
 - **PR #118**: sim: attribute the offset Monte Carlo sigma to device groups (#107)
