@@ -1,0 +1,11 @@
+{
+  "drc_style": "drc(full)",
+  "drc_total": 0,
+  "drc_by_rule": [],
+  "magic_types_seen": [
+    "poly",
+    "polycont",
+    "locali"
+  ],
+  "vacuous": false
+}

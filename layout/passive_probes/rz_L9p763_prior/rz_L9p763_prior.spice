@@ -1,0 +1,8 @@
+* extracted by klt extract --deck sky130
+
+* cell rz_L9p763_prior
+* pin vsubs
+.SUBCKT rz_L9p763_prior vsubs
+* device instance $1 r0 *1 5.301,0.705 res_high_po
+X$1 \$1 \$2 vsubs res_high_po r=2628.84584429 L=9.763U W=1.41U
+.ENDS rz_L9p763_prior

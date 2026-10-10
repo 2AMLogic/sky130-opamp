@@ -48,6 +48,9 @@ jobs:
           python sim/lib/dut_identity.py validate
           python sim/lib/dut_identity.py current
 
+      - name: Compensation-passive grid legality (issue #131)
+        run: python design/bin/grid_check.py
+
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
 

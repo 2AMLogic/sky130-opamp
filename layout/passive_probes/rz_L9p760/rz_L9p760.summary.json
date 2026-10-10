@@ -1,0 +1,36 @@
+{
+  "id": "rz_L9p760",
+  "role": "XRz alternative: nearest grid-legal length below 9.763",
+  "kind": "passive probe (not full-core layout)",
+  "spice_statement": {
+    "model": "res_high_po_1p41",
+    "L": 9.76,
+    "W": 1.41
+  },
+  "spice_L_off_grid": false,
+  "generator_bbox_um": {
+    "x0": 0.0,
+    "y0": 0.0,
+    "x1": 10.6,
+    "y1": 1.41
+  },
+  "klt_drc": {
+    "status": "clean",
+    "violation_count": 0
+  },
+  "magic_drc_full": {
+    "total": 0,
+    "by_rule": [],
+    "vacuous": false
+  },
+  "extract_device": {
+    "class": "res_high_po",
+    "params": {
+      "r_ohm": 2628.154722,
+      "l_um": 9.76,
+      "w_um": 1.41,
+      "area_um2": 13.7616,
+      "perimeter_um": 22.34
+    }
+  }
+}

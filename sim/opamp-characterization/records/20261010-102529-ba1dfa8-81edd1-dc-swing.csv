@@ -1,0 +1,2 @@
+corner,temp_c,vdd_v,vout_min_v,vout_max_v,vpp_v,vpp_pct_of_vdd,sweep_vout_min_v,sweep_vout_max_v,elapsed_s
+tt,27.0,1.8,0.120036117,1.53098124,1.410945123,78.38584016666668,5.44270607e-08,1.63719914,1.77

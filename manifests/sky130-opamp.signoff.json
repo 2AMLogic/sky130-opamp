@@ -33,13 +33,13 @@
         "command": null,
         "kind": "generic",
         "check_status": "pass",
-        "content_hash": "sha256:6fd7a3a7bce83722c82fc1408527c6d09ab690a5f4a0843f6c138a096861c340",
+        "content_hash": "sha256:6234ec4b5745ac53091e5a0eecb34633b239d95545585df25c06d01173e84d13",
         "input_verified": true,
         "exit_status": 0,
         "artifact_binding": {
           "t1_item": 1,
           "path": "opamp_core.pair.json",
-          "content_hash": "sha256:6fd7a3a7bce83722c82fc1408527c6d09ab690a5f4a0843f6c138a096861c340",
+          "content_hash": "sha256:6234ec4b5745ac53091e5a0eecb34633b239d95545585df25c06d01173e84d13",
           "input_verified": true,
           "summary": "T1 item 1 (design sources): design/opamp_core.sch is the committed schematic source and design/netlist/opamp_core.spice is the xschem-generated netlist derived from it. The cited input, opamp_core.pair.json, pins the sha256 of both files. CI (.github/workflows/design-sources.yml) re-runs headless xschem on the schematic with design/xschemrc and fails when the regenerated netlist differs from the committed one (design/bin/netlist_check.py; normalised: sch_path line, wrapping, number formatting, xschem-version-dependent evaluation of the PDK symbols' derived ad/as/pd/ps/nrd/nrs formulas, compared with parameter-specific tolerances: pd/ps within 0.005 um absolute, half the 0.01 um rounding grid; ad/as/nrd/nrs within 1e-6 relative), or when the pair record is stale. Negative controls: design/bin/test_netlist_check.py. LIMITS: klt signoff grades this generic envelope on its status field and never re-hashes the cited input (klayout-tools#2196, #2403); the repo-side re-hash step in .github/workflows/signoff.yml and the design-sources workflow are what keep it honest. It asserts nothing about sizing, spec compliance, or the PDK-symbol library beyond the pin in sim/gm-id-characterization/pdk.json.",
           "source": "design/bin/netlist_check.py"

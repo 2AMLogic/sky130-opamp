@@ -212,7 +212,7 @@ C {devices/lab_pin.sym} 440 400 0 0 {name=l32 lab=vss}
 
 * Rz: nulling resistor, 2.50 kohm [DR-001 (d); DR-007]
 C {sky130_fd_pr/res_high_po_1p41.sym} 900 150 0 0 {name=Rz
-L=9.763
+L=9.765
 model=res_high_po_1p41
 spiceprefix=X
 mult=1}
