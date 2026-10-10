@@ -10,8 +10,10 @@ Derived fields (rewritten by refresh, compared by validate):
   maturity.tier / t1_met / t1_total   <- manifests/sky130-opamp.signoff.json
   top_cell, ports (ordered)           <- design/netlist/opamp_core.spice
 Authored fields (never touched): consumers, spec_status, evaluated_at, notes.
-Validate also checks that every non-null artifact path exists and that `gds`
-never points into layout/opamp_stage1 (a partial layout, not the full core).
+Validate also resolves every non-null artifact path against the repo root
+(rejecting malformed or root-escaping paths), requires `gds` to be a regular
+file, and rejects any `gds` that resolves into layout/opamp_stage1 (a partial
+layout, not the full core), including `..` and symlink aliases.
 
 Snapshot semantics: the manifest describes the current checkout. It does not
 embed its own resulting commit SHA; `evaluated_at` is a disclosed historical
@@ -84,17 +86,32 @@ def check(root):
         actual = _get(man, field)
         if actual != expected:
             errs.append(f"{field}: expected {expected!r} (from source), actual {actual!r}")
+    root_r = root.resolve()
+    partial_r = (root_r / PARTIAL_DIR).resolve()
     for field in ("netlist", "gds", "maturity.source"):
         p = _get(man, field)
-        if p is not None and not (root / p).exists():
-            errs.append(f"{field}: expected existing path, actual {p!r} (missing)")
-    gds = man.get("gds")
-    if gds is not None:
-        norm = Path(gds).as_posix().lstrip("./")
-        if norm == PARTIAL_DIR or norm.startswith(PARTIAL_DIR + "/"):
+        if p is None:
+            continue
+        if not isinstance(p, str) or not p.strip() or "\0" in p:
+            errs.append(f"{field}: expected non-empty path string, actual {p!r} (malformed)")
+            continue
+        try:
+            res = (root_r / p).resolve()
+        except (OSError, RuntimeError, ValueError) as exc:
+            errs.append(f"{field}: expected resolvable path, actual {p!r} ({exc})")
+            continue
+        if not res.is_relative_to(root_r):
+            errs.append(f"{field}: expected path inside repository root, actual {p!r} (escapes root)")
+            continue
+        if field == "gds" and res.is_relative_to(partial_r):
             errs.append(
-                f"gds: expected full-core GDS outside {PARTIAL_DIR}/ (partial layout), actual {gds!r}"
+                f"gds: expected full-core GDS outside {PARTIAL_DIR}/ (partial layout), actual {p!r}"
             )
+            continue
+        if not res.exists():
+            errs.append(f"{field}: expected existing path, actual {p!r} (missing)")
+        elif field == "gds" and not res.is_file():
+            errs.append(f"gds: expected regular file, actual {p!r} (not a regular file)")
     return errs
 
 
