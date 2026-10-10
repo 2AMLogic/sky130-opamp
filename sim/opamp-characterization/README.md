@@ -305,6 +305,35 @@ Reproduce (no simulator needed):
     python3 sim/lib/dut_identity.py current    # the report cited for T1 item 8 must record the current netlist's hash
     python3 sim/lib/dut_identity.py current --require-verified   # additionally reject a legacy (identity-less) record
 
+### PSRR/noise DUT identity (issue #151)
+
+`bin/psrr_noise_sweep.py` captures the DUT once (`capture_dut`) into
+`netlist-snapshots/<id>-psrr-noise/opamp_core.spice` *before* preparing any
+request, renders each selected bench (`psrr-vdd.spice`, `psrr-vss.spice`,
+`noise.spice`) with its include pointed at that sibling copy, and saves a
+replayable `<tag>.request.json` beside each body. All benches therefore share
+one hash even if `design/netlist/opamp_core.spice` is edited mid-campaign. The
+metadata `records/<id>-psrr-noise.json` carries the common `dut` block and, per
+bench, `rendered_body` / `request_snapshot`; `records/<id>-<tag>.request.json`
+points at the rendered body. Bodies, requests and the DUT copy are written
+before submission, so they exist whether or not the backend returns deck
+artifacts. `bin/validate_psrr_noise.py` follows the same discipline in
+`netlist-snapshots/<id>-psrr-noise-validation/` (its no-Cinp and fixed-Vcm
+variants are derived from the snapshot body), with `dut` in the validation record
+and one retained `<run>.request.json` per run.
+
+`dut_identity.py validate` discovers both record kinds and rejects a missing or
+corrupt snapshot, a missing rendered body or request, a request that does not
+point into the snapshot, and any body that includes the live DUT. Records that
+predate this change have no `dut` block and are reported UNVERIFIED, never
+inferred.
+
+Dry run and failure: `--dry-run` captures into a scratch directory outside the
+repo (printed, kept for inspection) and writes nothing under `records/` or
+`netlist-snapshots/`. A failed or partially errored run still writes no record
+and removes its just-created snapshot directory (no orphan, nothing falls back
+to a local grid); `--allow-errors` behaves as before.
+
 Current versus historical: `validate` is historical -- a record stays valid
 after the design changes. `current` fails with a "DUT mismatch (stale design)"
 diagnostic when the cited record measured different bytes than the committed

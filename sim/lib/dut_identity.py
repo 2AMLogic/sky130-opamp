@@ -21,6 +21,13 @@ netlist is the rendered bench in the snapshot, all chunks share one hash);
 older records are UNVERIFIED. ``current-offset`` is the separate, explicit
 "does a historical offset campaign equal today's netlist" diagnostic.
 
+PSRR/noise campaigns (``*-psrr-noise.json``) and their validation runs
+(``*-psrr-noise-validation.json``) use the same discipline (issue #151): the
+``dut`` block names a snapshot dir that also holds every rendered bench body
+and replayable request; ``validate`` checks the snapshot, that every submitted
+request points at a rendered body inside it, and that no body includes the live
+DUT. Older records without ``dut`` are UNVERIFIED.
+
 ``current`` takes the characterization the block manifest cites for a T1 item
 (default 8) and additionally requires its recorded DUT hash to equal the hash
 of the *current* ``design/netlist/opamp_core.spice``; a mismatch is reported
@@ -128,7 +135,7 @@ def check_current(record: dict, repo_root: Path = REPO_ROOT,
 def pvt_record_paths(repo_root: Path = REPO_ROOT) -> list[Path]:
     out = []
     for p in sorted((repo_root / RECORDS_REL).glob("*.json")):
-        if p.name.endswith((".characterization.json", ".klt.json", ".request.json")):
+        if p.name.endswith((".characterization.json", ".klt.json", ".request.json", "-psrr-noise.json")):
             continue
         try:
             d = json.loads(p.read_text())
@@ -265,8 +272,84 @@ def check_current_offset(repo_root: Path = REPO_ROOT) -> int:
     return rc
 
 
+def psrr_noise_records(repo_root: Path = REPO_ROOT) -> list[Path]:
+    """PSRR/noise campaign metadata and validation-run records (issue #151)."""
+    rdir = repo_root / RECORDS_REL
+    return sorted(p for p in rdir.glob("*.json")
+                  if p.name.endswith(("-psrr-noise.json", "-psrr-noise-validation.json")))
+
+
+def _in_snapshot(rec: dict, netlist: str, base: Path, repo_root: Path) -> str | None:
+    """Problem string unless ``netlist`` (relative to ``base``) is an existing
+    rendered body in the DUT snapshot directory."""
+    snap = (repo_root / rec["dut"]["snapshot_path"]).parent.resolve()
+    body = (base / netlist).resolve()
+    if body.parent != snap:
+        return f"request netlist {netlist!r} is not a rendered bench in the DUT snapshot"
+    if not body.is_file():
+        return f"rendered bench body {body.name} missing from the DUT snapshot"
+    return None
+
+
+def psrr_noise_problems(path: Path, repo_root: Path = REPO_ROOT) -> tuple[str, list[str]]:
+    rec = json.loads(path.read_text())
+    state, problems = verify_record_dut(rec, repo_root)
+    if state == UNVERIFIED or not (rec["dut"].get("snapshot_path") and rec["dut"].get("sha256")):
+        return state, problems
+    snap = (repo_root / rec["dut"]["snapshot_path"]).parent
+    if "runs" in rec:   # validation record: embedded requests, one rendered body each
+        for name, run in sorted((rec.get("runs") or {}).items()):
+            net = ((run or {}).get("request") or {}).get("netlist")
+            if not net:
+                problems.append(f"run {name}: no request netlist recorded")
+                continue
+            pr = _in_snapshot(rec, net, path.parent, repo_root)
+            if pr:
+                problems.append(f"run {name}: {pr}")
+            if not (snap / f"{name}.request.json").is_file():
+                problems.append(f"run {name}: replayable request {name}.request.json missing from the DUT snapshot")
+    else:               # campaign: committed request + retained snapshot request + body per bench
+        for bname, b in sorted((rec.get("benches") or {}).items()):
+            body, snapreq = b.get("rendered_body"), b.get("request_snapshot")
+            if not body or not snapreq:
+                problems.append(f"bench {bname}: record lacks rendered_body/request_snapshot")
+                continue
+            for what, rel in (("rendered_body", body), ("request_snapshot", snapreq)):
+                f = repo_root / rel
+                if f.parent.resolve() != snap.resolve() or not f.is_file():
+                    problems.append(f"bench {bname}: {what} {rel} missing or outside the DUT snapshot")
+            stem = path.name[: -len("-psrr-noise.json")]
+            req = _load(path.with_name(f"{stem}-{Path(snapreq).name}"))
+            if req is None:
+                problems.append(f"bench {bname}: committed request {stem}-{Path(snapreq).name} missing or unreadable")
+            else:
+                pr = _in_snapshot(rec, str(req.get("netlist", "")), path.parent, repo_root)
+                if pr:
+                    problems.append(f"bench {bname}: {pr}")
+                elif (path.parent / req["netlist"]).resolve() != (repo_root / body).resolve():
+                    problems.append(f"bench {bname}: committed request points at a different body than the record")
+    return state, problems
+
+
+def validate_psrr_noise(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
+    rc = 0
+    for p in psrr_noise_records(repo_root):
+        state, problems = psrr_noise_problems(p, repo_root)
+        if state == UNVERIFIED:
+            print(f"{p.name}: UNVERIFIED legacy PSRR/noise record (no recorded DUT identity)")
+            rc = 1 if require_verified else rc
+        elif problems:
+            rc = 1
+            for pr in problems:
+                print(f"{p.name}: FAIL {pr}")
+        else:
+            print(f"{p.name}: OK PSRR/noise DUT snapshot, bodies and requests verified")
+    return rc
+
+
 def validate_all(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
     rc = validate_offset(repo_root, require_verified)
+    rc |= validate_psrr_noise(repo_root, require_verified)
     for p in pvt_record_paths(repo_root):
         state, problems = verify_record_dut(json.loads(p.read_text()), repo_root)
         if state == UNVERIFIED:
