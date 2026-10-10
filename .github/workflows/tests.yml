@@ -6,7 +6,10 @@ name: unit tests
 #     the committed gm/ID -summary.csv exactly.
 #   - tests/: template placeholder rendering, PDK pin resolution, corner/CSV
 #     aggregation, and shape validation of the committed sim records.
-# Run locally with the same two commands (see README.md).
+#   - layout/bin/test_*.py: tool-free layout flow tests (stage_reference,
+#     compose-cell, magic-signoff); no klt, Magic or PDK. Must run from a
+#     full checkout. Full layout regeneration stays out of CI.
+# Run locally with `python3 design/bin/check_ci.py` (see README.md).
 
 on:
   push:
@@ -47,6 +50,9 @@ jobs:
 
       - name: Run unit tests
         run: python -m unittest discover -s tests -v
+
+      - name: Run layout flow unit tests
+        run: python -m unittest discover -s layout/bin -p 'test_*.py' -v
 
       - name: Append-only evidence check (PRs only)
         if: github.event_name == 'pull_request'

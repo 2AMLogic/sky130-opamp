@@ -76,6 +76,7 @@ python design/bin/spec_figures_check.py validate
 python sim/lib/dut_identity.py validate
 python sim/lib/dut_identity.py current
 python -m unittest discover -s tests -v
+python -m unittest discover -s layout/bin -p 'test_*.py' -v
 python design/bin/test_netlist_check.py CompareUnit -v
 python sim/lib/append_only_check.py --base origin/main   # only if origin/main resolves
 ```
