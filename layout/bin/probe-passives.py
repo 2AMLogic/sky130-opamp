@@ -147,7 +147,10 @@ def magic_drc(gds: Path, cell: str, tech: Path) -> dict:
         with open(t / "drc.tcl") as script:
             proc = subprocess.run(["magic", "-dnull", "-noconsole", "-rcfile", "/dev/null", "-T", str(tech)],
                                   cwd=t, stdin=script, capture_output=True, text=True, check=False)
-    log = proc.stdout + proc.stderr
+    return parse_magic_log(proc.stdout + proc.stderr)
+
+
+def parse_magic_log(log: str) -> dict:
     types = re.search(r"^MAGIC_TYPES: (.*)$", log, re.MULTILINE)
     total = re.search(r"^MAGIC_DRC_TOTAL: (\d+)", log, re.MULTILINE)
     if not total or not types:
