@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import _paths  # noqa: F401  -- sets sys.path for sim/lib
 import append_only_check as ao
@@ -105,6 +106,122 @@ class AppendOnlyTests(unittest.TestCase):
                  contextlib.redirect_stdout(io.StringIO()), \
                  contextlib.redirect_stderr(io.StringIO()):
                 self.assertEqual(ao.main(["--stdin", "--allowlist", "/nonexistent"]), rc)
+
+
+class LocalModeGitTests(unittest.TestCase):
+    """Real temp git repos: committed base..HEAD plus index/worktree vs HEAD."""
+
+    EV = "sim/blk/records/r.md"
+    EV2 = "sim/blk/corners/c.log"
+
+    def setUp(self):
+        import os, subprocess, tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        self.repo = Path(self._tmp.name)
+        self._cwd = os.getcwd()
+        self.addCleanup(os.chdir, self._cwd)
+        self.git("init", "-q", "-b", "main")
+        self.git("config", "user.email", "t@example.com")
+        self.git("config", "user.name", "t")
+        self.git("config", "commit.gpgsign", "false")
+        self.write(self.EV, "evidence\n")
+        self.write(self.EV2, "corner data\n")
+        self.write("sim/blk/README.md", "prose\n")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "base")
+        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
+        os.chdir(self.repo)
+
+    def git(self, *a):
+        import subprocess
+        subprocess.run(["git", *a], cwd=self.repo, check=True, capture_output=True)
+
+    def write(self, rel, text):
+        p = self.repo / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text)
+
+    def run_main(self, *extra, local=True):
+        import io, contextlib
+        argv = ["--base", "origin/main", "--allowlist", "sim/append-only-allowlist.txt"]
+        argv += (["--local"] if local else []) + list(extra)
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            rc = ao.main(argv)
+        return rc, err.getvalue()
+
+    def test_clean_passes(self):
+        self.assertEqual(self.run_main()[0], 0)
+
+    def test_unstaged_edit_fails_local_only(self):
+        self.write(self.EV, "changed\n")
+        rc, err = self.run_main()
+        self.assertEqual(rc, 1)
+        self.assertIn(self.EV, err)
+        self.assertEqual(self.run_main(local=False)[0], 0)
+
+    def test_staged_edit_fails(self):
+        self.write(self.EV, "changed\n")
+        self.git("add", self.EV)
+        self.assertEqual(self.run_main()[0], 1)
+
+    def test_unstaged_and_staged_deletion_fail(self):
+        (self.repo / self.EV).unlink()
+        self.assertEqual(self.run_main()[0], 1)
+        self.git("add", "-A")
+        self.assertEqual(self.run_main()[0], 1)
+
+    def test_staged_rename_fails(self):
+        self.git("mv", self.EV, "sim/blk/records/renamed.md")
+        rc, err = self.run_main()
+        self.assertEqual(rc, 1)
+        self.assertIn(self.EV, err)
+
+    def test_unstaged_rename_fails(self):
+        (self.repo / self.EV).rename(self.repo / "sim/blk/records/renamed.md")
+        self.assertEqual(self.run_main()[0], 1)
+
+    def test_staged_change_then_unstaged_restoration_still_fails(self):
+        self.write(self.EV, "changed\n")
+        self.git("add", self.EV)
+        self.write(self.EV, "evidence\n")  # worktree now equals HEAD
+        rc, err = self.run_main()
+        self.assertEqual(rc, 1)
+        self.assertIn(self.EV, err)
+
+    def test_staged_deletion_then_restored_in_worktree_fails(self):
+        self.git("rm", "-q", "--cached", self.EV)
+        self.assertEqual(self.run_main()[0], 1)
+
+    def test_additions_and_prose_pass(self):
+        self.write("sim/blk/records/new.md", "new\n")  # untracked
+        self.write("sim/blk/corners/new.log", "new\n")
+        self.git("add", "sim/blk/corners/new.log")  # staged add
+        self.write("sim/blk/README.md", "edited prose\n")
+        self.assertEqual(self.run_main()[0], 0)
+
+    def test_allowlisted_path_keeps_behaviour(self):
+        self.write("sim/append-only-allowlist.txt", f"{self.EV} | #99\n")
+        self.write(self.EV, "changed\n")
+        self.assertEqual(self.run_main()[0], 0)
+        self.write(self.EV2, "changed\n")  # not allowlisted
+        self.assertEqual(self.run_main()[0], 1)
+
+    def test_committed_violation_caught_in_both_modes(self):
+        self.write(self.EV, "changed\n")
+        self.git("commit", "-qam", "edit evidence")
+        self.assertEqual(self.run_main()[0], 1)
+        self.assertEqual(self.run_main(local=False)[0], 1)
+
+    def test_pr_mode_ignores_uncommitted(self):
+        self.write(self.EV, "changed\n")
+        self.git("add", self.EV)
+        self.assertEqual(self.run_main(local=False)[0], 0)
+
+    def test_stdin_and_local_exclusive(self):
+        with self.assertRaises(SystemExit):
+            self.run_main("--stdin")
 
 
 if __name__ == "__main__":
