@@ -1,6 +1,6 @@
 # DR-004: Consumers section and machine-parseable integrator view (editorial, additive-only)
 
-- **Status**: **proposed** — an editorial record, carried for ratification
+- **Status**: **ratified** (corrected 2026-10-09, issue #49: stated ratification act — approval of PR #34 by the Judge reviewer and merge — occurred, merged 2026-09-22; the original `proposed` text below is retained as history and its "merged copy still reads proposed" note no longer applies) — an editorial record, carried for ratification
   via this PR (Judge review + Champion/operator merge) per the 2026-08-19
   canary spec/DR ratification-via-PR standing policy
   ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)); the same
