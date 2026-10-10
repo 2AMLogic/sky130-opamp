@@ -4,6 +4,35 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-10
 
+- **PR #157**: Reject malformed manifest entries in the generic evidence freshness gate
+- **PR #156**: Tail-clamp candidate for the fall-slew gap: measured negative result (#78)
+- **PR #154**: Extract generic-evidence artifact hash gate into a tested local checker (#152)
+- **PR #153**: Bind PSRR/noise campaigns and validation runs to an immutable DUT snapshot
+- **PR #148**: pvt_sweep: bind historical AC cross-checks to matching DUT and supply points
+- **PR #146**: offset: matched-group sizing feasibility for the proposed offset allocation (#144)
+- **PR #145**: layout: unit-test probe-passives.py (#142)
+- **PR #141**: docs: reconcile signoff guide with partial layout, measured offset and klt 0.7.0 pin
+- **PR #140**: Restore grid_check in local CI runner; detect workflow omissions
+- **PR #139**: docs: restore CMRR in issue #53 README section and add 1 MHz erratum
+- **PR #136**: Add fleet execution for AC, slew and swing characterization with selectable netlists
+- **PR #135**: Grid-legal compensation resistor (XRz L=9.765) and passive realizability probes
+- **PR #134**: Identify sizing_check as historical DR-002 replay
+- **Issue #155** (closed): Reject malformed manifest entries in the standalone artifact freshness gate
+- **Issue #152** (closed): Expose generic-evidence artifact freshness as a tested local checker
+- **Issue #151** (closed): Bind PSRR/noise campaigns and validation runs to an immutable DUT snapshot
+- **Issue #149** (closed): Auditor: guard worktree-write-confinement rejects scoped sweep checkpoint writes
+- **Issue #144** (closed): Quantify matched-group sizing feasibility for the proposed offset allocation
+- **Issue #143** (closed): Bind historical AC cross-checks to matching DUT and supply points
+- **Issue #142** (closed): layout: unit-test probe-passives.py and de-duplicate its klt/Magic helpers
+- **Issue #138** (closed): Reconcile current signoff prerequisites with partial layout and measured offset
+- **Issue #137** (closed): Restore passive-grid checking and detect workflow omissions in the local CI runner
+- **Issue #132** (closed): Identify sizing_check widths and corners as historical DR-002 replay
+- **Issue #131** (closed): Verify grid-legal compensation resistor geometry and passive realizability
+- **Issue #130** (closed): Auditor guard review: worktree-write-confinement
+- **Issue #78** (closed): Characterize a tail clamp or degeneration candidate for the falling slew gap
+- **Issue #77** (closed): Add fleet execution for AC, slew and swing characterization with selectable netlists
+- **Issue #71** (closed): sim/opamp-characterization: README issue-#53 section has 'CMRR' replaced by a record id; record 566b9a5 overstates 1 MHz CMRR flatness
+
 - **PR #129**: test: assert klt version pin is identical across signoff workflow and manifest
 - **PR #128**: tests: unit tests for layout/bin/_klt_common.run_klt
 - **PR #125**: fix(integrator_check): resolve artifact paths, reject partial-layout aliases
