@@ -56,21 +56,26 @@ def main(argv):
             key = worst(rows, key=lambda k: float(rows[k][col]))
             cells.append(f"{float(rows[key][col]) * scale:.4g} {unit} @ {key[0].upper()}/{key[1]:g}C")
         cand, base = data[ids[0]][suf], data[ids[1]][suf]
-        better = sum(1 for k in cand if (float(cand[k][col]) > float(base[k][col])) == (worst is min)
+        common = [k for k in cand if k in base]
+        better = sum(1 for k in common if (float(cand[k][col]) > float(base[k][col])) == (worst is min)
                      and float(cand[k][col]) != float(base[k][col]))
-        same = sum(1 for k in cand if float(cand[k][col]) == float(base[k][col]))
-        print(f"| {label} | " + " | ".join(cells) + f" | {better} better, {len(cand) - better - same} worse, {same} equal |")
+        same = sum(1 for k in common if float(cand[k][col]) == float(base[k][col]))
+        absent = len(base) - len(common)
+        print(f"| {label} | " + " | ".join(cells) + f" | {better} better, {len(common) - better - same} worse, "
+              f"{same} equal" + (f", {absent} absent from candidate (errored unit)" if absent else "") + " |")
     print()
     print("Named points:")
     for label, corner, temp in NAMED:
         suf, col, scale, unit = next((m[1], m[2], m[3], m[5]) for m in METRICS if m[0] == label)
-        vals = [f"{float(data[rid][suf][(corner, temp)][col]) * scale:.4g}" for rid in ids]
+        vals = [f"{float(data[rid][suf][(corner, temp)][col]) * scale:.4g}" if (corner, temp) in data[rid][suf]
+                else "ABSENT(errored unit)" for rid in ids]
         print(f"  {label} @ {corner.upper()}/{temp:g}C: " + " | ".join(f"{rid}={v} {unit}" for rid, v in zip(ids, vals)))
     print()
     print("Full per-point delta (candidate - first baseline):")
     for label, suf, col, scale, worst, unit in METRICS:
         cand, base = data[ids[0]][suf], data[ids[1]][suf]
-        parts = [f"{k[0]}/{k[1]:g}:{(float(cand[k][col]) - float(base[k][col])) * scale:+.3g}" for k in sorted(cand)]
+        parts = [f"{k[0]}/{k[1]:g}:{(float(cand[k][col]) - float(base[k][col])) * scale:+.3g}" if k in cand
+                 else f"{k[0]}/{k[1]:g}:ABSENT" for k in sorted(base)]
         print(f"  {label} [{unit}]: " + " ".join(parts))
     return 0
 

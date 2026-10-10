@@ -1,0 +1,40 @@
+{
+  "netlist": "ac-iq-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      125.0
+    ]
+  },
+  "analysis": {
+    "kind": "dc",
+    "args": "Vinp 0 1m 1m"
+  },
+  "measurements": [
+    {
+      "name": "i_vdd_a",
+      "unit": "A",
+      "spice": ".meas dc i_vdd_a find i(vdd) at=0"
+    }
+  ],
+  "options": {
+    "timeout_s": 1200,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

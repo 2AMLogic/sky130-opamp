@@ -165,6 +165,19 @@ transition, so a last-digit difference in the transfer curve moves it by a
 step or two. `vout_max_v` does not show this. This is reported, not absorbed
 into a tolerance.
 
+#### Tail-clamp candidate for the fall-slew gap (issue #78): negative
+
+[`variants/`](variants/README.md) holds an experimental tail-clamp netlist (one
+added device; canonical design untouched), gm/ID-sized at two clamp strengths,
+and both measured on the fleet: records `20261010-162948-521c306-f0abf9`
+(45/45, 0 failed) and `20261010-162249-c8da429-a1db50` (44 + 1 unit whose
+SS/-40 C AC operating point is railed, a circuit result). Compared with the
+DR-007 baseline `20261010-103340-ba1dfa8-0241c1`, fall SR is **worse at all 15
+points** (worst 10.84 / 8.22 vs 11.03 V/us @ SS/-40 C). Swing and phase margin
+are also worse at all 15 points (PM misses >= 60 deg; worst 56.37 deg @ SS/27 C).
+Gain and GBW change slightly and Pq is unchanged. See the variants README for
+the mechanism and costs.
+
 ### PSRR and noise benches (issue #54)
 
 ```bash

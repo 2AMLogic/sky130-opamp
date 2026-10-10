@@ -1,0 +1,2 @@
+corner,temp_c,vdd_v,vcm_v,iq_a,pq_w,gain_dc_db,gbw_hz,phase_at_gbw_deg,phase_margin_deg,elapsed_s
+fs,125.0,1.8,0.9,6.56626e-05,0.00011819268,61.9262,18109100.0,-128.35572413859242,51.64427586140758,96.57

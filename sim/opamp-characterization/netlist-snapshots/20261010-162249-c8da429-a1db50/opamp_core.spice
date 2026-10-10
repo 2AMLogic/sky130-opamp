@@ -1,0 +1,43 @@
+** EXPERIMENTAL VARIANT (issue #78) -- NOT the canonical design.
+** Base: design/netlist/opamp_core.spice @ 9fb5db6 (DR-007 sizing, unchanged),
+**       plus ONE added device, XMCL (tail clamp). See README.md in this directory.
+** Flat netlist, same port order as the canonical file (vdd vss inn inp out ibias);
+** sim/opamp-characterization/bin/pvt_sweep.py --netlist wraps it in its own .subckt.
+**
+** XMCL: nfet_01v8, L = 1.2 um (the MB1/M5/M7 group length), drain = d1 (the
+** PMOS-mirror diode side, i.e. the same side M1 drives), gate = ibias, source = tail.
+** It is off while the tail sits at its quiescent level (V(tail) ~ 0.25-0.35 V), and
+** turns on when the falling-edge overdrive drags the tail toward vss: it then
+** holds V(tail) near ~0.1 V (gm/ID-sized, tt/27C), keeping M5 in saturation and
+** steering the tail current into d1 -> M3/M4 -> d2, the direction that turns M6 off.
+** Inherited DR-007 widths 4.634 / 7.819 um are off the 0.005 um grid (owned by
+** #50/#120, deliberately not repaired here). XMCL's unit width 15.495 um is on grid.
+**.subckt opamp_core vdd vss inn inp out ibias
+*.iopin vdd
+*.iopin vss
+*.iopin inn
+*.iopin inp
+*.iopin out
+*.iopin ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137
++ nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.04809286898839137
++ nrs=0.04809286898839137 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=2 m=2
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393
++ nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=10 m=10
+XM7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116
++ nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=10 m=10
+XMCL d1 ibias tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=15.495 nf=1 ad=4.49355 as=4.49355 pd=31.57 ps=31.57 nrd=0.018715714746692482
++ nrs=0.018715714746692482 sa=0 sb=0 sd=0 mult=8 m=8
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+**.ends
+.end

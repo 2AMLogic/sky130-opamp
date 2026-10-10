@@ -1,0 +1,14 @@
+* klt sim -- generated corner deck, do not edit
+.lib /opt/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice fs
+.include /var/tmp/eda-job-klt-sim-7767efbdd493/inputs/netlist.cir
+.temp 125.0
+.meas tran t20_rise when v(out)=v(l20) rise=1
+.meas tran t80_rise when v(out)=v(l80) rise=1
+.meas tran t80_fall when v(out)=v(l80) fall=1
+.meas tran t20_fall when v(out)=v(l20) fall=1
+.control
+alter vdd=1.8
+tran 2n 2.2u
+quit
+.endc
+.end
