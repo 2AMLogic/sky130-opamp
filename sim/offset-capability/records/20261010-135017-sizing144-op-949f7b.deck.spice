@@ -1,0 +1,401 @@
+* issue #144: ONE single-corner operating-point probe (tt, 27 C, VDD 1.8 V) of every
+* candidate and the canonical netlist, each wrapped as its own subcircuit and biased
+* identically (ideal 5 uA Iref, unity-gain buffer, VCM 0.9 V, 2 pF load). Not a grid.
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "$PDK_ROOT/sky130A/libs.tech/ngspice/corners/tt.spice"
+.include "$PDK_ROOT/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice"
+.include "$PDK_ROOT/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice"
+.temp 27
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+.subckt dut_canonical vdd vss inn inp out ibias
+.include "design/netlist/opamp_core.spice"
+.ends dut_canonical
+Xc_canonical vdd vss out_canonical inp_canonical out_canonical ibias_canonical dut_canonical
+Iref_canonical vdd ibias_canonical dc 5u
+Vinp_canonical inp_canonical 0 dc 0.9
+Cl_canonical out_canonical 0 2p
+.subckt dut_grid0 vdd vss inn inp out ibias
+.include "sim/offset-capability/candidates/opamp_core.grid0.spice"
+.ends dut_grid0
+Xc_grid0 vdd vss out_grid0 inp_grid0 out_grid0 ibias_grid0 dut_grid0
+Iref_grid0 vdd ibias_grid0 dc 5u
+Vinp_grid0 inp_grid0 0 dc 0.9
+Cl_grid0 out_grid0 0 2p
+.subckt dut_m2p1 vdd vss inn inp out ibias
+.include "sim/offset-capability/candidates/opamp_core.m2p1.spice"
+.ends dut_m2p1
+Xc_m2p1 vdd vss out_m2p1 inp_m2p1 out_m2p1 ibias_m2p1 dut_m2p1
+Iref_m2p1 vdd ibias_m2p1 dc 5u
+Vinp_m2p1 inp_m2p1 0 dc 0.9
+Cl_m2p1 out_m2p1 0 2p
+.subckt dut_m2p2 vdd vss inn inp out ibias
+.include "sim/offset-capability/candidates/opamp_core.m2p2.spice"
+.ends dut_m2p2
+Xc_m2p2 vdd vss out_m2p2 inp_m2p2 out_m2p2 ibias_m2p2 dut_m2p2
+Iref_m2p2 vdd ibias_m2p2 dc 5u
+Vinp_m2p2 inp_m2p2 0 dc 0.9
+Cl_m2p2 out_m2p2 0 2p
+.subckt dut_m4p2 vdd vss inn inp out ibias
+.include "sim/offset-capability/candidates/opamp_core.m4p2.spice"
+.ends dut_m4p2
+Xc_m4p2 vdd vss out_m4p2 inp_m4p2 out_m4p2 ibias_m4p2 dut_m4p2
+Iref_m4p2 vdd ibias_m4p2 dc 5u
+Vinp_m4p2 inp_m4p2 0 dc 0.9
+Cl_m4p2 out_m4p2 0 2p
+.control
+op
+echo OPV canonical out $&v(out_canonical)
+echo OPV canonical d1 $&v(xc_canonical.d1)
+echo OPV canonical d2 $&v(xc_canonical.d2)
+echo OPV canonical tail $&v(xc_canonical.tail)
+echo OPV canonical ibias $&v(ibias_canonical)
+echo OPD canonical XM1 id $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[id]
+echo OPD canonical XM1 gm $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD canonical XM1 gds $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD canonical XM1 vgs $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD canonical XM1 vds $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD canonical XM1 vth $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD canonical XM1 vdsat $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD canonical XM1 cgg $&@m.xc_canonical.xm1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD canonical XM2 id $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[id]
+echo OPD canonical XM2 gm $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[gm]
+echo OPD canonical XM2 gds $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[gds]
+echo OPD canonical XM2 vgs $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD canonical XM2 vds $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[vds]
+echo OPD canonical XM2 vth $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[vth]
+echo OPD canonical XM2 vdsat $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD canonical XM2 cgg $&@m.xc_canonical.xm2.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD canonical XM3 id $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[id]
+echo OPD canonical XM3 gm $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[gm]
+echo OPD canonical XM3 gds $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[gds]
+echo OPD canonical XM3 vgs $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD canonical XM3 vds $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[vds]
+echo OPD canonical XM3 vth $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[vth]
+echo OPD canonical XM3 vdsat $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD canonical XM3 cgg $&@m.xc_canonical.xm3.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD canonical XM4 id $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[id]
+echo OPD canonical XM4 gm $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[gm]
+echo OPD canonical XM4 gds $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[gds]
+echo OPD canonical XM4 vgs $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD canonical XM4 vds $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[vds]
+echo OPD canonical XM4 vth $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[vth]
+echo OPD canonical XM4 vdsat $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD canonical XM4 cgg $&@m.xc_canonical.xm4.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD canonical XM6 id $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[id]
+echo OPD canonical XM6 gm $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[gm]
+echo OPD canonical XM6 gds $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[gds]
+echo OPD canonical XM6 vgs $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD canonical XM6 vds $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[vds]
+echo OPD canonical XM6 vth $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[vth]
+echo OPD canonical XM6 vdsat $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD canonical XM6 cgg $&@m.xc_canonical.xm6.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD canonical XM7 id $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[id]
+echo OPD canonical XM7 gm $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[gm]
+echo OPD canonical XM7 gds $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[gds]
+echo OPD canonical XM7 vgs $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD canonical XM7 vds $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[vds]
+echo OPD canonical XM7 vth $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[vth]
+echo OPD canonical XM7 vdsat $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD canonical XM7 cgg $&@m.xc_canonical.xm7.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD canonical XMB1 id $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[id]
+echo OPD canonical XMB1 gm $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD canonical XMB1 gds $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD canonical XMB1 vgs $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD canonical XMB1 vds $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD canonical XMB1 vth $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD canonical XMB1 vdsat $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD canonical XMB1 cgg $&@m.xc_canonical.xmb1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD canonical XM5 id $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[id]
+echo OPD canonical XM5 gm $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[gm]
+echo OPD canonical XM5 gds $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[gds]
+echo OPD canonical XM5 vgs $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD canonical XM5 vds $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[vds]
+echo OPD canonical XM5 vth $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[vth]
+echo OPD canonical XM5 vdsat $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD canonical XM5 cgg $&@m.xc_canonical.xm5.msky130_fd_pr__nfet_01v8[cgg]
+echo OPI canonical $&i(vdd)
+echo OPV grid0 out $&v(out_grid0)
+echo OPV grid0 d1 $&v(xc_grid0.d1)
+echo OPV grid0 d2 $&v(xc_grid0.d2)
+echo OPV grid0 tail $&v(xc_grid0.tail)
+echo OPV grid0 ibias $&v(ibias_grid0)
+echo OPD grid0 XM1 id $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[id]
+echo OPD grid0 XM1 gm $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD grid0 XM1 gds $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD grid0 XM1 vgs $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD grid0 XM1 vds $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD grid0 XM1 vth $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD grid0 XM1 vdsat $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD grid0 XM1 cgg $&@m.xc_grid0.xm1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD grid0 XM2 id $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[id]
+echo OPD grid0 XM2 gm $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[gm]
+echo OPD grid0 XM2 gds $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[gds]
+echo OPD grid0 XM2 vgs $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD grid0 XM2 vds $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[vds]
+echo OPD grid0 XM2 vth $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[vth]
+echo OPD grid0 XM2 vdsat $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD grid0 XM2 cgg $&@m.xc_grid0.xm2.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD grid0 XM3 id $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[id]
+echo OPD grid0 XM3 gm $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[gm]
+echo OPD grid0 XM3 gds $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[gds]
+echo OPD grid0 XM3 vgs $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD grid0 XM3 vds $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[vds]
+echo OPD grid0 XM3 vth $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[vth]
+echo OPD grid0 XM3 vdsat $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD grid0 XM3 cgg $&@m.xc_grid0.xm3.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD grid0 XM4 id $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[id]
+echo OPD grid0 XM4 gm $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[gm]
+echo OPD grid0 XM4 gds $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[gds]
+echo OPD grid0 XM4 vgs $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD grid0 XM4 vds $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[vds]
+echo OPD grid0 XM4 vth $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[vth]
+echo OPD grid0 XM4 vdsat $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD grid0 XM4 cgg $&@m.xc_grid0.xm4.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD grid0 XM6 id $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[id]
+echo OPD grid0 XM6 gm $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[gm]
+echo OPD grid0 XM6 gds $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[gds]
+echo OPD grid0 XM6 vgs $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD grid0 XM6 vds $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[vds]
+echo OPD grid0 XM6 vth $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[vth]
+echo OPD grid0 XM6 vdsat $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD grid0 XM6 cgg $&@m.xc_grid0.xm6.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD grid0 XM7 id $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[id]
+echo OPD grid0 XM7 gm $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[gm]
+echo OPD grid0 XM7 gds $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[gds]
+echo OPD grid0 XM7 vgs $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD grid0 XM7 vds $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[vds]
+echo OPD grid0 XM7 vth $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[vth]
+echo OPD grid0 XM7 vdsat $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD grid0 XM7 cgg $&@m.xc_grid0.xm7.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD grid0 XMB1 id $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[id]
+echo OPD grid0 XMB1 gm $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD grid0 XMB1 gds $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD grid0 XMB1 vgs $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD grid0 XMB1 vds $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD grid0 XMB1 vth $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD grid0 XMB1 vdsat $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD grid0 XMB1 cgg $&@m.xc_grid0.xmb1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD grid0 XM5 id $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[id]
+echo OPD grid0 XM5 gm $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[gm]
+echo OPD grid0 XM5 gds $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[gds]
+echo OPD grid0 XM5 vgs $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD grid0 XM5 vds $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[vds]
+echo OPD grid0 XM5 vth $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[vth]
+echo OPD grid0 XM5 vdsat $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD grid0 XM5 cgg $&@m.xc_grid0.xm5.msky130_fd_pr__nfet_01v8[cgg]
+echo OPI grid0 $&i(vdd)
+echo OPV m2p1 out $&v(out_m2p1)
+echo OPV m2p1 d1 $&v(xc_m2p1.d1)
+echo OPV m2p1 d2 $&v(xc_m2p1.d2)
+echo OPV m2p1 tail $&v(xc_m2p1.tail)
+echo OPV m2p1 ibias $&v(ibias_m2p1)
+echo OPD m2p1 XM1 id $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p1 XM1 gm $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p1 XM1 gds $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p1 XM1 vgs $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p1 XM1 vds $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p1 XM1 vth $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p1 XM1 vdsat $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p1 XM1 cgg $&@m.xc_m2p1.xm1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p1 XM2 id $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p1 XM2 gm $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p1 XM2 gds $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p1 XM2 vgs $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p1 XM2 vds $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p1 XM2 vth $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p1 XM2 vdsat $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p1 XM2 cgg $&@m.xc_m2p1.xm2.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p1 XM3 id $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p1 XM3 gm $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p1 XM3 gds $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p1 XM3 vgs $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p1 XM3 vds $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p1 XM3 vth $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p1 XM3 vdsat $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p1 XM3 cgg $&@m.xc_m2p1.xm3.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p1 XM4 id $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p1 XM4 gm $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p1 XM4 gds $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p1 XM4 vgs $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p1 XM4 vds $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p1 XM4 vth $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p1 XM4 vdsat $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p1 XM4 cgg $&@m.xc_m2p1.xm4.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p1 XM6 id $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p1 XM6 gm $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p1 XM6 gds $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p1 XM6 vgs $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p1 XM6 vds $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p1 XM6 vth $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p1 XM6 vdsat $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p1 XM6 cgg $&@m.xc_m2p1.xm6.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p1 XM7 id $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p1 XM7 gm $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p1 XM7 gds $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p1 XM7 vgs $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p1 XM7 vds $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p1 XM7 vth $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p1 XM7 vdsat $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p1 XM7 cgg $&@m.xc_m2p1.xm7.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p1 XMB1 id $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p1 XMB1 gm $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p1 XMB1 gds $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p1 XMB1 vgs $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p1 XMB1 vds $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p1 XMB1 vth $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p1 XMB1 vdsat $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p1 XMB1 cgg $&@m.xc_m2p1.xmb1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p1 XM5 id $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p1 XM5 gm $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p1 XM5 gds $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p1 XM5 vgs $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p1 XM5 vds $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p1 XM5 vth $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p1 XM5 vdsat $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p1 XM5 cgg $&@m.xc_m2p1.xm5.msky130_fd_pr__nfet_01v8[cgg]
+echo OPI m2p1 $&i(vdd)
+echo OPV m2p2 out $&v(out_m2p2)
+echo OPV m2p2 d1 $&v(xc_m2p2.d1)
+echo OPV m2p2 d2 $&v(xc_m2p2.d2)
+echo OPV m2p2 tail $&v(xc_m2p2.tail)
+echo OPV m2p2 ibias $&v(ibias_m2p2)
+echo OPD m2p2 XM1 id $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p2 XM1 gm $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p2 XM1 gds $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p2 XM1 vgs $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p2 XM1 vds $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p2 XM1 vth $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p2 XM1 vdsat $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p2 XM1 cgg $&@m.xc_m2p2.xm1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p2 XM2 id $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p2 XM2 gm $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p2 XM2 gds $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p2 XM2 vgs $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p2 XM2 vds $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p2 XM2 vth $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p2 XM2 vdsat $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p2 XM2 cgg $&@m.xc_m2p2.xm2.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p2 XM3 id $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p2 XM3 gm $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p2 XM3 gds $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p2 XM3 vgs $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p2 XM3 vds $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p2 XM3 vth $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p2 XM3 vdsat $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p2 XM3 cgg $&@m.xc_m2p2.xm3.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p2 XM4 id $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p2 XM4 gm $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p2 XM4 gds $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p2 XM4 vgs $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p2 XM4 vds $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p2 XM4 vth $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p2 XM4 vdsat $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p2 XM4 cgg $&@m.xc_m2p2.xm4.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p2 XM6 id $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[id]
+echo OPD m2p2 XM6 gm $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m2p2 XM6 gds $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m2p2 XM6 vgs $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m2p2 XM6 vds $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m2p2 XM6 vth $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m2p2 XM6 vdsat $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m2p2 XM6 cgg $&@m.xc_m2p2.xm6.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m2p2 XM7 id $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p2 XM7 gm $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p2 XM7 gds $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p2 XM7 vgs $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p2 XM7 vds $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p2 XM7 vth $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p2 XM7 vdsat $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p2 XM7 cgg $&@m.xc_m2p2.xm7.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p2 XMB1 id $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p2 XMB1 gm $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p2 XMB1 gds $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p2 XMB1 vgs $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p2 XMB1 vds $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p2 XMB1 vth $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p2 XMB1 vdsat $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p2 XMB1 cgg $&@m.xc_m2p2.xmb1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m2p2 XM5 id $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[id]
+echo OPD m2p2 XM5 gm $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m2p2 XM5 gds $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m2p2 XM5 vgs $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m2p2 XM5 vds $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m2p2 XM5 vth $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m2p2 XM5 vdsat $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m2p2 XM5 cgg $&@m.xc_m2p2.xm5.msky130_fd_pr__nfet_01v8[cgg]
+echo OPI m2p2 $&i(vdd)
+echo OPV m4p2 out $&v(out_m4p2)
+echo OPV m4p2 d1 $&v(xc_m4p2.d1)
+echo OPV m4p2 d2 $&v(xc_m4p2.d2)
+echo OPV m4p2 tail $&v(xc_m4p2.tail)
+echo OPV m4p2 ibias $&v(ibias_m4p2)
+echo OPD m4p2 XM1 id $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m4p2 XM1 gm $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m4p2 XM1 gds $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m4p2 XM1 vgs $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m4p2 XM1 vds $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m4p2 XM1 vth $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m4p2 XM1 vdsat $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m4p2 XM1 cgg $&@m.xc_m4p2.xm1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m4p2 XM2 id $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[id]
+echo OPD m4p2 XM2 gm $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m4p2 XM2 gds $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m4p2 XM2 vgs $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m4p2 XM2 vds $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m4p2 XM2 vth $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m4p2 XM2 vdsat $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m4p2 XM2 cgg $&@m.xc_m4p2.xm2.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m4p2 XM3 id $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[id]
+echo OPD m4p2 XM3 gm $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m4p2 XM3 gds $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m4p2 XM3 vgs $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m4p2 XM3 vds $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m4p2 XM3 vth $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m4p2 XM3 vdsat $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m4p2 XM3 cgg $&@m.xc_m4p2.xm3.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m4p2 XM4 id $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[id]
+echo OPD m4p2 XM4 gm $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m4p2 XM4 gds $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m4p2 XM4 vgs $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m4p2 XM4 vds $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m4p2 XM4 vth $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m4p2 XM4 vdsat $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m4p2 XM4 cgg $&@m.xc_m4p2.xm4.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m4p2 XM6 id $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[id]
+echo OPD m4p2 XM6 gm $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[gm]
+echo OPD m4p2 XM6 gds $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[gds]
+echo OPD m4p2 XM6 vgs $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[vgs]
+echo OPD m4p2 XM6 vds $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[vds]
+echo OPD m4p2 XM6 vth $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[vth]
+echo OPD m4p2 XM6 vdsat $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[vdsat]
+echo OPD m4p2 XM6 cgg $&@m.xc_m4p2.xm6.msky130_fd_pr__pfet_01v8[cgg]
+echo OPD m4p2 XM7 id $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[id]
+echo OPD m4p2 XM7 gm $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m4p2 XM7 gds $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m4p2 XM7 vgs $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m4p2 XM7 vds $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m4p2 XM7 vth $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m4p2 XM7 vdsat $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m4p2 XM7 cgg $&@m.xc_m4p2.xm7.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m4p2 XMB1 id $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[id]
+echo OPD m4p2 XMB1 gm $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m4p2 XMB1 gds $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m4p2 XMB1 vgs $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m4p2 XMB1 vds $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m4p2 XMB1 vth $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m4p2 XMB1 vdsat $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m4p2 XMB1 cgg $&@m.xc_m4p2.xmb1.msky130_fd_pr__nfet_01v8[cgg]
+echo OPD m4p2 XM5 id $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[id]
+echo OPD m4p2 XM5 gm $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[gm]
+echo OPD m4p2 XM5 gds $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[gds]
+echo OPD m4p2 XM5 vgs $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[vgs]
+echo OPD m4p2 XM5 vds $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[vds]
+echo OPD m4p2 XM5 vth $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[vth]
+echo OPD m4p2 XM5 vdsat $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[vdsat]
+echo OPD m4p2 XM5 cgg $&@m.xc_m4p2.xm5.msky130_fd_pr__nfet_01v8[cgg]
+echo OPI m4p2 $&i(vdd)
+.endc
+.end

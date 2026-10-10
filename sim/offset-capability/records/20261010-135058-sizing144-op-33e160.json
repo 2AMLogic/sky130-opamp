@@ -1,0 +1,960 @@
+{
+  "record_id": "20261010-135058-sizing144-op-33e160",
+  "kind": "single-corner operating-point probe (local ngspice -b, one run)",
+  "conditions": {
+    "corner": "tt",
+    "temp_c": 27.0,
+    "vdd_v": 1.8,
+    "vcm_v": 0.9,
+    "iref_a": 5e-06,
+    "bench": "unity-gain buffer, 2 pF"
+  },
+  "ngspice": "",
+  "pdk_root": "/home/ubuntu/.volare/sky130A",
+  "dut_sha256": {
+    "canonical": "sha256:feb7cff49291aa308cbe3c07f5ea207f73fdf73110ac24647aacdb4753db9530",
+    "grid0": "sha256:b1907e62ac914921b33ba45ed76664ccdee866aad345414d1ad43869d30b99d2",
+    "m2p1": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2",
+    "m2p2": "sha256:c34cc8c4b269cb634374f5a8aab41aa4b9eb72ca48af78ba1ef567354a3350f4",
+    "m4p2": "sha256:fdd4ee4cdb0bdb147a93ff181c4687afcd83a0789b397806ac0778f439afe058"
+  },
+  "canonical_op_vs_pelgrom_constants": {
+    "id1": [
+      4.71553e-06,
+      4.715665e-06
+    ],
+    "gm1": [
+      8.3415e-05,
+      8.341725e-05
+    ],
+    "gds2": [
+      4.8978e-07,
+      4.898424e-07
+    ],
+    "id3": [
+      4.71553e-06,
+      4.715664e-06
+    ],
+    "gm3": [
+      6.68255e-05,
+      6.68271e-05
+    ],
+    "gds4": [
+      1.20931e-06,
+      1.209336e-06
+    ],
+    "id6": [
+      5.13048e-05,
+      5.130935e-05
+    ],
+    "gm6": [
+      0.000715352,
+      0.0007153998
+    ],
+    "id7": [
+      5.13048e-05,
+      5.130935e-05
+    ],
+    "gm7": [
+      0.000940473,
+      0.0009405352
+    ]
+  },
+  "candidates": {
+    "canonical": {
+      "netlist": "design/netlist/opamp_core.spice",
+      "geometry": {
+        "XM1": {
+          "kind": "nfet",
+          "w": 6.03,
+          "l": 1.2,
+          "mult": 1.0
+        },
+        "XM3": {
+          "kind": "pfet",
+          "w": 4.634,
+          "l": 0.3,
+          "mult": 1.0
+        },
+        "XM6": {
+          "kind": "pfet",
+          "w": 4.634,
+          "l": 0.3,
+          "mult": 10.0
+        },
+        "XM7": {
+          "kind": "nfet",
+          "w": 7.819,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XMB1": {
+          "kind": "nfet",
+          "w": 7.819,
+          "l": 1.2,
+          "mult": 1.0
+        }
+      },
+      "gate_area_um2": {
+        "pair_two_devices": 14.472,
+        "mirror_two_devices": 2.7804,
+        "xm6_total": 13.902000000000001,
+        "all_mos_total": 153.1308
+      },
+      "op": {
+        "nodes": {
+          "out": 0.899849,
+          "d1": 0.823261,
+          "d2": 0.815859,
+          "tail": 0.210231,
+          "ibias": 0.628094
+        },
+        "devices": {
+          "XM1": {
+            "id": 4.71553e-06,
+            "gm": 8.3415e-05,
+            "gds": 4.86764e-07,
+            "vgs": 0.689619,
+            "vds": 0.613029,
+            "vth": 0.626622,
+            "vdsat": 0.093425,
+            "cgg": 3.60574e-14
+          },
+          "XM2": {
+            "id": 4.72448e-06,
+            "gm": 8.35361e-05,
+            "gds": 4.8978e-07,
+            "vgs": 0.689769,
+            "vds": 0.605628,
+            "vth": 0.626622,
+            "vdsat": 0.093514,
+            "cgg": 3.60643e-14
+          },
+          "XM3": {
+            "id": 4.71553e-06,
+            "gm": 6.68255e-05,
+            "gds": 1.20975e-06,
+            "vgs": 0.976739,
+            "vds": 0.976739,
+            "vth": 0.936225,
+            "vdsat": 0.104622,
+            "cgg": 6.87038e-15
+          },
+          "XM4": {
+            "id": 4.72448e-06,
+            "gm": 6.69303e-05,
+            "gds": 1.20931e-06,
+            "vgs": 0.976739,
+            "vds": 0.98414,
+            "vth": 0.936164,
+            "vdsat": 0.104655,
+            "cgg": 6.87089e-15
+          },
+          "XM6": {
+            "id": 5.13048e-05,
+            "gm": 0.000715352,
+            "gds": 1.32519e-05,
+            "vgs": 0.98414,
+            "vds": 0.90015,
+            "vth": 0.936855,
+            "vdsat": 0.108412,
+            "cgg": 6.92813e-14
+          },
+          "XM7": {
+            "id": 5.13048e-05,
+            "gm": 0.000940473,
+            "gds": 4.59638e-06,
+            "vgs": 0.628093,
+            "vds": 0.899849,
+            "vth": 0.571598,
+            "vdsat": 0.0855689,
+            "cgg": 4.67726e-13
+          },
+          "XMB1": {
+            "id": 5e-06,
+            "gm": 9.22206e-05,
+            "gds": 5.07614e-07,
+            "vgs": 0.628093,
+            "vds": 0.628093,
+            "vth": 0.571599,
+            "vdsat": 0.0855689,
+            "cgg": 4.6803e-14
+          },
+          "XM5": {
+            "id": 9.44001e-06,
+            "gm": 0.000175086,
+            "gds": 2.43481e-06,
+            "vgs": 0.628094,
+            "vds": 0.21023,
+            "vth": 0.571599,
+            "vdsat": 0.0855689,
+            "cgg": 9.62348e-14
+          }
+        },
+        "i_vdd_a": null
+      },
+      "gm_over_id": {
+        "XM1": 17.68942197377601,
+        "XM3": 14.171365678937468,
+        "XM6": 13.943178805881713,
+        "XM7": 18.33109182766525
+      },
+      "sensitivities": {
+        "note": "input-referred Vos per unit threshold shift of one device, from this netlist's own OP",
+        "pair_dVos_dVT1": 1.0,
+        "mirror_dVos_dVT3": 0.8011209015165139,
+        "stage2_dVos_dVT6": 0.02036911826410118,
+        "first_stage_gain_A1": 49.093926749024476
+      },
+      "pelgrom_handcalc_sigma_v": {
+        "pair": 0.0017673267024123104,
+        "mirror": 0.007081806770804256,
+        "stage2": 4.026526010883413e-05,
+        "bias": 3.081980758150205e-05,
+        "passives": 0.0,
+        "total": 0.007299178170436694
+      },
+      "measured_anchored_estimate_sigma_v": {
+        "pair": 0.0031027054956851968,
+        "mirror": 0.007740105773942982,
+        "stage2": 5.241777326378235e-05,
+        "bias": 3.716618412975573e-05,
+        "total": 0.008339073553637557
+      },
+      "capacitance_estimate_f": {
+        "note": "BSIM4 cgg at the OP (gate total); the mirror node (d1) holds cgg3+cgg4; the second-stage input node (d2) holds cgg6 (all 10 fingers) -- estimates, the AC fleet bench is the measurement",
+        "d1_cgg3_plus_cgg4": 1.374127e-14,
+        "d2_cgg6": 6.92813e-14,
+        "input_cgg1": 3.60574e-14,
+        "mirror_pole_estimate_hz": 773990224.3087759
+      },
+      "headroom": {
+        "vsg3_v": 0.976739,
+        "vth3_v": 0.936225,
+        "vsg6_v": 0.98414,
+        "vdsat6_v": 0.108412,
+        "v_d1_minus_v_d2_v": 0.00740200000000002,
+        "pair_sat_margin_v": 0.5196040000000001,
+        "icmr_upper_edge_estimate_v": 1.449883,
+        "note": "ICMR upper edge ~ VDD - Vsg3 + Vth1 (pair enters triode); tt/27 C only"
+      },
+      "systematic_vos_estimate_v": 0.00015100000000001224
+    },
+    "grid0": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.grid0.spice",
+      "geometry": {
+        "XM1": {
+          "kind": "nfet",
+          "w": 6.03,
+          "l": 1.2,
+          "mult": 1.0
+        },
+        "XM3": {
+          "kind": "pfet",
+          "w": 4.635,
+          "l": 0.3,
+          "mult": 1.0
+        },
+        "XM6": {
+          "kind": "pfet",
+          "w": 4.635,
+          "l": 0.3,
+          "mult": 10.0
+        },
+        "XM7": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XMB1": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 1.0
+        }
+      },
+      "gate_area_um2": {
+        "pair_two_devices": 14.472,
+        "mirror_two_devices": 2.7809999999999997,
+        "xm6_total": 13.904999999999998,
+        "all_mos_total": 153.15
+      },
+      "op": {
+        "nodes": {
+          "out": 0.899849,
+          "d1": 0.823272,
+          "d2": 0.815871,
+          "tail": 0.210231,
+          "ibias": 0.628085
+        },
+        "devices": {
+          "XM1": {
+            "id": 4.71553e-06,
+            "gm": 8.3415e-05,
+            "gds": 4.86761e-07,
+            "vgs": 0.689619,
+            "vds": 0.613041,
+            "vth": 0.626622,
+            "vdsat": 0.093425,
+            "cgg": 3.60574e-14
+          },
+          "XM2": {
+            "id": 4.72448e-06,
+            "gm": 8.35361e-05,
+            "gds": 4.89776e-07,
+            "vgs": 0.689769,
+            "vds": 0.60564,
+            "vth": 0.626622,
+            "vdsat": 0.093514,
+            "cgg": 3.60643e-14
+          },
+          "XM3": {
+            "id": 4.71553e-06,
+            "gm": 6.68282e-05,
+            "gds": 1.20992e-06,
+            "vgs": 0.976727,
+            "vds": 0.976727,
+            "vth": 0.936229,
+            "vdsat": 0.104612,
+            "cgg": 6.87174e-15
+          },
+          "XM4": {
+            "id": 4.72448e-06,
+            "gm": 6.6933e-05,
+            "gds": 1.20948e-06,
+            "vgs": 0.976727,
+            "vds": 0.984128,
+            "vth": 0.936168,
+            "vdsat": 0.104646,
+            "cgg": 6.87225e-15
+          },
+          "XM6": {
+            "id": 5.13048e-05,
+            "gm": 0.000715384,
+            "gds": 1.32537e-05,
+            "vgs": 0.984128,
+            "vds": 0.90015,
+            "vth": 0.93686,
+            "vdsat": 0.108401,
+            "cgg": 6.92951e-14
+          },
+          "XM7": {
+            "id": 5.13048e-05,
+            "gm": 0.000940502,
+            "gds": 4.59645e-06,
+            "vgs": 0.628085,
+            "vds": 0.899849,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.67783e-13
+          },
+          "XMB1": {
+            "id": 5e-06,
+            "gm": 9.22234e-05,
+            "gds": 5.07624e-07,
+            "vgs": 0.628085,
+            "vds": 0.628084,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.68087e-14
+          },
+          "XM5": {
+            "id": 9.44002e-06,
+            "gm": 0.000175092,
+            "gds": 2.43477e-06,
+            "vgs": 0.628085,
+            "vds": 0.21023,
+            "vth": 0.571596,
+            "vdsat": 0.0855649,
+            "cgg": 9.62464e-14
+          }
+        },
+        "i_vdd_a": null
+      },
+      "gm_over_id": {
+        "XM1": 17.68942197377601,
+        "XM3": 14.171938255084795,
+        "XM6": 13.943802529198049,
+        "XM7": 18.331657076920678
+      },
+      "sensitivities": {
+        "note": "input-referred Vos per unit threshold shift of one device, from this netlist's own OP",
+        "pair_dVos_dVT1": 1.0,
+        "mirror_dVos_dVT3": 0.8011532697956004,
+        "stage2_dVos_dVT6": 0.020371108313852422,
+        "first_stage_gain_A1": 49.08913077252633
+      },
+      "pelgrom_handcalc_sigma_v": {
+        "pair": 0.0017673267024123104,
+        "mirror": 0.00708132779250337,
+        "stage2": 4.0264842651411355e-05,
+        "bias": 3.0820416539131244e-05,
+        "passives": 0.0,
+        "total": 0.007298713457423138
+      },
+      "measured_anchored_estimate_sigma_v": {
+        "pair": 0.0031027054956851968,
+        "mirror": 0.007739582271561138,
+        "stage2": 5.241722981296457e-05,
+        "bias": 3.716691848318458e-05,
+        "total": 0.008338587654814777
+      },
+      "capacitance_estimate_f": {
+        "note": "BSIM4 cgg at the OP (gate total); the mirror node (d1) holds cgg3+cgg4; the second-stage input node (d2) holds cgg6 (all 10 fingers) -- estimates, the AC fleet bench is the measurement",
+        "d1_cgg3_plus_cgg4": 1.3743990000000001e-14,
+        "d2_cgg6": 6.92951e-14,
+        "input_cgg1": 3.60574e-14,
+        "mirror_pole_estimate_hz": 773868313.9273094
+      },
+      "headroom": {
+        "vsg3_v": 0.976727,
+        "vth3_v": 0.936229,
+        "vsg6_v": 0.984128,
+        "vdsat6_v": 0.108401,
+        "v_d1_minus_v_d2_v": 0.007400999999999991,
+        "pair_sat_margin_v": 0.519616,
+        "icmr_upper_edge_estimate_v": 1.4498950000000002,
+        "note": "ICMR upper edge ~ VDD - Vsg3 + Vth1 (pair enters triode); tt/27 C only"
+      },
+      "systematic_vos_estimate_v": 0.00015100000000001224
+    },
+    "m2p1": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m2p1.spice",
+      "geometry": {
+        "XM1": {
+          "kind": "nfet",
+          "w": 6.03,
+          "l": 1.2,
+          "mult": 1.0
+        },
+        "XM3": {
+          "kind": "pfet",
+          "w": 9.27,
+          "l": 0.6,
+          "mult": 1.0
+        },
+        "XM6": {
+          "kind": "pfet",
+          "w": 9.27,
+          "l": 0.6,
+          "mult": 10.0
+        },
+        "XM7": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XMB1": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 1.0
+        }
+      },
+      "gate_area_um2": {
+        "pair_two_devices": 14.472,
+        "mirror_two_devices": 11.123999999999999,
+        "xm6_total": 55.61999999999999,
+        "all_mos_total": 203.208
+      },
+      "op": {
+        "nodes": {
+          "out": 0.899936,
+          "d1": 0.750093,
+          "d2": 0.743654,
+          "tail": 0.209912,
+          "ibias": 0.628085
+        },
+        "devices": {
+          "XM1": {
+            "id": 4.71862e-06,
+            "gm": 8.34476e-05,
+            "gds": 5.13243e-07,
+            "vgs": 0.690024,
+            "vds": 0.54018,
+            "vth": 0.626549,
+            "vdsat": 0.0937022,
+            "cgg": 3.60941e-14
+          },
+          "XM2": {
+            "id": 4.72062e-06,
+            "gm": 8.34733e-05,
+            "gds": 5.16192e-07,
+            "vgs": 0.690088,
+            "vds": 0.533741,
+            "vth": 0.626549,
+            "vdsat": 0.09374,
+            "cgg": 3.60986e-14
+          },
+          "XM3": {
+            "id": 4.71861e-06,
+            "gm": 6.94435e-05,
+            "gds": 3.11513e-07,
+            "vgs": 1.04991,
+            "vds": 1.04991,
+            "vth": 1.0064,
+            "vdsat": 0.102123,
+            "cgg": 2.55802e-14
+          },
+          "XM4": {
+            "id": 4.72062e-06,
+            "gm": 6.94702e-05,
+            "gds": 3.10698e-07,
+            "vgs": 1.04991,
+            "vds": 1.05635,
+            "vth": 1.00639,
+            "vdsat": 0.102129,
+            "cgg": 2.55806e-14
+          },
+          "XM6": {
+            "id": 5.13052e-05,
+            "gm": 0.000741804,
+            "gds": 3.63679e-06,
+            "vgs": 1.05635,
+            "vds": 0.900063,
+            "vth": 1.00665,
+            "vdsat": 0.105585,
+            "cgg": 2.58105e-13
+          },
+          "XM7": {
+            "id": 5.13052e-05,
+            "gm": 0.000940507,
+            "gds": 4.59635e-06,
+            "vgs": 0.628085,
+            "vds": 0.899936,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.67783e-13
+          },
+          "XMB1": {
+            "id": 5e-06,
+            "gm": 9.22234e-05,
+            "gds": 5.07624e-07,
+            "vgs": 0.628085,
+            "vds": 0.628084,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.68087e-14
+          },
+          "XM5": {
+            "id": 9.43924e-06,
+            "gm": 0.000175075,
+            "gds": 2.441e-06,
+            "vgs": 0.628085,
+            "vds": 0.209912,
+            "vth": 0.571596,
+            "vdsat": 0.0855649,
+            "cgg": 9.62593e-14
+          }
+        },
+        "i_vdd_a": null
+      },
+      "gm_over_id": {
+        "XM1": 17.68474681156779,
+        "XM3": 14.716939946297744,
+        "XM6": 14.45865136477394,
+        "XM7": 18.331611610519012
+      },
+      "sensitivities": {
+        "note": "input-referred Vos per unit threshold shift of one device, from this netlist's own OP",
+        "pair_dVos_dVT1": 1.0,
+        "mirror_dVos_dVT3": 0.8321809135313658,
+        "stage2_dVos_dVT6": 0.009909092652155364,
+        "first_stage_gain_A1": 100.91741344072368
+      },
+      "pelgrom_handcalc_sigma_v": {
+        "pair": 0.0017673282688618374,
+        "mirror": 0.0029261371888782625,
+        "stage2": 7.791419208967463e-06,
+        "bias": 1.4458062546485313e-05,
+        "passives": 0.0,
+        "total": 0.003418478872223792
+      },
+      "measured_anchored_estimate_sigma_v": {
+        "pair": 0.0031027082457322306,
+        "mirror": 0.0031981402605275834,
+        "stage2": 1.0142958083341196e-05,
+        "bias": 1.743524885225807e-05,
+        "total": 0.004455929358915313
+      },
+      "capacitance_estimate_f": {
+        "note": "BSIM4 cgg at the OP (gate total); the mirror node (d1) holds cgg3+cgg4; the second-stage input node (d2) holds cgg6 (all 10 fingers) -- estimates, the AC fleet bench is the measurement",
+        "d1_cgg3_plus_cgg4": 5.11608e-14,
+        "d2_cgg6": 2.58105e-13,
+        "input_cgg1": 3.60941e-14,
+        "mirror_pole_estimate_hz": 216030169.3992673
+      },
+      "headroom": {
+        "vsg3_v": 1.04991,
+        "vth3_v": 1.0064,
+        "vsg6_v": 1.05635,
+        "vdsat6_v": 0.105585,
+        "v_d1_minus_v_d2_v": 0.0064389999999999725,
+        "pair_sat_margin_v": 0.4464778,
+        "icmr_upper_edge_estimate_v": 1.3766390000000002,
+        "note": "ICMR upper edge ~ VDD - Vsg3 + Vth1 (pair enters triode); tt/27 C only"
+      },
+      "systematic_vos_estimate_v": 6.4000000000064e-05
+    },
+    "m2p2": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m2p2.spice",
+      "geometry": {
+        "XM1": {
+          "kind": "nfet",
+          "w": 12.06,
+          "l": 2.4,
+          "mult": 1.0
+        },
+        "XM3": {
+          "kind": "pfet",
+          "w": 9.27,
+          "l": 0.6,
+          "mult": 1.0
+        },
+        "XM6": {
+          "kind": "pfet",
+          "w": 9.27,
+          "l": 0.6,
+          "mult": 10.0
+        },
+        "XM7": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XMB1": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 1.0
+        }
+      },
+      "gate_area_um2": {
+        "pair_two_devices": 57.888,
+        "mirror_two_devices": 11.123999999999999,
+        "xm6_total": 55.61999999999999,
+        "all_mos_total": 246.624
+      },
+      "op": {
+        "nodes": {
+          "out": 0.89995,
+          "d1": 0.749771,
+          "d2": 0.743654,
+          "tail": 0.229679,
+          "ibias": 0.628085
+        },
+        "devices": {
+          "XM1": {
+            "id": 4.7411e-06,
+            "gm": 8.5535e-05,
+            "gds": 3.91522e-07,
+            "vgs": 0.670271,
+            "vds": 0.520092,
+            "vth": 0.597879,
+            "vdsat": 0.0936531,
+            "cgg": 1.45067e-13
+          },
+          "XM2": {
+            "id": 4.74301e-06,
+            "gm": 8.55611e-05,
+            "gds": 3.93556e-07,
+            "vgs": 0.670321,
+            "vds": 0.513975,
+            "vth": 0.597879,
+            "vdsat": 0.0936841,
+            "cgg": 1.45085e-13
+          },
+          "XM3": {
+            "id": 4.7411e-06,
+            "gm": 6.97108e-05,
+            "gds": 3.1281e-07,
+            "vgs": 1.05023,
+            "vds": 1.05023,
+            "vth": 1.0064,
+            "vdsat": 0.102301,
+            "cgg": 2.55922e-14
+          },
+          "XM4": {
+            "id": 4.74301e-06,
+            "gm": 6.97363e-05,
+            "gds": 3.12032e-07,
+            "vgs": 1.05023,
+            "vds": 1.05635,
+            "vth": 1.00639,
+            "vdsat": 0.102306,
+            "cgg": 2.55925e-14
+          },
+          "XM6": {
+            "id": 5.13053e-05,
+            "gm": 0.000741804,
+            "gds": 3.63682e-06,
+            "vgs": 1.05635,
+            "vds": 0.90005,
+            "vth": 1.00665,
+            "vdsat": 0.105585,
+            "cgg": 2.58105e-13
+          },
+          "XM7": {
+            "id": 5.13053e-05,
+            "gm": 0.000940508,
+            "gds": 4.59633e-06,
+            "vgs": 0.628085,
+            "vds": 0.899949,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.67783e-13
+          },
+          "XMB1": {
+            "id": 5e-06,
+            "gm": 9.22234e-05,
+            "gds": 5.07624e-07,
+            "vgs": 0.628085,
+            "vds": 0.628084,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.68087e-14
+          },
+          "XM5": {
+            "id": 9.48412e-06,
+            "gm": 0.000176,
+            "gds": 2.12011e-06,
+            "vgs": 0.628085,
+            "vds": 0.229679,
+            "vth": 0.571596,
+            "vdsat": 0.0855649,
+            "cgg": 9.55827e-14
+          }
+        },
+        "i_vdd_a": null
+      },
+      "gm_over_id": {
+        "XM1": 18.041171879943473,
+        "XM3": 14.703507624812806,
+        "XM6": 14.458623183179906,
+        "XM7": 18.33159537123845
+      },
+      "sensitivities": {
+        "note": "input-referred Vos per unit threshold shift of one device, from this netlist's own OP",
+        "pair_dVos_dVT1": 1.0,
+        "mirror_dVos_dVT3": 0.8149973694978663,
+        "stage2_dVos_dVT6": 0.00824911439761501,
+        "first_stage_gain_A1": 121.22513421430071
+      },
+      "pelgrom_handcalc_sigma_v": {
+        "pair": 0.0008836061559301697,
+        "mirror": 0.002865722886057383,
+        "stage2": 6.486195151739918e-06,
+        "bias": 1.2036050447900477e-05,
+        "passives": 0.0,
+        "total": 0.002998885532278396
+      },
+      "measured_anchored_estimate_sigma_v": {
+        "pair": 0.0015512523362453056,
+        "mirror": 0.0031321100638240485,
+        "stage2": 8.443802570493111e-06,
+        "bias": 1.4514499026599586e-05,
+        "total": 0.0034952509539514106
+      },
+      "capacitance_estimate_f": {
+        "note": "BSIM4 cgg at the OP (gate total); the mirror node (d1) holds cgg3+cgg4; the second-stage input node (d2) holds cgg6 (all 10 fingers) -- estimates, the AC fleet bench is the measurement",
+        "d1_cgg3_plus_cgg4": 5.11847e-14,
+        "d2_cgg6": 2.58105e-13,
+        "input_cgg1": 1.45067e-13,
+        "mirror_pole_estimate_hz": 216760446.1272704
+      },
+      "headroom": {
+        "vsg3_v": 1.05023,
+        "vth3_v": 1.0064,
+        "vsg6_v": 1.05635,
+        "vdsat6_v": 0.105585,
+        "v_d1_minus_v_d2_v": 0.006116999999999928,
+        "pair_sat_margin_v": 0.4264389,
+        "icmr_upper_edge_estimate_v": 1.347649,
+        "note": "ICMR upper edge ~ VDD - Vsg3 + Vth1 (pair enters triode); tt/27 C only"
+      },
+      "systematic_vos_estimate_v": 4.999999999999449e-05
+    },
+    "m4p2": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m4p2.spice",
+      "geometry": {
+        "XM1": {
+          "kind": "nfet",
+          "w": 12.06,
+          "l": 2.4,
+          "mult": 1.0
+        },
+        "XM3": {
+          "kind": "pfet",
+          "w": 18.535,
+          "l": 1.2,
+          "mult": 1.0
+        },
+        "XM6": {
+          "kind": "pfet",
+          "w": 18.535,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XM7": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 10.0
+        },
+        "XMB1": {
+          "kind": "nfet",
+          "w": 7.82,
+          "l": 1.2,
+          "mult": 1.0
+        }
+      },
+      "gate_area_um2": {
+        "pair_two_devices": 57.888,
+        "mirror_two_devices": 44.484,
+        "xm6_total": 222.42000000000002,
+        "all_mos_total": 446.784
+      },
+      "op": {
+        "nodes": {
+          "out": 0.899966,
+          "d1": 0.715997,
+          "d2": 0.710304,
+          "tail": 0.229559,
+          "ibias": 0.628085
+        },
+        "devices": {
+          "XM1": {
+            "id": 4.74162e-06,
+            "gm": 8.55391e-05,
+            "gds": 4.02958e-07,
+            "vgs": 0.670407,
+            "vds": 0.486438,
+            "vth": 0.597851,
+            "vdsat": 0.0937521,
+            "cgg": 1.45161e-13
+          },
+          "XM2": {
+            "id": 4.74224e-06,
+            "gm": 8.55468e-05,
+            "gds": 4.05167e-07,
+            "vgs": 0.670441,
+            "vds": 0.480745,
+            "vth": 0.597851,
+            "vdsat": 0.0937731,
+            "cgg": 1.45179e-13
+          },
+          "XM3": {
+            "id": 4.74162e-06,
+            "gm": 6.9953e-05,
+            "gds": 1.08663e-07,
+            "vgs": 1.084,
+            "vds": 1.084,
+            "vth": 1.03836,
+            "vdsat": 0.0999752,
+            "cgg": 1.00912e-13
+          },
+          "XM4": {
+            "id": 4.74224e-06,
+            "gm": 6.99613e-05,
+            "gds": 1.08278e-07,
+            "vgs": 1.084,
+            "vds": 1.0897,
+            "vth": 1.03836,
+            "vdsat": 0.0999753,
+            "cgg": 1.00912e-13
+          },
+          "XM6": {
+            "id": 5.13054e-05,
+            "gm": 0.000744551,
+            "gds": 1.33795e-06,
+            "vgs": 1.0897,
+            "vds": 0.900034,
+            "vth": 1.03836,
+            "vdsat": 0.103124,
+            "cgg": 1.01742e-12
+          },
+          "XM7": {
+            "id": 5.13054e-05,
+            "gm": 0.000940509,
+            "gds": 4.59631e-06,
+            "vgs": 0.628085,
+            "vds": 0.899966,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.67783e-13
+          },
+          "XMB1": {
+            "id": 5e-06,
+            "gm": 9.22234e-05,
+            "gds": 5.07624e-07,
+            "vgs": 0.628085,
+            "vds": 0.628084,
+            "vth": 0.571595,
+            "vdsat": 0.0855649,
+            "cgg": 4.68087e-14
+          },
+          "XM5": {
+            "id": 9.48386e-06,
+            "gm": 0.000175995,
+            "gds": 2.12172e-06,
+            "vgs": 0.628085,
+            "vds": 0.229558,
+            "vth": 0.571596,
+            "vdsat": 0.0855649,
+            "cgg": 9.55862e-14
+          }
+        },
+        "i_vdd_a": null
+      },
+      "gm_over_id": {
+        "XM1": 18.040058039235536,
+        "XM3": 14.75297472171958,
+        "XM6": 14.512137123967458,
+        "XM7": 18.33157913202119
+      },
+      "sensitivities": {
+        "note": "input-referred Vos per unit threshold shift of one device, from this netlist's own OP",
+        "pair_dVos_dVT1": 1.0,
+        "mirror_dVos_dVT3": 0.8177897593030555,
+        "stage2_dVos_dVT6": 0.00600245969387099,
+        "first_stage_gain_A1": 166.59836983513327
+      },
+      "pelgrom_handcalc_sigma_v": {
+        "pair": 0.0008836063317856026,
+        "mirror": 0.0014379519244546576,
+        "stage2": 2.3601310678416596e-06,
+        "bias": 8.725716689324561e-06,
+        "passives": 0.0,
+        "total": 0.0016877640815483844
+      },
+      "measured_anchored_estimate_sigma_v": {
+        "pair": 0.0015512526449757839,
+        "mirror": 0.001571618705978889,
+        "stage2": 3.0724454493165002e-06,
+        "bias": 1.0522505446599998e-05,
+        "total": 0.002208277674697871
+      },
+      "capacitance_estimate_f": {
+        "note": "BSIM4 cgg at the OP (gate total); the mirror node (d1) holds cgg3+cgg4; the second-stage input node (d2) holds cgg6 (all 10 fingers) -- estimates, the AC fleet bench is the measurement",
+        "d1_cgg3_plus_cgg4": 2.01824e-13,
+        "d2_cgg6": 1.01742e-12,
+        "input_cgg1": 1.45161e-13,
+        "mirror_pole_estimate_hz": 55163735.40365543
+      },
+      "headroom": {
+        "vsg3_v": 1.084,
+        "vth3_v": 1.03836,
+        "vsg6_v": 1.0897,
+        "vdsat6_v": 0.103124,
+        "v_d1_minus_v_d2_v": 0.005692999999999948,
+        "pair_sat_margin_v": 0.3926859,
+        "icmr_upper_edge_estimate_v": 1.313851,
+        "note": "ICMR upper edge ~ VDD - Vsg3 + Vth1 (pair enters triode); tt/27 C only"
+      },
+      "systematic_vos_estimate_v": 3.399999999997849e-05
+    }
+  }
+}

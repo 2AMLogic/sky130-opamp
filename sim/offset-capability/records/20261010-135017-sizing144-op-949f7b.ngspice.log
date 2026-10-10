@@ -1,0 +1,370 @@
+
+Note: Compatibility modes selected: hs a
+
+
+Circuit: * issue #144: one single-corner operating-point probe (tt, 27 c, vdd 1.8 v) of every
+
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+option SCALE: Scale is set to 1e-06 for instance and model parameters
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+OPV canonical out 0.899849
+OPV canonical d1 0.823261
+OPV canonical d2 0.815859
+OPV canonical tail 0.210231
+OPV canonical ibias 0.628094
+OPD canonical XM1 id 4.71553E-06
+OPD canonical XM1 gm 8.3415E-05
+OPD canonical XM1 gds 4.86764E-07
+OPD canonical XM1 vgs 0.689619
+OPD canonical XM1 vds 0.613029
+OPD canonical XM1 vth 0.626622
+OPD canonical XM1 vdsat 0.093425
+OPD canonical XM1 cgg 3.60574E-14
+OPD canonical XM2 id 4.72448E-06
+OPD canonical XM2 gm 8.35361E-05
+OPD canonical XM2 gds 4.8978E-07
+OPD canonical XM2 vgs 0.689769
+OPD canonical XM2 vds 0.605628
+OPD canonical XM2 vth 0.626622
+OPD canonical XM2 vdsat 0.093514
+OPD canonical XM2 cgg 3.60643E-14
+OPD canonical XM3 id 4.71553E-06
+OPD canonical XM3 gm 6.68255E-05
+OPD canonical XM3 gds 1.20975E-06
+OPD canonical XM3 vgs 0.976739
+OPD canonical XM3 vds 0.976739
+OPD canonical XM3 vth 0.936225
+OPD canonical XM3 vdsat 0.104622
+OPD canonical XM3 cgg 6.87038E-15
+OPD canonical XM4 id 4.72448E-06
+OPD canonical XM4 gm 6.69303E-05
+OPD canonical XM4 gds 1.20931E-06
+OPD canonical XM4 vgs 0.976739
+OPD canonical XM4 vds 0.98414
+OPD canonical XM4 vth 0.936164
+OPD canonical XM4 vdsat 0.104655
+OPD canonical XM4 cgg 6.87089E-15
+OPD canonical XM6 id 5.13048E-05
+OPD canonical XM6 gm 0.000715352
+OPD canonical XM6 gds 1.32519E-05
+OPD canonical XM6 vgs 0.98414
+OPD canonical XM6 vds 0.90015
+OPD canonical XM6 vth 0.936855
+OPD canonical XM6 vdsat 0.108412
+OPD canonical XM6 cgg 6.92813E-14
+OPD canonical XM7 id 5.13048E-05
+OPD canonical XM7 gm 0.000940473
+OPD canonical XM7 gds 4.59638E-06
+OPD canonical XM7 vgs 0.628093
+OPD canonical XM7 vds 0.899849
+OPD canonical XM7 vth 0.571598
+OPD canonical XM7 vdsat 0.0855689
+OPD canonical XM7 cgg 4.67726E-13
+OPD canonical XMB1 id 5E-06
+OPD canonical XMB1 gm 9.22206E-05
+OPD canonical XMB1 gds 5.07614E-07
+OPD canonical XMB1 vgs 0.628093
+OPD canonical XMB1 vds 0.628093
+OPD canonical XMB1 vth 0.571599
+OPD canonical XMB1 vdsat 0.0855689
+OPD canonical XMB1 cgg 4.6803E-14
+OPD canonical XM5 id 9.44001E-06
+OPD canonical XM5 gm 0.000175086
+OPD canonical XM5 gds 2.43481E-06
+OPD canonical XM5 vgs 0.628094
+OPD canonical XM5 vds 0.21023
+OPD canonical XM5 vth 0.571599
+OPD canonical XM5 vdsat 0.0855689
+OPD canonical XM5 cgg 9.62348E-14
+OPI canonical -0.000328813
+OPV grid0 out 0.899849
+OPV grid0 d1 0.823272
+OPV grid0 d2 0.815871
+OPV grid0 tail 0.210231
+OPV grid0 ibias 0.628085
+OPD grid0 XM1 id 4.71553E-06
+OPD grid0 XM1 gm 8.3415E-05
+OPD grid0 XM1 gds 4.86761E-07
+OPD grid0 XM1 vgs 0.689619
+OPD grid0 XM1 vds 0.613041
+OPD grid0 XM1 vth 0.626622
+OPD grid0 XM1 vdsat 0.093425
+OPD grid0 XM1 cgg 3.60574E-14
+OPD grid0 XM2 id 4.72448E-06
+OPD grid0 XM2 gm 8.35361E-05
+OPD grid0 XM2 gds 4.89776E-07
+OPD grid0 XM2 vgs 0.689769
+OPD grid0 XM2 vds 0.60564
+OPD grid0 XM2 vth 0.626622
+OPD grid0 XM2 vdsat 0.093514
+OPD grid0 XM2 cgg 3.60643E-14
+OPD grid0 XM3 id 4.71553E-06
+OPD grid0 XM3 gm 6.68282E-05
+OPD grid0 XM3 gds 1.20992E-06
+OPD grid0 XM3 vgs 0.976727
+OPD grid0 XM3 vds 0.976727
+OPD grid0 XM3 vth 0.936229
+OPD grid0 XM3 vdsat 0.104612
+OPD grid0 XM3 cgg 6.87174E-15
+OPD grid0 XM4 id 4.72448E-06
+OPD grid0 XM4 gm 6.6933E-05
+OPD grid0 XM4 gds 1.20948E-06
+OPD grid0 XM4 vgs 0.976727
+OPD grid0 XM4 vds 0.984128
+OPD grid0 XM4 vth 0.936168
+OPD grid0 XM4 vdsat 0.104646
+OPD grid0 XM4 cgg 6.87225E-15
+OPD grid0 XM6 id 5.13048E-05
+OPD grid0 XM6 gm 0.000715384
+OPD grid0 XM6 gds 1.32537E-05
+OPD grid0 XM6 vgs 0.984128
+OPD grid0 XM6 vds 0.90015
+OPD grid0 XM6 vth 0.93686
+OPD grid0 XM6 vdsat 0.108401
+OPD grid0 XM6 cgg 6.92951E-14
+OPD grid0 XM7 id 5.13048E-05
+OPD grid0 XM7 gm 0.000940502
+OPD grid0 XM7 gds 4.59645E-06
+OPD grid0 XM7 vgs 0.628085
+OPD grid0 XM7 vds 0.899849
+OPD grid0 XM7 vth 0.571595
+OPD grid0 XM7 vdsat 0.0855649
+OPD grid0 XM7 cgg 4.67783E-13
+OPD grid0 XMB1 id 5E-06
+OPD grid0 XMB1 gm 9.22234E-05
+OPD grid0 XMB1 gds 5.07624E-07
+OPD grid0 XMB1 vgs 0.628085
+OPD grid0 XMB1 vds 0.628084
+OPD grid0 XMB1 vth 0.571595
+OPD grid0 XMB1 vdsat 0.0855649
+OPD grid0 XMB1 cgg 4.68087E-14
+OPD grid0 XM5 id 9.44002E-06
+OPD grid0 XM5 gm 0.000175092
+OPD grid0 XM5 gds 2.43477E-06
+OPD grid0 XM5 vgs 0.628085
+OPD grid0 XM5 vds 0.21023
+OPD grid0 XM5 vth 0.571596
+OPD grid0 XM5 vdsat 0.0855649
+OPD grid0 XM5 cgg 9.62464E-14
+OPI grid0 -0.000328813
+OPV m2p1 out 0.899936
+OPV m2p1 d1 0.750093
+OPV m2p1 d2 0.743654
+OPV m2p1 tail 0.209912
+OPV m2p1 ibias 0.628085
+OPD m2p1 XM1 id 4.71862E-06
+OPD m2p1 XM1 gm 8.34476E-05
+OPD m2p1 XM1 gds 5.13243E-07
+OPD m2p1 XM1 vgs 0.690024
+OPD m2p1 XM1 vds 0.54018
+OPD m2p1 XM1 vth 0.626549
+OPD m2p1 XM1 vdsat 0.0937022
+OPD m2p1 XM1 cgg 3.60941E-14
+OPD m2p1 XM2 id 4.72062E-06
+OPD m2p1 XM2 gm 8.34733E-05
+OPD m2p1 XM2 gds 5.16192E-07
+OPD m2p1 XM2 vgs 0.690088
+OPD m2p1 XM2 vds 0.533741
+OPD m2p1 XM2 vth 0.626549
+OPD m2p1 XM2 vdsat 0.09374
+OPD m2p1 XM2 cgg 3.60986E-14
+OPD m2p1 XM3 id 4.71861E-06
+OPD m2p1 XM3 gm 6.94435E-05
+OPD m2p1 XM3 gds 3.11513E-07
+OPD m2p1 XM3 vgs 1.04991
+OPD m2p1 XM3 vds 1.04991
+OPD m2p1 XM3 vth 1.0064
+OPD m2p1 XM3 vdsat 0.102123
+OPD m2p1 XM3 cgg 2.55802E-14
+OPD m2p1 XM4 id 4.72062E-06
+OPD m2p1 XM4 gm 6.94702E-05
+OPD m2p1 XM4 gds 3.10698E-07
+OPD m2p1 XM4 vgs 1.04991
+OPD m2p1 XM4 vds 1.05635
+OPD m2p1 XM4 vth 1.00639
+OPD m2p1 XM4 vdsat 0.102129
+OPD m2p1 XM4 cgg 2.55806E-14
+OPD m2p1 XM6 id 5.13052E-05
+OPD m2p1 XM6 gm 0.000741804
+OPD m2p1 XM6 gds 3.63679E-06
+OPD m2p1 XM6 vgs 1.05635
+OPD m2p1 XM6 vds 0.900063
+OPD m2p1 XM6 vth 1.00665
+OPD m2p1 XM6 vdsat 0.105585
+OPD m2p1 XM6 cgg 2.58105E-13
+OPD m2p1 XM7 id 5.13052E-05
+OPD m2p1 XM7 gm 0.000940507
+OPD m2p1 XM7 gds 4.59635E-06
+OPD m2p1 XM7 vgs 0.628085
+OPD m2p1 XM7 vds 0.899936
+OPD m2p1 XM7 vth 0.571595
+OPD m2p1 XM7 vdsat 0.0855649
+OPD m2p1 XM7 cgg 4.67783E-13
+OPD m2p1 XMB1 id 5E-06
+OPD m2p1 XMB1 gm 9.22234E-05
+OPD m2p1 XMB1 gds 5.07624E-07
+OPD m2p1 XMB1 vgs 0.628085
+OPD m2p1 XMB1 vds 0.628084
+OPD m2p1 XMB1 vth 0.571595
+OPD m2p1 XMB1 vdsat 0.0855649
+OPD m2p1 XMB1 cgg 4.68087E-14
+OPD m2p1 XM5 id 9.43924E-06
+OPD m2p1 XM5 gm 0.000175075
+OPD m2p1 XM5 gds 2.441E-06
+OPD m2p1 XM5 vgs 0.628085
+OPD m2p1 XM5 vds 0.209912
+OPD m2p1 XM5 vth 0.571596
+OPD m2p1 XM5 vdsat 0.0855649
+OPD m2p1 XM5 cgg 9.62593E-14
+OPI m2p1 -0.000328813
+OPV m2p2 out 0.89995
+OPV m2p2 d1 0.749771
+OPV m2p2 d2 0.743654
+OPV m2p2 tail 0.229679
+OPV m2p2 ibias 0.628085
+OPD m2p2 XM1 id 4.7411E-06
+OPD m2p2 XM1 gm 8.5535E-05
+OPD m2p2 XM1 gds 3.91522E-07
+OPD m2p2 XM1 vgs 0.670271
+OPD m2p2 XM1 vds 0.520092
+OPD m2p2 XM1 vth 0.597879
+OPD m2p2 XM1 vdsat 0.0936531
+OPD m2p2 XM1 cgg 1.45067E-13
+OPD m2p2 XM2 id 4.74301E-06
+OPD m2p2 XM2 gm 8.55611E-05
+OPD m2p2 XM2 gds 3.93556E-07
+OPD m2p2 XM2 vgs 0.670321
+OPD m2p2 XM2 vds 0.513975
+OPD m2p2 XM2 vth 0.597879
+OPD m2p2 XM2 vdsat 0.0936841
+OPD m2p2 XM2 cgg 1.45085E-13
+OPD m2p2 XM3 id 4.7411E-06
+OPD m2p2 XM3 gm 6.97108E-05
+OPD m2p2 XM3 gds 3.1281E-07
+OPD m2p2 XM3 vgs 1.05023
+OPD m2p2 XM3 vds 1.05023
+OPD m2p2 XM3 vth 1.0064
+OPD m2p2 XM3 vdsat 0.102301
+OPD m2p2 XM3 cgg 2.55922E-14
+OPD m2p2 XM4 id 4.74301E-06
+OPD m2p2 XM4 gm 6.97363E-05
+OPD m2p2 XM4 gds 3.12032E-07
+OPD m2p2 XM4 vgs 1.05023
+OPD m2p2 XM4 vds 1.05635
+OPD m2p2 XM4 vth 1.00639
+OPD m2p2 XM4 vdsat 0.102306
+OPD m2p2 XM4 cgg 2.55925E-14
+OPD m2p2 XM6 id 5.13053E-05
+OPD m2p2 XM6 gm 0.000741804
+OPD m2p2 XM6 gds 3.63682E-06
+OPD m2p2 XM6 vgs 1.05635
+OPD m2p2 XM6 vds 0.90005
+OPD m2p2 XM6 vth 1.00665
+OPD m2p2 XM6 vdsat 0.105585
+OPD m2p2 XM6 cgg 2.58105E-13
+OPD m2p2 XM7 id 5.13053E-05
+OPD m2p2 XM7 gm 0.000940508
+OPD m2p2 XM7 gds 4.59633E-06
+OPD m2p2 XM7 vgs 0.628085
+OPD m2p2 XM7 vds 0.899949
+OPD m2p2 XM7 vth 0.571595
+OPD m2p2 XM7 vdsat 0.0855649
+OPD m2p2 XM7 cgg 4.67783E-13
+OPD m2p2 XMB1 id 5E-06
+OPD m2p2 XMB1 gm 9.22234E-05
+OPD m2p2 XMB1 gds 5.07624E-07
+OPD m2p2 XMB1 vgs 0.628085
+OPD m2p2 XMB1 vds 0.628084
+OPD m2p2 XMB1 vth 0.571595
+OPD m2p2 XMB1 vdsat 0.0855649
+OPD m2p2 XMB1 cgg 4.68087E-14
+OPD m2p2 XM5 id 9.48412E-06
+OPD m2p2 XM5 gm 0.000176
+OPD m2p2 XM5 gds 2.12011E-06
+OPD m2p2 XM5 vgs 0.628085
+OPD m2p2 XM5 vds 0.229679
+OPD m2p2 XM5 vth 0.571596
+OPD m2p2 XM5 vdsat 0.0855649
+OPD m2p2 XM5 cgg 9.55827E-14
+OPI m2p2 -0.000328813
+OPV m4p2 out 0.899966
+OPV m4p2 d1 0.715997
+OPV m4p2 d2 0.710304
+OPV m4p2 tail 0.229559
+OPV m4p2 ibias 0.628085
+OPD m4p2 XM1 id 4.74162E-06
+OPD m4p2 XM1 gm 8.55391E-05
+OPD m4p2 XM1 gds 4.02958E-07
+OPD m4p2 XM1 vgs 0.670407
+OPD m4p2 XM1 vds 0.486438
+OPD m4p2 XM1 vth 0.597851
+OPD m4p2 XM1 vdsat 0.0937521
+OPD m4p2 XM1 cgg 1.45161E-13
+OPD m4p2 XM2 id 4.74224E-06
+OPD m4p2 XM2 gm 8.55468E-05
+OPD m4p2 XM2 gds 4.05167E-07
+OPD m4p2 XM2 vgs 0.670441
+OPD m4p2 XM2 vds 0.480745
+OPD m4p2 XM2 vth 0.597851
+OPD m4p2 XM2 vdsat 0.0937731
+OPD m4p2 XM2 cgg 1.45179E-13
+OPD m4p2 XM3 id 4.74162E-06
+OPD m4p2 XM3 gm 6.9953E-05
+OPD m4p2 XM3 gds 1.08663E-07
+OPD m4p2 XM3 vgs 1.084
+OPD m4p2 XM3 vds 1.084
+OPD m4p2 XM3 vth 1.03836
+OPD m4p2 XM3 vdsat 0.0999752
+OPD m4p2 XM3 cgg 1.00912E-13
+OPD m4p2 XM4 id 4.74224E-06
+OPD m4p2 XM4 gm 6.99613E-05
+OPD m4p2 XM4 gds 1.08278E-07
+OPD m4p2 XM4 vgs 1.084
+OPD m4p2 XM4 vds 1.0897
+OPD m4p2 XM4 vth 1.03836
+OPD m4p2 XM4 vdsat 0.0999753
+OPD m4p2 XM4 cgg 1.00912E-13
+OPD m4p2 XM6 id 5.13054E-05
+OPD m4p2 XM6 gm 0.000744551
+OPD m4p2 XM6 gds 1.33795E-06
+OPD m4p2 XM6 vgs 1.0897
+OPD m4p2 XM6 vds 0.900034
+OPD m4p2 XM6 vth 1.03836
+OPD m4p2 XM6 vdsat 0.103124
+OPD m4p2 XM6 cgg 1.01742E-12
+OPD m4p2 XM7 id 5.13054E-05
+OPD m4p2 XM7 gm 0.000940509
+OPD m4p2 XM7 gds 4.59631E-06
+OPD m4p2 XM7 vgs 0.628085
+OPD m4p2 XM7 vds 0.899966
+OPD m4p2 XM7 vth 0.571595
+OPD m4p2 XM7 vdsat 0.0855649
+OPD m4p2 XM7 cgg 4.67783E-13
+OPD m4p2 XMB1 id 5E-06
+OPD m4p2 XMB1 gm 9.22234E-05
+OPD m4p2 XMB1 gds 5.07624E-07
+OPD m4p2 XMB1 vgs 0.628085
+OPD m4p2 XMB1 vds 0.628084
+OPD m4p2 XMB1 vth 0.571595
+OPD m4p2 XMB1 vdsat 0.0855649
+OPD m4p2 XMB1 cgg 4.68087E-14
+OPD m4p2 XM5 id 9.48386E-06
+OPD m4p2 XM5 gm 0.000175995
+OPD m4p2 XM5 gds 2.12172E-06
+OPD m4p2 XM5 vgs 0.628085
+OPD m4p2 XM5 vds 0.229558
+OPD m4p2 XM5 vth 0.571596
+OPD m4p2 XM5 vdsat 0.0855649
+OPD m4p2 XM5 cgg 9.55862E-14
+OPI m4p2 -0.000328813
+Note: Simulation executed from .control section 
+
+--- stderr ---
+Warning: m=xx on .subckt line will override multiplier m hierarchy!
+
+Using KLU as Direct Linear Solver
+Note: Starting dynamic gmin stepping
+Note: Dynamic gmin stepping completed

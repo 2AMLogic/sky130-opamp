@@ -92,10 +92,11 @@ def pdk_root() -> Path:
     return Path(pin["default_pdk_root"]).expanduser() / "sky130A"
 
 
-def parse_core() -> dict[str, dict]:
-    """instance -> {kind, w, l, mult} (um) from the core netlist."""
+def parse_core(core: Path | None = None) -> dict[str, dict]:
+    """instance -> {kind, w, l, mult} (um) from the core netlist (default: the
+    canonical design netlist; issue #144 passes a candidate netlist)."""
     lines: list[str] = []
-    for ln in CORE.read_text().splitlines():
+    for ln in Path(core or CORE).read_text().splitlines():
         if ln.startswith("+") and lines:
             lines[-1] += " " + ln[1:].strip()
         else:
@@ -139,10 +140,13 @@ def device_sigmas(root: Path, geom: dict) -> dict:
             "sigma_beta_rel": c["s_tox"] / math.sqrt(area)}
 
 
-def calc(root: Path | None = None, op: dict | None = None) -> dict:
+def calc(root: Path | None = None, op: dict | None = None, core_path: Path | None = None) -> dict:
+    """`op`/`core_path` default to the canonical OP constants and netlist; a
+    candidate study (issue #144) must pass BOTH, its own drawn geometry and its
+    own newly simulated operating point, never the baseline OP for a resized DUT."""
     root = root or pdk_root()
     op = op or OP
-    core = parse_core()
+    core = parse_core(core_path)
     d = {n: device_sigmas(root, core[n]) for n in ("XM1", "XM3", "XM6", "XM7", "XMB1")}
     g = {}
     # input pair (two devices)

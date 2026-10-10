@@ -1,0 +1,219 @@
+{
+  "issue": 144,
+  "date": "2026-10-10",
+  "status": "PREDECLARED before any fleet submission of this study (committed ahead of the runs). Immutable; results go to new records.",
+  "scope": "exploratory feasibility; canonical design/netlist unchanged; DR-009 stays proposed; no spec target is changed",
+  "op_record": "sim/offset-capability/records/20261010-135058-sizing144-op-33e160.json",
+  "op_record_superseded": {
+    "sim/offset-capability/records/20261010-135017-sizing144-op-949f7b.json": "first run of the same probe; identical OP, but its derived systematic_vos_estimate_v has the wrong sign (tool bug fixed before the second run). Kept, not used."
+  },
+  "candidates": {
+    "grid0": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.grid0.spice",
+      "sha256": "sha256:b1907e62ac914921b33ba45ed76664ccdee866aad345414d1ad43869d30b99d2",
+      "pmos_scale": 1,
+      "pair_scale": 1,
+      "why": "reference: canonical sizing snapped to the 0.005 um grid only (4.634->4.635, 7.819->7.820); isolates the grid snap from the resizes",
+      "monte_carlo": false,
+      "predicted_sigma_v": {
+        "measured_anchored": 0.008338587654814777,
+        "pelgrom_handcalc": 0.007298713457423138,
+        "area_scaling_only": 0.008339051922887865
+      }
+    },
+    "m2p1": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m2p1.spice",
+      "sha256": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2",
+      "pmos_scale": 2,
+      "pair_scale": 1,
+      "why": "mirror-only: PMOS group W,L x2 (area x4), pair unchanged; tests the mirror-only path and exposes the input-pair floor",
+      "monte_carlo": true,
+      "predicted_sigma_v": {
+        "measured_anchored": 0.004455929358915313,
+        "pelgrom_handcalc": 0.003418478872223792,
+        "area_scaling_only": 0.0049606581955822585
+      }
+    },
+    "m2p2": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m2p2.spice",
+      "sha256": "sha256:c34cc8c4b269cb634374f5a8aab41aa4b9eb72ca48af78ba1ef567354a3350f4",
+      "pmos_scale": 2,
+      "pair_scale": 2,
+      "why": "balanced moderate: PMOS group and pair both W,L x2 (area x4 each)",
+      "monte_carlo": true,
+      "predicted_sigma_v": {
+        "measured_anchored": 0.0034952509539514106,
+        "pelgrom_handcalc": 0.002998885532278396,
+        "area_scaling_only": 0.004169897313910295
+      }
+    },
+    "m4p2": {
+      "netlist": "sim/offset-capability/candidates/opamp_core.m4p2.spice",
+      "sha256": "sha256:fdd4ee4cdb0bdb147a93ff181c4687afcd83a0789b397806ac0778f439afe058",
+      "pmos_scale": 4,
+      "pair_scale": 2,
+      "why": "largest bounded step along the area-optimal direction (mirror area factor ~ 5.7x the pair's, see `bounds`): PMOS x4 (area x16), pair x2 (area x4)",
+      "monte_carlo": true,
+      "predicted_sigma_v": {
+        "measured_anchored": 0.002208277674697871,
+        "pelgrom_handcalc": 0.0016877640815483844,
+        "area_scaling_only": 0.002480953304427694
+      }
+    }
+  },
+  "candidate_count_bound": "3 sizing candidates (m2p1, m2p2, m4p2) + 1 grid-only reference (grid0). No candidate is added after results are seen; a follow-up needs a new plan.",
+  "monte_carlo": {
+    "tool": "python3 sim/offset-capability/bin/offset_probe.py campaign --label <label> --base-seed 20261085 --corners tt --n-total 100 --chunk 100 --netlist <candidate>",
+    "labels": {
+      "m2p1": "sizing144-m2p1",
+      "m2p2": "sizing144-m2p2",
+      "m4p2": "sizing144-m4p2"
+    },
+    "base_seed": 20261085,
+    "corners": [
+      "tt"
+    ],
+    "n_per_candidate": 100,
+    "chunks_per_candidate": 1,
+    "seed_pairing": "seed 20261085 = chunk 0 of #85 (tt) and of #107; per-sample seeds equal the canonical run's first 100 samples",
+    "max_attempts_per_chunk": 6,
+    "retry": "capacity refusals only (offset_probe default 300 s wait); any other failure is recorded, not retried locally",
+    "sample_budget_total": 300,
+    "statistical_label": "EXPLORATORY: N=100 at tt / 27 C / 1.8 V only. Relative standard error of sigma 7.1 % (1 SE). Not the N>=300 + corners basis of DR-009; no compliance claim is made from it.",
+    "dut_snapshot": "offset_probe captures each candidate once into records/dut-<label>/ (sha256 recorded in every chunk summary)"
+  },
+  "pvt": {
+    "tool": "python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses ac,tran_sr,dc_swing --netlist <netlist>",
+    "netlists": [
+      "grid0",
+      "m2p1",
+      "m2p2",
+      "m4p2"
+    ],
+    "grid": "5 corners x 3 temperatures, paired supplies (the canonical record 20261010-103340-ba1dfa8-0241c1 grid)",
+    "requests_per_netlist": 4,
+    "requests_total": 16,
+    "units_total": 240,
+    "no_local_fallback": true,
+    "canonical_reference": "sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1 (fleet, same command, canonical DUT before the XRz 9.763->9.765 grid snap; grid0 is the like-for-like reference)"
+  },
+  "predeclared_checks": {
+    "mc_vs_prediction": "measured sigma within +/-25 % of the measured-anchored estimate (2 SE at N=100 is 14 %; the rest is the single-OP hand-calc ratio). Informative only: disagreement is reported, the tolerance is not widened.",
+    "targets_unchanged": {
+      "open_loop_gain_db_min": 60.0,
+      "gbw_hz_min": 16000000.0,
+      "phase_margin_deg_min": 60.0,
+      "slew_v_per_us": 20.0,
+      "swing": "~1.39 Vpp at SS/-40 C (currently unmet; regressions reported)",
+      "power": "~128.7 uW at 1.98 V (reported)",
+      "offset_sigma_v_proposed": 0.000275
+    }
+  },
+  "decision_rule": {
+    "sizing_candidate_supported": "some candidate has MC sigma upper 2-SE bound <= 0.275 mV AND open-loop gain, GBW and phase margin meet their targets at all 15 PVT points AND no other ratified row regresses vs grid0.",
+    "sizing_insufficient": "otherwise. Then the record quantifies the area still required (from the measured candidate sigmas, extrapolated with the Pelgrom area law, with its uncertainty) and the measured PVT/headroom cost trend, and proposes a separately scoped technique study (trim / chopping / auto-zero) instead of a sizing candidate."
+  },
+  "bounds_snapshot": {
+    "inputs": {
+      "attribution": "sim/offset-capability/records/20261009-attribution-summary.json",
+      "group_sigma_v": {
+        "pair": 0.003102705512901309,
+        "mirror": 0.007740082449106288,
+        "stage2": 5.2419091023015637e-05,
+        "bias": 3.716709249822762e-05
+      },
+      "target_sigma_v": 0.000275,
+      "target_status": "DR-009 proposed, not ratified",
+      "matched_gate_area_um2": {
+        "pair_two_devices": 14.472,
+        "mirror_two_devices": 2.7804
+      },
+      "sigma_rel_standard_error_N300": 0.040893041005476534,
+      "tag": "ESTIMATE (first-order Pelgrom area scaling at a fixed operating point)"
+    },
+    "mirror_only": {
+      "floor_sigma_v": 0.0031033708533877522,
+      "floor_over_target": 11.284984921410008,
+      "floor_band_2se_v": [
+        0.00284955831026218,
+        0.0033571833965133245
+      ],
+      "statement": "with the mirror term driven to zero, sigma -> sigma_pair; the pair alone is 11.3x the target, so no mirror size meets it"
+    },
+    "pair_area_factor_min": {
+      "k": 134.64812322208692,
+      "band_2se": [
+        113.52409466778455,
+        157.57346446163461
+      ],
+      "note": "pair gate area multiplier needed even if the mirror contributed nothing"
+    },
+    "area_optimal": {
+      "central": {
+        "feasible": true,
+        "k_pair": 281.8775756867237,
+        "k_mirror": 1604.265316036489,
+        "area_um2": 8539.831560046117,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 494.9938304262663
+      },
+      "low_2se": {
+        "feasible": true,
+        "k_pair": 237.65571937608811,
+        "k_mirror": 1352.583038306287,
+        "area_um2": 7200.075450517546,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 417.3376139271954
+      },
+      "high_2se": {
+        "feasible": true,
+        "k_pair": 329.8703694647402,
+        "k_mirror": 1877.409337125038,
+        "area_um2": 9993.832907836175,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 579.2720379678291
+      },
+      "mirror_to_pair_factor_ratio": 5.691354880316751
+    },
+    "area_optimal_handcalc_split": {
+      "feasible": true,
+      "k_pair": 120.41758841915517,
+      "k_mirror": 1100.8457872083661,
+      "area_um2": 4803.474966356154,
+      "area_baseline_um2": 17.2524,
+      "area_factor": 278.42357969651493,
+      "note": "same optimisation with the Pelgrom hand-calc group sigmas (pair 1.77 mV, mirror 7.08 mV) instead of the measured ones: the model-uncertainty end of the range"
+    },
+    "mirror_gmid_lever": {
+      "baseline_gm_over_id_3": 14.171302281078548,
+      "reduction_if_gmid3_5": 2.8342604562157097,
+      "note": "lowering the mirror gm/ID (higher overdrive) divides the mirror term by gm/ID3_old/gm/ID3_new at constant area; even gm/ID = 5 (deep strong inversion, ~400 mV overdrive) is a 2.8x reduction, and the mirror's Vsg rise is taken straight out of the ICMR upper edge (DR-002: 136 mV window at the worst corner) and the XM6 overdrive"
+    },
+    "candidates_area_scaling_estimate": {
+      "grid0": {
+        "k_pair": 1,
+        "k_mirror": 1,
+        "sigma_v": 0.008339051922887865,
+        "over_target": 30.32382517413769
+      },
+      "m2p1": {
+        "k_pair": 1,
+        "k_mirror": 4,
+        "sigma_v": 0.0049606581955822585,
+        "over_target": 18.038757074844575
+      },
+      "m2p2": {
+        "k_pair": 4,
+        "k_mirror": 4,
+        "sigma_v": 0.004169897313910295,
+        "over_target": 15.1632629596738
+      },
+      "m4p2": {
+        "k_pair": 4,
+        "k_mirror": 16,
+        "sigma_v": 0.002480953304427694,
+        "over_target": 9.02164837973707
+      }
+    }
+  }
+}

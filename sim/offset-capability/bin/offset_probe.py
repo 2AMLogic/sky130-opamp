@@ -12,7 +12,7 @@ Usage:
   offset_probe.py run --bench pair|offset --label NAME [--mismatch on|off]
                       [--seed N --n N] [--backend NAME] [--dry-run]
   offset_probe.py campaign --label NAME --base-seed N [--corners tt,ss,ff]
-                      [--only corner:chunk,...] [--resume]
+                      [--only corner:chunk,...] [--resume] [--netlist PATH]
                       [--n-total 300 --chunk 100] [--backend NAME] [--dry-run]
   offset_probe.py summarize CHUNK.summary.json ...
 
@@ -96,15 +96,22 @@ def render_bench(template_text: str) -> str:
     return out
 
 
-def capture_offset_dut(snap_dir: Path) -> dict:
+def capture_offset_dut(snap_dir: Path, src: Path | None = None) -> dict:
     """Capture the DUT once into a fresh ``snap_dir`` and render the bench
-    against it. Returns the ``dut`` metadata block. Refuses an existing dir."""
+    against it. Returns the ``dut`` metadata block. Refuses an existing dir.
+    ``src`` defaults to the canonical design netlist; a candidate study
+    (issue #144, ``campaign --netlist``) passes an alternate flat netlist with
+    the same ports, which is snapshotted the same way (the canonical design is
+    never touched)."""
     snap_dir = Path(snap_dir)
+    src = Path(src) if src is not None else DESIGN_NETLIST
+    if not src.is_file():
+        raise ProbeError(f"DUT netlist {src} not found")
     try:
         snap_dir.mkdir(parents=True)
     except FileExistsError:
         raise ProbeError(f"DUT snapshot {snap_dir} already exists; use --resume to continue that campaign") from None
-    dut = dut_identity.capture_dut(DESIGN_NETLIST, snap_dir, REPO)
+    dut = dut_identity.capture_dut(src, snap_dir, REPO)
     write_new(snap_dir / RENDERED_BENCH, render_bench(BENCH_TEMPLATE.read_text()))
     return dut
 
@@ -324,6 +331,8 @@ def open_campaign_dut(a) -> tuple[Path, dict, dict]:
         if not plan_path.is_file():
             raise ProbeError(f"cannot resume {a.label!r}: no DUT snapshot/plan at {plan_path} "
                              "(legacy campaigns have no recorded DUT and cannot be bound retroactively)")
+        if getattr(a, "netlist", None):
+            raise ProbeError("--netlist is fixed by the original campaign snapshot; do not pass it with --resume")
         saved = json.loads(plan_path.read_text())
         _, problems = dut_identity.verify_record_dut(saved, REPO)
         if problems:
@@ -346,7 +355,7 @@ def open_campaign_dut(a) -> tuple[Path, dict, dict]:
     if bad:
         raise SystemExit(f"unknown corner(s) {bad}; choose from {CORNERS}")
     RECORDS.mkdir(exist_ok=True)
-    dut = capture_offset_dut(snap_dir)
+    dut = capture_offset_dut(snap_dir, Path(a.netlist).resolve() if getattr(a, "netlist", None) else None)
     write_new(snap_dir / PLAN_NAME, json.dumps({"campaign": a.label, **params, "dut": dut}, indent=2) + "\n")
     return snap_dir, dut, params
 
@@ -469,6 +478,8 @@ def main(argv=None) -> int:
     c.add_argument("--max-attempts", type=int, default=6)
     c.add_argument("--retry-wait-s", type=int, default=300)
     c.add_argument("--only", help="resume: comma list of corner:chunk to run, e.g. ss:2,ff:0")
+    c.add_argument("--netlist", help="new campaign only: snapshot this flat DUT netlist (ports vdd vss inn inp "
+                                     "out ibias) instead of design/netlist/opamp_core.spice (issue #144)")
     c.add_argument("--backend")
     c.add_argument("--dry-run", action="store_true")
     s = sub.add_parser("summarize")
