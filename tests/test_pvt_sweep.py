@@ -638,5 +638,406 @@ class CartesianSupplyTests(unittest.TestCase):
         self.assertTrue(all(r["vdd_v"] == pvt.VDD_BY_CORNER[r["corner"]] for r in rows))
 
 
+class FleetAnalysisTests(unittest.TestCase):
+    """Issue #77: ac / tran_sr / dc_swing as klt (fleet) requests. Simulator-free:
+    run_klt_sim is mocked and subprocess.run is armed to fail the test."""
+
+    CORNERS = list(pvt.DEFAULT_CORNERS)
+    TEMPS = [-40.0, 27.0, 125.0]
+    AC_NAMES = ["gain_dc_db", "gbw_hz", "phase_at_gbw_rad"]
+
+    # -- request construction ------------------------------------------------
+    def test_bodies_are_klt_bodies_without_placeholders_or_solver_overrides(self):
+        for a in pvt.FLEET_ANALYSES:
+            with self.subTest(analysis=a):
+                req, body, tag = klt_request(a)
+                live = "\n".join(ln for ln in body.splitlines() if not ln.lstrip().startswith("*")) + "\n"
+                self.assertNotRegex(live, r"\{[A-Za-z_]")
+                for forbidden in (".control", ".end\n", ".lib", ".temp", "wrdata"):
+                    self.assertNotIn(forbidden, live)
+                # DR-006: no tolerance override in the body or the request
+                self.assertNotRegex(live + json.dumps(req), r"(?i)reltol|abstol|vntol|\.options?\s+(?!scale)")
+                self.assertIn('.include "opamp_core.spice"', live)
+                self.assertEqual(req["backend"], "batch")
+
+    def test_request_shapes(self):
+        ac, _b, tag = klt_request("ac")
+        self.assertEqual((tag, ac["analysis"]), ("ac", {"kind": "ac", "args": "dec 20 1 1g"}))
+        iq, _b, tag = klt_request("ac_iq")
+        self.assertEqual((tag, iq["analysis"]["kind"]), ("ac-iq", "dc"))
+        self.assertEqual([m["name"] for m in iq["measurements"]], ["i_vdd_a"])
+        # klt 0.5.0 runner compatibility: `.meas` cards only, no expr / analysis_steps
+        for r in (ac, iq, klt_request("tran_sr")[0], klt_request("dc_swing")[0]):
+            self.assertNotIn("analysis_steps", r)
+            self.assertTrue(all("spice" in m and "expr" not in m for m in r["measurements"]))
+        sr, _b, tag = klt_request("tran_sr")
+        self.assertEqual((tag, sr["analysis"]), ("tran-sr", {"kind": "tran", "args": "2n 2.2u"}))
+        self.assertEqual({m["name"] for m in sr["measurements"]}, {"t20_rise", "t80_rise", "t80_fall", "t20_fall"})
+        dc, body, tag = klt_request("dc_swing")
+        self.assertEqual((tag, dc["analysis"]["kind"]), ("dc-swing", "dc"))
+        self.assertTrue(dc["options"]["waveforms"])
+        self.assertTrue(dc["options"]["keep_artifacts"])
+        self.assertNotIn("waveforms", klt_request("tran_sr")[0]["options"])
+        self.assertAlmostEqual(float(dc["analysis"]["args"].split()[-1]), 1 / 360, places=10)
+        end = float(dc["analysis"]["args"].split()[2])
+        self.assertTrue(1.0 < end < 1.0 + 1 / 360)  # reaches the k=360 (VDD) point, adds no 361st
+
+    def test_paired_five_by_three_matrix_and_supply_pairing(self):
+        for a in pvt.FLEET_ANALYSES:
+            req, _b, _t = klt_request(a, temps=self.TEMPS)
+            self.assertEqual(req["corners"]["temperature_c"], self.TEMPS)
+            keep = {(c, v) for c in req["corners"]["process"] for v in req["corners"]["supply_v"]["vdd"]}
+            for ex in req["exclude"]:
+                keep.discard((ex["process"], ex["supply_v"]["vdd"]))
+            self.assertEqual(keep, {(c, pvt.VDD_BY_CORNER[c]) for c in self.CORNERS}, a)
+
+    def test_cartesian_request_has_no_exclusions(self):
+        for a in pvt.FLEET_ANALYSES:
+            with tempfile.TemporaryDirectory() as d:
+                path, _tag = pvt.build_klt_request(a, None, None, FakeKltPdk(), self.CORNERS, self.TEMPS,
+                                                   Path(d), "batch", "cartesian", None)
+                req = json.loads(path.read_text())
+            self.assertNotIn("exclude", req)
+            self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
+
+    def test_selected_netlist_is_what_the_request_includes(self):
+        with tempfile.TemporaryDirectory() as d:
+            cand = Path(d) / "cand.spice"
+            cand.write_text("* candidate\nM1 out inp vss vss sky130_fd_pr__nfet_01v8 w=1 l=1\n")
+            real = pvt.ACTIVE_DUT[0]
+            pvt.ACTIVE_DUT[0] = cand
+            try:
+                with tempfile.TemporaryDirectory() as r:
+                    pvt.build_klt_request("ac", None, None, FakeKltPdk(), ["tt"], [27.0], Path(r), "batch")
+                    self.assertEqual((Path(r) / pvt.dut_identity.SNAPSHOT_NAME).read_text(), cand.read_text())
+            finally:
+                pvt.ACTIVE_DUT[0] = real
+
+    # -- row builders --------------------------------------------------------
+    def test_ac_row_matches_local_definitions(self):
+        vals = {"gain_dc_db": 90.0, "gbw_hz": 1e7, "phase_at_gbw_rad": math.radians(-110.0)}
+        iq = {"values": {"i_vdd_a": -6e-5}, "status": "pass", "runtime_s": 1.0}
+        row = pvt.ac_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 3.0}, None, iq)
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["ac"]))
+        self.assertAlmostEqual(row["phase_margin_deg"], 70.0)
+        self.assertAlmostEqual(row["vcm_v"], 0.9)
+        self.assertAlmostEqual(row["iq_a"], 6e-5)
+        self.assertAlmostEqual(row["pq_w"], 6e-5 * 1.8)
+        self.assertAlmostEqual(row["elapsed_s"], 4.0)
+        for k in self.AC_NAMES:
+            bad = {x: y for x, y in vals.items() if x != k}
+            with self.assertRaises(sh.HarnessError):
+                pvt.ac_row("tt", 27.0, {"values": bad, "status": "pass", "runtime_s": 1.0}, None, iq)
+        with self.assertRaises(sh.HarnessError):  # NaN is not a passing number
+            pvt.ac_row("tt", 27.0, {"values": dict(vals, gbw_hz=float("nan")), "status": "pass", "runtime_s": 1.0},
+                       None, iq)
+        info = {"values": vals, "status": "pass", "runtime_s": 1.0}
+        with self.assertRaises(sh.HarnessError):  # no Iq companion unit
+            pvt.ac_row("tt", 27.0, info, None, None)
+        with self.assertRaises(sh.HarnessError):  # Iq companion without its measurement
+            pvt.ac_row("tt", 27.0, info, None, {"values": {}, "status": "pass", "runtime_s": 1.0})
+
+    def test_tran_sr_row_matches_local_definition(self):
+        vals = {"t20_rise": 1e-7, "t80_rise": 1.5e-7, "t80_fall": 5e-7, "t20_fall": 5.6e-7}
+        row = pvt.tran_sr_row("ff", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0})
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["tran_sr"]))
+        span = 0.4 * 1.98
+        self.assertAlmostEqual(row["sr_rise_v_per_us"], 0.6 * span / 5e-8 / 1e6)
+        self.assertAlmostEqual(row["sr_fall_v_per_us"], 0.6 * span / 6e-8 / 1e6)
+        self.assertAlmostEqual(row["v_low_v"], 0.3 * 1.98)
+        with self.assertRaises(sh.HarnessError):
+            pvt.tran_sr_row("ff", 27.0, {"values": dict(vals, t80_fall=None), "status": "pass", "runtime_s": 1.0})
+        with self.assertRaises(sh.HarnessError):  # crossings out of order
+            pvt.tran_sr_row("ff", 27.0, {"values": dict(vals, t80_rise=5e-8), "status": "pass", "runtime_s": 1.0})
+
+    @staticmethod
+    def follower_sweep(vdd, lo=0.15, hi=0.2):
+        n = pvt.SWING_POINTS
+        vin = [vdd * k / n for k in range(n + 1)]
+        vout = [min(max(v, lo), vdd - hi) for v in vin]
+        return vin, vout
+
+    @staticmethod
+    def write_waveform(path, vin, vout):
+        path.write_text(json.dumps({
+            "plotname": "DC transfer characteristic",
+            "variables": [{"index": 0, "name": "v(sw)"}, {"index": 1, "name": "v(inp)"}, {"index": 2, "name": "v(out)"}],
+            "points": [[a / 1.8, a, b] for a, b in zip(vin, vout)]}))
+        return str(path)
+
+    def test_dc_swing_row_from_waveform_equals_shared_rule(self):
+        vin, vout = self.follower_sweep(1.8)
+        with tempfile.TemporaryDirectory() as d:
+            wf = self.write_waveform(Path(d) / "w.json", vin, vout)
+            info = {"artifacts": {"waveform": wf}, "status": "pass", "runtime_s": 2.0, "values": {}}
+            row = pvt.dc_swing_row("tt", 27.0, info)
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["dc_swing"]))
+        ref = pvt.swing_row("tt", 27.0, 1.8, vin, vout)
+        for k, v in ref.items():
+            self.assertEqual(row[k], v)
+        self.assertAlmostEqual(row["vout_min_v"], 0.15, delta=1.8 / 360)
+        self.assertAlmostEqual(row["vout_max_v"], 1.6, delta=1.8 / 360)
+
+    def test_dc_swing_failures_are_errors(self):
+        vin, vout = self.follower_sweep(1.8)
+        with tempfile.TemporaryDirectory() as d:
+            ok = self.write_waveform(Path(d) / "w.json", vin, vout)
+            short = self.write_waveform(Path(d) / "s.json", vin[:20], vout[:20])
+            trunc = self.write_waveform(Path(d) / "t.json", vin[:250], vout[:250])
+            junk = Path(d) / "j.json"
+            junk.write_text("{not json")
+            wrong_supply = ok
+            for label, wf in (("missing", str(Path(d) / "none.json")), ("none", None), ("short", short),
+                              ("junk", str(junk))):
+                with self.subTest(label), self.assertRaises(sh.HarnessError):
+                    pvt.dc_swing_row("tt", 27.0, {"artifacts": {"waveform": wf}, "status": "pass", "runtime_s": 1.0})
+            with self.assertRaises(sh.HarnessError):  # sweep does not reach this corner's VDD
+                pvt.dc_swing_row("ff", 27.0, {"artifacts": {"waveform": trunc}, "status": "pass", "runtime_s": 1.0})
+            with self.assertRaises(sh.HarnessError):  # 1.8 V sweep presented as the 1.98 V corner
+                pvt.dc_swing_row("ff", 27.0, {"artifacts": {"waveform": wrong_supply}, "status": "pass", "runtime_s": 1.0})
+
+    # -- campaigns against mocked responses ---------------------------------
+    def _fake_klt(self, d, calls=None, mutate=None, env=None):
+        """A run_klt_sim stand-in answering from the request (see _campaign)."""
+        d = Path(d)
+        calls = [] if calls is None else calls
+
+        def fake_klt(req_path, out_dir, bk):
+            Path(out_dir).mkdir(parents=True, exist_ok=True)  # klt creates its outdir
+            req = json.loads(Path(req_path).read_text())
+            calls.append((req, bk))
+            kind = req["netlist"].split("-body")[0]  # ac / ac-iq / tran-sr / dc-swing
+            kind = {"ac": "ac", "ac-iq": "ac_iq", "tran-sr": "tran_sr", "dc-swing": "dc_swing"}[kind]
+            excl = {(e["process"], e["supply_v"]["vdd"]) for e in req.get("exclude", [])}
+            units = []
+            for c in req["corners"]["process"]:
+                for t in req["corners"]["temperature_c"]:
+                    for v in req["corners"]["supply_v"]["vdd"]:
+                        if (c, v) in excl:
+                            continue
+                        unit = {"process": c, "temperature_c": t, "supply_v": {"vdd": v}, "status": "pass",
+                                "runtime_s": 1.5, "diagnostics": [], "artifacts": {},
+                                "measurements": self._measurements(kind, v)}
+                        if kind == "dc_swing":
+                            vin, vout = self.follower_sweep(v)
+                            unit["artifacts"]["waveform"] = self.write_waveform(
+                                d / f"wf-{c}-{t:g}-{v:g}.json", vin, vout)
+                        if mutate:
+                            unit = mutate(kind, unit)
+                            if unit is None:
+                                continue
+                        units.append(unit)
+            return {"status": "pass", "corner_count": len(units), "corners": units,
+                    "environment": {"remote": {"provider": "aws-batch-fleet", "job_id": "j"}} if env is None else env}
+        return fake_klt
+
+    def _campaign(self, analyses, mode="paired", mutate=None, backend="batch", env=None, tmp=None):
+        """Run run_klt_analyses with a mocked fleet. `mutate(analysis, unit)` may edit/return None to drop."""
+        d = Path(tmp)
+        calls = []
+        fake_klt = self._fake_klt(d, calls, mutate, env)
+        results, errors, jobs = {a: [] for a in analyses}, [], []
+        snap, logs = d / "snap", d / "logs"
+        snap.mkdir()
+        logs.mkdir()
+        real = pvt.run_klt_sim
+        pvt.run_klt_sim = fake_klt
+        try:
+            pvt.run_klt_analyses(analyses, FakeKltPdk(), self.CORNERS, self.TEMPS, backend, d / "req", logs, snap,
+                                 results, errors, jobs, mode, None)
+        finally:
+            pvt.run_klt_sim = real
+        return results, errors, jobs, calls
+
+    @staticmethod
+    def _measurements(kind, vdd):
+        if kind == "ac":
+            vals = {"gain_dc_db": 90.0, "gbw_hz": 1e7, "phase_at_gbw_rad": math.radians(-110.0)}
+        elif kind == "ac_iq":
+            vals = {"i_vdd_a": -6e-5}
+        elif kind == "tran_sr":
+            vals = {"t20_rise": 1e-7, "t80_rise": 1.5e-7, "t80_fall": 5e-7, "t20_fall": 5.6e-7}
+        else:
+            vals = {"vout_mid_v": 0.5 * vdd}
+        return [{"name": k, "value": v} for k, v in vals.items()]
+
+    def _armed(self):
+        """Fail the test if anything tries to start a local simulator subprocess."""
+        import subprocess
+        from unittest import mock
+
+        def boom(*a, **k):
+            raise AssertionError(f"local subprocess invoked: {a[:1]}")
+        return mock.patch.object(subprocess, "run", boom)
+
+    def test_paired_campaign_accounts_for_all_45_units_without_local_sim(self):
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, jobs, calls = self._campaign(list(pvt.FLEET_ANALYSES), tmp=d)
+        self.assertEqual(errors, [])
+        self.assertEqual({a: len(r) for a, r in results.items()}, {a: 15 for a in pvt.FLEET_ANALYSES})
+        self.assertEqual(sum(len(r) for r in results.values()), 45)
+        self.assertEqual(len(calls), 4)  # ac-iq (Iq companion), ac, tran-sr, dc-swing
+        self.assertTrue(all(bk == "batch" for _r, bk in calls))
+        for a, rows in results.items():
+            self.assertEqual({(r["corner"], r["temp_c"], r["vdd_v"]) for r in rows},
+                             set(pvt.supply_points(self.CORNERS, self.TEMPS)), a)
+            self.assertTrue(all(set(r) == set(pvt.FIELDNAMES[a]) for r in rows))
+        self.assertTrue(all(j["remote"]["job_id"] == "j" for j in jobs))  # remote provenance kept
+
+    def test_cartesian_result_keys_unique_for_several_supplies(self):
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, _j, calls = self._campaign(list(pvt.FLEET_ANALYSES), "cartesian", tmp=d)
+        self.assertEqual(errors, [])
+        for a, rows in results.items():
+            keys = [(r["corner"], r["temp_c"], r["vdd_v"]) for r in rows]
+            self.assertEqual(len(keys), 45, a)
+            self.assertEqual(len(set(keys)), 45, a)
+            self.assertEqual({v for _c, _t, v in keys}, {1.62, 1.8, 1.98})
+        # several supplies at the SAME process/temperature stay distinct rows
+        tt27 = [r["vdd_v"] for r in results["tran_sr"] if (r["corner"], r["temp_c"]) == ("tt", 27.0)]
+        self.assertEqual(sorted(tt27), [1.62, 1.8, 1.98])
+
+    def test_missing_metric_and_missing_unit_are_failures_not_zeros(self):
+        def mutate(kind, u):
+            if kind == "ac_iq":
+                return u
+            if (u["process"], u["temperature_c"]) == ("ss", -40.0):
+                return None  # unit absent from the response
+            if (u["process"], u["temperature_c"]) == ("tt", 27.0):
+                u["measurements"] = u["measurements"][:-1]  # partial output
+            return u
+
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, _j, _c = self._campaign(["ac", "tran_sr"], mutate=mutate, tmp=d)
+        for a in ("ac", "tran_sr"):
+            self.assertEqual(len(results[a]), 13, a)
+        self.assertEqual(len(errors), 4)
+        self.assertEqual(sum("not in the klt response" in e for e in errors), 2)
+        self.assertEqual(sum("missing measurements" in e for e in errors), 2)
+
+    def test_failed_timeout_units_and_missing_waveform_count_as_failures(self):
+        def mutate(kind, u):
+            if u["process"] == "ff" and u["temperature_c"] == 125.0:
+                u["status"] = "error"
+                u["diagnostics"] = [{"severity": "error", "code": "timeout", "message": "corner timed out"}]
+            if u["process"] == "sf":
+                u["artifacts"] = {"waveform": None}
+            return u
+
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, _j, _c = self._campaign(["dc_swing"], mutate=mutate, tmp=d)
+        self.assertEqual(len(results["dc_swing"]), 15 - 1 - 3)
+        self.assertEqual(len(errors), 4)
+        self.assertTrue(any("timeout" in e for e in errors))
+        self.assertEqual(sum("missing waveform" in e for e in errors), 3)
+
+    def test_non_ok_status_without_diagnostics_is_a_failure(self):
+        def mutate(kind, u):
+            if u["process"] == "tt":
+                u["status"] = "error"
+            return u
+
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, _j, _c = self._campaign(["tran_sr"], mutate=mutate, tmp=d)
+        self.assertEqual(len(results["tran_sr"]), 12)
+        self.assertEqual(len(errors), 3)
+
+    def test_batch_response_without_remote_provenance_is_refused(self):
+        with tempfile.TemporaryDirectory() as d, self._armed():
+            results, errors, _j, _c = self._campaign(["ac"], env={}, tmp=d)
+        self.assertEqual(results["ac"], [])
+        self.assertEqual(len(errors), 2)  # the ac request and its ac-iq companion
+        self.assertTrue(all("no environment.remote" in e for e in errors))
+
+    def test_capacity_refusal_is_retried_then_reported_never_run_locally(self):
+        attempts = []
+
+        def refuse(req_path, out_dir, bk):
+            attempts.append(bk)
+            raise sh.HarnessError("batch backend failed: ... exceeds BATCH_MAX_CONCURRENT_INSTANCES=8")
+
+        saved = (pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S)
+        pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = refuse, 2, 0
+        try:
+            with tempfile.TemporaryDirectory() as d, self._armed():
+                dd = Path(d)
+                (dd / "snap").mkdir()
+                (dd / "logs").mkdir()
+                results, errors, jobs = {"ac": []}, [], []
+                pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
+                                     dd / "logs", dd / "snap", results, errors, jobs)
+        finally:
+            pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
+        self.assertEqual(attempts, ["batch"] * 6)  # ac-iq and ac, 1 try + 2 retries each
+        self.assertEqual(results["ac"], [])
+        self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", errors[0])
+
+    def test_local_ngspice_is_forbidden_for_a_batch_fleet_campaign(self):
+        pvt.LOCAL_SIM_FORBIDDEN[0] = True
+        try:
+            with self.assertRaises(sh.HarnessError):
+                pvt.run_ngspice("ngspice", "* deck", Path("/nonexistent"), Path("/nonexistent/log"))
+        finally:
+            pvt.LOCAL_SIM_FORBIDDEN[0] = False
+
+    def test_cli_fleet_and_netlist_flags(self):
+        a = pvt.parse_args([])
+        self.assertEqual((a.fleet, a.netlist, a.backend), (False, None, "batch"))
+        a = pvt.parse_args(["--fleet", "--netlist", "/x/cand.spice"])
+        self.assertEqual((a.fleet, a.netlist), (True, "/x/cand.spice"))
+
+    def test_end_to_end_fleet_record_with_selected_netlist(self):
+        """main(): --fleet --netlist writes a 45-unit record, snapshots the INPUT netlist, leaves the
+        canonical design untouched and never starts a local simulator."""
+        import hashlib
+        from unittest import mock
+
+        canon = pvt.DESIGN_NETLIST
+        canon_hash = hashlib.sha256(canon.read_bytes()).hexdigest()
+
+        class Pdk:
+            matches_pin, variant, root, installed_commit = True, "sky130A", Path("/pdk"), "abc"
+            pin = {"open_pdks_commit": "abc"}
+            own_pin = {"rc_corner": {"choice": "typical"}}
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            (root / "cand").mkdir(parents=True)
+            cand = root / "cand" / "candidate.spice"
+            cand.write_text("* candidate netlist, not the canonical design\n")
+            records, snaps = root / "records", root / "snaps"
+            patches = [
+                mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
+                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), mock.patch.object(pvt, "resolve_pdk", lambda: Pdk()),
+                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
+                mock.patch.object(pvt, "klt_version", lambda: "klt-test"), mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
+                mock.patch.object(pvt, "run_klt_sim", self._fake_klt(Path(d))),
+                mock.patch.object(pvt, "first_line", lambda *_a, **_k: self.fail("ngspice version probed")),
+                mock.patch.object(pvt, "ACTIVE_DUT", [canon]),
+            ]
+            (Path(d) / "dummy").mkdir()
+            with self._armed():
+                for p in patches:
+                    p.start()
+                try:
+                    rc = pvt.main(["--fleet", "--netlist", str(cand), "--backend", "batch"])
+                finally:
+                    mock.patch.stopall()
+                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
+            self.assertEqual(rc, 0)
+            rec = json.loads(next(records.glob("*.json")).read_text())
+            self.assertEqual(rec["matrix"]["n_failed"], 0)
+            self.assertEqual(rec["matrix"]["n_runs"], 45)
+            self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+            self.assertEqual(rec["matrix"]["execution"]["solver_settings"]["policy"], "DR-006")
+            self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
+            self.assertEqual(rec["dut"]["sha256"], "sha256:" + hashlib.sha256(cand.read_bytes()).hexdigest())
+            self.assertEqual((root / rec["dut"]["snapshot_path"]).read_bytes(), cand.read_bytes())
+            self.assertTrue(all(j["remote"] and j["backend"] == "batch" for j in rec["klt_jobs"]))
+            for a in pvt.FLEET_ANALYSES:
+                self.assertEqual(len(list(csv.DictReader((records / Path(rec["links"][f"{a}_csv"]).name).open()))), 15)
+        self.assertEqual(hashlib.sha256(canon.read_bytes()).hexdigest(), canon_hash)
+
+
 if __name__ == "__main__":
     unittest.main()
