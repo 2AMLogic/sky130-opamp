@@ -145,10 +145,17 @@ directory or an extension of one, with the same evidence set.
    sharing the mirror groups' unit devices, each with its own guard ring.
    Their size and topology wait on #47 (slew-rate topology evaluation) and
    #50.
-4. **`Rz` (`res_high_po_1p41`, L=9.763) and `Cc` (`cap_mim_m3_1`, 15.62 x
+4. **`Rz` (`res_high_po_1p41`, L=9.765) and `Cc` (`cap_mim_m3_1`, 15.62 x
    15.62).** These use `res_array` (`flavor: "high"`) and `cap_array` (MiM
-   on met3/capm). Check grid representability of both first: 9.763 is
-   off-grid.
+   on met3/capm). Grid representability was checked first (issue #131,
+   [DR-010](../spec/decision-records/DR-010-compensation-resistor-geometry.md)):
+   the old L=9.763 is off-grid (klt DRC `*.ongrid.1`, 10 violations), so
+   the schematic now uses 9.765; 15.62 x 15.62 is on-grid and DRC-clean.
+   Evidence is in [`passive_probes/`](passive_probes/index.json), built by
+   `bin/probe-passives.py`. **These are single-element passive probes, not
+   full-core layout**: they show the elements can be drawn and what length
+   extracts, nothing about routing, guard rings, LVS or placement. The
+   real `Rz`/`Cc` placement is still to do.
 5. **Top-level assembly `opamp_core`.** The sub-blocks are placed as
    committed cells (`blocks[].cell`, a sibling feature this port has not
    needed yet), with supply rails, the six `opamp_core` pins and full-cell

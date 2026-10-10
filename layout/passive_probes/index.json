@@ -1,0 +1,151 @@
+{
+  "schema": "sky130-opamp/passive-probes/1",
+  "tools": {
+    "klt": "0.7.0+g4cbdfa769875",
+    "pdk": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+  },
+  "probes": [
+    {
+      "id": "rz_L9p763_prior",
+      "role": "XRz prior schematic length (off-grid) -- negative control",
+      "kind": "passive probe (not full-core layout)",
+      "spice_statement": {
+        "model": "res_high_po_1p41",
+        "L": 9.763,
+        "W": 1.41
+      },
+      "spice_L_off_grid": true,
+      "generator_bbox_um": {
+        "x0": 0.0,
+        "y0": 0.0,
+        "x1": 10.603,
+        "y1": 1.41
+      },
+      "klt_drc": {
+        "status": "violations",
+        "violation_count": 10
+      },
+      "magic_drc_full": {
+        "total": 0,
+        "by_rule": [],
+        "vacuous": false
+      },
+      "extract_device": {
+        "class": "res_high_po",
+        "params": {
+          "r_ohm": 2628.845844,
+          "l_um": 9.763,
+          "w_um": 1.41,
+          "area_um2": 13.76583,
+          "perimeter_um": 22.346
+        }
+      }
+    },
+    {
+      "id": "rz_L9p765",
+      "role": "XRz candidate: nearest grid-legal length above 9.763",
+      "kind": "passive probe (not full-core layout)",
+      "spice_statement": {
+        "model": "res_high_po_1p41",
+        "L": 9.765,
+        "W": 1.41
+      },
+      "spice_L_off_grid": false,
+      "generator_bbox_um": {
+        "x0": 0.0,
+        "y0": 0.0,
+        "x1": 10.605,
+        "y1": 1.41
+      },
+      "klt_drc": {
+        "status": "clean",
+        "violation_count": 0
+      },
+      "magic_drc_full": {
+        "total": 0,
+        "by_rule": [],
+        "vacuous": false
+      },
+      "extract_device": {
+        "class": "res_high_po",
+        "params": {
+          "r_ohm": 2629.306592,
+          "l_um": 9.765,
+          "w_um": 1.41,
+          "area_um2": 13.76865,
+          "perimeter_um": 22.35
+        }
+      }
+    },
+    {
+      "id": "rz_L9p760",
+      "role": "XRz alternative: nearest grid-legal length below 9.763",
+      "kind": "passive probe (not full-core layout)",
+      "spice_statement": {
+        "model": "res_high_po_1p41",
+        "L": 9.76,
+        "W": 1.41
+      },
+      "spice_L_off_grid": false,
+      "generator_bbox_um": {
+        "x0": 0.0,
+        "y0": 0.0,
+        "x1": 10.6,
+        "y1": 1.41
+      },
+      "klt_drc": {
+        "status": "clean",
+        "violation_count": 0
+      },
+      "magic_drc_full": {
+        "total": 0,
+        "by_rule": [],
+        "vacuous": false
+      },
+      "extract_device": {
+        "class": "res_high_po",
+        "params": {
+          "r_ohm": 2628.154722,
+          "l_um": 9.76,
+          "w_um": 1.41,
+          "area_um2": 13.7616,
+          "perimeter_um": 22.34
+        }
+      }
+    },
+    {
+      "id": "cc_15p62",
+      "role": "XCc as in the schematic (cap_mim_m3_1 W=L=15.62)",
+      "kind": "passive probe (not full-core layout)",
+      "spice_statement": {
+        "model": "cap_mim_m3_1",
+        "L": 15.62,
+        "W": 15.62
+      },
+      "spice_L_off_grid": false,
+      "generator_bbox_um": {
+        "x0": 0.0,
+        "y0": 0.0,
+        "x1": 16.62,
+        "y1": 17.54
+      },
+      "klt_drc": {
+        "status": "clean",
+        "violation_count": 0
+      },
+      "magic_drc_full": {
+        "total": 0,
+        "by_rule": [],
+        "vacuous": false
+      },
+      "extract_device": {
+        "class": "sky130_fd_pr__model__cap_mim",
+        "params": {
+          "c_f": 4.9984e-13,
+          "area_um2": 243.9844,
+          "perimeter_um": 62.48
+        }
+      }
+    }
+  ]
+}

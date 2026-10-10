@@ -1,0 +1,111 @@
+{
+  "schema_version": 3,
+  "file": "cc_15p62.gds",
+  "deck": "sky130",
+  "top": "cc_15p62",
+  "dbu_um": 0.001,
+  "netlist_path": "cc_15p62.spice",
+  "netlist_sha256": "88b83b6adbc8cb0ff670be067a2b76f99d1f9f6a49173d0585e4840a40887c34",
+  "status": "extracted",
+  "device_count": 1,
+  "net_count": 2,
+  "pin_count": 0,
+  "device_counts": {
+    "sky130_fd_pr__model__cap_mim": 1
+  },
+  "dummy_devices_dropped": 0,
+  "ignored_layers": [],
+  "device_recognition_only_layers": [
+    {
+      "layer": 89,
+      "datatype": 44,
+      "shapes": 1
+    }
+  ],
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "pnp",
+    "sky130_fd_pr__model__cap_mim",
+    "sky130_fd_pr__model__cap_mim_m4",
+    "resistor"
+  ],
+  "devices": [
+    {
+      "name": "$1",
+      "class": "sky130_fd_pr__model__cap_mim",
+      "nets": {
+        "a": "\\$1",
+        "b": "\\$2"
+      },
+      "params": {
+        "c_f": 4.9984e-13,
+        "area_um2": 243.9844,
+        "perimeter_um": 62.48
+      },
+      "instance_path": [
+        {
+          "cell": "cap_array",
+          "array_index": null
+        }
+      ]
+    }
+  ],
+  "nets": [
+    {
+      "name": "\\$1",
+      "pin": false,
+      "device_count": 1,
+      "net_id": 1,
+      "pin_index": null,
+      "label_positions_um": []
+    },
+    {
+      "name": "\\$2",
+      "pin": false,
+      "device_count": 1,
+      "net_id": 2,
+      "pin_index": null,
+      "label_positions_um": []
+    }
+  ],
+  "warnings": [
+    "found 0 pin-name label(s) on any of this deck's label layers (64/5, 66/5, 67/5, 68/5, 69/5, 70/5, 71/5, 72/5) anywhere in 'cc_15p62' -- no net can be named, so 0 top-level pins will be promoted below and `klt lvs` will have no net/device anchor to seed a match against a reference netlist. Compare the layers `klt layers` reports for this GDS against the list above; for a `klt place-and-route` layout in particular, check that request.io.layer_h/layer_v chose a layer this --deck actually scans for pin labels (issue #1385)",
+    "0 top-level pins are promoted on 'cc_15p62' after extraction -- `klt lvs` has no net/device anchor to seed correspondence against a reference netlist and will report a full mismatch regardless of device-count agreement. If this design genuinely has zero top-level pins by intent, this warning can be ignored; otherwise see the pin-name-label warning above (if present) or check that --top-cell-pins/--pins/--def-pins did not demote every promoted pin (issue #1385)",
+    "2 nets connect to exactly one device terminal -- source/drain/body/resistor-equivalent, not a gate -- and are not a declared pin; this can be a legitimate single-terminal tie (e.g. an intentionally unterminated dummy's diffusion tie), but confirm these nets have no other intended connectivity -- see single_terminal_nets[] for the full list."
+  ],
+  "black_box_regions": [],
+  "abstracted_cells": [],
+  "unmodelled_poly": [],
+  "merged_net_labels": [],
+  "voltage_domain_warnings": [],
+  "missing_flavour_markers": [],
+  "unbiased_pmos_body_nets": [],
+  "single_terminal_nets": [
+    {
+      "net": "\\$1",
+      "device": "$1",
+      "terminal": "a",
+      "terminal_kind": "a"
+    },
+    {
+      "net": "\\$2",
+      "device": "$1",
+      "terminal": "b",
+      "terminal_kind": "b"
+    }
+  ],
+  "dead_metal": [],
+  "matched_device_groups": [],
+  "def_pin_promotion": null,
+  "label_layers": null,
+  "pdk": null,
+  "parasitics": null,
+  "spef_path": null,
+  "subcircuit": null,
+  "metrics": {
+    "extract__device__count": 1,
+    "extract__net__count": 2,
+    "extract__pin__count": 0
+  }
+}

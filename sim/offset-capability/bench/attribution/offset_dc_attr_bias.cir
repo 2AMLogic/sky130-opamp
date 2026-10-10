@@ -56,7 +56,7 @@ XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=
 XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116 nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=1 m=1
 XM6 out d2 vdd vdd mmoff_pfet L=0.3 W=4.634 nf=1 ad=1.34386 as=1.34386 pd=9.85 ps=9.85 nrd=0.06258092360811393 nrs=0.06258092360811393 sa=0 sb=0 sd=0 mult=10 m=10
 XM7 out ibias vss vss mmoff_nfet L=1.2 W=7.819 nf=1 ad=2.26751 as=2.26751 pd=16.22 ps=16.22 nrd=0.037089141833994116 nrs=0.037089141833994116 sa=0 sb=0 sd=0 mult=10 m=10
-XRz cz d2 vss mmoff_res L=9.763 mult=1 m=1
+XRz cz d2 vss mmoff_res L=9.765 mult=1 m=1
 XCc cz out mmoff_cap W=15.62 L=15.62 MF=1 m=1
 **.ends
 

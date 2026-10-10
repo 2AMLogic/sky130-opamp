@@ -1,0 +1,12 @@
+{
+  "drc_style": "drc(full)",
+  "drc_total": 0,
+  "drc_by_rule": [],
+  "magic_types_seen": [
+    "metal3",
+    "mimcap",
+    "mimcapcontact",
+    "metal4"
+  ],
+  "vacuous": false
+}
