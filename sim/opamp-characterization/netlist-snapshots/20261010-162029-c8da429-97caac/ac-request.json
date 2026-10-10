@@ -1,0 +1,50 @@
+{
+  "netlist": "ac-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      125.0
+    ]
+  },
+  "analysis": {
+    "kind": "ac",
+    "args": "dec 20 1 1g"
+  },
+  "measurements": [
+    {
+      "name": "gain_dc_db",
+      "unit": "dB",
+      "spice": ".meas ac gain_dc_db find vdb(out) at=1"
+    },
+    {
+      "name": "gbw_hz",
+      "unit": "Hz",
+      "spice": ".meas ac gbw_hz when vdb(out)=0 cross=1"
+    },
+    {
+      "name": "phase_at_gbw_rad",
+      "unit": "rad",
+      "spice": ".meas ac phase_at_gbw_rad find vp(out) when vdb(out)=0 cross=1"
+    }
+  ],
+  "options": {
+    "timeout_s": 1200,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}
