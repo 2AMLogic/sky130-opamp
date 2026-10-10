@@ -61,6 +61,9 @@ class Bounds(unittest.TestCase):
         self.assertFalse(sf.area_optimal(1.0, 1.0, 1.0, 1.0, 0.3, rest=0.4)["feasible"])
 
     def test_mirror_only_floor_is_the_pair(self):
+        # bounds() also evaluates the Pelgrom hand calc, which reads the pinned PDK's model files
+        if not (sf.hc.pdk_root() / sf.hc.SPICE / "sky130_fd_pr__nfet_01v8__tt.pm3.spice").exists():
+            self.skipTest("pinned PDK not installed")
         b = sf.bounds()
         s = b["inputs"]["group_sigma_v"]
         self.assertGreater(b["mirror_only"]["floor_sigma_v"], s["pair"])
