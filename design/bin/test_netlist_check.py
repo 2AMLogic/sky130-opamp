@@ -52,6 +52,60 @@ class CompareUnit(unittest.TestCase):
         self.assertTrue(nc.compare(t.replace("XM1 d1 inn", "XM1 d1 inp"), t))
 
 
+def _dev(**kv):
+    base = dict(ad=1.7487, **{"as": 1.7487}, pd=12.64, ps=12.64, nrd=0.048, nrs=0.048)
+    base.update(kv)
+    body = " ".join(f"{k}={v!r}" for k, v in base.items())
+    return f"XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.03 nf=1 {body} mult=1 m=1\n"
+
+
+class DerivedTolerance(unittest.TestCase):
+    def agree(self, key, a, b):
+        fwd = nc.compare(_dev(**{key: a}), _dev(**{key: b}))
+        rev = nc.compare(_dev(**{key: b}), _dev(**{key: a}))
+        self.assertEqual(bool(fwd), bool(rev), "operand order matters")
+        return not fwd
+
+    def test_perimeter_rounding_passes(self):
+        for k in ("pd", "ps"):
+            self.assertTrue(self.agree(k, 9.848, 9.85))
+            self.assertTrue(self.agree(k, 16.218, 16.22))
+            self.assertTrue(self.agree(k, 12.64, 12.645))
+
+    def test_perimeter_just_outside_fails(self):
+        for k in ("pd", "ps"):
+            self.assertFalse(self.agree(k, 12.64, 12.66))
+            self.assertFalse(self.agree(k, 12.64, 12.69))
+            self.assertFalse(self.agree(k, 12.64, 12.6349))
+            self.assertFalse(self.agree(k, 12.64, 12.6451))
+
+    def test_other_keys_tight_relative(self):
+        for k in ("ad", "as", "nrd", "nrs"):
+            v = 1.7487 if k in ("ad", "as") else 0.048
+            self.assertTrue(self.agree(k, v, v * (1 + 1e-9)))
+            self.assertTrue(self.agree(k, v, v * (1 - 1e-9)))
+            for f in (1 + 1e-4, 1 - 1e-4, 1.002, 0.998, 1.0005):
+                self.assertFalse(self.agree(k, v, v * f), (k, f))
+
+    def test_perimeter_allowance_not_applied_to_others(self):
+        for k in ("ad", "as", "nrd", "nrs"):
+            self.assertFalse(self.agree(k, 0.048, 0.052))
+
+    def test_near_zero(self):
+        for k in ("ad", "as", "nrd", "nrs"):
+            self.assertTrue(self.agree(k, 0.0, 0.0))
+            self.assertTrue(self.agree(k, 0.0, 1e-15))
+            self.assertFalse(self.agree(k, 0.0, 1e-6))
+            self.assertFalse(self.agree(k, 1e-9, 2e-9))
+        self.assertTrue(self.agree("pd", 0.0, 0.004))
+        self.assertFalse(self.agree("pd", 0.0, 0.006))
+
+    def test_committed_pd_edit_fails_via_netlist(self):
+        t = NETLIST.read_text()
+        self.assertTrue(nc.compare(t.replace("pd=12.64", "pd=12.66"), t))
+        self.assertTrue(nc.compare(t, t.replace("ad=1.7487", "ad=1.752")))
+
+
 @unittest.skipUnless(HAVE_XSCHEM, "xschem not installed")
 class EndToEnd(unittest.TestCase):
     def test_clean_tree_passes(self):
