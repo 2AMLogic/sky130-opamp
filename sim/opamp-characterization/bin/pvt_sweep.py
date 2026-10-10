@@ -852,40 +852,171 @@ def latest_ac_csv(before_id: str) -> Path | None:
     return cands[-1] if cands else None
 
 
-def crosscheck(ref_csv: Path, cmrr_mid_rows: list[dict], icmr_rows: list[dict]) -> dict:
-    """Sanity check against the committed open-loop AC record at the same grid points.
+REPO_REL_RECORDS = "sim/opamp-characterization/records"
+
+
+def _supply_key(v) -> float | None:
+    return None if v in (None, "") else round(float(v), 6)
+
+
+def _num(v) -> float | None:
+    return None if v in (None, "") else float(v)
+
+
+def _ref_key(r: dict) -> tuple:
+    """Join key of an AC reference point: process, temperature, supply."""
+    return (r["corner"], float(r["temp_c"]), _supply_key(r.get("vdd_v")))
+
+
+def _unavailable_reference(reasons: list[str], skipped: list[dict] | None = None) -> dict:
+    return {"available": False, "rows": [], "csv": None, "identity": None,
+            "unavailable_reasons": reasons, "skipped_candidates": skipped or []}
+
+
+def current_campaign_reference(ac_rows: list[dict], dut_meta: dict, record_id: str) -> dict:
+    """This campaign's own AC rows: same DUT snapshot by construction (#104)."""
+    return {"available": True, "rows": ac_rows, "csv": None,
+            "identity": {"source": "current_campaign", "record_id": record_id,
+                         "dut_sha256": dut_meta["sha256"],
+                         "reference": "this record's ac analysis"},
+            "unavailable_reasons": [], "skipped_candidates": []}
+
+
+def select_ac_reference(before_id: str, dut_sha256: str, repo_root: Path | None = None,
+                        records_dir: Path | None = None) -> dict:
+    """Newest earlier committed AC record whose DUT identity is *verified* and
+    equal to ``dut_sha256``. Filename order only ranks the candidates; it never
+    qualifies one. Legacy records (no ``dut`` block), corrupt/missing snapshots
+    and different-DUT records are skipped with a recorded reason; if none
+    qualifies the reference is explicitly unavailable (never guessed)."""
+    repo_root = REPO_ROOT if repo_root is None else repo_root
+    rdir = RECORDS_DIR if records_dir is None else records_dir
+    cands = sorted((p for p in rdir.glob("*-ac.csv") if p.name.split("-ac.csv")[0] < before_id), reverse=True)
+    skipped: list[dict] = []
+    for csv_path in cands:
+        rid = csv_path.name.split("-ac.csv")[0]
+        try:
+            rec = json.loads((rdir / f"{rid}.json").read_text())
+            if not isinstance(rec, dict):
+                raise ValueError("not an object")
+        except (OSError, ValueError):
+            skipped.append({"csv": csv_path.name, "reason": "record JSON missing or unreadable; DUT identity unverifiable"})
+            continue
+        state, problems = dut_identity.verify_record_dut(rec, repo_root)
+        if state == dut_identity.UNVERIFIED:
+            skipped.append({"csv": csv_path.name, "reason": "legacy record without dut identity (unverified)"})
+            continue
+        if problems:
+            skipped.append({"csv": csv_path.name, "reason": "DUT identity failed verification: " + "; ".join(problems)})
+            continue
+        sha = rec["dut"]["sha256"]
+        if sha != dut_sha256:
+            skipped.append({"csv": csv_path.name, "reason": f"different DUT ({sha} != {dut_sha256})"})
+            continue
+        return {"available": True, "rows": list(csv.DictReader(csv_path.open())),
+                "csv": csv_path.name,
+                "identity": {"source": "historical", "record_id": rid, "dut_sha256": sha,
+                             "reference": f"{REPO_REL_RECORDS}/{csv_path.name}"},
+                "unavailable_reasons": [], "skipped_candidates": skipped}
+    reason = (f"no earlier AC record with verified DUT identity {dut_sha256}"
+              if cands else "no earlier AC record exists")
+    return _unavailable_reference([reason], skipped)
+
+
+def choose_ac_reference(record_id: str, dut_meta: dict, current_ac_rows: list[dict] | None,
+                        repo_root: Path | None = None, records_dir: Path | None = None) -> dict:
+    """Same-campaign AC first, then a verified-identical historical record."""
+    if current_ac_rows:
+        return current_campaign_reference(current_ac_rows, dut_meta, record_id)
+    return select_ac_reference(record_id, dut_meta["sha256"], repo_root, records_dir)
+
+
+def index_reference(rows: list[dict]) -> tuple[dict[tuple, dict], set[tuple]]:
+    """Reference rows by (process, temperature, supply); keys seen more than
+    once are returned as duplicates and never silently resolved."""
+    idx: dict[tuple, dict] = {}
+    dups: set[tuple] = set()
+    for r in rows:
+        k = _ref_key(r)
+        if k in idx:
+            dups.add(k)
+        idx[k] = r
+    return idx, dups
+
+
+def _match_ref(r: dict, idx: dict, dups: set, vcm: float | None, label: str) -> tuple[dict | None, str | None]:
+    """(reference row, None) or (None, diagnostic) for a measured point."""
+    k = _ref_key(r)
+    name = f"{label} {k[0]}/{k[1]:g}C/" + ("?" if k[2] is None else f"{k[2]:g}V")
+    if k in dups:
+        return None, f"{name}: duplicate reference points"
+    a = idx.get(k)
+    if a is None:
+        return None, f"{name}: no reference point"
+    a_vcm = a.get("vcm_v")
+    if vcm is not None and a_vcm not in (None, "") and abs(float(a_vcm) - vcm) > 1e-3:
+        return None, f"{name}: common-mode mismatch (measured {vcm:g} V, reference {float(a_vcm):g} V)"
+    return a, None
+
+
+def crosscheck(reference: dict, cmrr_mid_rows: list[dict], icmr_rows: list[dict]) -> dict:
+    """Sanity check against an open-loop AC reference (see select_ac_reference)
+    at matching (process, temperature, supply, mid common-mode) points.
 
     Adm_dc (new CMRR deck instance D) vs gain_dc_db, GBW vs gbw_hz, and the ICMR
     mid-point supply current vs iq_a. Not a substitute for the CMRR/ICMR
     figures themselves -- it shows the new decks reproduce the established AC
     bench's operating point and gain before their numbers are trusted.
+
+    Unmatched points are counted and diagnosed, never counted as agreement;
+    ``ok`` is None (not False, not True) when nothing could be compared, and
+    ``all_points_matched`` says whether coverage was complete.
     """
-    ref = {(r["corner"], float(r["temp_c"])): r for r in csv.DictReader(ref_csv.open())}
-    d_gain, d_gbw, d_iq, n = 0.0, 0.0, 0.0, 0
+    base = {"reference_identity": reference.get("identity"),
+            "reference_available": bool(reference.get("available")),
+            "tolerance_gain_db": CROSSCHECK_TOL_GAIN_DB, "tolerance_gbw_frac": CROSSCHECK_TOL_GBW_FRAC,
+            "tolerance_iq_frac": CROSSCHECK_TOL_IQ_FRAC}
+    if reference.get("identity") and reference["identity"].get("reference"):
+        base["reference_csv"] = reference["identity"]["reference"]
+    if not reference.get("available"):
+        return {**base, "unavailable_reasons": list(reference.get("unavailable_reasons") or ["no reference"]),
+                "skipped_candidates": reference.get("skipped_candidates", []),
+                "cmrr_points_compared": 0, "cmrr_points_unmatched": len(cmrr_mid_rows),
+                "icmr_points_compared": 0, "icmr_points_unmatched": len(icmr_rows),
+                "diagnostics": [], "all_points_matched": False, "ok": None}
+    idx, dups = index_reference(reference["rows"])
+    diags: list[str] = []
+    d_gain, d_gbw, d_iq, n, n_iq = 0.0, 0.0, 0.0, 0, 0
     for r in cmrr_mid_rows:
-        a = ref.get((r["corner"], float(r["temp_c"])))
+        a, why = _match_ref(r, idx, dups, _num(r.get("vcm_v")), "cmrr")
         if a is None:
+            diags.append(why)
             continue
         n += 1
         d_gain = max(d_gain, abs(r["adm_1hz_db"] - float(a["gain_dc_db"])))
         d_gbw = max(d_gbw, abs(r["gbw_hz"] / float(a["gbw_hz"]) - 1.0))
-    n_iq = 0
     for r in icmr_rows:
-        a = ref.get((r["corner"], float(r["temp_c"])))
+        vcm = None if r.get("vdd_v") in (None, "") else 0.5 * float(r["vdd_v"])
+        a, why = _match_ref(r, idx, dups, vcm, "icmr")
         if a is None:
+            diags.append(why)
             continue
         n_iq += 1
         d_iq = max(d_iq, abs(r["iq_mid_a"] / float(a["iq_a"]) - 1.0))
-    return {
-        "reference_csv": f"sim/opamp-characterization/records/{ref_csv.name}",
-        "cmrr_points_compared": n, "max_abs_adm_dc_minus_gain_dc_db": round(d_gain, 4),
-        "max_rel_gbw_error": round(d_gbw, 5), "tolerance_gain_db": CROSSCHECK_TOL_GAIN_DB,
-        "tolerance_gbw_frac": CROSSCHECK_TOL_GBW_FRAC,
-        "icmr_points_compared": n_iq, "max_rel_iq_error": round(d_iq, 5),
-        "tolerance_iq_frac": CROSSCHECK_TOL_IQ_FRAC,
-        "ok": bool(n and d_gain <= CROSSCHECK_TOL_GAIN_DB and d_gbw <= CROSSCHECK_TOL_GBW_FRAC
-                   and (not n_iq or d_iq <= CROSSCHECK_TOL_IQ_FRAC)),
+    un_c, un_i = len(cmrr_mid_rows) - n, len(icmr_rows) - n_iq
+    out = {
+        **base, "cmrr_points_compared": n, "cmrr_points_unmatched": un_c,
+        "max_abs_adm_dc_minus_gain_dc_db": round(d_gain, 4), "max_rel_gbw_error": round(d_gbw, 5),
+        "icmr_points_compared": n_iq, "icmr_points_unmatched": un_i, "max_rel_iq_error": round(d_iq, 5),
+        "diagnostics": diags, "all_points_matched": not (un_c or un_i),
     }
+    if not (n or n_iq):
+        out["unavailable_reasons"] = ["reference has no matching points"]
+        out["ok"] = None
+    else:
+        out["ok"] = bool(n and d_gain <= CROSSCHECK_TOL_GAIN_DB and d_gbw <= CROSSCHECK_TOL_GBW_FRAC
+                         and (not n_iq or d_iq <= CROSSCHECK_TOL_IQ_FRAC))
+    return out
 
 
 # --------------------------------------------------------------------------
@@ -1026,15 +1157,32 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
         v = r.get("vdd_v")
         return (r["corner"], float(r["temp_c"]), None if v in (None, "") else round(float(v), 6))
 
-    ac = {key(r): float(r["phase_margin_deg"]) for r in ac_rows}
+    ac: dict[tuple, float] = {}
+    dup: set[tuple] = set()
+    for r in ac_rows:
+        k = key(r)
+        if k in ac:
+            dup.add(k)
+        ac[k] = float(r["phase_margin_deg"])
     out = []
     for r in step_rows:
-        pm = ac.get(key(r))
-        if pm is None and key(r)[2] is None:
-            pm = ac.get(next((k for k in ac if k[:2] == key(r)[:2]), None))
+        k, pm, ref_status = key(r), None, "matched"
+        if k in dup:
+            ref_status = "duplicate_reference"
+        elif k in ac:
+            pm = ac[k]
+        elif k[2] is None:  # step row carries no supply: only an unambiguous corner/temp reference qualifies
+            same = [kk for kk in ac if kk[:2] == k[:2]]
+            if len(same) == 1 and same[0] not in dup:
+                pm = ac[same[0]]
+            else:
+                ref_status = "ambiguous_supply" if same else "missing_reference"
+        else:
+            ref_status = "missing_reference"
         row = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "ac_pm_deg": pm,
                "expected_overshoot_pct": None, "measured_overshoot_pct": float(r["overshoot_pct"]),
-               "delta_pp": None, "agrees": None, "settle_1pct_ns": float(r["settle_1pct_ns"])}
+               "delta_pp": None, "agrees": None, "settle_1pct_ns": float(r["settle_1pct_ns"]),
+               "reference_status": ref_status}
         if key(r)[2] is not None:
             row["vdd_v"] = key(r)[2]
         if pm is not None:
@@ -1048,14 +1196,18 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
 def pm_overshoot_summary(table: list[dict], tol_pp: float = STEP_PM_TOL_PP) -> dict:
     cmp_rows = [r for r in table if r["agrees"] is not None]
     return {"tolerance_pp": tol_pp, "points": len(table), "points_with_ac_reference": len(cmp_rows),
+            "points_without_ac_reference": [
+                f"{r['corner']}/{r['temp_c']:g}C" + (f"/{r['vdd_v']:g}V" if "vdd_v" in r else "")
+                + f" ({r.get('reference_status', 'missing_reference')})" for r in table if r["agrees"] is None],
             "points_disagreeing": [f"{r['corner']}/{r['temp_c']:g}C" + (f"/{r['vdd_v']:g}V" if "vdd_v" in r else "")
                                 for r in cmp_rows if not r["agrees"]],
             "max_abs_delta_pp": max((abs(r["delta_pp"]) for r in cmp_rows), default=None)}
 
 
-def latest_ac_rows(before_id: str) -> tuple[Path, list[dict]] | None:
-    ref = latest_ac_csv(before_id)
-    return (ref, list(csv.DictReader(ref.open()))) if ref else None
+def latest_ac_rows(before_id: str, dut_sha256: str, repo_root: Path | None = None,
+                   records_dir: Path | None = None) -> dict:
+    """Verified-identity historical AC reference (see select_ac_reference)."""
+    return select_ac_reference(before_id, dut_sha256, repo_root, records_dir)
 
 
 ANALYSES = {"ac": run_ac, "tran_sr": run_tran_sr, "dc_swing": run_dc_swing}
@@ -1347,24 +1499,23 @@ def main(argv=None) -> int:
             )
         # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
         n_runs += sum(len(expected) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
+        ac_ref = choose_ac_reference(record_id, dut_meta, results.get("ac"))
         if "tran_step" in klt_analyses and results["tran_step"]:
-            ref_name, ac_rows = None, None
-            if results.get("ac"):
-                ref_name, ac_rows = "this record's ac analysis", results["ac"]
-            else:
-                got = latest_ac_rows(record_id)
-                if got:
-                    ref_name, ac_rows = f"sim/opamp-characterization/records/{got[0].name}", got[1]
-            if ac_rows:
-                pm_table = pm_overshoot_table(ac_rows, results["tran_step"])
-                pm_crosscheck = {"ac_reference": ref_name, "summary": pm_overshoot_summary(pm_table), "table": pm_table}
-                print(f"AC-PM vs overshoot ({ref_name}): {json.dumps(pm_crosscheck['summary'])}", file=sys.stderr)
+            pm_table = pm_overshoot_table(ac_ref["rows"], results["tran_step"]) if ac_ref["available"] else []
+            pm_crosscheck = {
+                "reference_identity": ac_ref["identity"], "reference_available": ac_ref["available"],
+                "ac_reference": (ac_ref["identity"] or {}).get("reference"),
+                "unavailable_reasons": ac_ref["unavailable_reasons"],
+                "skipped_candidates": ac_ref["skipped_candidates"],
+                "summary": pm_overshoot_summary(pm_table) if pm_table else None, "table": pm_table,
+            }
+            print(f"AC-PM vs overshoot ({pm_crosscheck['ac_reference'] or 'reference unavailable'}): "
+                  f"{json.dumps(pm_crosscheck['summary'] or ac_ref['unavailable_reasons'])}", file=sys.stderr)
         if not len(errors) > n_klt_errors0 and "icmr" in klt_analyses and "cmrr" in klt_analyses:
-            ref = latest_ac_csv(record_id)
-            if ref is not None:
-                mid_rows = [r for r in results["cmrr"] if r["cm_point"] == "mid"]
-                klt_crosscheck = crosscheck(ref, mid_rows, results["icmr"])
-                print(f"cross-check vs {ref.name}: {json.dumps(klt_crosscheck)}", file=sys.stderr)
+            mid_rows = [r for r in results["cmrr"] if r["cm_point"] == "mid"]
+            klt_crosscheck = crosscheck(ac_ref, mid_rows, results["icmr"])
+            print(f"cross-check vs {klt_crosscheck.get('reference_csv', 'unavailable reference')}: "
+                  f"{json.dumps({k: v for k, v in klt_crosscheck.items() if k != 'skipped_candidates'})}", file=sys.stderr)
 
     elapsed_total = time.monotonic() - t_start
     print(f"Completed {n_runs} runs ({len(errors)} failed) in {elapsed_total:.1f}s", file=sys.stderr)

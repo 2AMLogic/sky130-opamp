@@ -9,6 +9,7 @@ from pathlib import Path
 import _paths
 from _paths import EXP, RECORDS, REPO, TESTBENCH
 import spice_harness as sh
+import dut_identity
 
 pvt = _paths.load_module("pvt_sweep", EXP / "bin" / "pvt_sweep.py")
 
@@ -333,12 +334,148 @@ class KltBenchTests(unittest.TestCase):
 
     def test_crosscheck_agreement_and_disagreement(self):
         ref = RECORDS / "20261001-074923-c317ff9-ac.csv"
-        r = next(csv.DictReader(ref.open()))
-        cm = {"corner": r["corner"], "temp_c": float(r["temp_c"]),
-              "adm_1hz_db": float(r["gain_dc_db"]), "gbw_hz": float(r["gbw_hz"])}
-        ic = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "iq_mid_a": float(r["iq_a"])}
-        self.assertTrue(pvt.crosscheck(ref, [cm], [ic])["ok"])
-        self.assertFalse(pvt.crosscheck(ref, [dict(cm, adm_1hz_db=cm["adm_1hz_db"] + 1.0)], [ic])["ok"])
+        rows = list(csv.DictReader(ref.open()))
+        r = rows[0]
+        reference = {"available": True, "rows": rows, "identity": {"reference": ref.name}}
+        cm = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "vdd_v": float(r["vdd_v"]),
+              "vcm_v": float(r["vcm_v"]), "adm_1hz_db": float(r["gain_dc_db"]), "gbw_hz": float(r["gbw_hz"])}
+        ic = {"corner": r["corner"], "temp_c": float(r["temp_c"]), "vdd_v": float(r["vdd_v"]),
+              "iq_mid_a": float(r["iq_a"])}
+        self.assertTrue(pvt.crosscheck(reference, [cm], [ic])["ok"])
+        self.assertFalse(pvt.crosscheck(reference, [dict(cm, adm_1hz_db=cm["adm_1hz_db"] + 1.0)], [ic])["ok"])
+
+
+def ac_ref_row(corner="tt", temp=27.0, vdd=1.8, gain=66.0, gbw=2.0e7, iq=6.5e-5, pm=65.0, vcm=None):
+    return {"corner": corner, "temp_c": str(temp), "vdd_v": str(vdd), "vcm_v": str(0.5 * vdd if vcm is None else vcm),
+            "iq_a": str(iq), "gain_dc_db": str(gain), "gbw_hz": str(gbw), "phase_margin_deg": str(pm)}
+
+
+def cc_rows(vdd=1.8, gain=66.0, gbw=2.0e7, iq=6.5e-5, corner="tt", temp=27.0):
+    cm = {"corner": corner, "temp_c": temp, "vdd_v": vdd, "vcm_v": 0.5 * vdd, "adm_1hz_db": gain, "gbw_hz": gbw}
+    ic = {"corner": corner, "temp_c": temp, "vdd_v": vdd, "iq_mid_a": iq}
+    return cm, ic
+
+
+def ref_of(rows):
+    return {"available": True, "rows": rows, "identity": {"reference": "x"}}
+
+
+class ReferenceBindingTests(unittest.TestCase):
+    """Issue #143: historical AC is usable only with verified matching DUT identity."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.rdir = self.root / "records"
+        self.rdir.mkdir()
+        self.addCleanup(self._tmp.cleanup)
+
+    def add(self, rid, dut_bytes=b"* dut A\n", legacy=False, rows=None, corrupt=False):
+        (self.rdir / f"{rid}-ac.csv").write_text(
+            "corner,temp_c,vdd_v,vcm_v,iq_a,gain_dc_db,gbw_hz,phase_margin_deg\n"
+            + "".join(f"{r['corner']},{r['temp_c']},{r['vdd_v']},{r['vcm_v']},{r['iq_a']},"
+                      f"{r['gain_dc_db']},{r['gbw_hz']},{r['phase_margin_deg']}\n"
+                      for r in (rows or [ac_ref_row()])))
+        rec = {"record_id": rid}
+        if not legacy:
+            snap = self.root / "snap" / rid
+            snap.mkdir(parents=True)
+            (snap / "opamp_core.spice").write_bytes(dut_bytes)
+            declared = dut_identity.sha256_bytes(b"other" if corrupt else dut_bytes)
+            rec["dut"] = {"snapshot_path": f"snap/{rid}/opamp_core.spice", "sha256": declared}
+        (self.rdir / f"{rid}.json").write_text(json.dumps(rec))
+
+    def select(self, sha=None, before="20261010-000000-zzz-000000"):
+        sha = dut_identity.sha256_bytes(b"* dut A\n") if sha is None else sha
+        return pvt.select_ac_reference(before, sha, self.root, self.rdir)
+
+    def test_newer_different_dut_cannot_displace_compatible_evidence(self):
+        self.add("20261001-000000-aaa-000001")
+        self.add("20261005-000000-bbb-000002", dut_bytes=b"* dut B\n")
+        got = self.select()
+        self.assertTrue(got["available"])
+        self.assertEqual(got["identity"]["record_id"], "20261001-000000-aaa-000001")
+        self.assertEqual(got["identity"]["dut_sha256"], dut_identity.sha256_bytes(b"* dut A\n"))
+        self.assertIn("different DUT", got["skipped_candidates"][0]["reason"])
+
+    def test_legacy_unverified_ac_is_unavailable(self):
+        self.add("20261001-000000-aaa-000001", legacy=True)
+        got = self.select()
+        self.assertFalse(got["available"])
+        self.assertIn("no earlier AC record with verified DUT identity", got["unavailable_reasons"][0])
+        self.assertIn("legacy", got["skipped_candidates"][0]["reason"])
+        cc = pvt.crosscheck(got, [cc_rows()[0]], [cc_rows()[1]])
+        self.assertIsNone(cc["ok"])  # neither agreement nor disagreement
+        self.assertEqual((cc["cmrr_points_compared"], cc["cmrr_points_unmatched"]), (0, 1))
+        self.assertTrue(cc["unavailable_reasons"])
+
+    def test_corrupt_snapshot_is_unavailable_and_later_records_only(self):
+        self.add("20261001-000000-aaa-000001", corrupt=True)
+        self.add("20261011-000000-ccc-000003")  # not earlier than before_id
+        got = self.select()
+        self.assertFalse(got["available"])
+        self.assertIn("failed verification", got["skipped_candidates"][0]["reason"])
+
+    def test_no_candidates(self):
+        self.assertIn("no earlier AC record exists", self.select()["unavailable_reasons"][0])
+
+    def test_current_campaign_preferred_over_matching_history(self):
+        self.add("20261001-000000-aaa-000001")
+        meta = {"sha256": dut_identity.sha256_bytes(b"* dut A\n")}
+        cur = [ac_ref_row(gain=70.0)]
+        got = pvt.choose_ac_reference("20261010-000000-zzz-000000", meta, cur, self.root, self.rdir)
+        self.assertEqual(got["identity"]["source"], "current_campaign")
+        self.assertIs(got["rows"], cur)
+        got = pvt.choose_ac_reference("20261010-000000-zzz-000000", meta, None, self.root, self.rdir)
+        self.assertEqual(got["identity"]["source"], "historical")
+
+    def test_two_supplies_at_one_corner_do_not_overwrite(self):
+        ref = ref_of([ac_ref_row(vdd=1.62, gain=60.0, iq=6.0e-5), ac_ref_row(vdd=1.98, gain=70.0, iq=7.0e-5)])
+        a, b = cc_rows(vdd=1.62, gain=60.0, iq=6.0e-5), cc_rows(vdd=1.98, gain=70.0, iq=7.0e-5)
+        cc = pvt.crosscheck(ref, [a[0], b[0]], [a[1], b[1]])
+        self.assertEqual((cc["cmrr_points_compared"], cc["icmr_points_compared"]), (2, 2))
+        self.assertTrue(cc["ok"] and cc["all_points_matched"])
+        # a last-write-wins index would pair 1.62 V with the 1.98 V reference and fail
+        bad = pvt.crosscheck(ref, [cc_rows(vdd=1.62, gain=70.0)[0]], [])
+        self.assertFalse(bad["ok"])
+
+    def test_missing_reference_point_is_diagnosed_not_agreement(self):
+        ref = ref_of([ac_ref_row(vdd=1.8)])
+        ok_cm, ok_ic = cc_rows(vdd=1.8)
+        miss_cm, miss_ic = cc_rows(vdd=1.98)
+        cc = pvt.crosscheck(ref, [ok_cm, miss_cm], [ok_ic, miss_ic])
+        self.assertEqual((cc["cmrr_points_compared"], cc["cmrr_points_unmatched"]), (1, 1))
+        self.assertEqual((cc["icmr_points_compared"], cc["icmr_points_unmatched"]), (1, 1))
+        self.assertFalse(cc["all_points_matched"])
+        self.assertTrue(cc["ok"])  # the valid pair is kept, not discarded
+        self.assertTrue(any("no reference point" in d and "1.98" in d for d in cc["diagnostics"]))
+        only_missing = pvt.crosscheck(ref, [miss_cm], [miss_ic])
+        self.assertIsNone(only_missing["ok"])
+
+    def test_duplicate_reference_points_are_not_resolved(self):
+        ref = ref_of([ac_ref_row(gain=66.0), ac_ref_row(gain=50.0)])
+        cm, ic = cc_rows()
+        cc = pvt.crosscheck(ref, [cm], [ic])
+        self.assertEqual(cc["cmrr_points_compared"], 0)
+        self.assertIsNone(cc["ok"])
+        self.assertTrue(any("duplicate" in d for d in cc["diagnostics"]))
+
+    def test_common_mode_mismatch_is_unmatched(self):
+        ref = ref_of([ac_ref_row(vcm=0.5)])
+        cm, ic = cc_rows()
+        cc = pvt.crosscheck(ref, [cm], [ic])
+        self.assertEqual(cc["cmrr_points_compared"], 0)
+        self.assertTrue(any("common-mode mismatch" in d for d in cc["diagnostics"]))
+
+    def test_pm_table_does_not_guess_between_supplies(self):
+        ac = [{"corner": "tt", "temp_c": "27", "vdd_v": v, "phase_margin_deg": "60"} for v in ("1.62", "1.98")]
+        step = [{"corner": "tt", "temp_c": 27.0, "overshoot_pct": 9.0, "settle_1pct_ns": 1.0}]
+        tab = pvt.pm_overshoot_table(ac, step)
+        self.assertIsNone(tab[0]["agrees"])
+        self.assertEqual(tab[0]["reference_status"], "ambiguous_supply")
+        dup = pvt.pm_overshoot_table(ac + [ac[0]], [dict(step[0], vdd_v=1.62)])
+        self.assertEqual(dup[0]["reference_status"], "duplicate_reference")
+        self.assertEqual(pvt.pm_overshoot_summary(dup)["points_without_ac_reference"], ["tt/27C/1.62V (duplicate_reference)"])
 
 
 def synthetic_step(vdd=1.8, zeta=0.5, wn=2 * math.pi * 20e6, v_ofs=0.0, t_stop=pvt.STEP_T_STOP_S, dt=0.25e-9,
