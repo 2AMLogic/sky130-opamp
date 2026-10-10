@@ -16,8 +16,9 @@ Simulator-free. Reads only the committed bare-device sweep
   XMS    nfet  drain = out, gate nx     }  to the output as an extra sink
 
 Sink added = 10 x max(0, I_C - I_6c). At quiescent I(M6) = 50 uA, I_6c = 5 uA
-> I_C = 4.5 uA, so nx is pulled to vss and XMS is off (no static current, so
-the M6/M7 balance and the systematic offset are undisturbed). When a falling
+> I_C = 4.5 uA, so nx is pulled to vss and XMS is off (XMS carries ~0, so
+the M6/M7 balance is not disturbed by a static sink; the two bias legs I_6c
+and I_C do draw from the rail, ~9.5 uA, see item 5). When a falling
 edge cuts I(M6), I_6c drops below I_C and XMS adds 10 x the deficit. The
 replica tracks M6 over PVT, so there is no fixed level shift and no
 dependence on the d2 DC level (which spans 0.47-0.82 V across corners).
@@ -113,7 +114,9 @@ def main():
           f"= {area_n + area_p:.2f} um^2  (baseline MOS gate area 153.13 um^2, "
           f"+{(area_n + area_p) / 153.13 * 100:.0f} %)")
     print("5. Quiescent current added (design): replica leg I_6c = I(M6)/10 = 5 uA from vdd "
-          "(XMP6C -> XMA); XMC/XMS static current ~ 0 (I_C < I_6c). 5 uA of the 1.8 V rail ~ +9 uW.")
+          "(XMP6C -> XMA) PLUS the I_C = 4.5 uA leg (XMC -> XMA2 triode, because I_C < I_6c "
+          "clips nx to vss but XMC still conducts); XMS itself ~ 0. Design ~ +9.5 uA ~ +17 uW at 1.8 V. "
+          "(An earlier draft of this script said ~5 uA: it forgot that XMC conducts while clipped.)")
     print("6. Boost law: I_S = 10 x max(0, I_C - I_6c). I_C = 4.5 uA, so I_S = 10 x (4.5 uA - I(M6)/10) "
           "= 45 uA - I(M6) for I(M6) < 45 uA; e.g. I(M6) = 14 uA -> 31 uA extra sink.")
     # Density spread: I_6c replicas track M6 (same L, same Vsg density), so only mirror
