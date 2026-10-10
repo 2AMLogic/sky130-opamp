@@ -861,7 +861,7 @@ bench precision, not tuned to hide disagreement; committed records are unchanged
   ngspice 42 reproduced the fleet's ngspice 46 value at SS/125 °C
   (66.9021 dB) to the printed digits.
 
-## ICMR and CMrecords/20261009-103006-566b9a5 (issue #53)
+## ICMR and CMRR (issue #53)
 
 > **Pre-layout**, schematic netlist, R+C typical, `VDD` tied to corner; fleet
 > runner klt 0.5.0 vs client 0.7.0 (`runner_compatibility: "mismatch"`, benches
@@ -888,17 +888,33 @@ bench precision, not tuned to hide disagreement; committed records are unchanged
   criterion-sensitive. Not relaxed.
 - Every edge is input-stage limited; none is rail-limited.
 
-**CMrecords/20261009-103006-566b9a5 (Adm - Acm), 30 points**
+**CMRR (Adm - Acm), 30 points**
 
-| CM point | Worst CMrecords/20261009-103006-566b9a5 @ 1 Hz (= 1 kHz) | Best |
+| CM point | Worst CMRR @ 1 Hz (= 1 kHz) | Best |
 |---|---|---|
 | 0.5*VDD | 55.11 dB SS / -40 C | 75.22 dB SF / -40 C |
 | 0.956 V | 69.34 dB FS / 125 C | 81.76 dB SS / 27 C |
 
-CMrecords/20261009-103006-566b9a5 is flat from 1 Hz to ~100 kHz and falls <= 0.4 dB by 1 MHz. The spec CMrecords/20261009-103006-566b9a5
-row is `[TBD]`, so there is no target to grade against.
+CMRR is flat from 1 Hz to 10 kHz (agreement within 0.001 dB at every point) and
+within 0.03 dB at 100 kHz. The spec CMRR row was `[TBD]` when this record was
+written, so the record graded nothing against a target.
 
-**Cross-checks (pass)**: Adm(1 Hz) from the CMrecords/20261009-103006-566b9a5 deck equals `gain_dc_db` in the
+**Erratum (issue #71) to record `20261009-103006-566b9a5`**: the record's
+statement that CMRR is "<= 0.4 dB lower at 1 MHz" is not supported by its own
+`20261009-103006-566b9a5-cmrr.csv`. Recomputing `cmrr_1mhz_db - cmrr_1hz_db` over
+all 30 rows gives a signed change from **-2.3900 dB** (SS / 27 C / window,
+Vcm = 0.956 V) to **+0.9034 dB** (SS / -40 C / window, Vcm = 0.956 V); 29 rows
+fall and one (the latter) rises. These two points bind. The record and CSV are
+unchanged (append-only evidence); this note is the correction. This is a
+re-reading of archived data, not a new simulation. 1 MHz CMRR should not be
+treated as flat relative to 1 Hz.
+
+[`DR-008`](../../spec/decision-records/DR-008-cmrr-target.md) proposes a CMRR
+target of >= 50 dB over DC - 1 kHz only, partly for this reason. DR-008 is
+**proposed, not ratified**: the CMRR row in `spec/target-spec.md` stays OPEN until
+a separate ratification PR, so no ratified CMRR target exists yet.
+
+**Cross-checks (pass)**: Adm(1 Hz) from the CMRR deck equals `gain_dc_db` in the
 committed `20261001-074923-c317ff9-ac.csv` to 0.0000 dB at 15 points (tolerance
 0.05 dB; GBW identical); the ICMR bench's mid-point quiescent current agrees with
 the committed `iq_a` to 7e-5 relative (tolerance 1 percent), confirming the held-at-mid-rail
