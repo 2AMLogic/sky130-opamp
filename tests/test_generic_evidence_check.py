@@ -143,6 +143,69 @@ class CheckTests(Fixture):
         self.assertTrue(fails[1].startswith("item 10:"))
 
 
+class MalformedManifestTests(Fixture):
+    def raw(self, obj):
+        self.write(MANIFEST, json.dumps(obj))
+
+    def test_bad_roots_fail(self):
+        for root in ([], None, "", False, 0):
+            self.raw(root)
+            n, _, fails = self.run_check()
+            self.assertEqual(n, 0)
+            self.assertEqual(len(fails), 1, root)
+            self.assertIn("root must be a JSON object", fails[0])
+
+    def test_missing_evidence_fails(self):
+        self.raw({})
+        fails = self.run_check()[2]
+        self.assertEqual(len(fails), 1)
+        self.assertIn("missing required 'evidence'", fails[0])
+
+    def test_bad_evidence_types_fail(self):
+        for ev in ([], "", False, None, 0, ["x"], "ev/a.json"):
+            self.raw({"evidence": ev})
+            fails = self.run_check()[2]
+            self.assertEqual(len(fails), 1, ev)
+            self.assertIn("'evidence' must be an object", fails[0])
+
+    def test_empty_evidence_passes(self):
+        self.manifest({})
+        self.assertEqual(self.run_check(), (0, [], []))
+
+    def test_bad_entries_each_fail(self):
+        bad = [{"content_hash": "sha256:x"}, [], 7, None, "", {"file": ""},
+               {"file": 3}, {"command": "klt drc"}, {"command": []},
+               {"command": [1]}, {"file": "a", "command": ["x"]},
+               {"file": "a", "content_hash": 5}]
+        for entry in bad:
+            self.manifest({"1": entry})
+            n, _, fails = self.run_check()
+            self.assertEqual((n, len(fails)), (0, 1), entry)
+            self.assertTrue(fails[0].startswith("item 1:"), entry)
+
+    def test_malformed_entries_aggregate_in_item_order(self):
+        self.manifest({"10": [], "2": {"content_hash": "x"}, "3": None})
+        fails = self.run_check()[2]
+        self.assertEqual([f.split(":")[0] for f in fails],
+                         ["item 2", "item 3", "item 10"])
+
+    def test_mixed_valid_and_malformed(self):
+        self.write("ev/rec.md", "r")
+        self.envelope("ev/env.json", "rec.md", h(b"r"))
+        self.manifest({"1": "ev/env.json", "2": 7})
+        n, oks, fails = self.run_check()
+        self.assertEqual((n, len(oks), len(fails)), (1, 1, 1))
+        self.assertTrue(fails[0].startswith("item 2:"))
+
+    def test_supported_shapes_still_pass(self):
+        self.write("ev/rec.md", "r")
+        self.envelope("ev/env.json", "rec.md", h(b"r"))
+        self.envelope("ev/k.json", None, None, kind="klt")
+        self.manifest({"1": "ev/env.json", "2": {"command": ["klt", "drc"]},
+                       "3": {"file": "ev/k.json", "content_hash": "sha256:x"}})
+        self.assertEqual(self.run_check()[::2], (1, []))
+
+
 class CliTests(Fixture):
     def cli(self):
         return subprocess.run(
@@ -159,6 +222,20 @@ class CliTests(Fixture):
         r = self.cli()
         self.assertEqual(r.returncode, 1)
         self.assertIn("item 1", r.stderr)
+
+    def test_malformed_input_exits_nonzero(self):
+        for obj, needle in (([], "root must be"), ({"evidence": {"4": []}}, "item 4")):
+            self.write(MANIFEST, json.dumps(obj))
+            r = self.cli()
+            self.assertEqual(r.returncode, 1)
+            self.assertIn(needle, r.stderr)
+            self.assertNotIn("verified against", r.stdout)
+
+    def test_empty_evidence_reports_zero(self):
+        self.manifest({})
+        r = self.cli()
+        self.assertEqual(r.returncode, 0)
+        self.assertIn(": 0", r.stdout)
 
 
 class CommittedEvidenceTests(unittest.TestCase):

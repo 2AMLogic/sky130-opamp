@@ -194,8 +194,16 @@ python3 design/bin/check_ci.py                   # default gate; includes the ab
 
 It aggregates every item-specific failure (malformed or unreadable
 envelope, missing `provenance.input.path`/`content_hash`, unresolvable
-file, hash disagreement). It skips `{"command": [...]}` entries and
-non-generic envelopes. The `klt signoff` render-and-byte-compare step
+file, hash disagreement). It skips well-formed `{"command": [...]}`
+entries (non-empty list of strings) and non-generic envelopes. It also
+rejects malformed input instead of passing vacuously: a manifest root
+that is not an object, a missing `evidence` key (required; the gate is
+only ever run on `manifests/sky130-opamp.json`), a non-object `evidence`
+(`null`, `[]`, `""`, `false`, ...), and any entry that is not a non-empty
+path string, a `{"file": <non-empty str>[, "content_hash": <str>]}`
+object, or a `{"command": [...]}` object (including empty or non-string
+`file`/`command`, both keys at once, and non-object entries). An empty
+`"evidence": {}` is well-formed and passes with `0` checked. The `klt signoff` render-and-byte-compare step
 stays separate. On a hash failure, regenerate in the same PR: re-hash the
 artifact (`sha256sum`, prefixed `sha256:`), write it into the envelope's
 `provenance.input.content_hash` and the manifest's pinned `content_hash`,

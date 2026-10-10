@@ -8,6 +8,11 @@ manifest evidence entry that cites a generic envelope, resolve the envelope's
 provenance.input.path, hash the file and compare with
 provenance.input.content_hash.
 
+Malformed input fails rather than passing vacuously: the manifest root must be
+an object, 'evidence' must be present and an object ({} passes with 0 checked),
+and every entry must be a non-empty path string, {"file": non-empty str[,
+"content_hash": str]} or {"command": non-empty list of str} (skipped).
+
 Resolution order (matches klt): relative to the envelope's own directory
 first, then repo-relative. Skipped: {"command": [...]} entries (no file) and
 envelopes whose kind is not "generic" (klt computed those hashes itself).
@@ -59,6 +64,40 @@ def resolve_artifact(root, envelope_rel, artifact):
     return None
 
 
+def _type_name(value):
+    return "null" if value is None else type(value).__name__
+
+
+def _classify_entry(entry):
+    """Return ("file", path), ("skip", None) or ("error", message)."""
+    if isinstance(entry, str):
+        if entry:
+            return "file", entry
+        return "error", "empty file path"
+    if isinstance(entry, dict):
+        has_file, has_cmd = "file" in entry, "command" in entry
+        if has_file and has_cmd:
+            return "error", "ambiguous evidence entry (both 'file' and 'command')"
+        if has_file:
+            path = entry["file"]
+            if not isinstance(path, str) or not path:
+                return "error", ("'file' must be a non-empty string, "
+                                 f"got {_type_name(path)}")
+            if "content_hash" in entry and not isinstance(entry["content_hash"], str):
+                return "error", ("'content_hash' must be a string, "
+                                 f"got {_type_name(entry['content_hash'])}")
+            return "file", path
+        if has_cmd:
+            cmd = entry["command"]
+            if (isinstance(cmd, list) and cmd
+                    and all(isinstance(c, str) for c in cmd)):
+                return "skip", None
+            return "error", "'command' must be a non-empty list of strings"
+    return "error", (
+        f"unrecognized evidence entry of type {_type_name(entry)} (expected "
+        'path string, {"file": ...} or {"command": [...]})')
+
+
 def check_manifest(manifest, root=REPO):
     """Return (checked_count, ok_lines, failures)."""
     root = Path(root)
@@ -68,19 +107,25 @@ def check_manifest(manifest, root=REPO):
             data = json.load(handle)
     except Exception as exc:
         return 0, [], [f"cannot read manifest {manifest}: {exc}"]
-    evidence = data.get("evidence") if isinstance(data, dict) else None
-    evidence = evidence or {}
+    if not isinstance(data, dict):
+        return 0, [], [f"manifest {manifest}: root must be a JSON object, "
+                       f"got {_type_name(data)}"]
+    if "evidence" not in data:
+        return 0, [], [f"manifest {manifest}: missing required 'evidence' object"]
+    evidence = data["evidence"]
     if not isinstance(evidence, dict):
-        return 0, [], [f"manifest {manifest}: 'evidence' must be an object"]
+        return 0, [], [f"manifest {manifest}: 'evidence' must be an object, "
+                       f"got {_type_name(evidence)}"]
 
     checked, oks, failures = 0, [], []
     for item, entry in sorted(evidence.items(), key=_sort_key):
-        # A bare path string or {"file": ..., "content_hash": ...}; a
-        # {"command": [...]} entry has no file to open and is skipped.
-        path = entry if isinstance(entry, str) else (
-            entry.get("file") if isinstance(entry, dict) else None)
-        if not path or not isinstance(path, str):
+        kind, value = _classify_entry(entry)
+        if kind == "skip":
             continue
+        if kind == "error":
+            failures.append(f"item {item}: {value}")
+            continue
+        path = value
         try:
             with open(root / path) as handle:
                 envelope = json.load(handle)
