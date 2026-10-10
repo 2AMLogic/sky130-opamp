@@ -1,0 +1,46 @@
+{
+  "campaign": "sizing144-m2p1",
+  "dut": {
+    "source_path": "sim/offset-capability/candidates/opamp_core.m2p1.spice",
+    "snapshot_path": "sim/offset-capability/records/dut-sizing144-m2p1/opamp_core.spice",
+    "sha256": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2"
+  },
+  "base_seed": 20261085,
+  "n_total": 100,
+  "chunk": 100,
+  "corners": {
+    "tt": {
+      "chunks": [
+        {
+          "chunk": 0,
+          "seed": 20261085,
+          "n": 100,
+          "offset": 0,
+          "record_id": "20261010-135145-offset-sizing144-m2p1-tt-c0-32db39"
+        }
+      ],
+      "n_requested": 100,
+      "n_returned": 100,
+      "n_ok": 100,
+      "n_failed": 0,
+      "failure_reasons": {},
+      "mean_v": 0.0006581299999999768,
+      "sigma_v": 0.004245834709084741,
+      "three_sigma_v": 0.012737504127254223,
+      "mean_abs_plus_3sigma_v": 0.0133956341272542,
+      "min_v": -0.014541000000000026,
+      "max_v": 0.011691000000000007
+    }
+  },
+  "attempts": [
+    {
+      "record_id": "20261010-135145-offset-sizing144-m2p1-tt-c0-32db39",
+      "corner": "tt",
+      "chunk": 0,
+      "attempt": 1,
+      "exit_code": 0,
+      "got_samples": true,
+      "job_id": "klt-sim-9f66ea133ae0"
+    }
+  ]
+}

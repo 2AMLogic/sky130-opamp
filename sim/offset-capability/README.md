@@ -149,3 +149,26 @@ version-mismatch and Rz/Cc prerequisites are in
 and its `*-campaign-offset-mc300-final-*.campaign.json`. These are measured
 values only: N>=300 and any offset limit remain unratified, and
 `spec/target-spec.md` is unchanged.
+
+## Matched-group sizing feasibility (#144)
+
+Whether enlarging the mirror and input pair can reach the DR-009 *proposed*
+σ ≤ 0.275 mV: [`records/campaign-20261010-sizing-feasibility.md`](records/campaign-20261010-sizing-feasibility.md),
+disposition in the proposed [`DR-011`](../../spec/decision-records/DR-011-offset-closure-sizing-feasibility.md).
+Finding: no (σ 4.25 / 3.22 / 2.34 mV for three bounded candidates, phase
+margin fails the ratified row from the first step; ≈ 280–580× matched area
+needed). Exploratory N = 100 at tt only; canonical design unchanged.
+
+```
+python3 sim/offset-capability/bin/sizing_feasibility.py bounds     # simulator-free area bounds
+python3 sim/offset-capability/bin/sizing_feasibility.py gmid       # gm/ID-first, committed sweep
+python3 sim/offset-capability/bin/sizing_feasibility.py gen --check # candidates == regeneration, on grid
+python3 sim/offset-capability/bin/sizing_feasibility.py op         # ONE local single-corner OP deck
+python3 sim/offset-capability/bin/offset_probe.py campaign --label sizing144-m2p1 --base-seed 20261085 \
+    --corners tt --n-total 100 --chunk 100 --netlist sim/offset-capability/candidates/opamp_core.m2p1.spice
+python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses ac,tran_sr,dc_swing \
+    --netlist sim/offset-capability/candidates/opamp_core.m2p1.spice
+python3 sim/offset-capability/bin/sizing_feasibility.py summarize --pvt '{"m2p1": "<pvt record id>", ...}'
+```
+
+`candidates/` holds generated, non-canonical netlists (not design inputs).

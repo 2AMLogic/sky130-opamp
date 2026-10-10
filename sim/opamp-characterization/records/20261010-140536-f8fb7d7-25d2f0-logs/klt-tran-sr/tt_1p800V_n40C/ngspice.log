@@ -1,0 +1,49 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * klt sim -- generated corner deck, do not edit
+
+Doing analysis at TEMP = -40.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+Initial Transient Solution
+--------------------------
+
+Node                                   Voltage
+----                                   -------
+vdd                                        1.8
+vss                                          0
+ibias                                  0.66952
+xdut.d1                                0.76167
+xdut.d2                               0.607873
+inn                                   0.538987
+xdut.tail                           0.00178395
+inp                                       0.54
+out                                   0.538987
+xdut.cz                               0.607873
+xdut.xrz.ra                           0.607873
+xdut.xcc.a                            0.538987
+xdut.xcc.b1                           0.538987
+p                                            0
+l20                                      0.684
+l80                                      1.116
+bl80#branch                                  0
+bl20#branch                                  0
+bin#branch                                   0
+vp#branch                                    0
+vss#branch                         5.46219e-05
+vdd#branch                        -5.46219e-05
+
+
+No. of Data Rows : 1127
+
+  Measurements for Transient Analysis
+
+t20_rise            =   2.13375e-07
+t80_rise            =   2.36394e-07
+t80_fall            =   1.22005e-06
+t20_fall            =   1.25174e-06
+
+ngspice-46 done

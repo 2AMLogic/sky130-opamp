@@ -293,7 +293,7 @@ class DutBinding(unittest.TestCase):
 
     def args(self, **kw):
         d = dict(label="c1", base_seed=10, corners="tt", n_total=2, chunk=1, max_attempts=1,
-                 retry_wait_s=0, only=None, resume=False, backend=None, dry_run=False)
+                 retry_wait_s=0, only=None, resume=False, backend=None, dry_run=False, netlist=None)
         d.update(kw)
         return argparse.Namespace(**d)
 
@@ -340,6 +340,24 @@ class DutBinding(unittest.TestCase):
             self.run_campaign(FakeKlt(self), resume=True, label="never-captured", only="tt:0")
         with self.assertRaises(op.ProbeError):   # fresh campaign never silently reuses a label
             self.run_campaign(FakeKlt(self))
+
+    def test_candidate_netlist_is_snapshotted_not_the_live_design(self):
+        """Issue #144: `campaign --netlist` captures the candidate; the live design is untouched."""
+        cand = self.tmp / "candidates" / "opamp_core.cand.spice"
+        cand.parent.mkdir()
+        cand.write_text("* candidate netlist\n")
+        live = self.live.read_bytes()
+        klt = FakeKlt(self)
+        self.run_campaign(klt, netlist=str(cand))
+        self.assertTrue(all(s["dut"] == cand.read_bytes() for s in klt.submitted))
+        self.assertEqual(self.live.read_bytes(), live)
+        camp = json.loads(next(self.rec.glob("*.campaign.json")).read_text())
+        self.assertEqual(camp["dut"]["sha256"], dut_identity.sha256_bytes(cand.read_bytes()))
+        self.assertEqual(camp["dut"]["source_path"], "candidates/opamp_core.cand.spice")
+        with self.assertRaises(op.ProbeError):   # the snapshot, not a new --netlist, defines a resume
+            self.run_campaign(FakeKlt(self), resume=True, netlist=str(cand), only="tt:1")
+        with self.assertRaises(op.ProbeError):
+            self.run_campaign(FakeKlt(self), label="c2", netlist=str(self.tmp / "missing.spice"))
 
     def test_aggregation_rejects_mixed_hashes_naming_record(self):
         self.run_campaign(FakeKlt(self))

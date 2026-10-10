@@ -547,16 +547,86 @@ def paired_vs_canonical(mc: dict) -> dict | None:
             "sigma_candidate_v": sd(c), "sigma_ratio": sd(c) / sd(b), "pearson": attribution.pearson(c, b)}
 
 
+def extrapolate(cands: dict) -> dict | None:
+    """Area still needed, anchored on the MEASURED candidate sigmas instead of the baseline split.
+
+    m2p1 (pair unchanged) isolates the long-L mirror: sigma_mir^2 = sigma(m2p1)^2 - sigma_pair0^2,
+    with sigma_pair0 the #107 measured pair term. m2p2 (same PMOS geometry as m2p1) then gives the
+    2x-scaled pair: sigma_pair^2 = sigma(m2p2)^2 - sigma_mir^2. Each per-area coefficient
+    (sigma * sqrt(area)) feeds the same area-optimal split as `bounds`. The band propagates
+    +/-2 SE (N = 100) of each candidate sigma, worst-case direction; the pair term from #107 keeps
+    its own N = 300 SE. Differences of noisy variances are fragile; the band says how fragile."""
+    try:
+        s1, s2 = cands["m2p1"]["mc"]["sigma_v"], cands["m2p2"]["mc"]["sigma_v"]
+        se1, se2 = cands["m2p1"]["mc"]["sigma_rel_se"], cands["m2p2"]["mc"]["sigma_rel_se"]
+        a_m = cands["m2p1"]["op"]["gate_area_um2"]["mirror_two_devices"]
+        a_p = cands["m2p2"]["op"]["gate_area_um2"]["pair_two_devices"]
+    except (KeyError, TypeError):
+        return None
+    attr = _attr()
+    rest = math.hypot(attr["stage2"], attr["bias"])
+    se_attr = 1 / math.sqrt(2 * (N_ATTR - 1))
+
+    def one(f1: float, f2: float, fp: float) -> dict:
+        p0 = attr["pair"] * fp
+        vm = (s1 * f1) ** 2 - p0 ** 2
+        vp = (s2 * f2) ** 2 - max(vm, 0.0)
+        if vm <= 0 or vp <= 0:
+            return {"resolvable": False, "reason": "variance difference not positive at this end of the band"}
+        sm, sp = math.sqrt(vm), math.sqrt(vp)
+        r = area_optimal(sp, sm, a_p, a_m, TARGET_SIGMA_V, rest)
+        r.update({"resolvable": True, "sigma_mirror_long_l_v": sm, "sigma_pair_x4_v": sp,
+                  "area_factor_vs_canonical_matched": r["area_um2"] / (2 * 6.03 * 1.2 + 2 * 4.634 * 0.3)})
+        # XM6 must follow the mirror (10:1, same W and L): its gate area and the d2 node load grow with k_mirror.
+        g = cands["m2p1"]["op"]
+        r["xm6_area_um2"] = g["gate_area_um2"]["xm6_total"] * r["k_mirror"]
+        r["d2_cgg6_estimate_f"] = g["capacitance_estimate_f"]["d2_cgg6"] * r["k_mirror"]
+        return r
+    return {"method": extrapolate.__doc__.split("\n\n")[0].strip(),
+            "anchors": {"m2p1_sigma_v": s1, "m2p2_sigma_v": s2, "pair_107_sigma_v": attr["pair"],
+                        "mirror_area_um2_m2p1": a_m, "pair_area_um2_m2p2": a_p},
+            "central": one(1, 1, 1),
+            "low": one(1 - 2 * se1, 1 - 2 * se2, 1 + 2 * se_attr),
+            "high": one(1 + 2 * se1, 1 + 2 * se2, 1 - 2 * se_attr),
+            "tag": "ESTIMATE (Pelgrom area law extrapolated far outside the simulated range)"}
+
+
+def decide(cands: dict) -> dict:
+    """Mechanical application of the plan's predeclared decision rule."""
+    rows = {}
+    ref = cands.get("grid0", {}).get("pvt")
+    for name in ("m2p1", "m2p2", "m4p2"):
+        c = cands.get(name, {})
+        mc, pv = c.get("mc"), c.get("pvt")
+        if not (mc and pv and mc["sigma_v"] is not None):
+            rows[name] = {"complete": False}
+            continue
+        upper = mc["sigma_v"] * (1 + 2 * mc["sigma_rel_se"])
+        perf = {"gain": pv["gain_dc_db_min"]["value"] >= TARGETS["gain_dc_db_min"],
+                "gbw": pv["gbw_hz_min"]["value"] >= TARGETS["gbw_hz_min"],
+                "pm": pv["pm_deg_min"]["value"] >= TARGETS["pm_deg_min"]}
+        regress = {}
+        if ref:
+            for k, better in (("sr_rise_min", "high"), ("sr_fall_min", "high"), ("vpp_min", "high"), ("pq_w_max", "low")):
+                d = pv[k]["value"] - ref[k]["value"]
+                regress[k] = (d < 0) if better == "high" else (d > 0)
+        rows[name] = {"complete": True, "sigma_upper_2se_v": upper, "offset_meets_proposed": upper <= TARGET_SIGMA_V,
+                      "ratified_rows_met_all_15": perf, "regresses_vs_grid0": regress,
+                      "supported": upper <= TARGET_SIGMA_V and all(perf.values()) and not any(regress.values())}
+    verdict = ("sizing_candidate_supported" if any(r.get("supported") for r in rows.values())
+               else "sizing_insufficient" if all(r.get("complete") for r in rows.values()) else "incomplete")
+    return {"rule": "plan.decision_rule", "per_candidate": rows, "verdict": verdict}
+
+
 def summarize(args) -> int:
     plan = json.loads(PLAN.read_text())
-    ops = sorted(RECORDS.glob("*-sizing144-op.json"))
-    opr = json.loads(ops[-1].read_text()) if ops else None
-    out = {"plan": str(PLAN.relative_to(REPO)), "op_record": opr and opr["record_id"],
+    opr = json.loads((REPO / plan["op_record"]).read_text())   # the plan names the OP record it used
+    out = {"plan": str(PLAN.relative_to(REPO)), "op_record": opr["record_id"],
            "targets_unchanged": TARGETS, "offset_target_sigma_v": TARGET_SIGMA_V,
            "bounds": bounds(), "candidates": {}}
     for name in ["canonical", *CANDIDATES]:
         entry: dict = {}
-        if opr and name in opr["candidates"]:
+        if name in opr["candidates"]:
             c = opr["candidates"][name]
             entry["op"] = {k: c[k] for k in ("gm_over_id", "sensitivities", "pelgrom_handcalc_sigma_v",
                                              "measured_anchored_estimate_sigma_v", "capacitance_estimate_f",
@@ -570,6 +640,8 @@ def summarize(args) -> int:
             entry["mc"] = mc
             entry["mc"]["over_target"] = mc["sigma_v"] / TARGET_SIGMA_V if mc["sigma_v"] else None
         out["candidates"][name] = entry
+    out["extrapolation_from_candidates"] = extrapolate(out["candidates"])
+    out["decision"] = decide(out["candidates"])
     rid = allocate_record_id(RECORDS, "sizing144-summary")
     write_new(RECORDS / f"{rid}.json", json.dumps(out, indent=2) + "\n")
     print(rid)
