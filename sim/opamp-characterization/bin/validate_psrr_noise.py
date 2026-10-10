@@ -21,16 +21,21 @@ from __future__ import annotations
 
 import json
 import math
-import sys
+import os
+import shutil
 import tempfile
+import sys
 from pathlib import Path
 
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+import dut_identity  # noqa: E402
 from spice_harness import allocate_record_id, git_sha, run_klt_sim, write_new  # noqa: E402
 
 TB = EXP_DIR / "testbench"
+RECORDS_DIR = EXP_DIR / "records"
+SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 MODELS = {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"}
 
 
@@ -196,50 +201,70 @@ def evaluate(res: dict) -> tuple[dict, list[dict], bool]:
 
 def main() -> int:
     ac = {"kind": "ac", "args": "dec 20 0.1 1g"}
-    with tempfile.TemporaryDirectory(prefix="opamp-psrr-val-") as t:
-        tmp = Path(t)
-        no_cinp = tmp / "psrr_vdd_no_cinp.cir"
-        src = (TB / "psrr_vdd.cir").read_text()
-        assert "Cinp inp 0 1\n" in src
-        no_cinp.write_text(src.replace("Cinp inp 0 1\n", "").replace(
-            '.include "../../../design/netlist/opamp_core.spice"',
-            f'.include "{REPO_ROOT / "design/netlist/opamp_core.spice"}"'))
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import psrr_noise_sweep as m  # noqa: E402
+    # Capture the DUT once (issue #151); every run below uses bodies rendered
+    # against that copy, retained with their requests in the snapshot dir.
+    rid = allocate_record_id(RECORDS_DIR, git_sha(REPO_ROOT), extra_dirs=[SNAPSHOT_DIR])
+    snap = SNAPSHOT_DIR / f"{rid}-psrr-noise-validation"
+    out = RECORDS_DIR / f"{rid}-psrr-noise-validation.json"
+    done = False
+    try:
+        dut, bodies = m.capture_benches(snap, ["psrr_vdd", "noise"])
+        print(f"DUT snapshot: {dut['snapshot_path']} ({dut['sha256']})", file=sys.stderr)
+        psrr_body = bodies["psrr_vdd"].read_text()
+        assert "Cinp inp 0 1\n" in psrr_body
+        no_cinp = snap / "psrr_vdd_no_cinp.spice"
+        no_cinp.write_text(psrr_body.replace("Cinp inp 0 1\n", ""))
         # Finite-difference variant: the input must be held at a fixed 0.9 V
         # (the divider would legitimately move Vcm with vdd and read 6 dB).
-        fixed = tmp / "psrr_vdd_fixed_vcm.cir"
+        fixed = snap / "psrr_vdd_fixed_vcm.spice"
         fixed_src = no_cinp.read_text().replace("Rdiv1 vdd inp 500k\n", "Vfix inp 0 dc 0.9\n").replace(
             "Rdiv2 inp 0 500k\n", "")
         assert "Vfix" in fixed_src and "Rdiv2" not in fixed_src
         fixed.write_text(fixed_src)
-        res = {
-            "dc_fd_psrr": run(tmp, "dc_fd", req(
-                fixed, "tt", [1.79, 1.81], 27, {"kind": "op", "args": ""},
-                [{"name": "vout", "expr": "v(out)", "unit": "V"},
-                 {"name": "vinp", "expr": "v(inp)", "unit": "V"}])),
-            "ac_reference": run(tmp, "ac_ref", req(
-                TB / "psrr_vdd.cir", "tt", [1.8], 27, ac,
-                [{"name": "avs_0p1hz_db", "expr": "db(v(out))[0]", "unit": "dB"},
-                 {"name": "avs_1khz_db", "expr": "db(v(out))[80]", "unit": "dB"}])),
-            "noise_bandlimited": run(tmp, "noise_bl", req(
-                TB / "noise.cir", "ss", [1.62], 125,
-                {"kind": "noise", "args": "v(out) Vinp dec 100 100 1e6"},
-                [{"name": "inoise_total_100hz_1mhz", "expr": "noise2.inoise_total", "unit": "V"}], 8)),
-            "noise_full_sweep_same_corner": None,
-            "negative_control_no_cinp": run(tmp, "negctl", req(
-                no_cinp, "tt", [1.8], 27, ac,
-                [{"name": "avs_1khz_db", "expr": "db(v(out))[80]", "unit": "dB"}])),
-        }
-        # Same corner through the main bench's full-sweep trapezoid.
-        sys.path.insert(0, str(Path(__file__).resolve().parent))
-        import psrr_noise_sweep as m  # noqa: E402
-        nreq = m.build_request("noise", ["ss"], [125.0], str(TB / "noise.cir"), False)
-        res["noise_full_sweep_same_corner"] = run(tmp, "noise_full", nreq)
+        with tempfile.TemporaryDirectory(prefix="opamp-psrr-val-") as t:
+            tmp = Path(t)
 
-    summary, criteria, ok = evaluate(res)
-    rid = allocate_record_id(EXP_DIR / "records", git_sha(REPO_ROOT))
-    out = EXP_DIR / "records" / f"{rid}-psrr-noise-validation.json"
-    write_new(out, json.dumps(
-        {"record_id": rid, "summary": summary, "criteria": criteria, "passed": ok, "runs": res}, indent=2) + "\n")
+            def go(name, r):
+                snap_r = dict(r)
+                snap_r["netlist"] = Path(r["netlist"]).name
+                (snap / f"{name}.request.json").write_text(json.dumps(snap_r, indent=2) + "\n")
+                res_ = run(tmp, name, r)
+                # recorded netlist: relative to records/, pointing into the snapshot
+                res_["request"] = dict(r, netlist=os.path.relpath(r["netlist"], RECORDS_DIR))
+                return res_
+
+            res = {
+                "dc_fd_psrr": go("dc_fd_psrr", req(
+                    fixed, "tt", [1.79, 1.81], 27, {"kind": "op", "args": ""},
+                    [{"name": "vout", "expr": "v(out)", "unit": "V"},
+                     {"name": "vinp", "expr": "v(inp)", "unit": "V"}])),
+                "ac_reference": go("ac_reference", req(
+                    bodies["psrr_vdd"], "tt", [1.8], 27, ac,
+                    [{"name": "avs_0p1hz_db", "expr": "db(v(out))[0]", "unit": "dB"},
+                     {"name": "avs_1khz_db", "expr": "db(v(out))[80]", "unit": "dB"}])),
+                "noise_bandlimited": go("noise_bandlimited", req(
+                    bodies["noise"], "ss", [1.62], 125,
+                    {"kind": "noise", "args": "v(out) Vinp dec 100 100 1e6"},
+                    [{"name": "inoise_total_100hz_1mhz", "expr": "noise2.inoise_total", "unit": "V"}], 8)),
+                "noise_full_sweep_same_corner": None,
+                "negative_control_no_cinp": go("negative_control_no_cinp", req(
+                    no_cinp, "tt", [1.8], 27, ac,
+                    [{"name": "avs_1khz_db", "expr": "db(v(out))[80]", "unit": "dB"}])),
+            }
+            # Same corner through the main bench's full-sweep trapezoid.
+            nreq = m.build_request("noise", ["ss"], [125.0], str(bodies["noise"]), False)
+            res["noise_full_sweep_same_corner"] = go("noise_full_sweep_same_corner", nreq)
+
+        summary, criteria, ok = evaluate(res)
+        write_new(out, json.dumps(
+            {"record_id": rid, "dut": dut, "summary": summary, "criteria": criteria, "passed": ok, "runs": res},
+            indent=2) + "\n")
+        done = True
+    finally:
+        if not done:   # no record written -> no orphan snapshot
+            shutil.rmtree(snap, ignore_errors=True)
     print(json.dumps(summary, indent=2))
     for c in criteria:
         print(f"[{c['verdict'].upper()}] {c['name']}: {c['detail']}")

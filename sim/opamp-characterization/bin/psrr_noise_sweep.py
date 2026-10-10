@@ -28,10 +28,11 @@ Records (append-only; a new timestamped set per run, never overwritten):
     records/<id>-<bench>.klt.json      the unmodified `klt sim` response
     records/<id>-psrr-noise.json/.md   metadata (backend, remote job ids, pins)
     records/<id>-psrr-noise-logs/      per-corner ngspice log (when returned)
-    netlist-snapshots/<id>-psrr-noise/ per-corner generated deck (when returned)
+    netlist-snapshots/<id>-psrr-noise/ DUT copy (opamp_core.spice), rendered bench bodies and
+                                       replayable requests (always), per-corner decks (when returned)
 
     --check-env       report tool availability and exit
-    --dry-run         write the three request files to a scratch dir and exit
+    --dry-run         capture the DUT and write the request files to a scratch dir and exit
     --benches B,B     subset of {psrr_vdd,psrr_vss,noise}
     --corners C,C     subset of {tt,ff,ss,sf,fs}
     --temps T,T       degC (default -40,27,125)
@@ -47,6 +48,7 @@ import csv
 import json
 import math
 import os
+import re
 import platform
 import shutil
 import sys
@@ -58,6 +60,7 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+import dut_identity  # noqa: E402
 from spice_harness import (  # noqa: E402
     KLT_CMD,
     KltSimError,
@@ -71,6 +74,8 @@ from spice_harness import (  # noqa: E402
 TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
+DESIGN_NETLIST = REPO_ROOT / dut_identity.CURRENT_NETLIST_REL
+_DUT_INCLUDE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
 DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
 DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
@@ -186,6 +191,33 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
     if runner_version_check:
         req["batch"] = {"runner_version_check": runner_version_check}
     return req
+
+
+def render_bench(template_text: str) -> str:
+    """The bench body with its DUT include pointed at the sibling snapshot copy
+    (bare name; `klt sim` resolves it against the request's directory)."""
+    out, n = _DUT_INCLUDE.subn(rf'\1"{dut_identity.SNAPSHOT_NAME}"', template_text)
+    if n != 1:
+        raise ValueError(f"bench body must include the DUT exactly once (found {n})")
+    return out
+
+
+def capture_benches(snap_dir: Path, benches: list[str], src: Path | None = None,
+                    repo_root: Path | None = None) -> tuple[dict, dict[str, Path]]:
+    """Capture the DUT bytes ONCE into a fresh ``snap_dir`` and render every
+    selected bench against that copy (issue #151). Returns (dut block, bench ->
+    rendered body path). Nothing later reads the live netlist or the committed
+    testbench include again."""
+    src = Path(src) if src is not None else DESIGN_NETLIST
+    repo_root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    snap_dir.mkdir(parents=True)
+    dut = dut_identity.capture_dut(src, snap_dir, repo_root)
+    bodies = {}
+    for bench in benches:
+        body = snap_dir / f"{BENCHES[bench]['tag']}.spice"
+        write_new(body, render_bench((TESTBENCH_DIR / BENCHES[bench]["netlist"]).read_text()))
+        bodies[bench] = body
+    return dut, bodies
 
 
 def run_klt(request_path: Path, outdir: Path, backend: str | None) -> tuple[int, dict | None, str]:
@@ -315,27 +347,52 @@ def main(argv=None) -> int:
     # Atomically reserve a unique record namespace (issue #75) before any write.
     record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=[SNAPSHOT_DIR])
 
-    # Requests live in a scratch dir during the run but reference the committed
-    # testbench by relative path; the request JSON itself is committed as the
-    # record (records/<id>-<bench>.request.json) with a path relative to there.
+    # Capture the DUT once (issue #151) and render every bench against that
+    # copy before any request is prepared. The snapshot directory holds the DUT,
+    # the rendered bodies and the replayable requests, so they survive whatever
+    # the backend returns. A dry run uses a persistent scratch dir instead and
+    # never touches the records tree.
+    snap_dir = SNAPSHOT_DIR / f"{record_id}-psrr-noise"
+    if args.dry_run:
+        snap_dir = Path(tempfile.mkdtemp(prefix="opamp-psrr-noise-dryrun-")) / "snapshot"
+    keep_snapshot = False
+    try:
+        rc = _run(args, benches, corners, temps, sha, record_id, snap_dir)
+        keep_snapshot = not args.dry_run and rc is not None and rc[1]
+        return rc[0]
+    finally:
+        # A failed run writes no record, so it leaves no orphan snapshot either.
+        if not args.dry_run and not keep_snapshot:
+            shutil.rmtree(snap_dir, ignore_errors=True)
+
+
+def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, bool]:
+    """(exit code, record written)."""
+    dut_root = snap_dir.parent if args.dry_run else REPO_ROOT
+    dut, bodies = capture_benches(snap_dir, benches, repo_root=dut_root)
+    print(f"DUT snapshot: {dut['snapshot_path']} ({dut['sha256']})", file=sys.stderr)
     with tempfile.TemporaryDirectory(prefix="opamp-psrr-noise-") as tmp:
         tmpdir = Path(tmp)
         results: dict[str, dict] = {}
         failures: list[str] = []
         prepared: dict[str, tuple[dict, Path, Path]] = {}
         for bench in benches:
-            netlist_abs = TESTBENCH_DIR / BENCHES[bench]["netlist"]
-            req = build_request(bench, corners, temps, str(netlist_abs), keep_artifacts=True,
+            req = build_request(bench, corners, temps, str(bodies[bench]), keep_artifacts=True,
                                 runner_version_check=args.runner_version_check)
             req_path = tmpdir / f"{bench}.request.json"
             req_path.write_text(json.dumps(req, indent=2) + "\n")
+            # Replayable request beside its body and the DUT copy.
+            snap_req = dict(req)
+            snap_req["netlist"] = bodies[bench].name
+            write_new(snap_dir / f"{BENCHES[bench]['tag']}.request.json", json.dumps(snap_req, indent=2) + "\n")
             if args.dry_run:
-                print(f"{req_path} ({len(req['measurements'])} measurements)")
-                shutil.copy(req_path, Path(tempfile.gettempdir()) / req_path.name)
+                print(f"{snap_dir / (BENCHES[bench]['tag'] + '.request.json')} "
+                      f"({len(req['measurements'])} measurements)")
                 continue
             prepared[bench] = (req, req_path, tmpdir / f"out-{bench}")
         if args.dry_run:
-            return 0
+            print(f"dry-run snapshot dir (kept, outside the records tree): {snap_dir}")
+            return 0, False
 
         # One `klt sim` per bench. They are submitted concurrently only because
         # each is a thin client waiting on its own backend job (the batch fleet
@@ -371,11 +428,10 @@ def main(argv=None) -> int:
             print("\nNo record written. Failures:", file=sys.stderr)
             for f in failures:
                 print(f"  - {f}", file=sys.stderr)
-            return 1
+            return 1, False
 
         RECORDS_DIR.mkdir(parents=True, exist_ok=True)
         log_dir = RECORDS_DIR / f"{record_id}-psrr-noise-logs"
-        snap_dir = SNAPSHOT_DIR / f"{record_id}-psrr-noise"
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
@@ -384,7 +440,7 @@ def main(argv=None) -> int:
             write_csv(csv_path, rows, fields)
             written.append(csv_path)
             req_rec = dict(res["request"])
-            req_rec["netlist"] = f"../testbench/{BENCHES[bench]['netlist']}"
+            req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
             write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
             write_new(RECORDS_DIR / f"{record_id}-{tag}.klt.json", json.dumps(payload, indent=2) + "\n")
             n_art = 0
@@ -405,6 +461,8 @@ def main(argv=None) -> int:
                 "engine_version": (payload.get("environment") or {}).get("engine_version"),
                 "backend_remote": remote,
                 "artifacts_copied": n_art,
+                "rendered_body": bodies[bench].relative_to(REPO_ROOT).as_posix(),
+                "request_snapshot": (snap_dir / f"{tag}.request.json").relative_to(REPO_ROOT).as_posix(),
                 "csv": f"sim/opamp-characterization/records/{csv_path.name}",
             }
             any_bad |= payload["status"] not in ("pass", "pass_partial")
@@ -427,6 +485,7 @@ def main(argv=None) -> int:
                        "psrr_window_hz": [F0_HZ, 1e3], "noise_band_hz": [1e2, 1e6]},
             "backend_arg": args.backend,
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
+            "dut": dut,
             "benches": meta_benches,
             "tools": {
                 "klt": klt_version(),
@@ -438,7 +497,7 @@ def main(argv=None) -> int:
         print(f"Wrote record {record_id}-psrr-noise:")
         for w in written:
             print(f"  {w.relative_to(REPO_ROOT)}")
-        return 1 if any_bad else 0
+        return (1 if any_bad else 0), True
 
 
 if __name__ == "__main__":
