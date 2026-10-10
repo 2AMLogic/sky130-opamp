@@ -953,8 +953,12 @@ python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses tran_step   # who
 
 Like icmr/cmrr there is no local ngspice loop; a failed batch submit is an
 error, not a fallback. The record gets `<id>-tran-step.csv` plus, when an AC
-reference exists (this run's `ac` analysis, else the newest committed `-ac.csv`),
-a `tran_step_pm_crosscheck` object: for each point the AC phase margin, the
+reference exists (this run's `ac` analysis, else the newest earlier committed
+`-ac.csv` whose `dut` identity is verified and equal to this run's DUT hash;
+legacy identity-unverified or different-DUT records are never used and the
+reason is recorded as `unavailable_reasons`/`skipped_candidates`; points match
+on process, temperature and supply, and missing/duplicate/ambiguous points are
+reported, not counted as agreement), a `tran_step_pm_crosscheck` object: for each point the AC phase margin, the
 overshoot a standard second-order unity-feedback loop with that PM would show
 (`pm_to_overshoot_pct`), the measured overshoot, and the difference, flagged
 when it exceeds **5 percentage points** (`STEP_PM_TOL_PP`). It is a
