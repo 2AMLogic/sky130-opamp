@@ -90,8 +90,14 @@ interpolation reproduces the historical sweep summary and says nothing about the
 current schematic sizing. The current design is covered by the DUT identity
 checks (`dut_identity.py`) and the netlist checks.
 
-If `origin/main` does not resolve the append-only check is skipped with an
-explicit message. The runner mirrors `.github/workflows/tests.yml` (the source
+The local runner invokes the append-only check with `--local`: besides the
+committed `origin/main...HEAD` comparison it compares the index and the working
+tree against `HEAD` separately (so a staged edit stays visible even if an
+unstaged change restores the file), applying the same guarded-path and allowlist
+rules. Untracked new evidence is an addition and passes. PR CI keeps the
+committed-only invocation. If `origin/main` does not resolve the append-only
+check is skipped with an explicit message (so uncommitted edits are then not
+checked either; run `git fetch origin main`). The runner mirrors `.github/workflows/tests.yml` (the source
 of truth); it never runs xschem. The separate xschem + pinned-PDK gate
 (`netlist_check.py` regeneration and the `EndToEnd` netlist tests) runs only in
 `.github/workflows/design-sources.yml`.

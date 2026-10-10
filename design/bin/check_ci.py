@@ -37,10 +37,13 @@ def default_checks(py=None):
     ]
 
 
-def append_only_check(py=None):
+def append_only_check(py=None, local=False):
+    """PR form (committed only) by default; local=True adds staged/working-tree."""
     py = py or sys.executable
-    return ("append-only evidence",
-            [py, "sim/lib/append_only_check.py", "--base", BASE_REF])
+    cmd = [py, "sim/lib/append_only_check.py", "--base", BASE_REF]
+    if local:
+        cmd.append("--local")
+    return ("append-only evidence", cmd)
 
 
 def ref_resolves(ref, repo=REPO):
@@ -66,7 +69,7 @@ def run_checks(checks, repo=REPO, run=subprocess.run):
 def main(repo=REPO, resolves=ref_resolves, run=subprocess.run):
     checks = default_checks()
     if resolves(BASE_REF, repo):
-        checks.append(append_only_check())
+        checks.append(append_only_check(local=True))
     else:
         print(f"==> append-only evidence: SKIPPED ({BASE_REF} does not resolve; "
               f"run `git fetch origin main` to enable)")

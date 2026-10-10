@@ -151,6 +151,22 @@ class CheckCiTests(unittest.TestCase):
         self.assertEqual(
             check_ci.main(resolves=lambda *a: True, run=fake_run("append_only")), 3)
 
+    def test_local_mode_requested_and_pr_form_unchanged(self):
+        log = []
+        check_ci.main(resolves=lambda *a: True, run=fake_run(log=log))
+        self.assertIn("--local", log[-1])
+        self.assertIn("append_only", " ".join(log[-1]))
+        self.assertNotIn("--local", check_ci.append_only_check("python")[1])
+        self.assertIn("--local", check_ci.append_only_check("python", local=True)[1])
+
+    def test_missing_base_skip_is_explicit(self):
+        import contextlib, io
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            check_ci.main(resolves=lambda *a: False, run=fake_run())
+        self.assertIn("append-only evidence: SKIPPED", buf.getvalue())
+        self.assertIn(check_ci.BASE_REF, buf.getvalue())
+
     def test_ref_resolves(self):
         self.assertFalse(check_ci.ref_resolves("refs/nonexistent/zzz"))
         self.assertTrue(check_ci.ref_resolves("HEAD"))
