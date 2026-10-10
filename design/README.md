@@ -20,8 +20,8 @@ design/
     netlist_check.py  CI drift guard: regenerates the netlist with headless
                       xschem and compares it with the committed one (issue
                       #55); test_netlist_check.py holds its negative controls
-    sizing_check.py   re-derives every number in DR-002 from the committed
-                      gm/ID sweep; no simulation, stdlib only
+    sizing_check.py   historical DR-002 replay (not the current sizing) from
+                      the committed gm/ID sweep; no simulation, stdlib only
 ```
 
 ## What's here
@@ -44,16 +44,21 @@ design/
   superseding record, not a silent change". DR-002 carries the per-device
   operating point, the literal `-full-sweep.csv` rows each width is computed
   from, the mirror ratios, `Rz`/`Cc`, the corner table, and the open items.
-- **`design/bin/sizing_check.py`** — reproduces all of it:
+- **`design/bin/sizing_check.py`** — a historical replay that reproduces the
+  DR-002 estimates. Its hard-coded dimensions are DR-002's, not the current
+  schematic sizing in `design/netlist/opamp_core.spice`:
 
   ```bash
   python3 design/bin/sizing_check.py validate   # interpolation vs -summary.csv
   python3 design/bin/sizing_check.py widths     # bracketing CSV rows -> W
-  python3 design/bin/sizing_check.py corners    # committed W, evaluated tt/ss/ff
+  python3 design/bin/sizing_check.py corners    # DR-002 historical W, evaluated tt/ss/ff
   ```
 
   It reads only `sim/gm-id-characterization/records/*.csv`, needs no PDK and
-  no simulator, and runs no simulation.
+  no simulator, and runs no simulation. `validate` checks interpolation
+  reproducibility against the historical sweep only; it does not check the
+  current design. Checks that validate the current design are the netlist and
+  DUT identity checks, not this script.
 
 ## Device summary (full derivation in DR-002)
 
@@ -152,10 +157,10 @@ Done, with the real pinned PDK installed:
   **clean** on this schematic. The check was confirmed non-vacuous: the same
   command on a copy with the input pair narrowed to `W = 0.3 µm` reports
   `M1 (nfet_01v8): finger width is too small, w / nf = 0.3`.
-- **Sizing arithmetic** — `python3 design/bin/sizing_check.py validate`
+- **Sizing arithmetic (historical, not current design)** — `python3 design/bin/sizing_check.py validate`
   reproduces all 465 populated rows of the committed gm/ID `-summary.csv`
   from the full sweep, exactly, using the same interpolation DR-002's widths
-  are derived with.
+  are derived with. This is interpolation reproducibility only.
 
 **Not done, deliberately** (out of scope for issue #13, and not claimed
 anywhere in this directory or in DR-002):

@@ -20,6 +20,19 @@ class SizingCheckTests(unittest.TestCase):
         self.assertEqual(rc, 0, out)
         self.assertIn("EXACT match", out)
 
+    def test_cli_output_identifies_historical_dr002_replay(self):
+        for cmd in (sc.cmd_widths, sc.cmd_corners):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                cmd()
+            out = buf.getvalue()
+            self.assertIn("DR-002 HISTORICAL REPLAY", out)
+            self.assertIn("not the current schematic sizing", out)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            sc.cmd_validate()
+        self.assertIn("NOT consistency with the current design", buf.getvalue())
+
     def test_main_validate_and_unknown_command(self):
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(sc.main(["sizing_check.py", "validate"]), 0)

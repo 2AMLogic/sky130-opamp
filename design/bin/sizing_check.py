@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Re-derive every number in spec/decision-records/DR-002-device-sizing.md.
+"""HISTORICAL REPLAY of spec/decision-records/DR-002-device-sizing.md.
+
+This utility re-derives the DR-002 numbers. Its hard-coded dimensions are the
+DR-002 historical sizing, NOT the current schematic sizing (see
+design/netlist/opamp_core.spice for that). It validates reproducibility of
+the historical estimates only, not consistency with the current design.
 
 This script performs **no simulation**. It reads the already-committed
 bare-device gm/ID sweep
@@ -10,13 +15,15 @@ and does three things:
 
 1.  `validate`  -- proves the interpolation used below is the same one the
     sweep harness itself used, by reproducing every populated row of the
-    committed `-summary.csv` from the full sweep.
+    committed `-summary.csv` from the full sweep. This checks interpolation
+    reproducibility against the historical sweep only; it does not compare
+    anything with the current design.
 2.  `widths`    -- prints the two literal full-sweep rows bracketing each
     device's chosen gm/ID design point, the interpolated current density,
     and the channel width that density implies for that device's assigned
     bias current.
-3.  `corners`   -- takes the *committed* widths (as drawn in
-    design/opamp_core.sch), back-solves each device's operating point at
+3.  `corners`   -- takes the DR-002 historical widths (hard-coded
+    below; not the current schematic), back-solves each device's operating point at
     tt/27C, ss/-40C and ff/125C from its fixed current density, and prints
     the first-order gain / bandwidth / headroom / noise / power figures
     DR-002 quotes.
@@ -47,7 +54,9 @@ SUMMARY = RECORD + "-summary.csv"
 BOLTZMANN = 1.380649e-23  # J/K
 
 # ---------------------------------------------------------------------------
-# The committed design point (mirrors design/opamp_core.sch exactly).
+# The DR-002 HISTORICAL design point (constants replayed from DR-002; they
+# differ from the current design/netlist/opamp_core.spice and are deliberately
+# not repointed).
 # ---------------------------------------------------------------------------
 IREF = 5e-6     # external reference current sunk into the ibias pin
 ISS = 10e-6     # input-pair tail current   (M5 = 2 x MB1)
@@ -130,6 +139,8 @@ def interp_at_J(dev, corner, length, temp, j_target):
 # ---------------------------------------------------------------------------
 def cmd_validate():
     print("== interpolation validation against the committed -summary.csv ==")
+    print("   (checks interpolation reproducibility against the historical"
+          " sweep only; NOT consistency with the current design)")
     worst = {"vov_v": 0.0, "gm_gds": 0.0, "ft_hz": 0.0}
     compared = skipped = 0
     for s in csv.DictReader(open(SUMMARY)):
@@ -162,7 +173,8 @@ DEVICE_POINTS = [
 
 
 def cmd_widths():
-    print("== width derivation at tt/27C (the sizing corner) ==")
+    print("== DR-002 HISTORICAL REPLAY: width derivation at tt/27C ==")
+    print("   (hard-coded DR-002 dimensions, not the current schematic sizing)")
     print(f"   source: {os.path.relpath(FULL, REPO)}")
     print("   CSV columns: device,corner,length_um,width_um,temp_c,vds_v,"
           "overdrive_bias_v,vov_v,id_a,gm_s,gds_s,cgg_f,vth_v,gm_id_per_v,"
@@ -188,7 +200,9 @@ def cmd_widths():
 
 
 def cmd_corners():
-    print("== committed sizing, evaluated across the corner extremes ==")
+    print("== DR-002 HISTORICAL REPLAY: DR-002 sizing, evaluated across the"
+          " corner extremes ==")
+    print("   (hard-coded DR-002 dimensions, not the current schematic sizing)")
     j_in, j_p, j_n = ID1 * 1e6 / W_IN, ID1 * 1e6 / W_P, IREF * 1e6 / W_N
     print(f"   fixed current densities: M1/M2 {j_in:.5f}, M3/M4/M6 {j_p:.5f},"
           f" MB1/M5/M7 {j_n:.5f} uA/um")
