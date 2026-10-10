@@ -55,7 +55,10 @@ fields (maturity from the signoff record, top cell and ordered ports from the
 netlist, artifact paths) and `refresh` rewrites only those. `consumers`,
 `spec_status` and the `evaluated_at` stamp are authored and not compared; the
 manifest never embeds its own commit SHA. `gds` stays null until a qualified
-full-core layout exists (`layout/opamp_stage1` is partial and is rejected).
+full-core layout exists. Non-null artifact paths are resolved against the
+repo root and must stay inside it; `gds` must be a regular file, and
+`layout/opamp_stage1` (partial) is rejected however it is spelled (`..`
+segments, symlinks).
 
 ## Tests
 
