@@ -27,6 +27,8 @@ def default_checks(py=None):
         ("dut_identity validate", [py, "sim/lib/dut_identity.py", "validate"]),
         ("dut_identity current", [py, "sim/lib/dut_identity.py", "current"]),
         ("unit tests", [py, "-m", "unittest", "discover", "-s", "tests", "-v"]),
+        ("layout flow unit tests",
+         [py, "-m", "unittest", "discover", "-s", "layout/bin", "-p", "test_*.py", "-v"]),
         ("netlist compare controls (CompareUnit)",
          [py, "design/bin/test_netlist_check.py", "CompareUnit", "-v"]),
     ]

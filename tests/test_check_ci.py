@@ -1,4 +1,5 @@
 import os
+import shlex
 import stat
 import subprocess
 import sys
@@ -26,7 +27,8 @@ class CheckCiTests(unittest.TestCase):
         for name, cmd in check_ci.default_checks("python"):
             if "test_netlist_check" in " ".join(cmd):
                 continue
-            self.assertIn(" ".join(["python"] + cmd[1:]), text, name)
+            # shell-quoted, as written in the workflow (e.g. -p 'test_*.py')
+            self.assertIn(shlex.join(["python"] + cmd[1:]), text, name)
 
     def test_netlist_selects_compareunit_not_endtoend(self):
         joined = [" ".join(c) for _, c in check_ci.default_checks()]

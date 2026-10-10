@@ -72,10 +72,12 @@ non-MOS card, a terminal net outside the pin list, or a pin no card uses is
 a hard error. Bare sky130 geometry literals (`L=1.2`) are read as
 micrometres because the request names `reference.deck: "sky130"`
 (klayout-tools#1492/#1505). The sibling's `u`-suffix rewrite is therefore
-not needed. Unit tests:
+not needed. Unit tests (all `layout/bin/test_*.py`: stage_reference,
+compose-cell, magic-signoff; tool-free, run from the repo root of a full
+checkout, as in `.github/workflows/tests.yml`):
 
 ```
-python3 -m unittest layout/bin/test_stage_reference.py layout/bin/test_compose_cell.py
+python3 -m unittest discover -s layout/bin -p 'test_*.py' -v
 ```
 
 ### Toolchain
