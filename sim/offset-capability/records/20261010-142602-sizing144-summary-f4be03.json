@@ -1,0 +1,642 @@
+{
+  "plan": "sim/offset-capability/records/sizing-feasibility-plan-20261010.json",
+  "op_record": null,
+  "targets_unchanged": {
+    "gain_dc_db_min": 60.0,
+    "gbw_hz_min": 16000000.0,
+    "pm_deg_min": 60.0,
+    "sr_v_per_us": 20.0,
+    "swing_vpp_ss_m40_target_v": 1.39
+  },
+  "offset_target_sigma_v": 0.000275,
+  "bounds": {
+    "inputs": {
+      "attribution": "sim/offset-capability/records/20261009-attribution-summary.json",
+      "group_sigma_v": {
+        "pair": 0.003102705512901309,
+        "mirror": 0.007740082449106288,
+        "stage2": 5.2419091023015637e-05,
+        "bias": 3.716709249822762e-05
+      },
+      "target_sigma_v": 0.000275,
+      "target_status": "DR-009 proposed, not ratified",
+      "matched_gate_area_um2": {
+        "pair_two_devices": 14.472,
+        "mirror_two_devices": 2.7804
+      },
+      "sigma_rel_standard_error_N300": 0.040893041005476534,
+      "tag": "ESTIMATE (first-order Pelgrom area scaling at a fixed operating point)"
+    },
+    "mirror_only": {
+      "floor_sigma_v": 0.0031033708533877522,
+      "floor_over_target": 11.284984921410008,
+      "floor_band_2se_v": [
+        0.00284955831026218,
+        0.0033571833965133245
+      ],
+      "statement": "with the mirror term driven to zero, sigma -> sigma_pair; the pair alone is 11.3x the target, so no mirror size meets it"
+    },
+    "pair_area_factor_min": {
+      "k": 134.64812322208692,
+      "band_2se": [
+        113.52409466778455,
+        157.57346446163461
+      ],
+      "note": "pair gate area multiplier needed even if the mirror contributed nothing"
+    },
+    "area_optimal": {
+      "central": {
+        "feasible": true,
+        "k_pair": 281.8775756867237,
+        "k_mirror": 1604.265316036489,
+        "area_um2": 8539.831560046117,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 494.9938304262663
+      },
+      "low_2se": {
+        "feasible": true,
+        "k_pair": 237.65571937608811,
+        "k_mirror": 1352.583038306287,
+        "area_um2": 7200.075450517546,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 417.3376139271954
+      },
+      "high_2se": {
+        "feasible": true,
+        "k_pair": 329.8703694647402,
+        "k_mirror": 1877.409337125038,
+        "area_um2": 9993.832907836175,
+        "area_baseline_um2": 17.2524,
+        "area_factor": 579.2720379678291
+      },
+      "mirror_to_pair_factor_ratio": 5.691354880316751
+    },
+    "area_optimal_handcalc_split": {
+      "feasible": true,
+      "k_pair": 120.41758841915517,
+      "k_mirror": 1100.8457872083661,
+      "area_um2": 4803.474966356154,
+      "area_baseline_um2": 17.2524,
+      "area_factor": 278.42357969651493,
+      "note": "same optimisation with the Pelgrom hand-calc group sigmas (pair 1.77 mV, mirror 7.08 mV) instead of the measured ones: the model-uncertainty end of the range"
+    },
+    "mirror_gmid_lever": {
+      "baseline_gm_over_id_3": 14.171302281078548,
+      "reduction_if_gmid3_5": 2.8342604562157097,
+      "note": "lowering the mirror gm/ID (higher overdrive) divides the mirror term by gm/ID3_old/gm/ID3_new at constant area; even gm/ID = 5 (deep strong inversion, ~400 mV overdrive) is a 2.8x reduction, and the mirror's Vsg rise is taken straight out of the ICMR upper edge (DR-002: 136 mV window at the worst corner) and the XM6 overdrive"
+    },
+    "candidates_area_scaling_estimate": {
+      "grid0": {
+        "k_pair": 1,
+        "k_mirror": 1,
+        "sigma_v": 0.008339051922887865,
+        "over_target": 30.32382517413769
+      },
+      "m2p1": {
+        "k_pair": 1,
+        "k_mirror": 4,
+        "sigma_v": 0.0049606581955822585,
+        "over_target": 18.038757074844575
+      },
+      "m2p2": {
+        "k_pair": 4,
+        "k_mirror": 4,
+        "sigma_v": 0.004169897313910295,
+        "over_target": 15.1632629596738
+      },
+      "m4p2": {
+        "k_pair": 4,
+        "k_mirror": 16,
+        "sigma_v": 0.002480953304427694,
+        "over_target": 9.02164837973707
+      }
+    }
+  },
+  "candidates": {
+    "canonical": {
+      "pvt": {
+        "record_id": "20261010-103340-ba1dfa8-0241c1",
+        "dut_sha256": "sha256:6efc7494e1c27af3623c702a7a55806da59bd2346d3651d9ea23f71ecaf79ace",
+        "n_failed": 0,
+        "n_rows": {
+          "ac": 15,
+          "tran_sr": 15,
+          "dc_swing": 15
+        },
+        "jobs": [
+          [
+            "ac-iq",
+            "klt-sim-f9dedd139483"
+          ],
+          [
+            "ac",
+            "klt-sim-1b4543f131da"
+          ],
+          [
+            "tran-sr",
+            "klt-sim-f559608fc9e4"
+          ],
+          [
+            "dc-swing",
+            "klt-sim-884d4fd53766"
+          ]
+        ],
+        "gain_dc_db_min": {
+          "value": 61.6392,
+          "at": "fs/125C"
+        },
+        "gbw_hz_min": {
+          "value": 17923300.0,
+          "at": "ss/125C"
+        },
+        "pm_deg_min": {
+          "value": 63.936512398144274,
+          "at": "sf/27C"
+        },
+        "sr_rise_min": {
+          "value": 19.876284443535603,
+          "at": "ss/-40C"
+        },
+        "sr_fall_min": {
+          "value": 11.032917139614092,
+          "at": "ss/-40C"
+        },
+        "vpp_min": {
+          "value": 0.9484676756475507,
+          "at": "ss/-40C"
+        },
+        "pq_w_max": {
+          "value": 0.000131924232,
+          "at": "ff/125C"
+        },
+        "tt27": {
+          "gain_dc_db": 65.8153,
+          "gbw_hz": 22514000.0,
+          "phase_margin_deg": 65.42734858107467,
+          "pq_w": 0.00011834064,
+          "iq_a": 6.57448e-05
+        },
+        "swing_ss_m40": {
+          "vout_min_v": 0.2544767653500912,
+          "vout_max_v": 1.202944440997642,
+          "vpp_v": 0.9484676756475507
+        }
+      }
+    },
+    "grid0": {
+      "pvt": {
+        "record_id": "20261010-135147-f8fb7d7-d8da70",
+        "dut_sha256": "sha256:b1907e62ac914921b33ba45ed76664ccdee866aad345414d1ad43869d30b99d2",
+        "n_failed": 0,
+        "n_rows": {
+          "ac": 15,
+          "tran_sr": 15,
+          "dc_swing": 15
+        },
+        "jobs": [
+          [
+            "ac-iq",
+            "klt-sim-2a72c7d5f75a"
+          ],
+          [
+            "ac",
+            "klt-sim-ca9a2185d22d"
+          ],
+          [
+            "tran-sr",
+            "klt-sim-e31bb31a9149"
+          ],
+          [
+            "dc-swing",
+            "klt-sim-37f6fd9b768a"
+          ]
+        ],
+        "gain_dc_db_min": {
+          "value": 61.6377,
+          "at": "fs/125C"
+        },
+        "gbw_hz_min": {
+          "value": 17923300.0,
+          "at": "ss/125C"
+        },
+        "pm_deg_min": {
+          "value": 63.93880422932479,
+          "at": "sf/27C"
+        },
+        "sr_rise_min": {
+          "value": 19.877300613496928,
+          "at": "ss/-40C"
+        },
+        "sr_fall_min": {
+          "value": 11.029787234042551,
+          "at": "ss/-40C"
+        },
+        "vpp_min": {
+          "value": 0.9484629520760908,
+          "at": "ss/-40C"
+        },
+        "pq_w_max": {
+          "value": 0.000131924232,
+          "at": "ff/125C"
+        },
+        "tt27": {
+          "gain_dc_db": 65.8139,
+          "gbw_hz": 22514000.0,
+          "phase_margin_deg": 65.4296404122552,
+          "pq_w": 0.00011834082,
+          "iq_a": 6.57449e-05
+        },
+        "swing_ss_m40": {
+          "vout_min_v": 0.2544830921112862,
+          "vout_max_v": 1.202946044187377,
+          "vpp_v": 0.9484629520760908
+        }
+      }
+    },
+    "m2p1": {
+      "pvt": {
+        "record_id": "20261010-135603-f8fb7d7-4be22e",
+        "dut_sha256": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2",
+        "n_failed": 0,
+        "n_rows": {
+          "ac": 15,
+          "tran_sr": 15,
+          "dc_swing": 15
+        },
+        "jobs": [
+          [
+            "ac-iq",
+            "klt-sim-8b51789b425d"
+          ],
+          [
+            "ac",
+            "klt-sim-f9c48d5cd920"
+          ],
+          [
+            "tran-sr",
+            "klt-sim-2e611cb2a53d"
+          ],
+          [
+            "dc-swing",
+            "klt-sim-ef21603d5026"
+          ]
+        ],
+        "gain_dc_db_min": {
+          "value": 77.3819,
+          "at": "ss/125C"
+        },
+        "gbw_hz_min": {
+          "value": 17288100.0,
+          "at": "ss/125C"
+        },
+        "pm_deg_min": {
+          "value": 54.110286211650646,
+          "at": "sf/27C"
+        },
+        "sr_rise_min": {
+          "value": 19.845847583073876,
+          "at": "ss/-40C"
+        },
+        "sr_fall_min": {
+          "value": 12.739187418086459,
+          "at": "ss/-40C"
+        },
+        "vpp_min": {
+          "value": 0.9322543875815794,
+          "at": "ss/-40C"
+        },
+        "pq_w_max": {
+          "value": 0.000131922648,
+          "at": "ff/125C"
+        },
+        "tt27": {
+          "gain_dc_db": 79.1564,
+          "gbw_hz": 21729000.0,
+          "phase_margin_deg": 55.48423900437436,
+          "pq_w": 0.00011834009999999999,
+          "iq_a": 6.57445e-05
+        },
+        "swing_ss_m40": {
+          "vout_min_v": 0.2553949441260457,
+          "vout_max_v": 1.187649331707625,
+          "vpp_v": 0.9322543875815794
+        }
+      },
+      "mc": {
+        "campaign": "20261010-140251-campaign-sizing144-m2p1-67c725.campaign.json",
+        "dut": {
+          "source_path": "sim/offset-capability/candidates/opamp_core.m2p1.spice",
+          "snapshot_path": "sim/offset-capability/records/dut-sizing144-m2p1/opamp_core.spice",
+          "sha256": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2"
+        },
+        "base_seed": 20261085,
+        "n_requested": 100,
+        "n_ok": 100,
+        "n_failed": 0,
+        "failure_reasons": {},
+        "mean_v": 0.0006581299999999768,
+        "sigma_v": 0.004245834709084741,
+        "min_v": -0.014541000000000026,
+        "max_v": 0.011691000000000007,
+        "sigma_rel_se": 0.07106690545187015,
+        "attempts": [
+          {
+            "record_id": "20261010-135145-offset-sizing144-m2p1-tt-c0-32db39",
+            "corner": "tt",
+            "chunk": 0,
+            "attempt": 1,
+            "exit_code": 0,
+            "got_samples": true,
+            "job_id": "klt-sim-9f66ea133ae0"
+          }
+        ],
+        "label": "EXPLORATORY (N=100, tt / 27 C / 1.8 V only); not an N>=300 + corners result",
+        "paired_with_canonical_first_100": {
+          "canonical_record": "20261009-143703-offset-mc300-ttssff-tt-c0-b49127",
+          "n_common": 100,
+          "sigma_canonical_v": 0.007560146651689398,
+          "sigma_candidate_v": 0.004245834709084741,
+          "sigma_ratio": 0.5616074534924481,
+          "pearson": 0.37048260696081436
+        },
+        "over_target": 15.43939894212633
+      }
+    },
+    "m2p2": {
+      "pvt": {
+        "record_id": "20261010-140018-f8fb7d7-1cb482",
+        "dut_sha256": "sha256:c34cc8c4b269cb634374f5a8aab41aa4b9eb72ca48af78ba1ef567354a3350f4",
+        "n_failed": 0,
+        "n_rows": {
+          "ac": 15,
+          "tran_sr": 15,
+          "dc_swing": 15
+        },
+        "jobs": [
+          [
+            "ac-iq",
+            "klt-sim-b508cb280bb0"
+          ],
+          [
+            "ac",
+            "klt-sim-20b7a23a17b1"
+          ],
+          [
+            "tran-sr",
+            "klt-sim-e98c7047b46a"
+          ],
+          [
+            "dc-swing",
+            "klt-sim-5b2d61544ac6"
+          ]
+        ],
+        "gain_dc_db_min": {
+          "value": 78.7597,
+          "at": "fs/125C"
+        },
+        "gbw_hz_min": {
+          "value": 17461900.0,
+          "at": "ss/125C"
+        },
+        "pm_deg_min": {
+          "value": 49.4933922984865,
+          "at": "sf/27C"
+        },
+        "sr_rise_min": {
+          "value": 18.86371355101642,
+          "at": "ss/-40C"
+        },
+        "sr_fall_min": {
+          "value": 13.890675241157593,
+          "at": "ss/125C"
+        },
+        "vpp_min": {
+          "value": 0.9265162908908697,
+          "at": "ss/-40C"
+        },
+        "pq_w_max": {
+          "value": 0.000131971752,
+          "at": "ff/125C"
+        },
+        "tt27": {
+          "gain_dc_db": 80.7487,
+          "gbw_hz": 22177300.0,
+          "phase_margin_deg": 50.95558059166032,
+          "pq_w": 0.00011842092,
+          "iq_a": 6.57894e-05
+        },
+        "swing_ss_m40": {
+          "vout_min_v": 0.2385224894621452,
+          "vout_max_v": 1.165038780353015,
+          "vpp_v": 0.9265162908908697
+        }
+      },
+      "mc": {
+        "campaign": "20261010-141355-campaign-sizing144-m2p2-5a76bf.campaign.json",
+        "dut": {
+          "source_path": "sim/offset-capability/candidates/opamp_core.m2p2.spice",
+          "snapshot_path": "sim/offset-capability/records/dut-sizing144-m2p2/opamp_core.spice",
+          "sha256": "sha256:c34cc8c4b269cb634374f5a8aab41aa4b9eb72ca48af78ba1ef567354a3350f4"
+        },
+        "base_seed": 20261085,
+        "n_requested": 100,
+        "n_ok": 100,
+        "n_failed": 0,
+        "failure_reasons": {},
+        "mean_v": 3.3059999999978104e-05,
+        "sigma_v": 0.0032248119162756666,
+        "min_v": -0.0066190000000000415,
+        "max_v": 0.00758700000000001,
+        "sigma_rel_se": 0.07106690545187015,
+        "attempts": [
+          {
+            "record_id": "20261010-140251-offset-sizing144-m2p2-tt-c0-d282ef",
+            "corner": "tt",
+            "chunk": 0,
+            "attempt": 1,
+            "exit_code": 0,
+            "got_samples": true,
+            "job_id": "klt-sim-1919d6c48366"
+          }
+        ],
+        "label": "EXPLORATORY (N=100, tt / 27 C / 1.8 V only); not an N>=300 + corners result",
+        "paired_with_canonical_first_100": {
+          "canonical_record": "20261009-143703-offset-mc300-ttssff-tt-c0-b49127",
+          "n_common": 100,
+          "sigma_canonical_v": 0.007560146651689398,
+          "sigma_candidate_v": 0.0032248119162756666,
+          "sigma_ratio": 0.42655414833190397,
+          "pearson": 0.2598415213633819
+        },
+        "over_target": 11.726588786456968
+      }
+    },
+    "m4p2": {
+      "pvt": {
+        "record_id": "20261010-140536-f8fb7d7-25d2f0",
+        "dut_sha256": "sha256:fdd4ee4cdb0bdb147a93ff181c4687afcd83a0789b397806ac0778f439afe058",
+        "n_failed": 0,
+        "n_rows": {
+          "ac": 15,
+          "tran_sr": 15,
+          "dc_swing": 15
+        },
+        "jobs": [
+          [
+            "ac-iq",
+            "klt-sim-17c34a0bcaf8"
+          ],
+          [
+            "ac",
+            "klt-sim-2e6db89ffb7a"
+          ],
+          [
+            "tran-sr",
+            "klt-sim-fad0853fe1dc"
+          ],
+          [
+            "dc-swing",
+            "klt-sim-c9ffbfc53d49"
+          ]
+        ],
+        "gain_dc_db_min": {
+          "value": 84.278,
+          "at": "ss/125C"
+        },
+        "gbw_hz_min": {
+          "value": 13965200.0,
+          "at": "ss/125C"
+        },
+        "pm_deg_min": {
+          "value": 27.1170985674473,
+          "at": "sf/27C"
+        },
+        "sr_rise_min": {
+          "value": 17.38663804668634,
+          "at": "ss/125C"
+        },
+        "sr_fall_min": {
+          "value": 12.562197092084048,
+          "at": "ss/125C"
+        },
+        "vpp_min": {
+          "value": 0.9067099160383876,
+          "at": "ss/-40C"
+        },
+        "pq_w_max": {
+          "value": 0.000131971356,
+          "at": "ff/125C"
+        },
+        "tt27": {
+          "gain_dc_db": 86.398,
+          "gbw_hz": 17464500.0,
+          "phase_margin_deg": 28.267597820069994,
+          "pq_w": 0.00011842073999999999,
+          "iq_a": 6.57893e-05
+        },
+        "swing_ss_m40": {
+          "vout_min_v": 0.2397458689677095,
+          "vout_max_v": 1.146455785006097,
+          "vpp_v": 0.9067099160383876
+        }
+      },
+      "mc": {
+        "campaign": "20261010-142532-campaign-sizing144-m4p2-38fae6.campaign.json",
+        "dut": {
+          "source_path": "sim/offset-capability/candidates/opamp_core.m4p2.spice",
+          "snapshot_path": "sim/offset-capability/records/dut-sizing144-m4p2/opamp_core.spice",
+          "sha256": "sha256:fdd4ee4cdb0bdb147a93ff181c4687afcd83a0789b397806ac0778f439afe058"
+        },
+        "base_seed": 20261085,
+        "n_requested": 100,
+        "n_ok": 100,
+        "n_failed": 0,
+        "failure_reasons": {},
+        "mean_v": -0.0004917100000000275,
+        "sigma_v": 0.0023387198272136096,
+        "min_v": -0.004730000000000012,
+        "max_v": 0.005611000000000033,
+        "sigma_rel_se": 0.07106690545187015,
+        "attempts": [
+          {
+            "record_id": "20261010-141356-offset-sizing144-m4p2-tt-c0-ba1d40",
+            "corner": "tt",
+            "chunk": 0,
+            "attempt": 1,
+            "exit_code": 0,
+            "got_samples": true,
+            "job_id": "klt-sim-bc7863202875"
+          }
+        ],
+        "label": "EXPLORATORY (N=100, tt / 27 C / 1.8 V only); not an N>=300 + corners result",
+        "paired_with_canonical_first_100": {
+          "canonical_record": "20261009-143703-offset-mc300-ttssff-tt-c0-b49127",
+          "n_common": 100,
+          "sigma_canonical_v": 0.007560146651689398,
+          "sigma_candidate_v": 0.0023387198272136096,
+          "sigma_ratio": 0.30934847364250495,
+          "pearson": 0.22041690038974251
+        },
+        "over_target": 8.504435735322216
+      }
+    }
+  },
+  "extrapolation_from_candidates": null,
+  "decision": {
+    "rule": "plan.decision_rule",
+    "per_candidate": {
+      "m2p1": {
+        "complete": true,
+        "sigma_upper_2se_v": 0.0048493113767543285,
+        "offset_meets_proposed": false,
+        "ratified_rows_met_all_15": {
+          "gain": true,
+          "gbw": true,
+          "pm": false
+        },
+        "regresses_vs_grid0": {
+          "sr_rise_min": true,
+          "sr_fall_min": false,
+          "vpp_min": true,
+          "pq_w_max": false
+        },
+        "supported": false
+      },
+      "m2p2": {
+        "complete": true,
+        "sigma_upper_2se_v": 0.0036831667233837204,
+        "offset_meets_proposed": false,
+        "ratified_rows_met_all_15": {
+          "gain": true,
+          "gbw": true,
+          "pm": false
+        },
+        "regresses_vs_grid0": {
+          "sr_rise_min": true,
+          "sr_fall_min": false,
+          "vpp_min": true,
+          "pq_w_max": true
+        },
+        "supported": false
+      },
+      "m4p2": {
+        "complete": true,
+        "sigma_upper_2se_v": 0.002671130988891617,
+        "offset_meets_proposed": false,
+        "ratified_rows_met_all_15": {
+          "gain": true,
+          "gbw": false,
+          "pm": false
+        },
+        "regresses_vs_grid0": {
+          "sr_rise_min": true,
+          "sr_fall_min": false,
+          "vpp_min": true,
+          "pq_w_max": true
+        },
+        "supported": false
+      }
+    },
+    "verdict": "sizing_insufficient"
+  }
+}

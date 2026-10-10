@@ -1,0 +1,14 @@
+{
+  "campaign": "sizing144-m2p1",
+  "base_seed": 20261085,
+  "corners": [
+    "tt"
+  ],
+  "n_total": 100,
+  "chunk": 100,
+  "dut": {
+    "source_path": "sim/offset-capability/candidates/opamp_core.m2p1.spice",
+    "snapshot_path": "sim/offset-capability/records/dut-sizing144-m2p1/opamp_core.spice",
+    "sha256": "sha256:699ecd449fa7eff600eedc776b5572b07de44ab3008479acb18f37a7685651f2"
+  }
+}
