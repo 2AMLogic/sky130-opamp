@@ -5,91 +5,121 @@ Simulator-free. Reads only the committed bare-device sweep
 
     sim/gm-id-characterization/records/20260909-062847-35a9d46-full-sweep.csv
 
-(nfet_01v8, L = 1.2 um, W = 2.0 um, |Vds| = 0.9 V, Vsb = 0) and prints the
-design inputs of `signal-dependent-sink.spice`:
+(W = 2.0 um, |Vds| = 0.9 V, Vsb = 0) and prints the design inputs of
+`signal-dependent-sink.spice`, a replica-subtraction class-AB boost sink:
 
-  MF2  bias leg of the follower, gate = ibias, mirror of MB1 at ratio ~0.2
-  MF1  source follower, gate = d2 (the second-stage drive node), source = g
-  MS   boost sink, drain = out, gate = g, source = vss
+  XMP6C  pfet  gate = d2, drain -> na   1/10 replica of M6: I_6c = I(M6)/10
+  XMA    nfet  diode on na              }  1:1 mirror: draws I_6c out of nx
+  XMA2   nfet  drain nx, gate na        }
+  XMC    pfet  gate = d1, drain -> nx   I_C = 0.9 x the 5 uA M3 mirror unit
+  XMD    nfet  diode on nx              }  mirror of (I_C - I_6c), x10
+  XMS    nfet  drain = out, gate nx     }  to the output as an extra sink
 
-Topology: when the output must fall, M6 is turned off by d2 rising. d2 is
-level-shifted down by one Vgs through MF1 and drives MS. In quiescent (d2 about
-0.82 V at tt/27 C, measured by a single-corner local op probe) g sits near
-0.2 V and MS is in deep subthreshold, so the quiescent current is about zero and
-the M6/M7 balance (and hence the systematic offset) is not disturbed. On a
-falling edge d2 rises, g follows at gain < 1, and MS turns on exponentially.
-M7 (the fixed 50 uA sink) is untouched.
+Sink added = 10 x max(0, I_C - I_6c). At quiescent I(M6) = 50 uA, I_6c = 5 uA
+> I_C = 4.5 uA, so nx is pulled to vss and XMS is off (no static current, so
+the M6/M7 balance and the systematic offset are undisturbed). When a falling
+edge cuts I(M6), I_6c drops below I_C and XMS adds 10 x the deficit. The
+replica tracks M6 over PVT, so there is no fixed level shift and no
+dependence on the d2 DC level (which spans 0.47-0.82 V across corners).
 
-Sizing rule (gm/ID first): MF2 is the DR-007 mirror unit scaled so it carries
-I_F = 1 uA at Vgs(MB1) (current-density ratio kept at 1, so only W is scaled).
-MF1 has the same W and L (same current in the follower, so same Vgs; its Vgs
-at g ~ 0.2 V is a little larger from body effect, which only lowers the
-quiescent g further). MS is sized so that it carries I_BOOST at the gate
-voltage G_BOOST, using the density at that Vgs from the sweep.
+Sizing rule (gm/ID first, same rows and interpolation as DR-007):
+  nfet L = 1.2: the DR-007 mirror unit density J0 = 5 uA / 7.819 um
+                = 0.639 uA/um (gm/ID 18); 5 uA at J0 -> 7.819 um -> drawn 7.820
+                (grid; +0.013 %, the only deviation from a 1:1 ratio).
+  pfet L = 0.3: the DR-007 M3/M4/M6 density, gm/ID 14, J = 1.078993 uA/um;
+                5 uA -> 4.634 um -> drawn 4.635 (grid, +0.02 %); 4.5 uA ->
+                4.1706 um -> drawn 4.170.
 
 Usage:
-    python3 sim/opamp-characterization/variants/sink_sizing.py [--gboost V --iboost A --m N]
+    python3 sim/opamp-characterization/variants/sink_sizing.py
 """
 from __future__ import annotations
 
-import argparse
+import csv
 import math
 import os
-import sys
+from collections import defaultdict
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import tail_clamp_sizing as tcs  # noqa: E402  (reuse the sweep loader/interpolators)
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+FULL = os.path.join(REPO, "sim", "gm-id-characterization", "records",
+                    "20260909-062847-35a9d46-full-sweep.csv")
+GRID_UM = 0.005
+SWEEP_W_UM = 2.0
+I_UNIT_A = 5e-6
+MULT_S = 10           # XMS multiplicity (= replica ratio: M6 is 10 units of M3)
+IC_FRACTION = 0.9     # I_C as a fraction of the M3 unit current (margin for mirror error)
+GM_ID_PFET = 14.0     # DR-007 gm/ID of M3/M4/M6
 
-I_F_A = 1e-6          # follower bias current (0.2 of a 5 uA mirror unit)
-G_BOOST_V = 0.80      # MS gate voltage at which MS should carry I_BOOST (tt/27 C)
-I_BOOST_A = 100e-6    # boost sink current at G_BOOST (2x the fixed M7 sink)
-MS_M = 4              # MS drawn as 4 parallel units
-MS_L_UM = 1.2
+
+def load(device, length):
+    rows = defaultdict(list)
+    with open(FULL) as fh:
+        for r in csv.DictReader(fh):
+            if r["device"] != device or float(r["length_um"]) != length:
+                continue
+            i = float(r["id_a"])
+            if i > 0:
+                rows[(r["corner"], float(r["temp_c"]))].append((float(r["overdrive_bias_v"]), i, r))
+    for k in rows:
+        rows[k].sort(key=lambda t: t[0])
+    return rows
+
+
+def interp_gmid(series, target):
+    """Density (uA/um) at which gm/ID == target, linear in J between bracketing rows
+    (the interpolation DR-007 quotes literally, so 7.819 / 4.634 um are reproduced)."""
+    pts = [(float(r["gm_id_per_v"]), i / SWEEP_W_UM * 1e6) for _, i, r in series if r["gm_id_per_v"]]
+    pts.sort(key=lambda t: t[0])
+    for (g0, j0), (g1, j1) in zip(pts, pts[1:]):
+        if g0 <= target <= g1 and g1 > g0:
+            f = (target - g0) / (g1 - g0)
+            return j0 + f * (j1 - j0), (g0, j0), (g1, j1)
+    raise ValueError("gm/ID outside sweep")
+
+
+def snap(w):
+    return round(w / GRID_UM) * GRID_UM
+
+
+def legal(w):
+    return abs(w / GRID_UM - round(w / GRID_UM)) < 1e-9
 
 
 def main():
-    global G_BOOST_V, I_BOOST_A, MS_M
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--gboost", type=float, default=G_BOOST_V)
-    ap.add_argument("--iboost", type=float, default=I_BOOST_A)
-    ap.add_argument("--m", type=int, default=MS_M)
-    a = ap.parse_args()
-    G_BOOST_V, I_BOOST_A, MS_M = a.gboost, a.iboost, a.m
-    rows = tcs.load()
-    tt = rows[("tt", 27.0)]
-    j0 = tcs.I_UNIT_A / tcs.W_MIRROR_UM * 1e6
-    vgs_b, r0, r1 = tcs.vgs_at_density(tt, j0)
-    print(f"1. Bias diode MB1: J0 = {j0:.6f} uA/um, Vgs(MB1) = V(ibias) = {vgs_b:.4f} V "
-          f"(gm/ID rows {float(r0['gm_id_per_v']):.6f} / {float(r1['gm_id_per_v']):.6f})")
-    w_f_raw = I_F_A / (j0 * 1e-6)
-    w_f = tcs.snap(w_f_raw)
-    print(f"2. Follower MF1/MF2 (L = {tcs.L_UM}): J = J0 for I_F = {I_F_A * 1e6:.1f} uA -> "
-          f"W = {w_f_raw:.4f} um -> drawn {w_f:.3f} um (grid-legal: "
-          f"{abs(w_f / tcs.GRID_UM - round(w_f / tcs.GRID_UM)) < 1e-9}); "
-          f"actual I_F at J0 = {j0 * w_f:.4f} uA, ratio to MB1 {w_f / tcs.W_MIRROR_UM:.4f}")
-    j_b = tcs.density_at_vgs(tt, G_BOOST_V)
-    w_tot = I_BOOST_A / (j_b * 1e-6)
-    w_unit = tcs.snap(w_tot / MS_M)
-    print(f"3. Boost sink MS (L = {MS_L_UM}), tt/27C: Vgs = {G_BOOST_V:.3f} V -> "
-          f"J = {j_b:.4f} uA/um -> W_total for {I_BOOST_A * 1e6:.0f} uA = {w_tot:.2f} um "
-          f"-> m = {MS_M} x {w_unit:.3f} um (drawn total {w_unit * MS_M:.3f} um; grid-legal: "
-          f"{abs(w_unit / tcs.GRID_UM - round(w_unit / tcs.GRID_UM)) < 1e-9})")
-    w_d = w_unit * MS_M
-    print("\n4. MS current vs gate voltage at the drawn size (Vds = 0.9 V sweep, Vsb = 0), tt/27C:")
-    for vg in (0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00):
-        try:
-            print(f"   Vg = {vg:.2f} V  I = {tcs.density_at_vgs(tt, vg) * w_d:10.4f} uA")
-        except ValueError:
-            print(f"   Vg = {vg:.2f} V  outside sweep")
-    print("\n5. MS current at Vg = V(ibias)-referenced corner spread (I at the Vgs that gives "
-          f"{I_BOOST_A * 1e6:.0f} uA at tt/27C, per corner/T):")
-    for (c, t) in sorted(rows):
-        try:
-            print(f"   {c:3s} {t:6.1f}  I = {tcs.density_at_vgs(rows[(c, t)], G_BOOST_V) * w_d:10.3f} uA at Vg = {G_BOOST_V:.2f} V")
-        except ValueError:
-            print(f"   {c:3s} {t:6.1f}  outside sweep")
-    print(f"\n6. Drawn gate area added (W*L, not layout area): MF1+MF2 = {2 * w_f * tcs.L_UM:.3f} um^2, "
-          f"MS = {w_d * MS_L_UM:.2f} um^2, total = {2 * w_f * tcs.L_UM + w_d * MS_L_UM:.2f} um^2")
+    n = load("nfet", 1.2)[("tt", 27.0)]
+    p = load("pfet", 0.3)[("tt", 27.0)]
+    jn, (gn0, jn0), (gn1, jn1) = interp_gmid(n, 18.0)
+    jp, (gp0, jp0), (gp1, jp1) = interp_gmid(p, GM_ID_PFET)
+    print("1. nfet L=1.2 mirror unit (DR-007, gm/ID 18), tt/27C:")
+    print(f"   rows gm/ID {gn0:.6f} @ J {jn0:.6f} and {gn1:.6f} @ J {jn1:.6f} uA/um -> J = {jn:.6f} uA/um")
+    w_n = 5.0 / jn
+    print(f"   5 uA -> W = {w_n:.4f} um -> drawn {snap(w_n):.3f} um (grid-legal {legal(snap(w_n))}; "
+          f"DR-007 unit 7.819 um, ratio {snap(w_n) / 7.819:.5f})")
+    print("2. pfet L=0.3 M3/M4/M6 unit (DR-007, gm/ID 14), tt/27C:")
+    print(f"   rows gm/ID {gp0:.6f} @ J {jp0:.6f} and {gp1:.6f} @ J {jp1:.6f} uA/um -> J = {jp:.6f} uA/um")
+    w_rep = 5.0 / jp
+    w_c = IC_FRACTION * 5.0 / jp
+    print(f"   XMP6C: 5 uA -> W = {w_rep:.4f} um -> drawn {snap(w_rep):.3f} um (grid-legal {legal(snap(w_rep))}; "
+          f"DR-007 unit 4.634 um, ratio {snap(w_rep) / 4.634:.5f})")
+    print(f"   XMC:   {IC_FRACTION * 5:.1f} uA -> W = {w_c:.4f} um -> drawn {snap(w_c):.3f} um "
+          f"(grid-legal {legal(snap(w_c))}; I_C/I_unit = {snap(w_c) / 4.634:.4f})")
+    wn, wr, wc = snap(w_n), snap(w_rep), snap(w_c)
+    print("3. Drawn devices (all nf = 1, so finger width = W):")
+    area_n = wn * 1.2 * (1 + 1 + 1 + MULT_S)
+    area_p = (wr + wc) * 0.3
+    print(f"   XMA, XMA2, XMD: nfet {wn:.3f}/1.2 m=1;  XMS: nfet {wn:.3f}/1.2 m={MULT_S};  "
+          f"XMP6C: pfet {wr:.3f}/0.3 m=1;  XMC: pfet {wc:.3f}/0.3 m=1")
+    print(f"4. Drawn gate area added (W*L, NOT layout area): nfet {area_n:.2f} um^2 + pfet {area_p:.3f} um^2 "
+          f"= {area_n + area_p:.2f} um^2  (baseline MOS gate area 153.13 um^2, "
+          f"+{(area_n + area_p) / 153.13 * 100:.0f} %)")
+    print("5. Quiescent current added (design): replica leg I_6c = I(M6)/10 = 5 uA from vdd "
+          "(XMP6C -> XMA); XMC/XMS static current ~ 0 (I_C < I_6c). 5 uA of the 1.8 V rail ~ +9 uW.")
+    print("6. Boost law: I_S = 10 x max(0, I_C - I_6c). I_C = 4.5 uA, so I_S = 10 x (4.5 uA - I(M6)/10) "
+          "= 45 uA - I(M6) for I(M6) < 45 uA; e.g. I(M6) = 14 uA -> 31 uA extra sink.")
+    # Density spread: I_6c replicas track M6 (same L, same Vsg density), so only mirror
+    # accuracy limits the quiescent margin. Report the Vds term as a stated caveat.
+    print("   Caveat: XMP6C has |Vds| ~ 1.2 V vs M6's ~ 0.9 V; the sweep is at |Vds| = 0.9 V, "
+          "so the 10 % I_C margin is a design choice, not a computed tolerance. The fleet record measures it.")
 
 
 if __name__ == "__main__":
