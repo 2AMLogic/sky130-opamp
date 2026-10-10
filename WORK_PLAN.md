@@ -25,7 +25,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-- **#116**: Reject aliased partial-layout paths and directories in integrator GDS validation
+_None._
 
 ## PRs Awaiting Review
 
@@ -47,10 +47,14 @@ Issues carrying `loom:curated`.
 - **#46**: T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched *(curated)*
 - **#47**: T1 item 5: evaluate the two structural fixes DR-007 names for the falling slew-rate gap and draft the superseding topology record *(curated)*
 - **#49**: Install ratification/ee-key and ratification/market-key reviewer trees (product#151) *(curated)*
+- **#71**: sim/opamp-characterization: README issue-#53 section has 'CMRR' replaced by a record id; record 566b9a5 overstates 1 MHz CMRR flatness *(curated)*
+- **#77**: Add fleet execution for AC, slew and swing characterization with selectable netlists *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
+- **#131**: Verify grid-legal compensation resistor geometry and passive realizability *(architect)*
+- **#132**: Identify sizing_check widths and corners as historical DR-002 replay *(architect)*
 
 ## Epics
 
@@ -63,10 +67,10 @@ _None._
 | Operator merge-risk holds | 1 |
 | Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 1 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 4 |
-| Architect / Hermit proposals | 1 |
+| Curated | 6 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->

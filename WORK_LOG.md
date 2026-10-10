@@ -4,6 +4,16 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-10
 
+- **PR #129**: test: assert klt version pin is identical across signoff workflow and manifest
+- **PR #128**: tests: unit tests for layout/bin/_klt_common.run_klt
+- **PR #125**: fix(integrator_check): resolve artifact paths, reject partial-layout aliases
+- **PR #124**: fix(netlist_check): parameter-specific derived-parameter tolerances
+- **PR #123**: ci: run layout flow unit tests in the unit-tests job
+- **Issue #127** (closed): tests: assert the klt version pin is identical across the signoff workflow and manifest
+- **Issue #126** (closed): tests: add simulator-free unit tests for layout/bin/_klt_common.run_klt
+- **Issue #116** (closed): Reject aliased partial-layout paths and directories in integrator GDS validation
+- **Issue #59** (closed): netlist_check: tighten derived-parameter tolerance (0.5% lets small hand edits of ad/pd/nrd pass)
+- **Issue #57** (closed): Run layout flow unit tests in CI
 - **Issue #112** (closed): Auditor guard review: worktree-write-confinement should remain enforced
 
 ### 2026-10-09
