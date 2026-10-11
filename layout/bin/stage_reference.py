@@ -24,6 +24,10 @@ LVS request names ``reference.deck: "sky130"`` (see ``klt lvs`` docs,
 cards are passed through unchanged and the reference stays byte-comparable
 to the source.
 
+Supported devices: 4-terminal sky130 MOS cards plus the two compensation
+passives (``res_high_po_1p41``, three terminals incl. substrate;
+``cap_mim_m3_1``, two terminals). Any other model is rejected.
+
 Failure modes are hard errors, never silent: a selected device that is
 missing from the source, a selected device that appears more than once, a
 duplicate in the selection itself, a card that references a net outside the
@@ -63,23 +67,130 @@ def logical_lines(text: str) -> list[str]:
     return [" ".join(line.split()) for line in out]
 
 
-#: Number of terminals per element prefix this flow knows how to select.
-#: ``X`` subckt calls to sky130 MOS models carry four (d g s b).
+#: ``X`` subckt calls to sky130 MOS models carry four terminals (d g s b).
 _MOS_MODEL_RE = re.compile(r"^sky130_fd_pr__[np]fet_", re.IGNORECASE)
+
+#: Passive models this flow can select, keyed by lower-cased model name.
+#: Deliberately limited to the two models ``design/netlist/opamp_core.spice``
+#: uses for the compensation network (issue #167); any other resistor or
+#: capacitor model is a hard error rather than a guessed convention.
+#:
+#:   terminals       extracted-netlist terminal names, in SPICE card order.
+#:                   The resistor's third terminal is its substrate (``w`` in
+#:                   the klt extract, ``b`` in the model subckt).
+#:   extract_class   the ``class`` ``klt extract`` reports for the device.
+#:   default_w_um    resistor width when the card carries no ``W=`` (the
+#:                   model's own default; ``_1p41`` is the 1.41 um family).
+PASSIVE_MODELS: dict[str, dict] = {
+    "sky130_fd_pr__res_high_po_1p41": {
+        "kind": "resistor",
+        "terminals": ("a", "b", "w"),
+        "extract_class": "res_high_po",
+        "default_w_um": 1.41,
+    },
+    "sky130_fd_pr__cap_mim_m3_1": {
+        "kind": "capacitor",
+        "terminals": ("a", "b"),
+        "extract_class": "sky130_fd_pr__model__cap_mim",
+    },
+}
+
+MOS_TERMINALS = ("d", "g", "s", "b")
+
+
+def card_params(card: str) -> dict[str, float]:
+    """``key=value`` tokens of a card, lower-cased keys, numeric values."""
+    params: dict[str, float] = {}
+    for token in card.split()[1:]:
+        if "=" not in token:
+            continue
+        key, value = token.split("=", 1)
+        try:
+            params[key.lower()] = float(value)
+        except ValueError as exc:
+            raise ReferenceError(
+                f"{card.split()[0]}: parameter {token!r} is not a plain number"
+            ) from exc
+    return params
+
+
+def card_kind(model: str) -> str:
+    """``mos``, ``resistor`` or ``capacitor`` for a supported model name."""
+    if _MOS_MODEL_RE.match(model):
+        return "mos"
+    return PASSIVE_MODELS[model.lower()]["kind"]
+
+
+def terminal_names(model: str) -> tuple[str, ...]:
+    """Terminal names of a supported model, in card order."""
+    if _MOS_MODEL_RE.match(model):
+        return MOS_TERMINALS
+    return PASSIVE_MODELS[model.lower()]["terminals"]
 
 
 def card_terminals(card: str) -> tuple[str, list[str], str]:
-    """``(name, terminals, model)`` for a MOS subckt-call card."""
+    """``(name, terminals, model)`` for a supported subckt-call card.
+
+    Supported: four-terminal sky130 MOS cards and the two passive models in
+    :data:`PASSIVE_MODELS` with exactly their terminal count.
+    """
     tokens = card.split()
     name = tokens[0]
     if not name.upper().startswith("X"):
         raise ReferenceError(f"{name}: only X subckt-call cards are supported")
     positional = [t for t in tokens[1:] if "=" not in t]
-    if len(positional) < 5 or not _MOS_MODEL_RE.match(positional[4]):
-        raise ReferenceError(
-            f"{name}: not a 4-terminal sky130 MOS card (got {positional!r})"
-        )
-    return name, positional[:4], positional[4]
+    if len(positional) >= 5 and _MOS_MODEL_RE.match(positional[4]):
+        return name, positional[:4], positional[4]
+    if positional and positional[-1].lower() in PASSIVE_MODELS:
+        model = positional[-1]
+        count = len(PASSIVE_MODELS[model.lower()]["terminals"])
+        if len(positional) != count + 1:
+            raise ReferenceError(
+                f"{name}: {model} takes {count} terminals, card has "
+                f"{len(positional) - 1} ({positional!r})"
+            )
+        return name, positional[:count], model
+    raise ReferenceError(
+        f"{name}: not a 4-terminal sky130 MOS card or a supported passive "
+        f"({', '.join(sorted(PASSIVE_MODELS))}) (got {positional!r})"
+    )
+
+
+def passive_geometry(card: str) -> dict:
+    """Source geometry the layout must reproduce, for a passive card.
+
+    Resistor: ``{"kind", "l_um", "w_um", "units"}`` -- ``w_um`` is the card's
+    ``W=`` or the model default; ``units`` is ``m * mult`` identical parallel
+    bodies. Capacitor: ``{"kind", "area_um2", "perimeter_um"}`` summed over
+    ``MF * m`` units of ``W x L``. A missing ``L`` (or capacitor ``W``) is a
+    hard error: nothing is defaulted silently except the documented
+    resistor-width model default.
+    """
+    name, _terminals, model = card_terminals(card)
+    info = PASSIVE_MODELS.get(model.lower())
+    if info is None:
+        raise ReferenceError(f"{name}: {model} is not a passive model")
+    params = card_params(card)
+    units = params.get("m", 1.0) * params.get("mult", 1.0) * params.get("mf", 1.0)
+    if units <= 0 or abs(units - round(units)) > 1e-9:
+        raise ReferenceError(f"{name}: m*mult*mf = {units} is not a positive integer")
+    units = int(round(units))
+    if "l" not in params:
+        raise ReferenceError(f"{name}: {model} card has no L=")
+    if info["kind"] == "resistor":
+        return {
+            "kind": "resistor",
+            "l_um": params["l"],
+            "w_um": params.get("w", info["default_w_um"]),
+            "units": units,
+        }
+    if "w" not in params:
+        raise ReferenceError(f"{name}: {model} card has no W=")
+    return {
+        "kind": "capacitor",
+        "area_um2": params["w"] * params["l"] * units,
+        "perimeter_um": 2 * (params["w"] + params["l"]) * units,
+    }
 
 
 def select_cards(text: str, devices: list[str]) -> list[str]:
@@ -113,7 +224,9 @@ def build_reference(
     cards = select_cards(text, devices)
     used: set[str] = set()
     for card in cards:
-        name, terminals, _model = card_terminals(card)
+        name, terminals, model = card_terminals(card)
+        if card_kind(model) != "mos":
+            passive_geometry(card)  # rejects a card without the needed L/W
         stray = [t for t in terminals if t not in pins]
         if stray:
             raise ReferenceError(

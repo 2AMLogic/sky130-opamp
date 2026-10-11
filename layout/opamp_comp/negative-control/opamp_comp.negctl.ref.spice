@@ -1,0 +1,7 @@
+* NEGATIVE CONTROL -- scratch reference for opamp_comp: XRz.w rewired vss -> d2
+* Must NOT match the layout. Not a design artifact.
+.subckt opamp_comp d2 out cz vss
+XRz cz d2 d2 sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+.ends opamp_comp
+.end

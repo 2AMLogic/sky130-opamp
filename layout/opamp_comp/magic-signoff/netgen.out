@@ -1,0 +1,23 @@
+
+Subcircuit summary:
+Circuit 1: opamp_comp                      |Circuit 2: opamp_comp                      
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__cap_mim_m3_1 (1)             |sky130_fd_pr__cap_mim_m3_1 (1)             
+sky130_fd_pr__res_high_po_1p41 (1)         |sky130_fd_pr__res_high_po_1p41 (1)         
+Number of devices: 2                       |Number of devices: 2                       
+Number of nets: 4                          |Number of nets: 4                          
+---------------------------------------------------------------------------------------
+Circuits match uniquely.
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: opamp_comp                      |Circuit 2: opamp_comp                      
+-------------------------------------------|-------------------------------------------
+d2                                         |d2                                         
+vss                                        |vss                                        
+out                                        |out                                        
+cz                                         |cz                                         
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes opamp_comp and opamp_comp are equivalent.
+Circuits match uniquely.

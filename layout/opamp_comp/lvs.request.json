@@ -1,0 +1,12 @@
+{
+  "layout": {
+    "file": "opamp_comp.gds",
+    "deck": "sky130"
+  },
+  "reference": {
+    "netlist": "opamp_comp.ref.spice",
+    "form": "subckt-call",
+    "deck": "sky130",
+    "top": "opamp_comp"
+  }
+}

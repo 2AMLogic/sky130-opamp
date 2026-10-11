@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "generator": "draw",
+  "gds_path": "gen/rz_masks.gds",
+  "cell_name": "comp_rz_masks",
+  "dbu_um": 0.001,
+  "shape_count": 3,
+  "label_count": 0,
+  "layers": [
+    {
+      "layer": 86,
+      "datatype": 20,
+      "name": null,
+      "shapes": 1
+    },
+    {
+      "layer": 94,
+      "datatype": 20,
+      "name": null,
+      "shapes": 1
+    },
+    {
+      "layer": 95,
+      "datatype": 20,
+      "name": null,
+      "shapes": 1
+    }
+  ],
+  "bbox_um": {
+    "x0": 2.005,
+    "y0": 22.0,
+    "x1": 12.61,
+    "y1": 23.41
+  },
+  "warnings": [
+    "written verbatim by `klt draw`: no PDK awareness and no rule checking were applied; this cell is not guaranteed to be design-legal"
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "pdk": {
+    "variant": "sky130A"
+  },
+  "blocks": [
+    {
+      "id": "rz",
+      "generator_report": "gen/rz.gen.json"
+    },
+    {
+      "id": "cc",
+      "generator_report": "gen/cc.gen.json"
+    },
+    {
+      "id": "tap",
+      "generator_report": "gen/tap.gen.json"
+    },
+    {
+      "id": "tap_masks",
+      "cell": {
+        "gds_path": "gen/tap_masks.gds",
+        "cell_name": "comp_tap_masks",
+        "ports": []
+      }
+    },
+    {
+      "id": "rz_masks",
+      "cell": {
+        "gds_path": "gen/rz_masks.gds",
+        "cell_name": "comp_rz_masks",
+        "ports": []
+      }
+    },
+    {
+      "id": "pin_d2",
+      "cell": {
+        "gds_path": "gen/pin_d2.gds",
+        "cell_name": "stub_metal",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_out",
+      "cell": {
+        "gds_path": "gen/pin_out.gds",
+        "cell_name": "stub_metal4",
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_cz",
+      "cell": {
+        "gds_path": "gen/pin_cz.gds",
+        "cell_name": "stub_metal5",
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 71,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 71,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vss",
+      "cell": {
+        "gds_path": "gen/pin_vss.gds",
+        "cell_name": "stub_metal",
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    }
+  ],
+  "placement": {
+    "strategy": "explicit",
+    "order": [
+      "rz",
+      "cc",
+      "tap",
+      "tap_masks",
+      "rz_masks",
+      "pin_d2",
+      "pin_out",
+      "pin_cz",
+      "pin_vss"
+    ],
+    "origins_um": {
+      "cc": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rz": {
+        "x": 2.005,
+        "y": 22.0
+      },
+      "tap": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "tap_masks": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "pin_d2": {
+        "x": -6.0,
+        "y": 22.495
+      },
+      "pin_out": {
+        "x": -6.0,
+        "y": 8.1
+      },
+      "pin_cz": {
+        "x": 20.0,
+        "y": 18.0
+      },
+      "pin_vss": {
+        "x": 38.0,
+        "y": 23.71
+      },
+      "rz_masks": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "routing": {
+    "layer_role": "metal",
+    "width_um": 0.3
+  },
+  "connectivity": [
+    {
+      "net": "cz",
+      "layer_role": "metal5",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_B"
+        },
+        {
+          "block": "cc",
+          "port": "C0_TOP"
+        },
+        {
+          "block": "pin_cz",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "layer_role": "metal",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_A"
+        },
+        {
+          "block": "pin_d2",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "out",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "cc",
+          "port": "C0_BOT"
+        },
+        {
+          "block": "pin_out",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "layer_role": "metal",
+      "pins": [
+        {
+          "block": "tap",
+          "port": "TAP_E"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "d2",
+      "block": "pin_d2",
+      "port": "PAD"
+    },
+    {
+      "net": "out",
+      "block": "pin_out",
+      "port": "PAD"
+    },
+    {
+      "net": "cz",
+      "block": "pin_cz",
+      "port": "PAD"
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    }
+  ],
+  "options": {
+    "cell_name": "opamp_comp",
+    "output": "opamp_comp.gds"
+  }
+}
