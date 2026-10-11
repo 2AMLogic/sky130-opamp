@@ -159,6 +159,35 @@ class KltSimTests(unittest.TestCase):
         self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", str(exc))
         self.assertEqual(exc.cmd[:2], ["klt", "sim"])
 
+    def test_non_object_json_root_raises_typed_error_with_invocation(self):
+        sh.KLT_CMD[:] = ["klt"]
+        for stdout, tname in (("[]", "list"), ("null", "NoneType"), ("42", "int"),
+                              ("true", "bool"), ('"str"', "str")):
+            with self.subTest(stdout=stdout):
+                with self.assertRaises(sh.KltSimError) as cm:
+                    self._run(stdout, stderr="warn: odd\n", rc=3)
+                exc = cm.exception
+                self.assertIsInstance(exc, sh.HarnessError)
+                self.assertEqual((exc.returncode, exc.stderr), (3, "warn: odd\n"))
+                self.assertEqual(exc.cmd[:2], ["klt", "sim"])
+                self.assertIn(tname, str(exc))
+                self.assertIn("exit 3", str(exc))
+                self.assertEqual((self.tmp / "out" / "bench.request.stderr.txt").read_text(),
+                                 "warn: odd\n")
+
+    def test_non_object_root_rejected_through_run_klt_sim(self):
+        proc = mock.Mock(stdout="[]", stderr="", returncode=0)
+        with mock.patch.object(sh.subprocess, "run", return_value=proc):
+            with self.assertRaises(sh.KltSimError):
+                sh.run_klt_sim(self.req, self.tmp / "o")
+
+    def test_dict_reports_accepted_even_on_nonzero_exit(self):
+        sh.KLT_CMD[:] = ["klt"]
+        res, _cmd = self._run("{}", rc=2)
+        self.assertEqual((res.payload, res.returncode), ({}, 2))
+        res, _cmd = self._run('{"status": "fail"}', rc=1)
+        self.assertEqual(res.payload, {"status": "fail"})
+
     def test_run_klt_sim_returns_report_dict(self):
         proc = mock.Mock(stdout='{"status": "fail"}', stderr="", returncode=1)
         with mock.patch.object(sh.subprocess, "run", return_value=proc):
