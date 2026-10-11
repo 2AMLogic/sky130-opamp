@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -204,6 +205,158 @@ class MalformedManifestTests(Fixture):
         self.manifest({"1": "ev/env.json", "2": {"command": ["klt", "drc"]},
                        "3": {"file": "ev/k.json", "content_hash": "sha256:x"}})
         self.assertEqual(self.run_check()[::2], (1, []))
+
+
+class ContainmentTests(Fixture):
+    """Evidence must resolve inside the checkout (canonical realpath)."""
+
+    def setUp(self):
+        super().setUp()
+        self._out = tempfile.TemporaryDirectory()
+        self.addCleanup(self._out.cleanup)
+        self.outside = Path(self._out.name).resolve()
+        self.root = self.root / "repo"
+        self.root.mkdir()
+
+    def link(self, rel, target):
+        p = self.root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.symlink_to(target)
+
+    def one(self, env_rel="ev/env.json", entry=None):
+        self.manifest({"1": entry or env_rel})
+
+    def assert_rejected(self, needle="outside"):
+        n, _, fails = self.run_check()
+        self.assertEqual(n, 0)
+        self.assertEqual(len(fails), 1, fails)
+        self.assertIn("item 1", fails[0])
+        self.assertIn(needle, fails[0])
+
+    def test_external_absolute_artifact(self):
+        ext = self.outside / "rec.md"
+        ext.write_text("record\n")
+        self.envelope("ev/env.json", str(ext), h(b"record\n"))
+        self.one()
+        self.assert_rejected()
+
+    def test_parent_traversal_artifact(self):
+        (self.outside / "rec.md").write_text("record\n")
+        rel = os.path.relpath(self.outside / "rec.md", self.root / "ev")
+        self.envelope("ev/env.json", rel, h(b"record\n"))
+        self.one()
+        self.assert_rejected()
+
+    def test_symlink_escape_artifact(self):
+        (self.outside / "rec.md").write_text("record\n")
+        self.link("ev/rec.md", self.outside / "rec.md")
+        self.envelope("ev/env.json", "rec.md", h(b"record\n"))
+        self.one()
+        self.assert_rejected()
+
+    def test_escaping_envelope_candidate_does_not_fall_back(self):
+        # envelope-relative candidate escapes; a valid repo-relative file of
+        # the same name exists and has the declared hash: still an error.
+        (self.root / "ev").mkdir()
+        self.link("ev/rec.md", self.outside / "rec.md")
+        (self.outside / "rec.md").write_text("record\n")
+        self.write("rec.md", "record\n")
+        self.envelope("ev/env.json", "rec.md", h(b"record\n"))
+        self.one()
+        self.assert_rejected()
+
+    def test_external_absolute_envelope(self):
+        env = self.outside / "env.json"
+        env.write_text(json.dumps({"kind": "generic", "provenance": {"input": {}}}))
+        self.one(entry=str(env))
+        self.assert_rejected()
+
+    def test_traversal_envelope(self):
+        (self.outside / "env.json").write_text("{}")
+        self.one(entry=os.path.relpath(self.outside / "env.json", self.root))
+        self.assert_rejected()
+
+    def test_symlink_escape_envelope(self):
+        (self.outside / "env.json").write_text("{}")
+        self.link("ev/env.json", self.outside / "env.json")
+        self.one()
+        self.assert_rejected()
+
+    def test_contained_symlink_ok(self):
+        self.write("data/real.md", "record\n")
+        self.link("ev/rec.md", "../data/real.md")
+        self.write("envs/real.json", json.dumps(
+            {"kind": "generic", "provenance": {"input": {
+                "path": "rec.md", "content_hash": h(b"record\n")}}}))
+        self.link("ev/env.json", "../envs/real.json")
+        self.one()
+        n, oks, fails = self.run_check()
+        self.assertEqual((n, fails), (1, []))
+
+    def test_internal_parent_segment_ok(self):
+        self.write("ev/rec.md", "record\n")
+        self.envelope("ev/env.json", "sub/../rec.md", h(b"record\n"))
+        self.one(entry="ev/../ev/env.json")
+        self.assertEqual(self.run_check()[::2], (1, []))
+
+    def test_branches_with_matching_hashes(self):
+        self.write("ev/a.md", "A")
+        self.envelope("ev/env.json", "a.md", h(b"A"))
+        self.write("b.md", "B")
+        self.envelope("ev/env2.json", "b.md", h(b"B"))
+        self.manifest({"1": "ev/env.json", "2": "ev/env2.json"})
+        n, oks, fails = self.run_check()
+        self.assertEqual((n, fails), (2, []))
+        self.assertIn("ev/a.md", oks[0])
+        self.assertIn("b.md", oks[1])
+
+    def test_dangling_link(self):
+        self.link("ev/rec.md", "missing-target.md")
+        self.envelope("ev/env.json", "rec.md", h(b"x"))
+        self.one()
+        self.assert_rejected("dangling")
+
+    def test_unreadable_artifact_reported_and_others_continue(self):
+        art = self.write("ev/rec.md", "record\n")
+        self.envelope("ev/env.json", "rec.md", h(b"record\n"))
+        self.write("ev/ok.md", "ok")
+        self.envelope("ev/env2.json", "ok.md", h(b"ok"))
+        self.write("ev/bad.md", "bad")
+        self.envelope("ev/env3.json", "bad.md", h(b"zzz"))
+        self.manifest({"1": "ev/env.json", "2": "ev/env2.json", "3": "ev/env3.json"})
+        art.chmod(0)
+        self.addCleanup(art.chmod, 0o644)
+        if os.access(art, os.R_OK):
+            self.skipTest("file permissions not enforced (running as root)")
+        n, oks, fails = self.run_check()
+        self.assertEqual(len(fails), 2, fails)
+        self.assertIn("item 1", fails[0])
+        self.assertIn("cannot read", fails[0])
+        self.assertIn("item 3", fails[1])
+        self.assertEqual(len(oks), 1)
+
+    def test_errors_aggregate_with_other_items(self):
+        (self.outside / "rec.md").write_text("r")
+        self.envelope("ev/env.json", str(self.outside / "rec.md"), h(b"r"))
+        self.write("ev/rec2.md", "r2")
+        self.envelope("ev/env2.json", "rec2.md", h(b"other"))
+        self.manifest({"1": "ev/env.json", "2": "ev/env2.json"})
+        n, oks, fails = self.run_check()
+        self.assertEqual(len(fails), 2, fails)
+
+    def test_cli_nonzero_and_aggregates(self):
+        (self.outside / "rec.md").write_text("r")
+        self.envelope("ev/env.json", str(self.outside / "rec.md"), h(b"r"))
+        (self.outside / "env.json").write_text("{}")
+        self.manifest({"1": "ev/env.json", "2": str(self.outside / "env.json")})
+        r = subprocess.run(
+            [sys.executable, str(_paths.REPO / "design/bin/generic_evidence_check.py"),
+             "--manifest", MANIFEST, "--root", str(self.root)],
+            capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("item 1", r.stderr)
+        self.assertIn("item 2", r.stderr)
+        self.assertNotIn("verified against", r.stdout)
 
 
 class CliTests(Fixture):
