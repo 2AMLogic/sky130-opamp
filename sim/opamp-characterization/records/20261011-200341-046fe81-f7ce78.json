@@ -1,0 +1,1623 @@
+{
+  "record_id": "20261011-200341-046fe81-f7ce78",
+  "timestamp": "2026-10-11T20:52:11.810572+00:00",
+  "git": {
+    "sha": "046fe81"
+  },
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "icmr",
+      "cmrr",
+      "tran_step"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "cartesian",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      }
+    ],
+    "n_expected_tuples_per_analysis": 45,
+    "n_runs": 180,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "icmr",
+        "cmrr",
+        "tran_step"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": false,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+g1ed1b506d5b6",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "icmr-tt-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 183.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-063f1cfad45e",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-052d5a91e3ee6ebe8",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 143,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-tt-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-tt-1.62V-response.json"
+    },
+    {
+      "tag": "icmr-tt-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 153.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-3c397e4d3055",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0330477b73f85a6fc",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1a",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 112,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-tt-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-tt-1.8V-response.json"
+    },
+    {
+      "tag": "icmr-tt-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 236.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-aca95ccbdbfa",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-073955850c334af49",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 184,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-tt-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-tt-1.98V-response.json"
+    },
+    {
+      "tag": "icmr-ff-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 241.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-834faa33fba9",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-08f75c4f8cf849dee",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 197,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ff-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ff-1.62V-response.json"
+    },
+    {
+      "tag": "icmr-ff-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 363.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-9886fddc0bd2",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-056eddd58a03c00e7",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 253,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ff-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ff-1.8V-response.json"
+    },
+    {
+      "tag": "icmr-ff-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 404.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f17bf8896699",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0b24bd05f5cd313d4",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 161,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ff-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ff-1.98V-response.json"
+    },
+    {
+      "tag": "icmr-ss-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 335.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-d7ebae1c75e9",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0d62dbdef98c9e6fa",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 206,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ss-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ss-1.62V-response.json"
+    },
+    {
+      "tag": "icmr-ss-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 270.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-644978ca7e80",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-04e3842adf5226d68",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 215,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ss-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ss-1.8V-response.json"
+    },
+    {
+      "tag": "icmr-ss-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 206.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f21e927f244a",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0a38b2ec6064f360c",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 171,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-ss-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-ss-1.98V-response.json"
+    },
+    {
+      "tag": "icmr-sf-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 143.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f8073d1b4b61",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0049dcc0e051592df",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 103,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-sf-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-sf-1.62V-response.json"
+    },
+    {
+      "tag": "icmr-sf-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 501.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c48fb035e669",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-04270d0e398b1e8b1",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 124,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-sf-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-sf-1.8V-response.json"
+    },
+    {
+      "tag": "icmr-sf-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 398.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-b8df693ae780",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0e2f8c68ece2d3a0c",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 213,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-sf-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-sf-1.98V-response.json"
+    },
+    {
+      "tag": "icmr-fs-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 205.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f53e2b0ec750",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0e6faa4f53ebe3bb7",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 160,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-fs-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-fs-1.62V-response.json"
+    },
+    {
+      "tag": "icmr-fs-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 238.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-ace31f4f8e94",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-037d193597a8a0cb0",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 204,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-fs-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-fs-1.8V-response.json"
+    },
+    {
+      "tag": "icmr-fs-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 468.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f32f8470b4ca",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0c0771ed7420fba6a",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 280,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/icmr-fs-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-icmr-fs-1.98V-response.json"
+    },
+    {
+      "tag": "cmrr-mid",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 45,
+      "wall_s": 332.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f2bd17cafa3c",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-02d17d89ef90efd13",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 220,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 36
+        },
+        "by_severity": {
+          "warning": 36
+        },
+        "corners_with_diagnostics": 36
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/cmrr-mid-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-cmrr-mid-response.json"
+    },
+    {
+      "tag": "cmrr-window",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 45,
+      "wall_s": 594.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-5fb700bca7f6",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-098d41e50932a6cfb",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 224,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 37
+        },
+        "by_severity": {
+          "warning": 37
+        },
+        "corners_with_diagnostics": 37
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/cmrr-window-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-cmrr-window-response.json"
+    },
+    {
+      "tag": "tran-step",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 45,
+      "wall_s": 486.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-149741eb9cfd",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-05848fa36a7380864",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 361,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g1ed1b506d5b6",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-200341-046fe81-f7ce78/tran-step-request.json",
+      "response": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step-response.json"
+    }
+  ],
+  "klt_crosscheck": {
+    "reference_identity": {
+      "source": "historical",
+      "record_id": "20261011-194651-046fe81-86146b",
+      "dut_sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+      "reference": "sim/opamp-characterization/records/20261011-194651-046fe81-86146b-ac.csv"
+    },
+    "reference_available": true,
+    "tolerance_gain_db": 0.05,
+    "tolerance_gbw_frac": 0.01,
+    "tolerance_iq_frac": 0.01,
+    "reference_csv": "sim/opamp-characterization/records/20261011-194651-046fe81-86146b-ac.csv",
+    "cmrr_points_compared": 45,
+    "cmrr_points_unmatched": 0,
+    "max_abs_adm_dc_minus_gain_dc_db": 0.0,
+    "max_rel_gbw_error": 0.0,
+    "icmr_points_compared": 45,
+    "icmr_points_unmatched": 0,
+    "max_rel_iq_error": 9e-05,
+    "diagnostics": [],
+    "all_points_matched": true,
+    "ok": true
+  },
+  "tran_step_pm_crosscheck": {
+    "reference_identity": {
+      "source": "historical",
+      "record_id": "20261011-194651-046fe81-86146b",
+      "dut_sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+      "reference": "sim/opamp-characterization/records/20261011-194651-046fe81-86146b-ac.csv"
+    },
+    "reference_available": true,
+    "ac_reference": "sim/opamp-characterization/records/20261011-194651-046fe81-86146b-ac.csv",
+    "unavailable_reasons": [],
+    "skipped_candidates": [],
+    "summary": {
+      "tolerance_pp": 5.0,
+      "points": 45,
+      "points_with_ac_reference": 45,
+      "points_without_ac_reference": [],
+      "points_disagreeing": [],
+      "max_abs_delta_pp": 0.6731216074449735
+    },
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "ac_pm_deg": 67.42811720167151,
+        "expected_overshoot_pct": 2.986892600842546,
+        "measured_overshoot_pct": 3.0007745546311035,
+        "delta_pp": 0.0138819537885575,
+        "agrees": true,
+        "settle_1pct_ns": 28.986999999999995,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "ac_pm_deg": 67.48312115000407,
+        "expected_overshoot_pct": 2.950313523333221,
+        "measured_overshoot_pct": 2.8230646129227073,
+        "delta_pp": -0.1272489104105139,
+        "agrees": true,
+        "settle_1pct_ns": 27.25499999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "ac_pm_deg": 67.53927101392689,
+        "expected_overshoot_pct": 2.913108891755641,
+        "measured_overshoot_pct": 2.775624515516415,
+        "delta_pp": -0.13748437623922616,
+        "agrees": true,
+        "settle_1pct_ns": 26.684,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.37864716848856,
+        "expected_overshoot_pct": 4.433341967528382,
+        "measured_overshoot_pct": 4.061484628842759,
+        "delta_pp": -0.371857338685623,
+        "agrees": true,
+        "settle_1pct_ns": 33.04899999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.4296404122552,
+        "expected_overshoot_pct": 4.395594135213544,
+        "measured_overshoot_pct": 3.930982745686469,
+        "delta_pp": -0.46461138952707515,
+        "agrees": true,
+        "settle_1pct_ns": 31.749000000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.4428184415432,
+        "expected_overshoot_pct": 4.38585215283492,
+        "measured_overshoot_pct": 3.9260796719099593,
+        "delta_pp": -0.45977248092496037,
+        "agrees": true,
+        "settle_1pct_ns": 31.238000000000003,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.28773552655947,
+        "expected_overshoot_pct": 5.259083689634454,
+        "measured_overshoot_pct": 4.714646401519743,
+        "delta_pp": -0.544437288114711,
+        "agrees": true,
+        "settle_1pct_ns": 39.20600000000001,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.28372482199356,
+        "expected_overshoot_pct": 5.262180155946618,
+        "measured_overshoot_pct": 4.666283227887749,
+        "delta_pp": -0.5958969280588695,
+        "agrees": true,
+        "settle_1pct_ns": 38.06500000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.26137946798343,
+        "expected_overshoot_pct": 5.279439607425127,
+        "measured_overshoot_pct": 4.676987719781004,
+        "delta_pp": -0.6024518876441229,
+        "agrees": true,
+        "settle_1pct_ns": 37.507999999999996,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.22853924146926,
+        "expected_overshoot_pct": 2.468206344260157,
+        "measured_overshoot_pct": 2.5422457754225762,
+        "delta_pp": 0.07403943116241907,
+        "agrees": true,
+        "settle_1pct_ns": 27.393999999999988,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.34542263167596,
+        "expected_overshoot_pct": 2.395044178692447,
+        "measured_overshoot_pct": 2.395778628054154,
+        "delta_pp": 0.0007344493617069681,
+        "agrees": true,
+        "settle_1pct_ns": 26.128000000000007,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.40443728457443,
+        "expected_overshoot_pct": 2.358369703011801,
+        "measured_overshoot_pct": 2.350646427768047,
+        "delta_pp": -0.007723275243753935,
+        "agrees": true,
+        "settle_1pct_ns": 25.643999999999988,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.89545509969655,
+        "expected_overshoot_pct": 4.054585530893985,
+        "measured_overshoot_pct": 3.6952771457858766,
+        "delta_pp": -0.3593083851081085,
+        "agrees": true,
+        "settle_1pct_ns": 31.744999999999997,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.94702130125833,
+        "expected_overshoot_pct": 4.017270711980146,
+        "measured_overshoot_pct": 3.6237683189114183,
+        "delta_pp": -0.3935023930687276,
+        "agrees": true,
+        "settle_1pct_ns": 30.79,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.96363707731712,
+        "expected_overshoot_pct": 4.005266058210746,
+        "measured_overshoot_pct": 3.6015306505261893,
+        "delta_pp": -0.40373540768455696,
+        "agrees": true,
+        "settle_1pct_ns": 30.350000000000005,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.12845325951311,
+        "expected_overshoot_pct": 5.382379484172132,
+        "measured_overshoot_pct": 4.7758357712598825,
+        "delta_pp": -0.6065437129122495,
+        "agrees": true,
+        "settle_1pct_ns": 38.191,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.12215072376665,
+        "expected_overshoot_pct": 5.387271576120385,
+        "measured_overshoot_pct": 4.744516419478096,
+        "delta_pp": -0.6427551566422895,
+        "agrees": true,
+        "settle_1pct_ns": 37.32099999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.1003783275517,
+        "expected_overshoot_pct": 5.404179359646845,
+        "measured_overshoot_pct": 4.752138462308075,
+        "delta_pp": -0.6520408973387699,
+        "agrees": true,
+        "settle_1pct_ns": 36.852999999999994,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "ac_pm_deg": 66.25469963724358,
+        "expected_overshoot_pct": 3.796509973872866,
+        "measured_overshoot_pct": 3.692422918487095,
+        "delta_pp": -0.1040870553857709,
+        "agrees": true,
+        "settle_1pct_ns": 31.150999999999986,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "ac_pm_deg": 66.11088723066574,
+        "expected_overshoot_pct": 3.8992896230140155,
+        "measured_overshoot_pct": 3.595269645223522,
+        "delta_pp": -0.3040199777904933,
+        "agrees": true,
+        "settle_1pct_ns": 28.709999999999997,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "ac_pm_deg": 66.16474526340805,
+        "expected_overshoot_pct": 3.8607138805098105,
+        "measured_overshoot_pct": 3.525440680085354,
+        "delta_pp": -0.3352732004244565,
+        "agrees": true,
+        "settle_1pct_ns": 28.024999999999988,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "ac_pm_deg": 64.62807245686717,
+        "expected_overshoot_pct": 4.997887128215293,
+        "measured_overshoot_pct": 4.5714571207314245,
+        "delta_pp": -0.4264300074838685,
+        "agrees": true,
+        "settle_1pct_ns": 34.824,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "ac_pm_deg": 64.59713273593012,
+        "expected_overshoot_pct": 5.021502907838799,
+        "measured_overshoot_pct": 4.485560695086791,
+        "delta_pp": -0.5359422127520075,
+        "agrees": true,
+        "settle_1pct_ns": 33.011,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "ac_pm_deg": 64.61890513214507,
+        "expected_overshoot_pct": 5.004881656715945,
+        "measured_overshoot_pct": 4.42588517703496,
+        "delta_pp": -0.5789964796809848,
+        "agrees": true,
+        "settle_1pct_ns": 32.377,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.55931752145149,
+        "expected_overshoot_pct": 5.050402223814113,
+        "measured_overshoot_pct": 4.608041582327407,
+        "delta_pp": -0.4423606414867063,
+        "agrees": true,
+        "settle_1pct_ns": 40.546,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.5249400537436,
+        "expected_overshoot_pct": 5.076708131591797,
+        "measured_overshoot_pct": 4.550796389367965,
+        "delta_pp": -0.5259117422238324,
+        "agrees": true,
+        "settle_1pct_ns": 38.96699999999998,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.50144878414328,
+        "expected_overshoot_pct": 5.094702267086769,
+        "measured_overshoot_pct": 4.525905181035872,
+        "delta_pp": -0.5687970860508971,
+        "agrees": true,
+        "settle_1pct_ns": 38.306999999999974,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "ac_pm_deg": 65.2995789927605,
+        "expected_overshoot_pct": 4.4920301580440265,
+        "measured_overshoot_pct": 4.100000000000223,
+        "delta_pp": -0.3920301580438039,
+        "agrees": true,
+        "settle_1pct_ns": 28.256999999999987,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "ac_pm_deg": 65.39812773352301,
+        "expected_overshoot_pct": 4.418911977246848,
+        "measured_overshoot_pct": 3.945789157831762,
+        "delta_pp": -0.4731228194150865,
+        "agrees": true,
+        "settle_1pct_ns": 27.266000000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "ac_pm_deg": 65.43938069477242,
+        "expected_overshoot_pct": 4.388393020186044,
+        "measured_overshoot_pct": 3.925785157031582,
+        "delta_pp": -0.4626078631544619,
+        "agrees": true,
+        "settle_1pct_ns": 26.83000000000001,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "ac_pm_deg": 63.904999719412075,
+        "expected_overshoot_pct": 5.556442508944448,
+        "measured_overshoot_pct": 4.9477473873692395,
+        "delta_pp": -0.6086951215752086,
+        "agrees": true,
+        "settle_1pct_ns": 32.092999999999996,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "ac_pm_deg": 63.93880422932479,
+        "expected_overshoot_pct": 5.5300291557754395,
+        "measured_overshoot_pct": 4.8660948713460614,
+        "delta_pp": -0.6639342844293781,
+        "agrees": true,
+        "settle_1pct_ns": 31.27199999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "ac_pm_deg": 63.94625268066149,
+        "expected_overshoot_pct": 5.524213103031612,
+        "measured_overshoot_pct": 4.851091495586639,
+        "delta_pp": -0.6731216074449735,
+        "agrees": true,
+        "settle_1pct_ns": 30.85099999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.15595523367936,
+        "expected_overshoot_pct": 5.361044112007291,
+        "measured_overshoot_pct": 4.7980997624703186,
+        "delta_pp": -0.5629443495369726,
+        "agrees": true,
+        "settle_1pct_ns": 37.54200000000001,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.14678790895728,
+        "expected_overshoot_pct": 5.368153742016948,
+        "measured_overshoot_pct": 4.7811952988247715,
+        "delta_pp": -0.5869584431921764,
+        "agrees": true,
+        "settle_1pct_ns": 36.765,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.12959917510335,
+        "expected_overshoot_pct": 5.381490122380203,
+        "measured_overshoot_pct": 4.80156050716462,
+        "delta_pp": -0.5799296152155833,
+        "agrees": true,
+        "settle_1pct_ns": 36.30900000000001,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "ac_pm_deg": 69.07537086267263,
+        "expected_overshoot_pct": 1.9546295803181715,
+        "measured_overshoot_pct": 2.2976748827461067,
+        "delta_pp": 0.3430453024279352,
+        "agrees": true,
+        "settle_1pct_ns": 31.03699999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.84905253359594,
+        "expected_overshoot_pct": 2.088016497177534,
+        "measured_overshoot_pct": 2.2003850673867693,
+        "delta_pp": 0.11236857020923541,
+        "agrees": true,
+        "settle_1pct_ns": 27.541999999999994,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.91608859562626,
+        "expected_overshoot_pct": 2.0481998083104975,
+        "measured_overshoot_pct": 2.1257440104036864,
+        "delta_pp": 0.07754420209318891,
+        "agrees": true,
+        "settle_1pct_ns": 26.697999999999993,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "ac_pm_deg": 66.6064957234539,
+        "expected_overshoot_pct": 3.5482076750718536,
+        "measured_overshoot_pct": 3.411077261149621,
+        "delta_pp": -0.13713041392223246,
+        "agrees": true,
+        "settle_1pct_ns": 34.897,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "ac_pm_deg": 66.5394596614236,
+        "expected_overshoot_pct": 3.595172910493658,
+        "measured_overshoot_pct": 3.303408437320309,
+        "delta_pp": -0.2917644731733491,
+        "agrees": true,
+        "settle_1pct_ns": 32.499,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "ac_pm_deg": 66.57154529795092,
+        "expected_overshoot_pct": 3.5726729126891468,
+        "measured_overshoot_pct": 3.276638319159949,
+        "delta_pp": -0.2960345935291979,
+        "agrees": true,
+        "settle_1pct_ns": 31.796000000000003,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.67677386945329,
+        "expected_overshoot_pct": 4.960767524987634,
+        "measured_overshoot_pct": 4.5072956226265,
+        "delta_pp": -0.45347190236113466,
+        "agrees": true,
+        "settle_1pct_ns": 41.44699999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.63552090820387,
+        "expected_overshoot_pct": 4.992205775604766,
+        "measured_overshoot_pct": 4.433941030835084,
+        "delta_pp": -0.5582647447696827,
+        "agrees": true,
+        "settle_1pct_ns": 39.52099999999997,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.60916484962786,
+        "expected_overshoot_pct": 5.012315872455739,
+        "measured_overshoot_pct": 4.4272136068029555,
+        "delta_pp": -0.5851022656527833,
+        "agrees": true,
+        "settle_1pct_ns": 38.818,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      }
+    ]
+  },
+  "links": {
+    "icmr_csv": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-icmr.csv",
+    "cmrr_csv": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-cmrr.csv",
+    "tran_step_csv": "sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-tran-step.csv"
+  },
+  "errors": [],
+  "elapsed_s": 2909.9
+}

@@ -327,10 +327,66 @@ the matching `supply: {"mode": "cartesian", "values": [...]}` matrix in
 A subset or failed run is coverage evidence only; it supports no "met across the
 supply range" claim.
 
-**Campaign status**: the 45-point baseline campaign record is not yet produced; only a
-single-point probe (`20261009-214831-fba38c0-1e3b78`: SS / 27 C / 1.98 V, ac) exists.
-The local-ngspice analyses (`ac,tran_sr,dc_swing`) are a 135-run grid and are not hand-run
-on shared dispatch hosts.
+**Baseline campaign (issue #110)**: record
+[`20261011-194651-046fe81-86146b`](records/20261011-194651-046fe81-86146b.json)
+— `--supply-mode cartesian --fleet --analyses ac,tran_sr,dc_swing`, 135 units
+over 4 batch jobs (ac-iq 45, ac 45, tran-sr 45, dc-swing 45), **0 failed**, no
+local simulator (`tools.ngspice: not invoked`), on the Spot batch fleet
+(m6i/m7i.4xlarge, ngspice-46). DUT = the canonical
+`design/netlist/opamp_core.spice` snapshot (`sha256:e954d17d...`, the same DUT
+as the DR-013 paired records), same PDK pin; 45 tuples per analysis, no
+`exclude`. A first attempt at this campaign (2026-10-11 19:26 UTC) was
+aborted mid-run by a session crash before its tran-sr submit and produced no
+record; it was re-run in full rather than resumed.
+
+Comparison with the paired DR-013 baseline
+([`20261011-140526-04489d4-7e5893`](records/20261011-140526-04489d4-7e5893.json)):
+the 15 paired-tuple points reproduced inside the cartesian campaign are
+**identical to the last digit** with the paired fleet record (every column of
+the ac / tran-sr / dc-swing CSVs), so every difference below comes from the 30
+tuples the paired grid never measured. The new binding points cluster at
+**FS at 1.62 V** (the paired grid ran FS only at its 1.8 V pairing) and, for
+power, SF at 1.98 V:
+
+| Quantity | paired worst (15 pts) | cartesian worst (45 pts) | binding-point change |
+|---|---|---|---|
+| Open-loop DC gain | 61.64 dB @ FS / 125 °C / 1.8 V | 61.25 dB @ FS / 125 °C / 1.62 V | same corner, 1.8 → 1.62 V |
+| GBW | 17.92 MHz @ SS / 125 °C / 1.62 V | 17.58 MHz @ FS / 125 °C / 1.62 V | SS → FS |
+| Phase margin | 63.94° @ SF / 27 °C / 1.8 V | 63.90° @ SF / 27 °C / 1.62 V | same corner, 1.8 → 1.62 V |
+| Rise slew | 19.88 V/µs @ SS / −40 °C / 1.62 V | 19.79 V/µs @ FS / −40 °C / 1.62 V | SS → FS |
+| Fall slew | 11.03 V/µs @ SS / −40 °C / 1.62 V | **9.13 V/µs @ FS / −40 °C / 1.62 V** | SS → FS, −17% |
+| Output swing | 0.948 Vpp @ SS / −40 °C / 1.62 V | **0.897 Vpp @ SF / −40 °C / 1.62 V** | SS → SF, −5.4% |
+| Quiescent power | 131.92 µW @ FF / 125 °C / 1.98 V | 132.03 µW @ SF / 125 °C / 1.98 V | FF → SF |
+
+Verdicts: gain ≥ 60 dB, GBW ≥ 16 MHz, phase margin ≥ 60° and rise slew ≥ 99%
+of the 20 V/µs sizing example hold at **all 45 points** — no previously-met
+verdict is lost at the new supply extremes. The two rows that were already
+partially closed get **worse**, not better, there: fall slew drops from 55% to
+46% of target and swing from 58.5% to 55.4% of the 1.62 V rail. All 135 units
+passed (no convergence or headroom failures — the record's `errors` list is
+empty), so this grid is complete coverage; a complete grid with two unmet
+rows still supports no "met across the supply range" claim for those rows,
+and none is made. The spec's section 2 rows cite these worst cases as
+independent-supply figures validated by `design/bin/spec_figures_check.py`
+(matrices `s110-*` in `manifests/spec-section2-figures.json`).
+
+**Supplementary cartesian campaign (issue #110)**: record
+[`20261011-200341-046fe81-f7ce78`](records/20261011-200341-046fe81-f7ce78.json)
+— `--supply-mode cartesian --analyses icmr,cmrr,tran_step` (the klt-native
+analyses), 180 units (icmr 45, cmrr 45 points × 2 CM bias points, tran-step
+45), **0 failed**, same DUT snapshot and PDK pin. The graded section 2
+ICMR/CMRR rows keep citing the paired DR-013 records; this record is
+independent-supply coverage evidence, not a graded figure. Its findings: the
+ICMR target window is covered at **45 / 45** points (narrowest 0.423 V @
+SF / −40 °C / 1.62 V vs 0.452 V paired; both binding edges move to
+SF / −40 °C / 1.62 V), the 0.73 V bandgap-consumer sense point is **not
+covered at FS / −40 °C at any of the three supplies** (low edges 0.7408 /
+0.7388 / 0.7372 V at 1.62 / 1.8 / 1.98 V; the paired grid saw only its 1.8 V
+point), and mid-rail CMRR drops to **51.37 dB @ FS / −40 °C / 1.62 V**
+(paired worst 55.11 dB @ SS / −40 °C) — still above DR-008's *proposed*
+50 dB at all 45 points, with less margin; the window-centre worst is
+62.17 dB @ SF / −40 °C / 1.62 V (paired 69.34 dB). Worst 1 % settling
+lengthens slightly, 40.5 → 41.4 ns @ FS / 125 °C / 1.62 V.
 
 **PDK pin**: [`pdk.json`](pdk.json) — sky130A, open_pdks commit
 `c6d73a35f524070e85faff4a6a9eef49553ebc2b`, the **same pin** as
