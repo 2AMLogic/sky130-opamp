@@ -15,7 +15,7 @@ cites 20200101-000000-0000000 outside section 2
 ## 2. Performance targets
 | Parameter | Target |
 |---|---|
-| Open-loop DC gain | worst-case **61.64 dB @ FS / 125 °C** record `{RID}` |
+| Open-loop DC gain | superseded sizing: worst-case **61.64 dB @ FS / 125 °C** record `{RID}` |
 | Other row | 61.64 dB @ FS / 125 °C quoted elsewhere |
 
 Summary: gain fell to 61.64 dB @ FS / 125 °C.
@@ -31,6 +31,7 @@ MAPPING = {"matrices": {"m": MATRIX}, "figures": [{
     "matrix": "m", "row": "Open-loop DC gain", "record": RID, "csv": "ac", "key": "gain_dc_db", "reduce": "min",
     "expected": 61.64, "tol": 0.005, "unit": "dB",
     "at": {"corner": "fs", "temp_c": 125, "supply_v": 1.8}, "printed": ["61.64 dB @ FS / 125 °C"],
+    "scope": "historical", "scope_text": "superseded sizing", "historical_reason": "fixture", "legacy_unverified": True,
 }]}
 
 
@@ -157,7 +158,7 @@ class FixtureTests(unittest.TestCase):
 
 class SupplyBindingTests(unittest.TestCase):
     """Binding supply (issue #172). Fixture: power-like max with two supplies at ff/125."""
-    PSPEC = SPEC.replace("| Other row |", f"| Quiescent power | **131.92 µW @ FF / 125 °C / 1.98 V** `{RID}` |\n| Other row |")
+    PSPEC = SPEC.replace("| Other row |", f"| Quiescent power | superseded sizing **131.92 µW @ FF / 125 °C / 1.98 V** `{RID}` |\n| Other row |")
     HDR = "corner,temp_c,vdd_v,gain_dc_db,pq_w\n"
 
     def setUp(self):
@@ -353,7 +354,7 @@ class CampaignFigureTests(unittest.TestCase):
     CJ = "sim/x/records/camp.campaign.json"
     MD = "sim/x/records/camp.md"
     SPEC = ("# spec\n## 2. Targets\n| P | T |\n|---|---|\n"
-            "| Input-referred offset | sigma 8.69 mV @ SS / 27 °C camp.md camp.campaign.json |\n## 3. x\n")
+            "| Input-referred offset | previous DUT: sigma 8.69 mV @ SS / 27 °C camp.md camp.campaign.json |\n## 3. x\n")
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -367,7 +368,9 @@ class CampaignFigureTests(unittest.TestCase):
         fig = {"row": "Input-referred offset", "campaign_json": self.CJ, "record_md": self.MD,
                "corners": ["tt", "ss"], "n_per_corner": 300, "key": "sigma_v", "reduce": "max",
                "scale": 1000.0, "expected": 8.69, "tol": 0.005, "unit": "mV",
-               "at": {"corner": "ss", "temp_c": 27}, "printed": ["8.69 mV @ SS / 27 °C"]}
+               "at": {"corner": "ss", "temp_c": 27}, "printed": ["8.69 mV @ SS / 27 °C"],
+               "scope": "historical", "scope_text": "previous DUT", "historical_reason": "fixture",
+               "legacy_unverified": True}
         (self.tmp / sf.MAPPING).write_text(json.dumps({"figures": [], "campaign_figures": [fig]}))
 
     def write_json(self, n_ok_ss):
@@ -392,9 +395,165 @@ class CampaignFigureTests(unittest.TestCase):
         self.assertTrue(any("occurs 0x" in e for e in sf.check(self.tmp)))
 
 
+class ScopeProvenanceTests(unittest.TestCase):
+    """DUT scope and provenance (issue #186). Fixture: a current-design gain
+    figure on a record whose dut block names a snapshot equal to the canonical
+    netlist."""
+    NET = b"* canonical DUT\n.subckt opamp_core\n.ends\n"
+    SNAP = "sim/opamp-characterization/netlist-snapshots/" + RID + "/opamp_core.spice"
+    CSPEC = SPEC.replace("| Open-loop DC gain | superseded sizing: worst-case",
+                         "| Open-loop DC gain | on the current sizing: worst-case")
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        rec = self.tmp / sf.OPAMP_RECORDS
+        rec.mkdir(parents=True)
+        (rec / f"{RID}-ac.csv").write_text(CSV)
+        (self.tmp / "spec").mkdir()
+        (self.tmp / "manifests").mkdir()
+        (self.tmp / "design/netlist").mkdir(parents=True)
+        (self.tmp / "design/netlist/opamp_core.spice").write_bytes(self.NET)
+        (self.tmp / self.SNAP).parent.mkdir(parents=True)
+        (self.tmp / self.SNAP).write_bytes(self.NET)
+        self.write_record(self.NET)
+        self.write_spec(self.CSPEC)
+        self.fig()
+
+    def write_record(self, data, dut=True):
+        import hashlib
+        rec = {"record_id": RID}
+        if dut:
+            rec["dut"] = {"source_path": "design/netlist/opamp_core.spice", "snapshot_path": self.SNAP,
+                          "sha256": "sha256:" + hashlib.sha256(data).hexdigest()}
+        (self.tmp / sf.OPAMP_RECORDS / f"{RID}.json").write_text(json.dumps(rec))
+
+    def write_spec(self, t):
+        (self.tmp / sf.SPEC).write_text(t, encoding="utf-8")
+
+    def fig(self, **kw):
+        f = dict(MAPPING["figures"][0], scope="current", scope_text="on the current sizing")
+        for k in ("historical_reason", "legacy_unverified"):
+            f.pop(k, None)
+        f.update(kw)
+        self.write_map({"matrices": MAPPING["matrices"], "figures": [f]})
+
+    def write_map(self, m):
+        (self.tmp / sf.MAPPING).write_text(json.dumps(m), encoding="utf-8")
+
+    def errs(self):
+        return sf.check(self.tmp)
+
+    def test_current_verified_equal_passes(self):
+        self.assertEqual(self.errs(), [])
+
+    def test_current_other_dut_fails_despite_correct_numbers(self):
+        other = b"* an older DUT\n"
+        (self.tmp / self.SNAP).write_bytes(other)
+        self.write_record(other)
+        errs = self.errs()
+        self.assertTrue(any("DUT mismatch" in e for e in errs), errs)
+        self.assertFalse(any("recomputed" in e for e in errs), errs)
+
+    def test_current_missing_snapshot_fails(self):
+        (self.tmp / self.SNAP).unlink()
+        self.assertTrue(any("snapshot missing" in e for e in self.errs()))
+
+    def test_current_corrupt_snapshot_fails(self):
+        (self.tmp / self.SNAP).write_bytes(self.NET + b"* edited\n")
+        self.assertTrue(any("corrupted" in e for e in self.errs()))
+
+    def test_current_missing_canonical_netlist_fails(self):
+        (self.tmp / "design/netlist/opamp_core.spice").unlink()
+        self.assertTrue(any("current netlist missing" in e for e in self.errs()))
+
+    def test_current_legacy_record_fails(self):
+        self.write_record(self.NET, dut=False)
+        self.assertTrue(any("no verified `dut` block" in e for e in self.errs()))
+
+    def test_current_cannot_be_marked_legacy(self):
+        self.write_record(self.NET, dut=False)
+        self.fig(legacy_unverified=True)
+        self.assertTrue(any("no verified `dut` block" in e for e in self.errs()))
+
+    def test_historical_legacy_needs_explicit_flag(self):
+        self.write_record(self.NET, dut=False)
+        self.write_spec(SPEC)
+        self.fig(scope="historical", scope_text="superseded sizing", historical_reason="why")
+        self.assertTrue(any("legacy_unverified" in e for e in self.errs()))
+        self.fig(scope="historical", scope_text="superseded sizing", historical_reason="why",
+                 legacy_unverified=True)
+        self.assertEqual(self.errs(), [])
+
+    def test_historical_verified_other_dut_is_allowed_but_integrity_checked(self):
+        other = b"* an older DUT\n"
+        (self.tmp / self.SNAP).write_bytes(other)
+        self.write_record(other)
+        self.write_spec(SPEC)
+        self.fig(scope="historical", scope_text="superseded sizing", historical_reason="why")
+        self.assertEqual(self.errs(), [])
+        (self.tmp / self.SNAP).write_bytes(other + b"* edited\n")
+        self.assertTrue(any("corrupted" in e for e in self.errs()))
+
+    def test_legacy_flag_on_record_with_dut_fails(self):
+        self.write_spec(SPEC)
+        self.fig(scope="historical", scope_text="superseded sizing", historical_reason="why",
+                 legacy_unverified=True)
+        self.assertTrue(any("carries a `dut` block" in e for e in self.errs()))
+
+    def test_historical_needs_reason(self):
+        self.write_spec(SPEC)
+        self.fig(scope="historical", scope_text="superseded sizing")
+        self.assertTrue(any("historical_reason" in e for e in self.errs()))
+
+    def test_missing_or_unknown_scope_fails(self):
+        self.fig(scope=None)
+        self.assertTrue(any("scope must be one of" in e for e in self.errs()))
+        self.fig(scope="recent")
+        self.assertTrue(any("scope must be one of" in e for e in self.errs()))
+
+    def test_prose_calls_current_figure_historical_fails(self):
+        # JSON says current; the row's prose describes the figure as superseded.
+        self.write_spec(self.CSPEC.replace("on the current sizing: worst-case",
+                                           "on the current sizing, superseded by none, but historical: worst-case"))
+        self.assertTrue(any("describes it as historical" in e for e in self.errs()))
+
+    def test_prose_scope_text_absent_fails(self):
+        # JSON says current but the row carries no current-design wording.
+        self.write_spec(SPEC)
+        self.assertTrue(any("does not occur within" in e for e in self.errs()))
+
+    def test_historical_json_with_current_prose_fails(self):
+        self.fig(scope="historical", scope_text="on the current sizing", historical_reason="why")
+        self.assertTrue(any("contains no historical word" in e for e in self.errs()))
+
+    def test_current_scope_text_with_historical_word_fails(self):
+        self.write_spec(self.CSPEC.replace("on the current sizing", "on the current (superseded) sizing"))
+        self.fig(scope_text="on the current (superseded) sizing")
+        self.assertTrue(any("must say 'current'" in e for e in self.errs()))
+
+    def test_scope_text_after_figure_does_not_count(self):
+        self.write_spec(SPEC.replace("superseded sizing: worst-case **61.64 dB @ FS / 125 °C**",
+                                     "worst-case **61.64 dB @ FS / 125 °C** (current sizing)"))
+        self.fig(scope_text="current sizing")
+        self.assertTrue(any("does not occur within" in e for e in self.errs()))
+
+
 class CommittedTests(unittest.TestCase):
     def test_committed_spec_agrees_with_records(self):
         self.assertEqual(sf.check(_paths.REPO), [])
+
+    def test_committed_scopes_are_explicit(self):
+        m = json.loads((_paths.REPO / sf.MAPPING).read_text(encoding="utf-8"))
+        allf = m["figures"] + m["campaign_figures"]
+        self.assertTrue(all(f.get("scope") in sf.SCOPES for f in allf))
+        # Offset evidence has no canonical campaign: it must stay explicitly historical.
+        self.assertTrue(all(f["scope"] == "historical" and f.get("legacy_unverified")
+                            for f in m["campaign_figures"]))
+        # Deterministic current claims cite the DR-013 canonical records.
+        for f in m["figures"]:
+            if f["scope"] == "current":
+                self.assertIn("04489d4", f["record"])
 
 
 if __name__ == "__main__":

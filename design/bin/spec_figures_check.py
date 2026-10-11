@@ -58,11 +58,33 @@ corner set equals the authored `corners`, every corner has n_ok ==
 n_requested == `n_per_corner` and n_failed == 0, and the cited
 `record_md` file exists and is cited in the row.
 
+DUT scope and provenance (issue #186): every figure and campaign figure
+declares `scope`, either "current" or "historical", plus a `scope_text`
+phrase that must occur in the cited table row within SCOPE_WINDOW characters
+before the first occurrence of `printed[0]`, so a JSON annotation alone cannot
+hide a current-design claim in prose:
+  - "current": the cited record's `dut` block must verify (snapshot present,
+    hash intact, via sim/lib/dut_identity.verify_record_dut) AND equal the
+    canonical design/netlist/opamp_core.spice (dut_identity.check_current). A
+    numerically correct record for a different DUT, a missing/corrupt snapshot
+    or a record with no `dut` block fails. The `scope_text` must say "current"
+    and neither it nor the window before the figure may contain a historical
+    word (`historical_words`, default HISTORICAL_WORDS).
+  - "historical": needs a non-empty `historical_reason`, and its `scope_text`
+    must contain a historical word (e.g. "superseded DR-002 sizing",
+    "previous DUT"). A record with a `dut` block still has its identity
+    verified; a record without one is legacy and the entry must say
+    `"legacy_unverified": true` (never inferred from the Git SHA or today's
+    netlist). Historical entries claim nothing about the current design.
+
 Coverage (first increment): gain, GBW, phase margin, rise/fall slew, swing,
-quiescent power (record 20261001-074923-c317ff9) plus CMRR at both common-mode
-points and ICMR width/edges (record 20261009-103006-566b9a5). Not mapped: the
-ICMR low/high edge of the narrowest window (needs a row-select key), the
-superseded-sizing figures from record 20260916-032327-edc9f22, and ranges.
+quiescent power, CMRR at both common-mode points and ICMR width/edges, all as
+current-design figures on the DR-013 canonical records, plus the superseded
+DR-002 gain and GBW worst cases (legacy record 20260916-032327-edc9f22) as
+historical comparisons and the offset Monte Carlo campaign as historical
+evidence on the previous DUT. Not mapped: the ICMR low/high edge of the
+narrowest window (needs a row-select key), other superseded-sizing figures,
+and ranges.
 """
 import argparse
 import csv
@@ -76,9 +98,23 @@ REPO = Path(__file__).resolve().parent.parent.parent
 MAPPING = "manifests/spec-section2-figures.json"
 SPEC = "spec/target-spec.md"
 RECORDS_GLOB = "sim/*/records"
-ID_RE = re.compile(r"\b\d{8}-\d{6}-[0-9a-f]{7}\b")
+ID_RE = re.compile(r"\b\d{8}-\d{6}-[0-9a-f]{7}(?:-[0-9a-f]{6})?\b")
 NUM_RE = re.compile(r"\d+(?:\.\d+)?")
 OPAMP_RECORDS = "sim/opamp-characterization/records"
+SCOPES = ("current", "historical")
+SCOPE_WINDOW = 600
+HISTORICAL_WORDS = ("superseded", "historical", "previous dut", "prior record", "prior grid", "prior sizing")
+
+
+def _dut_identity():
+    mod = sys.modules.get("dut_identity")
+    if mod is None:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("dut_identity", REPO / "sim" / "lib" / "dut_identity.py")
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules["dut_identity"] = mod
+        spec.loader.exec_module(mod)
+    return mod
 
 
 def section2(text):
@@ -142,6 +178,73 @@ def check_text(name, fig, row):
     if not any(ct in s for s in printed):
         errs.append(f"{name}: binding corner {ct!r} does not appear in any printed string")
     return errs + check_supply_text(name, fig, printed)
+
+
+def hist_words(mapping):
+    return tuple(w.lower() for w in mapping.get("historical_words", HISTORICAL_WORDS))
+
+
+def check_scope_text(name, fig, row, words):
+    """Bind the declared scope to the cited table-row prose."""
+    scope, st = fig.get("scope"), fig.get("scope_text")
+    if scope not in SCOPES:
+        return [f"{name}: scope must be one of {SCOPES}, got {scope!r}"]
+    if not isinstance(st, str) or not st.strip():
+        return [f"{name}: scope {scope!r} needs a non-empty scope_text that appears in its section 2 row"]
+    errs = []
+    st_hist = [w for w in words if w in st.lower()]
+    if scope == "historical":
+        if not str(fig.get("historical_reason", "")).strip():
+            errs.append(f"{name}: historical scope needs a non-empty historical_reason")
+        if not st_hist:
+            errs.append(f"{name}: historical scope_text {st!r} contains no historical word {list(words)}")
+    elif st_hist or "current" not in st.lower():
+        errs.append(f"{name}: current scope_text {st!r} must say 'current' and contain no historical word")
+    pos = row.find(fig["printed"][0]) if fig.get("printed") else -1
+    if pos < 0:
+        return errs  # check_text already reports the missing printed text
+    window = row[max(0, pos - SCOPE_WINDOW): pos]
+    if st not in window:
+        errs.append(f"{name}: scope_text {st!r} does not occur within {SCOPE_WINDOW} characters before "
+                    f"{fig['printed'][0]!r} in its section 2 row")
+    elif scope == "current":
+        hit = [w for w in words if w in window.lower()]
+        if hit:
+            errs.append(f"{name}: declared current-design but its section 2 prose describes it as "
+                        f"historical (found {hit} before the figure)")
+    return errs
+
+
+def check_provenance(root, name, fig, rec_path):
+    """DUT identity of the record behind a figure, per its declared scope."""
+    scope = fig.get("scope")
+    if scope not in SCOPES:
+        return []  # reported by check_scope_text
+    root = Path(root)
+    try:
+        rec = json.loads(rec_path.read_text(encoding="utf-8"))
+        if not isinstance(rec, dict):
+            raise ValueError("not a JSON object")
+    except (OSError, ValueError) as e:
+        return [f"{name}: cannot read record {rec_path.name} for DUT identity: {e}"]
+    di = _dut_identity()
+    try:
+        state, problems = di.verify_record_dut(rec, root)
+        stale = di.check_current(rec, root) if scope == "current" and state == di.VERIFIED else []
+    except (AttributeError, TypeError, OSError) as e:
+        return [f"{name}: record {rec_path.name} has an unusable dut block: {e!r}"]
+    errs = [f"{name}: {p}" for p in problems + stale]
+    legacy = fig.get("legacy_unverified") is True
+    if state == di.UNVERIFIED:
+        if scope == "current":
+            errs.append(f"{name}: declared current-design but {rec_path.name} has no verified `dut` block "
+                        f"(legacy record); cite a record for the canonical DUT or mark the figure historical")
+        elif not legacy:
+            errs.append(f"{name}: {rec_path.name} has no `dut` block; a historical figure on it must set "
+                        f"\"legacy_unverified\": true")
+    elif legacy:
+        errs.append(f"{name}: legacy_unverified is set but {rec_path.name} carries a `dut` block")
+    return errs
 
 
 def record_exists(root, rid):
@@ -322,8 +425,10 @@ def check(root):
                         f"{fig.get('row_match', name)!r}, found {len(rows)}")
         else:
             errs += check_text(name, fig, rows[0])
+            errs += check_scope_text(name, fig, rows[0], hist_words(mapping))
             if fig["record"] not in rows[0]:
                 errs.append(f"{name}: record {fig['record']} is not cited in its section 2 row")
+        errs += check_provenance(root, name, fig, root / OPAMP_RECORDS / f"{fig['record']}.json")
         path = root / OPAMP_RECORDS / f"{fig['record']}-{fig['csv']}.csv"
         if not path.is_file():
             errs.append(f"{name}: record CSV missing: {path.relative_to(root)}")
@@ -392,12 +497,15 @@ def check_campaign_figures(root, spec2, mapping):
                         f"{fig.get('row_match', name)!r}, found {len(rows)}")
         else:
             errs += check_text(name, fig, rows[0])
+            errs += check_scope_text(name, fig, rows[0], hist_words(mapping))
             for cite in (fig["record_md"], fig["campaign_json"]):
                 if Path(cite).name not in rows[0]:
                     errs.append(f"{name}: {Path(cite).name} is not cited in its section 2 row")
         for cite in (fig["record_md"], fig["campaign_json"]):
             if not (root / cite).is_file():
                 errs.append(f"{name}: cited campaign file missing: {cite}")
+        if (root / fig["campaign_json"]).is_file():
+            errs += check_provenance(root, name, fig, root / fig["campaign_json"])
         try:
             data = json.loads((root / fig["campaign_json"]).read_text(encoding="utf-8"))
             cs = data["corners"]
@@ -440,6 +548,15 @@ def main(argv=None):
         print(f"FAIL {SPEC} {e}")
     if not errs:
         print(f"OK {SPEC} section 2 figures agree with committed records")
+        try:
+            m = json.loads((Path(a.root) / MAPPING).read_text(encoding="utf-8"))
+            allf = m["figures"] + m.get("campaign_figures", [])
+            cur = sum(f["scope"] == "current" for f in allf)
+            leg = [f["row"] for f in allf if f.get("legacy_unverified")]
+            print(f"NOTE {cur} figure(s) verified against the canonical DUT; "
+                  f"{len(allf) - cur} historical, {len(leg)} of them legacy/unverified: {', '.join(leg) or 'none'}")
+        except (OSError, ValueError, KeyError):
+            pass
     return 1 if errs else 0
 
 
