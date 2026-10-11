@@ -140,6 +140,288 @@
       }
     },
     {
+      "id": "mp34",
+      "cell": {
+        "gds_path": "gen/mp34.gds",
+        "cell_name": "stage1_mirror",
+        "ports": [
+          {
+            "name": "Q1_1_S",
+            "x_um": 0.21,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_1_D",
+            "x_um": 0.93,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_1_G",
+            "x_um": 0.57,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_1_S",
+            "x_um": 1.75,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_1_D",
+            "x_um": 2.47,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_1_G",
+            "x_um": 2.11,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q1_2_S",
+            "x_um": 3.29,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_2_D",
+            "x_um": 4.01,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_2_G",
+            "x_um": 3.65,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_2_S",
+            "x_um": 0.21,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_2_D",
+            "x_um": 0.93,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_2_G",
+            "x_um": 0.57,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q1_3_S",
+            "x_um": 1.75,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_3_D",
+            "x_um": 2.47,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_3_G",
+            "x_um": 2.11,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_3_S",
+            "x_um": 3.29,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_3_D",
+            "x_um": 4.01,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_3_G",
+            "x_um": 3.65,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "TAP_N",
+            "x_um": 2.11,
+            "y_um": 5.84,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "TAP_S",
+            "x_um": 2.11,
+            "y_um": -0.71,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 270
+          },
+          {
+            "name": "TAP_E",
+            "x_um": 4.93,
+            "y_um": 2.565,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "TAP_W",
+            "x_um": -0.71,
+            "y_um": 2.565,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vdd",
+      "cell": {
+        "gds_path": "gen/pin_vdd.gds",
+        "cell_name": "stub_metal2",
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
       "id": "pin_d1",
       "cell": {
         "gds_path": "gen/pin_d1.gds",
@@ -207,12 +489,14 @@
     "order": [
       "mn12",
       "fe_masks",
+      "mp34",
       "pin_tail",
       "pin_inn",
       "pin_vss",
       "pin_inp",
       "pin_d1",
-      "pin_d2"
+      "pin_d2",
+      "pin_vdd"
     ],
     "origins_um": {
       "mn12": {
@@ -236,16 +520,24 @@
         "y": 7.65
       },
       "pin_d1": {
-        "x": 8.0,
-        "y": 5.53
+        "x": 26.0,
+        "y": 4.71
       },
       "pin_d2": {
-        "x": 8.0,
+        "x": 26.0,
         "y": 10.79
       },
       "fe_masks": {
         "x": 0.0,
         "y": 0.0
+      },
+      "mp34": {
+        "x": 14.0,
+        "y": 0.0
+      },
+      "pin_vdd": {
+        "x": 26.0,
+        "y": -2.21
       }
     }
   },
@@ -351,6 +643,42 @@
           "port": "Q1_2_D"
         },
         {
+          "block": "mp34",
+          "port": "Q1_1_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_1_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_G"
+        },
+        {
           "block": "pin_d1",
           "port": "CONN"
         }
@@ -362,8 +690,8 @@
             "port": "Q1_1_D"
           },
           "to_pin": {
-            "block": "pin_d1",
-            "port": "CONN"
+            "block": "mp34",
+            "port": "Q2_2_G"
           },
           "waypoints_um": [
             [
@@ -376,7 +704,7 @@
             ],
             [
               7.0,
-              5.74
+              4.92
             ]
           ]
         },
@@ -386,9 +714,151 @@
             "port": "Q1_2_D"
           },
           "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_G"
+          },
+          "waypoints_um": [
+            [
+              7.0,
+              5.74
+            ],
+            [
+              7.0,
+              4.92
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_2_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_3_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          },
+          "waypoints_um": [
+            [
+              16.47,
+              4.92
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "waypoints_um": [
+            [
+              18.55,
+              4.92
+            ],
+            [
+              18.55,
+              2.155
+            ],
+            [
+              17.65,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_1_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_G"
+          },
+          "waypoints_um": [
+            [
+              14.93,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "waypoints_um": [
+            [
+              18.01,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          },
+          "to_pin": {
             "block": "pin_d1",
             "port": "CONN"
-          }
+          },
+          "waypoints_um": [
+            [
+              18.55,
+              4.92
+            ],
+            [
+              26.0,
+              4.92
+            ]
+          ]
         }
       ]
     },
@@ -403,6 +873,18 @@
         {
           "block": "mn12",
           "port": "Q2_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_D"
         },
         {
           "block": "pin_d2",
@@ -439,6 +921,74 @@
             [
               1.83,
               11.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_D"
+          },
+          "waypoints_um": [
+            [
+              1.83,
+              11.0
+            ],
+            [
+              9.0,
+              11.0
+            ],
+            [
+              9.0,
+              2.5
+            ],
+            [
+              14.93,
+              2.5
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_D"
+          },
+          "waypoints_um": [
+            [
+              14.93,
+              2.5
+            ],
+            [
+              16.47,
+              2.5
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_D"
+          },
+          "waypoints_um": [
+            [
+              16.47,
+              2.5
+            ],
+            [
+              18.01,
+              2.5
             ]
           ]
         }
@@ -561,6 +1111,144 @@
           "port": "CONN"
         }
       ]
+    },
+    {
+      "net": "vdd",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "mp34",
+          "port": "TAP_E"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_1_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_S"
+        },
+        {
+          "block": "pin_vdd",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "TAP_E"
+          },
+          "waypoints_um": [
+            [
+              20.0,
+              -2.0
+            ],
+            [
+              20.0,
+              2.565
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_S"
+          },
+          "waypoints_um": [
+            [
+              14.21,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_S"
+          },
+          "waypoints_um": [
+            [
+              15.75,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_S"
+          },
+          "waypoints_um": [
+            [
+              17.29,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_1_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_S"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_S"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_S"
+          }
+        }
+      ]
     }
   ],
   "pins": [
@@ -580,6 +1268,11 @@
       "port": "PAD"
     },
     {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    },
+    {
       "net": "d1",
       "block": "pin_d1",
       "port": "PAD"
@@ -590,8 +1283,8 @@
       "port": "PAD"
     },
     {
-      "net": "vss",
-      "block": "pin_vss",
+      "net": "vdd",
+      "block": "pin_vdd",
       "port": "PAD"
     }
   ],
