@@ -2,8 +2,22 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-11
+
+- **PR #168**: Layout: routed Rz/Cc compensation block with passive LVS verification (#167)
+- **Issue #167** (closed): Layout: build a routed Rz/Cc compensation block with passive LVS verification
+
 ### 2026-10-10
 
+- **PR #166**: Signal-dependent output sink candidate and proposed topology comparison (DR-012)
+- **PR #165**: Test tail_clamp_sizing.py against committed netlists (#164)
+- **PR #162**: Key variant comparison by (corner, temp_c, vdd_v)
+- **PR #160**: Detect uncommitted evidence edits in the local append-only gate
+- **Issue #79** (closed): Evaluate a signal-dependent output sink and draft the topology comparison decision
+- **Issue #164** (closed): tests: add simulator-free unit tests for tail_clamp_sizing.py
+- **Issue #150** (closed): Auditor: retain shared-worktree stash restriction
+- **Issue #161** (closed): Preserve supply voltage in variant comparison identity
+- **Issue #158** (closed): Detect uncommitted evidence edits in the local append-only gate
 - **PR #157**: Reject malformed manifest entries in the generic evidence freshness gate
 - **PR #156**: Tail-clamp candidate for the fall-slew gap: measured negative result (#78)
 - **PR #154**: Extract generic-evidence artifact hash gate into a tested local checker (#152)

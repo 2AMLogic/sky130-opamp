@@ -51,7 +51,8 @@ Issues carrying `loom:curated`.
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
-- **#158**: Detect uncommitted evidence edits in the local append-only gate *(architect)*
+- **#163**: pvt_sweep: refuse a multi-unit local ngspice grid when the backend is batch *(architect)*
+- **#172**: spec figures: verify the supply attributed to binding extrema *(architect)*
 
 ## Epics
 
@@ -68,6 +69,6 @@ _None._
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 4 |
-| Architect / Hermit proposals | 2 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
