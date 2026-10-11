@@ -1,0 +1,198 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 1,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "0eef48c21208510ae1a2753a4cccbbb4b7c7615a7136ba0fc0fbafe4be0e8b37",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "0eef48c21208510ae1a2753a4cccbbb4b7c7615a7136ba0fc0fbafe4be0e8b37"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ]
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 4,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/27C\",\"t20_fall\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"t20_rise\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"t80_fall\"]/observation",
+      "measurement:[0,\"tt/1.800V/27C\",\"t80_rise\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t20_fall\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t20_rise\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t80_fall\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.800V/27C\",\"t80_rise\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g1ed1b506d5b6",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:0eef48c21208510ae1a2753a4cccbbb4b7c7615a7136ba0fc0fbafe4be0e8b37",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "t20_rise",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.08188e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "t80_rise",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 2.29173e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "t80_fall",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.21441e-06,
+        "margin": null
+      }
+    },
+    {
+      "name": "t20_fall",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/27C",
+        "value": 1.24391e-06,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 49.449,
+      "measurements": [
+        {
+          "name": "t20_rise",
+          "value": 2.08188e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t80_rise",
+          "value": 2.29173e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t80_fall",
+          "value": 1.21441e-06,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t20_fall",
+          "value": 1.24391e-06,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201655-046fe81-7349fb-logs/klt-tran-sr/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201655-046fe81-7349fb-logs/klt-tran-sr/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

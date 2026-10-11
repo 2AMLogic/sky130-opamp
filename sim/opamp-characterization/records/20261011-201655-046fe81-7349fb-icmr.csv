@@ -1,0 +1,2 @@
+corner,temp_c,vdd_v,icmr_low_v,icmr_high_v,icmr_width_v,low_limiter,high_limiter,covers_target_window,covers_0v73,icmr_low_v_30db,icmr_high_v_30db,icmr_width_v_30db,icmr_low_v_50db,icmr_high_v_50db,icmr_width_v_50db,vid_mid_v,cmrr_mid_db,vout_mid_v,iq_mid_a,elapsed_s
+tt,27.0,1.8,0.6668,1.4723,0.8055,input_stage,input_stage,1,1,0.4207,1.5088,1.0881,0.7416,1.4322,0.6906,-0.000150422,65.11814772625375,0.899699,6.57427e-05,74.25

@@ -1,0 +1,150 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 1,
+    "sim__corner__passed_count": 1,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "0bdc1407a7ec7b13eb4cde0a962b8c8d4785cf4048edb33e8070287f1705fe35",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "0bdc1407a7ec7b13eb4cde0a962b8c8d4785cf4048edb33e8070287f1705fe35"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-cedd9eac3ba3",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-046b561398e637fc3",
+      "instance_type": "c7i.4xlarge",
+      "availability_zone": "us-east-1d",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 46,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g1ed1b506d5b6",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 1,
+    "measurements_declared": 1,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/-40C\",\"vout_pre_v\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"vout_pre_v\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g1ed1b506d5b6",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:0bdc1407a7ec7b13eb4cde0a962b8c8d4785cf4048edb33e8070287f1705fe35",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "vout_pre_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 0.746582,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 39.784,
+      "measurements": [
+        {
+          "name": "vout_pre_v",
+          "value": 0.746582,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201913-046fe81-7c5771-logs/klt-tran-sr-icmr-tt--40C-1.8V/tt_1p800V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201913-046fe81-7c5771-logs/klt-tran-sr-icmr-tt--40C-1.8V/tt_1p800V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201913-046fe81-7c5771-logs/klt-tran-sr-icmr-tt--40C-1.8V/tt_1p800V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-185/sim/opamp-characterization/records/20261011-201913-046fe81-7c5771-logs/klt-tran-sr-icmr-tt--40C-1.8V/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

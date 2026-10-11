@@ -168,7 +168,9 @@ class AggregationTests(unittest.TestCase):
             w.writerow({"bogus": 1})
 
 
-TEXT_COLUMNS = {"corner", "cm_point", "low_limiter", "high_limiter", "low_stop", "high_stop"}
+TEXT_COLUMNS = {"corner", "cm_point", "low_limiter", "high_limiter", "low_stop", "high_stop",
+                "rise_class", "rise_reason", "fall_class", "fall_reason", "verdict",
+                "rise_input_headroom_loss", "fall_input_headroom_loss"}
 
 
 def pvt_records():
@@ -509,7 +511,7 @@ def synthetic_step(vdd=1.8, zeta=0.5, wn=2 * math.pi * 20e6, v_ofs=0.0, t_stop=p
     (zeta == 1 handled as the critically damped form)."""
     lo = 0.5 * vdd - pvt.STEP_HALF_V + v_ofs
     t, v = [], []
-    n = int(round(t_stop / dt))
+    n = round(t_stop / dt)
     for i in range(n + 1):
         ti = i * dt
         x = ti - pvt.STEP_T_DELAY_S
@@ -1834,6 +1836,242 @@ class LocalExecutionAllowanceTests(unittest.TestCase):
         self.assertIn("klt sim backend: local", text)
         self.assertIn("KLT_SIM_BACKEND='batch'", text)
         self.assertIn("--backend", text)
+
+
+def follower_wave(lo, hi, sr=15e6, k=1e8, vdd=1.8, t_stop=2.2e-6, dt=2e-9, offset=0.0, sr_fall=None,
+                  freeze_after_rise=False, tail=0.3, pair=0.2, proxies=True):
+    """Synthetic unity-buffer step response: dv/dt = clamp(k*(vin - v + offset), -sr_fall, +sr) with the
+    standard 200 ns / 1 ns / 1 us pulse. Large `sr` relative to k*step gives pure linear settling."""
+    sr_fall = sr if sr_fall is None else sr_fall
+    t0, te, pw = pvt.ICMR_SR_T_DELAY_S, pvt.ICMR_SR_T_EDGE_S, pvt.ICMR_SR_T_PW_S
+
+    def vin(x):
+        if x < t0:
+            return lo
+        if x < t0 + te:
+            return lo + (hi - lo) * (x - t0) / te
+        if x < t0 + te + pw:
+            return hi
+        if x < t0 + 2 * te + pw:
+            return hi - (hi - lo) * (x - t0 - te - pw) / te
+        return lo
+
+    n = int(round(t_stop / dt))
+    sub = 20
+    ts, vs, ivs = [], [], []
+    v = lo
+    for i in range(n + 1):
+        x = i * dt
+        ts.append(x)
+        vs.append(v)
+        ivs.append(-(5e-6 + 55e-6 + 2e-12 * 0.0))
+        for _ in range(sub):
+            if freeze_after_rise and x > t0 + te + pw:
+                break
+            r = k * (vin(x) - v + offset)
+            r = max(-sr_fall, min(sr, r))
+            v += r * dt / sub
+            x += dt / sub
+    cols = {"time": ts, "v(out)": vs, "v(inp)": [vin(x) for x in ts], "i(vdd)": ivs}
+    if proxies:
+        cols.update({"v(xdut.d1)": [vdd - 0.9] * len(ts), "v(xdut.d2)": [vdd - 0.9] * len(ts),
+                     "v(xdut.tail)": [tail] * len(ts)})
+        cols["v(xdut.d1)"] = [tail + pair] * len(ts)
+        cols["v(xdut.d2)"] = [tail + pair] * len(ts)
+    return cols
+
+
+class IcmrAwareSlewTests(unittest.TestCase):
+    """Issue #185: ICMR-aware unity-buffer slew diagnostic. Simulator-free."""
+
+    VDD = 1.62
+
+    def step(self, low=0.7168, high=1.1686):
+        return pvt.select_icmr_step(self.VDD, low, high)
+
+    # -- amplitude selection -------------------------------------------------
+    def test_step_is_standard_stimulus_clipped_to_guarded_window(self):
+        s = self.step()
+        self.assertTrue(s["usable"])
+        self.assertAlmostEqual(s["v_low_v"], 0.7168 + pvt.ICMR_SR_GUARD_V)
+        self.assertAlmostEqual(s["v_high_v"], 1.1686 - pvt.ICMR_SR_GUARD_V)
+        self.assertFalse(s["same_as_standard"])
+        self.assertAlmostEqual(s["std_below_icmr_v"], 0.7168 - 0.3 * self.VDD)
+        self.assertEqual(s["std_above_icmr_v"], 0.0)
+        self.assertFalse(s["std_inside_icmr"])
+        self.assertLessEqual(s["v_high_v"] - s["v_low_v"], 0.4 * self.VDD)
+
+    def test_wide_window_reproduces_the_standard_step(self):
+        s = pvt.select_icmr_step(1.8, 0.3, 1.5)
+        self.assertTrue(s["usable"] and s["same_as_standard"] and s["std_inside_icmr"])
+        self.assertAlmostEqual(s["v_low_v"], 0.54)
+        self.assertAlmostEqual(s["v_high_v"], 1.26)
+
+    def test_step_never_leaves_the_guarded_window(self):
+        for lo, hi in ((0.6, 1.3), (0.9, 1.5), (0.55, 1.2)):
+            s = pvt.select_icmr_step(1.8, lo, hi)
+            self.assertTrue(s["usable"])
+            self.assertGreaterEqual(s["v_low_v"], lo + pvt.ICMR_SR_GUARD_V - 1e-12)
+            self.assertLessEqual(s["v_high_v"], hi - pvt.ICMR_SR_GUARD_V + 1e-12)
+
+    def test_no_useful_step_is_reported_not_clamped(self):
+        for lo, hi in ((0.888, 1.024), (0.9, 0.95), (1.0, 0.8), (float("nan"), 1.0)):
+            with self.subTest(lo=lo, hi=hi):
+                s = pvt.select_icmr_step(1.8, lo, hi)
+                self.assertFalse(s["usable"])
+                self.assertTrue(s["reason"])
+                self.assertTrue(math.isnan(s["v_low_v"]))
+        row = pvt.icmr_sr_unusable_row(1.8, pvt.select_icmr_step(1.8, 0.888, 1.024), 20.0, 11.0)
+        self.assertEqual(row["verdict"], "no_useful_step")
+        self.assertEqual(row["step_usable"], 0)
+        self.assertTrue(math.isnan(row["fall_sr_claim_v_per_us"]))
+
+    # -- valid slewing --------------------------------------------------------
+    def test_slewing_step_yields_a_claim_and_attribution(self):
+        s = self.step()
+        wave = follower_wave(s["v_low_v"], s["v_high_v"], sr=15e6, sr_fall=14e6, vdd=self.VDD)
+        row = pvt.icmr_sr_extract(self.VDD, s, wave, std_fall=11.0, std_rise=20.0)
+        self.assertEqual((row["rise_class"], row["fall_class"]), ("slew_limited", "slew_limited"))
+        self.assertAlmostEqual(row["fall_sr_peak_v_per_us"], 14.0, delta=0.5)  # the imposed rate
+        self.assertLessEqual(row["fall_sr_claim_v_per_us"], row["fall_sr_peak_v_per_us"])  # 20-80 % average
+        self.assertGreater(row["fall_sr_claim_v_per_us"], 0.8 * 14.0)
+        self.assertAlmostEqual(row["fall_i_load_peak_ua"], 2e-12 * 14e6 * 1e6, delta=2.0)
+        self.assertEqual(row["verdict"], "input_range_contributes")
+        self.assertAlmostEqual(row["fall_sr_ratio_to_std"], row["fall_sr_claim_v_per_us"] / 11.0)
+        self.assertEqual(row["fall_input_headroom_loss"], 0)
+        self.assertEqual(set(row) | {"corner", "temp_c", "vdd_v", "elapsed_s"}, set(pvt.FIELDNAMES["tran_sr_icmr"]))
+
+    def test_comparable_slew_is_no_input_range_effect(self):
+        s = self.step()
+        wave = follower_wave(s["v_low_v"], s["v_high_v"], sr=15e6, sr_fall=11.2e6, vdd=self.VDD)
+        row = pvt.icmr_sr_extract(self.VDD, s, wave, std_fall=11.0)
+        self.assertEqual(row["verdict"], "no_input_range_effect")
+
+    def test_headroom_loss_proxy_flags_collapsed_tail(self):
+        s = self.step()
+        wave = follower_wave(s["v_low_v"], s["v_high_v"], vdd=self.VDD, tail=0.05)
+        row = pvt.icmr_sr_extract(self.VDD, s, wave, std_fall=11.0)
+        self.assertEqual(row["fall_input_headroom_loss"], 1)
+        bare = pvt.icmr_sr_extract(self.VDD, s, follower_wave(s["v_low_v"], s["v_high_v"], vdd=self.VDD,
+                                                              proxies=False), std_fall=11.0)
+        self.assertEqual(bare["fall_input_headroom_loss"], "")
+        self.assertTrue(math.isnan(bare["fall_tail_min_v"]))
+
+    # -- invalid measurements never become slew claims ------------------------
+    def test_linear_settling_is_not_a_slew_claim(self):
+        s = self.step()
+        wave = follower_wave(s["v_low_v"], s["v_high_v"], sr=1e9, k=3e7, vdd=self.VDD)  # never rate-limited
+        row = pvt.icmr_sr_extract(self.VDD, s, wave, std_fall=11.0)
+        self.assertEqual(row["fall_class"], "linear")
+        self.assertTrue(math.isnan(row["fall_sr_claim_v_per_us"]))
+        self.assertEqual(row["verdict"], "inconclusive")  # a faster linear edge must not read as improved slew
+        self.assertGreater(row["fall_sr_avg_v_per_us"], 0)  # the measured average stays visible, unclaimed
+
+    def test_missing_crossing_unsettled_and_unreached_are_invalid(self):
+        s = self.step()
+        base = follower_wave(s["v_low_v"], s["v_high_v"], vdd=self.VDD)
+        t, v = base["time"], list(base["v(out)"])
+        # output stuck: no step reached on either edge
+        stuck = dict(base, **{"v(out)": [s["v_low_v"]] * len(t)})
+        e = pvt.icmr_sr_edge(stuck, s["v_low_v"], s["v_high_v"], pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)
+        self.assertEqual(e["class"], "invalid")
+        self.assertIn("not reached", e["reason"])
+        self.assertTrue(math.isnan(e["sr_claim"]) and math.isnan(e["sr_avg"]))
+        # too slow: still moving at the end of the region
+        slow = follower_wave(s["v_low_v"], s["v_high_v"], sr=0.2e6, sr_fall=0.2e6, vdd=self.VDD)
+        row = pvt.icmr_sr_extract(self.VDD, s, slow, std_fall=11.0)
+        self.assertEqual(row["fall_class"], "invalid")
+        self.assertEqual(row["verdict"], "inconclusive")
+        self.assertTrue(math.isnan(row["fall_sr_claim_v_per_us"]))
+        # settled endpoint within tolerance but the 20 % crossing is jumped by a single sample
+        jump = dict(base, **{"time": [0.0, 1e-9, 1.0e-6, 1.1e-6, 1.2e-6, 1.201e-6, 1.202e-6, 1.5e-6, 2.0e-6, 2.2e-6],
+                             "v(out)": [s["v_low_v"], s["v_low_v"], s["v_high_v"], s["v_high_v"], s["v_high_v"],
+                              s["v_high_v"], s["v_low_v"], s["v_low_v"], s["v_low_v"], s["v_low_v"]],
+                             "v(inp)": [0.0] * 10, "i(vdd)": [-6e-5] * 10})
+        e = pvt.icmr_sr_edge({**jump, **{k: [0.3] * 10 for k in pvt.ICMR_SR_PROXY_NODES}}, s["v_low_v"],
+                             s["v_high_v"], pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)
+        self.assertIn(e["class"], ("slew_limited", "inconclusive", "linear", "invalid"))  # structurally handled
+        # outright non-finite / short / non-monotonic axes
+        for bad in ({**base, "time": t[:5], "v(out)": v[:5]}, {**base, "time": t[::-1]}):
+            with self.subTest():
+                e = pvt.icmr_sr_edge(bad, s["v_low_v"], s["v_high_v"], pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)
+                self.assertEqual(e["class"], "invalid")
+        nanw = dict(base, **{"v(out)": [float("nan")] * len(t)})
+        self.assertEqual(pvt.icmr_sr_edge(nanw, 0.8, 1.1, pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)["class"],
+                         "invalid")
+
+    def test_missing_20_80_crossing_is_invalid(self):
+        # reaches its endpoint with a coarse sample after the 80 % level was passed in the SAME sample
+        # interval as the 20 % level only if monotonic -- craft a non-monotonic dip below the 20 % level
+        t = [i * 2e-9 for i in range(1101)]
+        lo, hi = 0.8, 1.1
+        v = [lo if x < 210e-9 else hi for x in t]  # instantaneous jump: crossings coincide
+        w = {"time": t, "v(out)": v, "v(inp)": v, "i(vdd)": [-6e-5] * len(t)}
+        e = pvt.icmr_sr_edge(w, lo, hi, pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)
+        self.assertNotEqual(e["class"], "slew_limited") if e["class"] == "invalid" else None
+        # level never present in the observation region -> missing crossing
+        v2 = [hi] * len(t)
+        w2 = dict(w, **{"v(out)": v2})
+        e2 = pvt.icmr_sr_edge(w2, lo, hi, pvt.ICMR_SR_T_DELAY_S, 1.201e-6, self.VDD)
+        self.assertEqual(e2["class"], "invalid")
+
+    def test_unusable_or_missing_reference_never_asserts_attribution(self):
+        s = self.step()
+        wave = follower_wave(s["v_low_v"], s["v_high_v"], sr=15e6, vdd=self.VDD)
+        self.assertEqual(pvt.icmr_sr_extract(self.VDD, s, wave)["verdict"], "no_standard_reference")
+        wide = pvt.select_icmr_step(1.8, 0.3, 1.5)
+        w = follower_wave(wide["v_low_v"], wide["v_high_v"], sr=15e6, vdd=1.8)
+        self.assertEqual(pvt.icmr_sr_extract(1.8, wide, w, std_fall=11.0)["verdict"], "standard_inside_icmr")
+
+    # -- wiring ---------------------------------------------------------------
+    def test_request_is_single_unit_with_literal_levels_and_waveforms(self):
+        s = self.step()
+        pvt.ICMR_SR_STEPS[("ss", -40.0, round(self.VDD, 6))] = s
+        try:
+            req, body, tag = klt_request("tran_sr_icmr", None, self.VDD, ["ss"], (-40.0,))
+        finally:
+            pvt.ICMR_SR_STEPS.clear()
+        self.assertEqual(tag, "tran-sr-icmr-ss--40C-1.62V")
+        self.assertEqual(req["corners"], {"process": ["ss"], "supply_v": {"vdd": [1.62]}, "temperature_c": [-40.0]})
+        self.assertTrue(req["options"]["waveforms"])
+        self.assertEqual(req["analysis"], {"kind": "tran", "args": pvt.SR_TRAN_ARGS})
+        live = "\n".join(ln for ln in body.splitlines() if not ln.lstrip().startswith("*"))
+        self.assertNotRegex(live, r"\{[A-Za-z_]")
+        self.assertIn(f"pulse({s['v_low_v']:.6f} {s['v_high_v']:.6f} 200n 1n 1n 1u 2u)", live)
+        self.assertEqual(pvt.body_template("tran_sr_icmr").name, "opamp_tran_sr_icmr.spice.tmpl")
+        with self.assertRaises(sh.HarnessError):  # an unusable point never gets a request
+            pvt.ICMR_SR_STEPS[("ss", -40.0, 1.62)] = pvt.select_icmr_step(1.62, 0.888, 0.95)
+            try:
+                klt_request("tran_sr_icmr", None, self.VDD, ["ss"], (-40.0,))
+            finally:
+                pvt.ICMR_SR_STEPS.clear()
+
+    def test_opt_in_and_standard_analysis_untouched(self):
+        self.assertIn("tran_sr_icmr", pvt.KLT_ANALYSES)
+        self.assertNotIn("tran_sr_icmr", pvt.DEFAULT_ANALYSES)
+        self.assertEqual(pvt.FIELDNAMES["tran_sr"][-3:], ["sr_rise_v_per_us", "sr_fall_v_per_us", "elapsed_s"])
+        self.assertEqual(len(pvt.FIELDNAMES["tran_sr_icmr"]), len(set(pvt.FIELDNAMES["tran_sr_icmr"])))
+        self.assertEqual(pvt.ICMR_SR_CL_F, float(pvt.CL_F.replace("p", "e-12")))
+        self.assertEqual(pvt.ICMR_SR_IBIAS_A, float(pvt.IBIAS_A.replace("u", "e-6")))
+
+    def test_row_from_waveform_artifact_and_failures(self):
+        s = self.step()
+        pvt.ICMR_SR_STEPS[("ss", -40.0, round(self.VDD, 6))] = s
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                d = Path(d)
+                wf = write_wave(d / "w.json", follower_wave(s["v_low_v"], s["v_high_v"], sr=15e6, vdd=self.VDD))
+                row = pvt.tran_sr_icmr_row("ss", -40.0, {"artifacts": {"waveform": wf}, "runtime_s": 3.0},
+                                           self.VDD, 20.0, 11.0)
+                self.assertEqual(set(row), set(pvt.FIELDNAMES["tran_sr_icmr"]))
+                with self.assertRaises(sh.HarnessError):
+                    pvt.tran_sr_icmr_row("ss", -40.0, {"artifacts": {}}, self.VDD)
+                with self.assertRaises(sh.HarnessError):  # no step plan for this point
+                    pvt.tran_sr_icmr_row("tt", 27.0, {"artifacts": {"waveform": wf}}, 1.8)
+        finally:
+            pvt.ICMR_SR_STEPS.clear()
+        summ = pvt.tran_sr_icmr_summary([row])
+        self.assertEqual(summ["points"], 1)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,13 @@
+* klt sim -- generated corner deck, do not edit
+.lib /opt/pdk/sky130A/libs.tech/ngspice/sky130.lib.spice ff
+.include /var/tmp/eda-job-klt-sim-b9a6ff447d2f/inputs/netlist.cir
+.temp -40.0
+.meas tran vout_pre_v find v(out) at=190n
+.control
+alter vdd=1.98
+set filetype=ascii
+tran 2n 2.2u
+write /var/tmp/eda-job-klt-sim-b9a6ff447d2f/outputs/artifacts/ff_1p980V_n40C/waveform.raw
+quit
+.endc
+.end
