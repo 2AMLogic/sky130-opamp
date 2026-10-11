@@ -1,0 +1,83 @@
+{
+  "issue": 147,
+  "date": "2026-10-11",
+  "status": "PREDECLARED. Committed before the study record is written. Immutable; later revisions are new dated files.",
+  "scope": "feasibility comparison of offset trim, chopping, auto-zeroing and consumer-side correction for the canonical opamp_core (DR-013 grid-legal widths). Desk study from committed evidence plus hand calculation. Canonical design, spec targets and the proposed status of DR-009 / DR-011 are unchanged. No technique is adopted; adoption needs its own decision record and ratification act.",
+  "base_commit": "9a58178",
+  "evidence_label_vocabulary": ["measured", "calculated", "assumed", "unknown"],
+  "label_rules": {
+    "measured": "value read from a committed record; the record, DUT version, corner/T/VDD and N are named",
+    "calculated": "derived by an equation in the study from labelled inputs; not a simulation result",
+    "assumed": "chosen by the study to make a calculation concrete; always listed with the range varied",
+    "unknown": "no responsible bound exists; the missing input and the experiment that would supply it are named"
+  },
+  "comparison_basis": {
+    "vdd_v": 1.8,
+    "iref_a": 5e-06,
+    "cl_f": 2e-12,
+    "vcm_v": 0.9,
+    "vos_definition": "open-loop V(inp)-V(inn) at v(out)=0.9 V crossing (offset_dc.cir); NOT the closed-loop offset a consumer sees (DR-009 open item, unresolved here)",
+    "grading_target_sigma_mv": 0.275,
+    "grading_target_note": "DR-009 PROPOSED allocation. Used only as a yardstick. Not ratified, not a compliance claim."
+  },
+  "baseline_inputs": {
+    "sigma_tt_mv": {"value": 8.583, "label": "measured", "source": "sim/offset-capability/records/campaign-20261009-offset-mc300.md", "n": 300, "dut": "DR-007 widths (historical for DR-013 netlist)"},
+    "sigma_worst_corner_mv": {"value": 8.69, "label": "measured", "corner": "ss/27C/1.8V", "source": "DR-009"},
+    "abs_mean_plus_3sigma_worst_mv": {"value": 26.59, "label": "measured", "source": "DR-009"},
+    "extremes_tt_mv": {"value": [-27.38, 27.64], "label": "measured"},
+    "group_sigma_mv": {"pair": 3.103, "mirror": 7.740, "stage2": 0.052, "bias": 0.037, "passives": 0.0, "label": "measured", "source": "campaign-20261009-offset-attribution.md", "n": 300},
+    "systematic_vos_tt_uv": {"value": 151, "label": "measured", "source": "20261009 capability probe, mismatch off"},
+    "corner_to_corner_pearson": {"value": [0.9989, 0.9996], "label": "measured", "source": "DR-009 caveats"},
+    "op_gm1_us": {"value": 83.4, "label": "measured", "source": "20261010-135058-sizing144-op-33e160.json, canonical, tt/27C (OP probe, single deterministic run)"},
+    "op_id1_ua": {"value": 4.7155, "label": "measured", "source": "same"},
+    "op_gm3_us": {"value": 66.8, "label": "measured", "source": "same"},
+    "op_gds_d2_total_us": {"value": 1.699, "label": "measured", "source": "same (gds2 + gds4)"},
+    "op_tail_current_ua": {"value": 9.44, "label": "measured", "source": "same (XM5)"},
+    "noise_tt_27c": {"integrated_100hz_1mhz_uvrms": 70.1, "floor_nv_rthz": 35.75, "flicker_corner_khz": 441.8, "label": "measured", "source": "sim/opamp-characterization/records/20261009-073753-e06f2fc-noise.csv", "dut": "DR-007 widths, single corner, no PVT"},
+    "ratified_row_baselines_dr013": {"label": "measured", "source": "sim/opamp-characterization/records/20261011-140526-04489d4-7e5893.json via spec/target-spec.md section 2", "gain_db_worst": 61.64, "gbw_mhz_worst": 17.92, "pm_deg_worst": 63.94, "icmr_note": "worst-corner upper edge 1.1686 V vs 1.024 V target (record 20261009-103006-566b9a5)"},
+    "pm_cap_sensitivity_deg_per_ff": {"value": 0.052, "label": "calculated", "derivation": "m2p1 (#144): worst-corner PM 63.94 -> 54.11 for +189 fF at d2 (also changes the d1 mirror pole, so this is an UPPER bound on d2-only sensitivity)"},
+    "pelgrom_nfet_vth0_slope_mv_um": {"value": 3.356, "label": "measured", "source": "pinned PDK sky130A, nfet_01v8 mismatch.corner.spice"},
+    "lvt_nfet_vth0_v": {"value": 0.418, "label": "measured", "source": "pinned PDK sky130_fd_pr__nfet_01v8_lvt__tt.pm3.spice, first-bin vth0 parameter; availability in this flow is unknown"}
+  },
+  "external_sources": [
+    "C. C. Enz, G. C. Temes, Proc. IEEE 84(11):1584-1614, 1996, doi:10.1109/5.542410 (autozeroing, CDS, chopper stabilization)",
+    "M. J. M. Pelgrom, A. C. J. Duinmaijer, A. P. G. Welbers, IEEE JSSC 24(5):1433-1439, 1989, doi:10.1109/JSSC.1989.572629 (matching)",
+    "R. Burt, J. Zhang, ISSCC 2006 Digest, pp. 1388-1397, doi:10.1109/isscc.2006.1696188 (chopper residual ripple filtering)",
+    "R. Wu, K. A. A. Makinwa, J. H. Huijsing, ISSCC 2009 Digest, pp. 322-323, doi:10.1109/isscc.2009.4977438 (ripple reduction loop)",
+    "J. A. Hanley, A. Lippman-Hand, JAMA 249(13):1743, 1983, doi:10.1001/jama.1983.03330370053031 (zero events in N trials: upper bound 3/N at 95%)",
+    "Pinned open PDK sky130A (open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b via volare): model parameters only"
+  ],
+  "uncertainty_treatment": {
+    "sigma_from_N": "1 SE of a sigma estimate = sigma/sqrt(2(N-1)); 4.1% at N=300",
+    "variance_budget": "residual sigma graded by RSS: sum of independent variances vs 0.275^2 = 0.0756 mV^2; every term listed with label; unknown terms stay unknown and are reported as the headroom they must fit in, never as zero",
+    "ranges_not_points": "assumed inputs are swept over a stated range and the result is quoted as a range",
+    "tails": "a finite observed tail is not a bound; coverage of a correction range is stated for a Gaussian model AND by the rule of three (3/N) for N=300"
+  },
+  "budget": {
+    "new_simulation_runs_this_increment": 0,
+    "new_klt_sim_requests_this_increment": 0,
+    "new_ngspice_runs_this_increment": 0,
+    "hand_calculation": "unlimited, reproducible from equations in the study record",
+    "note": "if any run is ever added to THIS increment, a finite budget must be appended here in a new committed file before execution"
+  },
+  "later_experiments_declared_not_authorized": {
+    "authorization": "each needs its own issue/plan commit before execution; listed here to bound the next step. Fleet only (KLT_SIM_BACKEND=batch); no hand-launched ngspice grids.",
+    "E1_systematic_vos_pvt": {"what": "deterministic mismatch-off Vos on the canonical DR-013 netlist over 5 corners x 3 temperatures x paired supplies", "requests": 1, "units": 15, "retry_cap": 2, "stop_rule": "stop when the request completes or after 2 retries; a failed unit is recorded, never zero"},
+    "E2_trimmed_residual_drift": {"what": "same 100 seeds (base 20261085, chunk 0) on the canonical netlist at tt, at T in {-40,125} C and VDD in {1.62,1.98} V; per-sample difference to the 27 C / 1.8 V value", "requests": 4, "mc_samples_per_request": 100, "total_sample_runs": 400, "retry_cap": 2, "failed_samples": "counted and reported; excluded from sigma only with the count shown", "stop_rule": "if sigma of the paired difference > 0.19 mV (the variance headroom left in the trim worksheet) any single-point trim is dead and the verdict for trim becomes 'needs hot/cold re-trim'; stop after the 4 requests regardless", "claim_level": "exploratory N=100 at one corner; not N>=300 per corner"},
+    "E3_switch_headroom": {"what": "single-corner DC check of an NMOS and an LVT-NMOS switch Ron at the d1/d2 and at the gate CM levels (0.82 V, 0.9 V, 1.024 V)", "runs": "at most 6 single-corner local runs, no grid", "stop_rule": "stop on the first answer that Ron*gm1 loss exceeds 10% at the required CM"},
+    "E4_pm_cap_budget": {"what": "AC/PM of the canonical netlist with an added capacitor on d2 of 25, 50, 100 fF", "requests": 1, "units": 3, "stop_rule": "stop after the request; result replaces the upper-bound PM-per-fF sensitivity"},
+    "closure_validation_protocol_not_part_of_this_increment": {"mc": "N>=300 per process corner (tt, ss, ff, sf, fs)", "temperature_supply": "-40/27/125 C and 1.62/1.8/1.98 V to be declared before the run", "report": "measured mean, sigma, 3 sigma and tails, failed samples and their count", "switched_system": "transient / PSS-like noise, ripple and settling measurements for chopping or auto-zero: tool support unknown"}
+  },
+  "stop_rules": [
+    "No technique is required to succeed; an evidenced infeasibility conclusion is a valid outcome.",
+    "If a worksheet cannot be bounded from labelled inputs, record the missing input and the exact experiment and stop; do not invent a number.",
+    "A calculated residual sigma is never labelled measured and never converted into a closure or compliance claim.",
+    "No target, canonical file or existing record is edited."
+  ],
+  "known_unknowns": [
+    "consumer (sky130-bandgap) open-loop to closed-loop offset conversion and its amplifier input common mode vs this block's ICMR (0.888-1.024 V)",
+    "non-volatile storage availability for trim codes in the open flow",
+    "junction leakage vs temperature of the pinned PDK switch devices",
+    "whether klt sim can run switched-system noise/ripple analyses"
+  ]
+}
