@@ -59,19 +59,19 @@
   "category_error_counts": {},
   "counts": {
     "nets": {
-      "layout": 6,
-      "reference": 6,
-      "matched": 6
+      "layout": 7,
+      "reference": 7,
+      "matched": 7
     },
     "devices": {
-      "layout": 2,
-      "reference": 2,
-      "matched": 2
+      "layout": 4,
+      "reference": 4,
+      "matched": 4
     },
     "pins": {
-      "layout": 6,
-      "reference": 6,
-      "matched": 6
+      "layout": 7,
+      "reference": 7,
+      "matched": 7
     }
   },
   "device_classes": null,
@@ -79,8 +79,8 @@
     "engine": "klayout",
     "engine_version": "0.30.12",
     "netgen_binary": null,
-    "layout_sha256": "523472ad5bf062369df8a548573baaa48faa94af2d7253b03b9f011f8c804433",
-    "reference_sha256": "8324cc46d6ee53e2c8a68388d3395aeff91cce3bf2cc25c8c49e7befd3bdc821",
+    "layout_sha256": "5e4af7a551247980552432448c9e1f84f4cf95d680fece47d59851cff9951990",
+    "reference_sha256": "f96179ba36af42bb6b2b5a5d8122b954f19c3cbfb904990ca2b251706aa7e8c0",
     "extracted_netlist": null
   },
   "provenance": {
@@ -89,7 +89,7 @@
     "pdk": null,
     "deck": null,
     "input": {
-      "content_hash": "sha256:523472ad5bf062369df8a548573baaa48faa94af2d7253b03b9f011f8c804433",
+      "content_hash": "sha256:5e4af7a551247980552432448c9e1f84f4cf95d680fece47d59851cff9951990",
       "role": "netlist"
     },
     "klayout_version_mismatch": false
@@ -119,6 +119,11 @@
     {
       "layout": "TAIL",
       "reference": "TAIL",
+      "pin": true
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
       "pin": true
     },
     {

@@ -54,6 +54,7 @@
       "125/44"
     ],
     "layers_checked": [
+      "64/20",
       "65/20",
       "65/44",
       "66/20",
@@ -119,6 +120,10 @@
       "npc.ongrid.1",
       "nsdm.angle.1",
       "nsdm.ongrid.1",
+      "nwell.angle.1",
+      "nwell.ongrid.1",
+      "nwell.space.1",
+      "nwell.width.1",
       "poly.angle.1",
       "poly.enclosing.licon.1",
       "poly.ongrid.1",
@@ -184,10 +189,6 @@
       "ncm.ongrid.1",
       "nsm.angle.1",
       "nsm.ongrid.1",
-      "nwell.angle.1",
-      "nwell.ongrid.1",
-      "nwell.space.1",
-      "nwell.width.1",
       "pad.angle.1",
       "pad.ongrid.1",
       "pwbm.angle.1",
@@ -282,6 +283,10 @@
       "npc.ongrid.1",
       "nsdm.angle.1",
       "nsdm.ongrid.1",
+      "nwell.angle.1",
+      "nwell.ongrid.1",
+      "nwell.space.1",
+      "nwell.width.1",
       "poly.angle.1",
       "poly.enclosing.licon.1",
       "poly.ongrid.1",
@@ -484,22 +489,6 @@
         "reason": "no_applicable_geometry"
       },
       {
-        "id": "nwell.angle.1",
-        "reason": "no_applicable_geometry"
-      },
-      {
-        "id": "nwell.ongrid.1",
-        "reason": "no_applicable_geometry"
-      },
-      {
-        "id": "nwell.space.1",
-        "reason": "no_applicable_geometry"
-      },
-      {
-        "id": "nwell.width.1",
-        "reason": "no_applicable_geometry"
-      },
-      {
         "id": "pad.angle.1",
         "reason": "no_applicable_geometry"
       },
@@ -618,7 +607,7 @@
       "released": true
     },
     "input": {
-      "content_hash": "sha256:27b38f5114cd7cd30a812beac359ed08c53ca59490665cc1a020275465c28a96",
+      "content_hash": "sha256:530a21f8fee6c2da54427f576375426a5bb66f4490d055aab76dc85e3bb29033",
       "role": "layout"
     },
     "klayout_version_mismatch": false

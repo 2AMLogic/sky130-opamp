@@ -1,47 +1,44 @@
 {
   "cell": "opamp_stage1",
   "_comment": [
-    "Cell descriptor for layout/bin/compose-cell.py (issue #46). See",
+    "Cell descriptor for layout/bin/compose-cell.py (issues #46, #121). See",
     "layout/opamp_stage1/README.md for the floorplan, matching style and results.",
     "",
-    "SCOPE OF THIS INCREMENT: the NMOS input pair XM1/XM2 of",
-    "design/netlist/opamp_core.spice (nfet_01v8, W=6.03, L=1.2, nf=1, m=1).",
-    "The PMOS mirror XM3/XM4 (W=4.634) is NOT drawn: 4.634 um is not a",
-    "multiple of sky130's 0.005 um manufacturing grid, so no DRC-clean drawing",
-    "of that exact width exists (README 'Why the PMOS mirror is not here').",
+    "SCOPE: the first-stage sub-block of design/netlist/opamp_core.spice:",
+    "  XM1/XM2  nfet_01v8 W=6.03 L=1.2 (input pair, issue #46)",
+    "  XM3/XM4  pfet_01v8 W=4.635 L=0.3 (mirror, issue #121, grid-legal width of DR-013)",
+    "Not the full op-amp (README 'Scope').",
     "",
-    "MATCHING: one klt diff_pair block, splits=2 -> a 2x2 common-centroid",
-    "cross-quad (row 0: XM1 | XM2, row 1: XM2 | XM1), each device two 3.015 um",
-    "units in parallel (2 x 3.015 = 6.03, exactly the netlist W), both units",
-    "of one device on opposite diagonals so their centroids coincide.",
-    "Enclosed by the generator's own p-tap guard ring (the substrate/body",
-    "contact, strapped to vss via TAP_W).",
+    "NMOS PAIR: klt diff_pair, splits=2 -> 2x2 common-centroid cross-quad, each device",
+    "two 3.015 um units (2 x 3.015 = 6.03). snap_ports_to_grid_um moves each port attach",
+    "point <= 0.0025 um (klayout-tools#2932). fe_masks is a klt-draw overlay adding the",
+    "nsdm/psdm/npc/poly-endcap masks the sky130 generators do not draw (#2934, #2936).",
     "",
-    "snap_ports_to_grid_um: the generator reports S/D port centres at the",
-    "midpoint of a 3.015 um strip (y=1.5075/5.7425), half a grid step off-grid;",
-    "gen-compose would centre its via stacks there and fail *.ongrid.1. The",
-    "driver moves each attach point by <= 0.0025 um, inside the same pad.",
-    "",
-    "fe_masks: front-end masks the klt generators do not draw on sky130, added as",
-    "one klt-draw overlay in the diff_pair's own frame (origin 0,0):",
-    "  nsdm 93/44 over all four n-diffusions (0.125 um enclosure);",
-    "  psdm 94/20 ring over the p-tap guard ring (0.125 um enclosure);",
-    "  npc 95/20 over each gate licon (0.1 um enclosure);",
-    "  poly 66/20 endcaps, 0.15 um past the diffusion along the full gate",
-    "  width at both ends of every gate (sky130 poly.8 is 0.13 um).",
-    "klt's curated deck checks none of these (klayout-tools#2934, #2936); the",
-    "PDK's Magic drc(full) does -- see layout/bin/magic-signoff.py.",
+    "PMOS MIRROR (block mp34, a klt-draw block with explicit ports): a 2 x 3 checkerboard",
+    "of six 1.545 um units, three per device (3 x 1.545 = 4.635, DR-013 grid-legal split;",
+    "two 2.3175 um units would be off-grid). Row 0 = XM3 | XM4 | XM3, row 1 = XM4 | XM3 | XM4",
+    "(Q1 = XM3 diode device, Q2 = XM4). It is drawn here, not by klt gen, because the",
+    "generator's gate landing pad (0.42 um) is wider than a L=0.3 gate and abuts the",
+    "diffusion, which Magic's poly.4 rejects (24 sites); mp34 keeps the generator's",
+    "geometry but starts the pad 0.15 um clear of the diffusion. It also carries the",
+    "psdm/nsdm/npc masks, the 0.15 um poly endcaps and an nwell 0.2 um beyond the n-tap",
+    "ring (the generator's 0.15 um fails diff/tap.10).",
     "",
     "ROUTING PLANES (one net family per plane where nets must cross):",
-    "  metal  (li1)  vss  -- TAP_W west to its pin stub",
-    "  metal2 (met1) tail -- two source columns (x=0.21, x=2.65) joined at y=-2.0",
-    "  metal3 (met2) d1 (south/east loop) and inn (west/north loop)",
-    "  metal4 (met3) d2 (north) and inp (west)",
-    "d1/d2 and inn/inp are the cross-quad's two inherently crossing pairs, so",
-    "each pair is split across met2/met3.",
+    "  metal  (li1)  vss  -- NMOS TAP_W west to its pin stub",
+    "  metal2 (met1) tail -- NMOS source columns, joined at y=-2.0",
+    "  metal2 (met1) vdd  -- PMOS source columns (one strap per column through both",
+    "                        rows), row-0 sources joined at y=-2.0, ring tap TAP_E via x=20",
+    "  metal3 (met2) d1   -- NMOS XM1 drains (south/east loop) into the PMOS gate bus",
+    "                        (row buses y=2.155 / y=4.92, east trunk x=18.55) and the",
+    "                        XM3 drains; also inn (west/north loop)",
+    "  metal4 (met3) d2   -- NMOS XM2 drains (y=11.0) to the east pin, with a branch",
+    "                        down x=9.0 to the XM4 drain bus at y=2.5; also inp (west)",
+    "The PMOS S and D pads sit 0.72 um apart, closer than met3.space.1 allows two",
+    "nets' met3 pads, so vdd stays on met1 and only d2 reaches met3 in the mirror.",
     "",
-    "PINS: every boundary net ends on a klt-draw stub at the cell edge (west:",
-    "tail, inn, vss, inp; east: d1, d2) whose PAD is promoted via pins[]."
+    "PINS: boundary nets end on klt-draw stubs (west: tail, inn, vss, inp; east: d1, d2,",
+    "vdd) whose PAD is promoted via pins[]."
   ],
   "pdk": {
     "variant": "sky130A",
@@ -453,6 +450,1286 @@
       }
     },
     {
+      "id": "mp34",
+      "draw": {
+        "cell_name": "stage1_mirror",
+        "shapes": [
+          {
+            "layer": [
+              64,
+              20
+            ],
+            "rect_um": [
+              -1.12,
+              -1.12,
+              5.34,
+              6.25
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              0.0,
+              0.0,
+              1.14,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.0,
+              0.0,
+              0.42,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.72,
+              0.0,
+              1.14,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.125,
+              0.685,
+              0.295,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.845,
+              0.685,
+              1.015,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              1.54,
+              0.0,
+              2.68,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              1.54,
+              0.0,
+              1.96,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              2.26,
+              0.0,
+              2.68,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              1.665,
+              0.685,
+              1.835,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.385,
+              0.685,
+              2.555,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              3.08,
+              0.0,
+              4.22,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.08,
+              0.0,
+              3.5,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.8,
+              0.0,
+              4.22,
+              1.545
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.205,
+              0.685,
+              3.375,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.925,
+              0.685,
+              4.095,
+              0.855
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              0.0,
+              2.765,
+              1.14,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.0,
+              2.765,
+              0.42,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.72,
+              2.765,
+              1.14,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.125,
+              3.455,
+              0.295,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.845,
+              3.455,
+              1.015,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              1.54,
+              2.765,
+              2.68,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              1.54,
+              2.765,
+              1.96,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              2.26,
+              2.765,
+              2.68,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              1.665,
+              3.455,
+              1.835,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.385,
+              3.455,
+              2.555,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              65,
+              20
+            ],
+            "rect_um": [
+              3.08,
+              2.765,
+              4.22,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.08,
+              2.765,
+              3.5,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.8,
+              2.765,
+              4.22,
+              4.31
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.205,
+              3.455,
+              3.375,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.925,
+              3.455,
+              4.095,
+              3.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.42,
+              -0.15,
+              0.72,
+              1.695
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.36,
+              1.695,
+              0.78,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.485,
+              2.07,
+              0.655,
+              2.24
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.36,
+              1.945,
+              0.78,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              0.385,
+              1.97,
+              0.755,
+              2.34
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              1.96,
+              -0.15,
+              2.26,
+              1.695
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              1.9,
+              1.695,
+              2.32,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.025,
+              2.07,
+              2.195,
+              2.24
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              1.9,
+              1.945,
+              2.32,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              1.925,
+              1.97,
+              2.295,
+              2.34
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              3.5,
+              -0.15,
+              3.8,
+              1.695
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              3.44,
+              1.695,
+              3.86,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.565,
+              2.07,
+              3.735,
+              2.24
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.44,
+              1.945,
+              3.86,
+              2.365
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              3.465,
+              1.97,
+              3.835,
+              2.34
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.42,
+              2.615,
+              0.72,
+              4.46
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.36,
+              4.46,
+              0.78,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              0.485,
+              4.835,
+              0.655,
+              5.005
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0.36,
+              4.71,
+              0.78,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              0.385,
+              4.735,
+              0.755,
+              5.105
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              1.96,
+              2.615,
+              2.26,
+              4.46
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              1.9,
+              4.46,
+              2.32,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.025,
+              4.835,
+              2.195,
+              5.005
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              1.9,
+              4.71,
+              2.32,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              1.925,
+              4.735,
+              2.295,
+              5.105
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              3.5,
+              2.615,
+              3.8,
+              4.46
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              3.44,
+              4.46,
+              3.86,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              3.565,
+              4.835,
+              3.735,
+              5.005
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              3.44,
+              4.71,
+              3.86,
+              5.13
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              3.465,
+              4.735,
+              3.835,
+              5.105
+            ]
+          },
+          {
+            "layer": [
+              65,
+              44
+            ],
+            "rect_um": [
+              -0.92,
+              -0.92,
+              5.14,
+              -0.5
+            ]
+          },
+          {
+            "layer": [
+              65,
+              44
+            ],
+            "rect_um": [
+              -0.92,
+              5.63,
+              5.14,
+              6.05
+            ]
+          },
+          {
+            "layer": [
+              65,
+              44
+            ],
+            "rect_um": [
+              -0.92,
+              -0.5,
+              -0.5,
+              5.63
+            ]
+          },
+          {
+            "layer": [
+              65,
+              44
+            ],
+            "rect_um": [
+              4.72,
+              -0.5,
+              5.14,
+              5.63
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              -0.92,
+              -0.92,
+              5.14,
+              -0.5
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              -0.92,
+              5.63,
+              5.14,
+              6.05
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              -0.92,
+              -0.5,
+              -0.5,
+              5.63
+            ]
+          },
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              4.72,
+              -0.5,
+              5.14,
+              5.63
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              1.155,
+              5.755,
+              1.325,
+              5.925
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              1.155,
+              -0.795,
+              1.325,
+              -0.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.895,
+              5.755,
+              3.065,
+              5.925
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              2.895,
+              -0.795,
+              3.065,
+              -0.625
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              -0.795,
+              1.46,
+              -0.625,
+              1.63
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              -0.795,
+              3.5,
+              -0.625,
+              3.67
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              4.845,
+              1.46,
+              5.015,
+              1.63
+            ]
+          },
+          {
+            "layer": [
+              66,
+              44
+            ],
+            "rect_um": [
+              4.845,
+              3.5,
+              5.015,
+              3.67
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              -0.125,
+              -0.125,
+              4.345,
+              4.435
+            ]
+          },
+          {
+            "layer": [
+              93,
+              44
+            ],
+            "rect_um": [
+              -1.045,
+              -1.045,
+              5.265,
+              -0.375
+            ]
+          },
+          {
+            "layer": [
+              93,
+              44
+            ],
+            "rect_um": [
+              -1.045,
+              5.505,
+              5.265,
+              6.175
+            ]
+          },
+          {
+            "layer": [
+              93,
+              44
+            ],
+            "rect_um": [
+              -1.045,
+              -0.375,
+              -0.375,
+              5.505
+            ]
+          },
+          {
+            "layer": [
+              93,
+              44
+            ],
+            "rect_um": [
+              4.595,
+              -0.375,
+              5.265,
+              5.505
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "Q1_1_S",
+            "x_um": 0.21,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_1_D",
+            "x_um": 0.93,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_1_G",
+            "x_um": 0.57,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_1_S",
+            "x_um": 1.75,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_1_D",
+            "x_um": 2.47,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_1_G",
+            "x_um": 2.11,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q1_2_S",
+            "x_um": 3.29,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_2_D",
+            "x_um": 4.01,
+            "y_um": 0.775,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_2_G",
+            "x_um": 3.65,
+            "y_um": 2.155,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_2_S",
+            "x_um": 0.21,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_2_D",
+            "x_um": 0.93,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_2_G",
+            "x_um": 0.57,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q1_3_S",
+            "x_um": 1.75,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q1_3_D",
+            "x_um": 2.47,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q1_3_G",
+            "x_um": 2.11,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "Q2_3_S",
+            "x_um": 3.29,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 180
+          },
+          {
+            "name": "Q2_3_D",
+            "x_um": 4.01,
+            "y_um": 3.535,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 1.545,
+            "direction_deg": 0
+          },
+          {
+            "name": "Q2_3_G",
+            "x_um": 3.65,
+            "y_um": 4.92,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "TAP_N",
+            "x_um": 2.11,
+            "y_um": 5.84,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "TAP_S",
+            "x_um": 2.11,
+            "y_um": -0.71,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 270
+          },
+          {
+            "name": "TAP_E",
+            "x_um": 4.93,
+            "y_um": 2.565,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "TAP_W",
+            "x_um": -0.71,
+            "y_um": 2.565,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vdd",
+      "draw": {
+        "cell_name": "stub_metal2",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
       "id": "pin_d1",
       "draw": {
         "cell_name": "stub_metal3",
@@ -546,12 +1823,14 @@
     "order": [
       "mn12",
       "fe_masks",
+      "mp34",
       "pin_tail",
       "pin_inn",
       "pin_vss",
       "pin_inp",
       "pin_d1",
-      "pin_d2"
+      "pin_d2",
+      "pin_vdd"
     ],
     "origins_um": {
       "mn12": {
@@ -575,16 +1854,24 @@
         "y": 7.65
       },
       "pin_d1": {
-        "x": 8.0,
-        "y": 5.53
+        "x": 26.0,
+        "y": 4.71
       },
       "pin_d2": {
-        "x": 8.0,
+        "x": 26.0,
         "y": 10.79
       },
       "fe_masks": {
         "x": 0.0,
         "y": 0.0
+      },
+      "mp34": {
+        "x": 14.0,
+        "y": 0.0
+      },
+      "pin_vdd": {
+        "x": 26.0,
+        "y": -2.21
       }
     }
   },
@@ -690,6 +1977,42 @@
           "port": "Q1_2_D"
         },
         {
+          "block": "mp34",
+          "port": "Q1_1_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_1_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_G"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_G"
+        },
+        {
           "block": "pin_d1",
           "port": "CONN"
         }
@@ -701,8 +2024,8 @@
             "port": "Q1_1_D"
           },
           "to_pin": {
-            "block": "pin_d1",
-            "port": "CONN"
+            "block": "mp34",
+            "port": "Q2_2_G"
           },
           "waypoints_um": [
             [
@@ -715,7 +2038,7 @@
             ],
             [
               7.0,
-              5.74
+              4.92
             ]
           ]
         },
@@ -725,9 +2048,151 @@
             "port": "Q1_2_D"
           },
           "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_G"
+          },
+          "waypoints_um": [
+            [
+              7.0,
+              5.74
+            ],
+            [
+              7.0,
+              4.92
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_2_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_3_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_G"
+          },
+          "waypoints_um": [
+            [
+              16.47,
+              4.92
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "waypoints_um": [
+            [
+              18.55,
+              4.92
+            ],
+            [
+              18.55,
+              2.155
+            ],
+            [
+              17.65,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_G"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_G"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_1_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_G"
+          },
+          "waypoints_um": [
+            [
+              14.93,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_G"
+          },
+          "waypoints_um": [
+            [
+              18.01,
+              2.155
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_3_G"
+          },
+          "to_pin": {
             "block": "pin_d1",
             "port": "CONN"
-          }
+          },
+          "waypoints_um": [
+            [
+              18.55,
+              4.92
+            ],
+            [
+              26.0,
+              4.92
+            ]
+          ]
         }
       ]
     },
@@ -742,6 +2207,18 @@
         {
           "block": "mn12",
           "port": "Q2_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_D"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_D"
         },
         {
           "block": "pin_d2",
@@ -778,6 +2255,74 @@
             [
               1.83,
               11.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mn12",
+            "port": "Q2_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_D"
+          },
+          "waypoints_um": [
+            [
+              1.83,
+              11.0
+            ],
+            [
+              9.0,
+              11.0
+            ],
+            [
+              9.0,
+              2.5
+            ],
+            [
+              14.93,
+              2.5
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_2_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_D"
+          },
+          "waypoints_um": [
+            [
+              14.93,
+              2.5
+            ],
+            [
+              16.47,
+              2.5
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_D"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_D"
+          },
+          "waypoints_um": [
+            [
+              16.47,
+              2.5
+            ],
+            [
+              18.01,
+              2.5
             ]
           ]
         }
@@ -900,6 +2445,144 @@
           "port": "CONN"
         }
       ]
+    },
+    {
+      "net": "vdd",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "mp34",
+          "port": "TAP_E"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_1_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_1_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_2_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_2_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q1_3_S"
+        },
+        {
+          "block": "mp34",
+          "port": "Q2_3_S"
+        },
+        {
+          "block": "pin_vdd",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "TAP_E"
+          },
+          "waypoints_um": [
+            [
+              20.0,
+              -2.0
+            ],
+            [
+              20.0,
+              2.565
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_1_S"
+          },
+          "waypoints_um": [
+            [
+              14.21,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_1_S"
+          },
+          "waypoints_um": [
+            [
+              15.75,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "pin_vdd",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_2_S"
+          },
+          "waypoints_um": [
+            [
+              17.29,
+              -2.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_1_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_2_S"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q2_1_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q1_3_S"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mp34",
+            "port": "Q1_2_S"
+          },
+          "to_pin": {
+            "block": "mp34",
+            "port": "Q2_3_S"
+          }
+        }
+      ]
     }
   ],
   "pins": [
@@ -919,6 +2602,11 @@
       "port": "PAD"
     },
     {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    },
+    {
       "net": "d1",
       "block": "pin_d1",
       "port": "PAD"
@@ -929,8 +2617,8 @@
       "port": "PAD"
     },
     {
-      "net": "vss",
-      "block": "pin_vss",
+      "net": "vdd",
+      "block": "pin_vdd",
       "port": "PAD"
     }
   ],
@@ -939,7 +2627,9 @@
     "subckt": "opamp_stage1",
     "devices": [
       "XM1",
-      "XM2"
+      "XM2",
+      "XM3",
+      "XM4"
     ],
     "pins": [
       "inn",
@@ -947,6 +2637,7 @@
       "tail",
       "d1",
       "d2",
+      "vdd",
       "vss"
     ],
     "options": {
@@ -954,6 +2645,16 @@
     }
   },
   "expect": {
-    "extracted_devices": 4
+    "extracted_devices": 10,
+    "magic_types": [
+      "nmos",
+      "ndiff",
+      "psubdiff",
+      "poly",
+      "pmos",
+      "pdiff",
+      "nsubdiff",
+      "nwell"
+    ]
   }
 }

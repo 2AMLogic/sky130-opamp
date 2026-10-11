@@ -7,7 +7,7 @@ the recipe (`cell.json`), every intermediate request/response, the composed
 GDS, and the reports that back each claim in the cell's README.
 
 **Status: two sub-blocks. `opamp_stage1/` (the NMOS input pair
-`XM1`/`XM2`) and `opamp_comp/` (the routed `XRz`/`XCc` compensation network;
+`XM1`/`XM2` and the PMOS mirror `XM3`/`XM4`) and `opamp_comp/` (the routed `XRz`/`XCc` compensation network;
 klt DRC/LVS and netgen pass, Magic `drc(full)` fails on the resistor heads,
 see `opamp_comp/README.md`).**
 That is not the op-amp's layout. T1 item 2 is `unmet`, and nothing in
@@ -147,11 +147,12 @@ DR-002/DR-007 fix the matching structure: three equal-length groups, with
 mirror ratios set by unit count only. Each step below is one sub-block
 directory or an extension of one, with the same evidence set.
 
-1. **First stage, PMOS mirror `XM3`/`XM4`.** Blocked on #50: W=4.634 is
-   off the 0.005 um grid, which needs a sizing decision record. Then the
-   mirror is added to `opamp_stage1/` as a `diff_pair` with
-   `mirror: true, flavor: "pfet"`, with an n-tap ring to `vdd`, `vdd`
-   added as the seventh pin, and 4/4 devices.
+1. **First stage, PMOS mirror `XM3`/`XM4`: done (#121).** Added to
+   `opamp_stage1/` at the grid-legal W=4.635 um of DR-013 as 2 x 3 units of
+   1.545 um, with an n-tap ring to `vdd`, `vdd` as the seventh pin, 4/4
+   devices, klt and Magic DRC clean, klt and netgen LVS matched. The mirror
+   block is drawn with `klt draw`, not `klt gen` (klayout-tools#3115);
+   see `opamp_stage1/README.md`.
 2. **Bias and tail mirror `XMB1`/`XM5` (1 : 2 units, nfet, L=1.2).** This
    is a three-unit common-centroid row (B T B, or T B T with dummies). Its
    W=7.819 is off-grid too (#50). It also depends on #47, which may change

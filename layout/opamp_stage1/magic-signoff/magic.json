@@ -10,12 +10,18 @@
     "netgen_setup": "sky130A_setup.tcl"
   },
   "magic_types_seen": [
+    "nwell",
     "pwell",
     "nmos",
+    "pmos",
     "ndiff",
+    "pdiff",
     "ndiffc",
+    "pdiffc",
     "psubdiff",
+    "nsubdiff",
     "psubdiffcont",
+    "nsubdiffcont",
     "poly",
     "polycont",
     "locali",
@@ -33,8 +39,8 @@
     "netlists_match_uniquely": true,
     "pins_matched": true,
     "result_lines": [
+      "Circuits match uniquely.",
       "Netlists match uniquely.",
-      "Circuits match correctly.",
       "Circuits match uniquely."
     ]
   }

@@ -53,31 +53,29 @@
     "finding_count": 0
   },
   "device_parameter_coverage": [],
-  "mismatch_count": 3,
-  "error_count": 3,
+  "mismatch_count": 1,
+  "error_count": 1,
   "category_counts": {
-    "device.unmatched": 1,
-    "topology": 2
+    "device.unmatched": 1
   },
   "category_error_counts": {
-    "device.unmatched": 1,
-    "topology": 2
+    "device.unmatched": 1
   },
   "counts": {
     "nets": {
-      "layout": 6,
-      "reference": 6,
-      "matched": 2
+      "layout": 7,
+      "reference": 7,
+      "matched": 3
     },
     "devices": {
-      "layout": 2,
-      "reference": 2,
-      "matched": 1
+      "layout": 4,
+      "reference": 4,
+      "matched": 3
     },
     "pins": {
-      "layout": 6,
-      "reference": 6,
-      "matched": 6
+      "layout": 7,
+      "reference": 7,
+      "matched": 7
     }
   },
   "device_classes": null,
@@ -85,8 +83,8 @@
     "engine": "klayout",
     "engine_version": "0.30.12",
     "netgen_binary": null,
-    "layout_sha256": "523472ad5bf062369df8a548573baaa48faa94af2d7253b03b9f011f8c804433",
-    "reference_sha256": "7ba67d97f5c4f40c3113f6d500a084c376d8bd876973b8d2ceafeae9ca5a0bdb",
+    "layout_sha256": "5e4af7a551247980552432448c9e1f84f4cf95d680fece47d59851cff9951990",
+    "reference_sha256": "6887a595c3976b383e5d6434801e629a3b48eedd7f58479e80a36340c12740e0",
     "extracted_netlist": null
   },
   "provenance": {
@@ -95,7 +93,7 @@
     "pdk": null,
     "deck": null,
     "input": {
-      "content_hash": "sha256:523472ad5bf062369df8a548573baaa48faa94af2d7253b03b9f011f8c804433",
+      "content_hash": "sha256:5e4af7a551247980552432448c9e1f84f4cf95d680fece47d59851cff9951990",
       "role": "netlist"
     },
     "klayout_version_mismatch": false
@@ -108,42 +106,10 @@
       "side": "reference",
       "net": null,
       "device": {
-        "layout": "\\$2",
-        "reference": "2",
+        "layout": "\\$1",
+        "reference": "1",
         "class": "NFET"
       },
-      "property": null,
-      "details": null,
-      "circuit": null,
-      "instance": null,
-      "subcircuit": null
-    },
-    {
-      "category": "topology",
-      "severity": "error",
-      "description": "nets were paired despite a name/identity conflict",
-      "side": "both",
-      "net": {
-        "layout": "INN",
-        "reference": "INP"
-      },
-      "device": null,
-      "property": null,
-      "details": null,
-      "circuit": null,
-      "instance": null,
-      "subcircuit": null
-    },
-    {
-      "category": "topology",
-      "severity": "error",
-      "description": "nets were paired despite a name/identity conflict",
-      "side": "both",
-      "net": {
-        "layout": "INP",
-        "reference": "INN"
-      },
-      "device": null,
       "property": null,
       "details": null,
       "circuit": null,
@@ -160,6 +126,11 @@
     {
       "layout": "D2",
       "reference": "D2",
+      "pin": true
+    },
+    {
+      "layout": "VDD",
+      "reference": "VDD",
       "pin": true
     }
   ]
