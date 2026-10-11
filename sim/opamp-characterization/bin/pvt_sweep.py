@@ -40,8 +40,9 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --check-env        report tool/PDK availability and exit (no simulation)
     --corners C,C       subset of {tt,ff,ss,sf,fs}      (default: all five)
     --temps T,T          temperatures in degC             (default: -40,27,125)
-    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step}
-                         (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step are opt-in)
+    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step,swing_fixcm}
+                         (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step/swing_fixcm
+                         are opt-in klt analyses)
     --backend NAME       effective `klt sim` backend for the icmr/cmrr/tran_step
                          requests AND the local-grid guard, resolved once per
                          run as explicit --backend > nonempty $KLT_SIM_BACKEND
@@ -77,7 +78,12 @@ are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
 `klt sim` request (corner/supply/temperature axes) and submitted with
 `klt sim <request> --backend batch`, and the per-corner measurement values in
 klt's JSON response are mapped into the same CSV/record scheme. No ngspice loop
-is ever run for them. Requires `klt` on PATH.
+is ever run for them. Requires `klt` on PATH. `swing_fixcm` (issue #181) is a
+klt analysis of the same kind: an output sweep at a FIXED input common mode,
+returned as a waveform and reduced by `fixcm_extract`; run it together with
+`--fleet --analyses dc_swing,swing_fixcm,icmr` so the record's
+`swing_fixcm_comparison` sets it against the unchanged unity-buffer metric and
+the ICMR window of the same DUT snapshot.
 """
 
 from __future__ import annotations
