@@ -172,3 +172,20 @@ python3 sim/offset-capability/bin/sizing_feasibility.py summarize --pvt '{"m2p1"
 ```
 
 `candidates/` holds generated, non-canonical netlists (not design inputs).
+
+## Offset-correction technique study (#147)
+
+Desk study comparing trim, chopping, auto-zero and consumer-side correction
+against the DR-009 *proposed* sigma <= 0.275 mV:
+[`records/offset-technique-study-147.md`](records/offset-technique-study-147.md),
+with the predeclared plan
+[`records/offset-technique-plan-147.json`](records/offset-technique-plan-147.json)
+(committed before the study; budget zero simulations). **Evidence level:
+calculated from committed measurements plus labelled assumptions; no new
+simulation, no measured residual sigma, no closure or compliance claim.**
+Finding: no technique is shown to close the gap or shown impossible; chopping
+as the topology stands leaves >= 7.74 mV (mirror unmodulated) and has an
+input-switch headroom problem at 1.8 V; digital trim (0.20 mV partial) and
+nulling-path auto-zero (0.06 to 0.21 mV) fit only if the unquantified terms
+stay small. Canonical design, spec and the proposed status of DR-009 and
+DR-011 are unchanged; any adoption needs its own decision record.
