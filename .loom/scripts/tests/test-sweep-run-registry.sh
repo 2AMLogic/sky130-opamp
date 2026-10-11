@@ -7,7 +7,10 @@
 #   - each `new` yields a distinct run id (concurrent sweeps don't collide),
 #   - a run never lists itself as a peer,
 #   - a dead-PID entry is pruned and never warns forever,
-#   - the run id is filename/JSON-safe.
+#   - the run id is filename/JSON-safe,
+#   - `snapshot-baseline` (sky130-opamp#188) creates a contained, RUN_ID-keyed,
+#     never-overwritten main-clean baseline only for a registered run, refuses
+#     malformed ids / symlink escapes, and fails without printing a path.
 #
 # Run from anywhere — uses an isolated TMPDIR so it never touches a real
 # workspace's .loom/sweep-run/.
@@ -528,6 +531,211 @@ assert_eq "heartbeat leaves pid unchanged" "$LIVE5" "$NEW_PID"
 "$REG" cleanup "$RID_DIFF"
 kill "$LIVE5" "$LIVE6" 2>/dev/null
 wait "$LIVE5" "$LIVE6" 2>/dev/null
+
+# --------------------------------------------------------------------------
+# sky130-opamp#188: `snapshot-baseline <RUN_ID>` — registry-owned creation of
+# the main-clean baseline. Exercised in its OWN disposable repository (with a
+# commit, and the real check-main-clean.sh alongside the helper) so the
+# snapshot reflects genuine `git status` dirt.
+# --------------------------------------------------------------------------
+CMC_SRC="$SCRIPT_DIR/../check-main-clean.sh"
+SNAP_REPO_RAW="$(mktemp -d)"
+OUTSIDE="$(mktemp -d)"
+SNAP_REPO="$(cd -P "$SNAP_REPO_RAW" && pwd -P)"
+cleanup_snap() { rm -rf "$SNAP_REPO_RAW" "$OUTSIDE"; }
+trap 'cleanup; cleanup_snap' EXIT
+
+cd "$SNAP_REPO" || exit 1
+git init -q .
+git config user.email t@example.invalid
+git config user.name t
+mkdir -p .loom/scripts
+cp "$HELPER" .loom/scripts/sweep-run-registry.sh
+cp "$CMC_SRC" .loom/scripts/check-main-clean.sh
+chmod +x .loom/scripts/*.sh
+echo tracked > tracked.txt
+git add -A && git commit -q -m init
+SREG="$SNAP_REPO/.loom/scripts/sweep-run-registry.sh"
+SDIR="$SNAP_REPO/.loom/sweep-checkpoint"
+
+# Run `snapshot-baseline`; capture stdout / exit separately (stderr dropped).
+snap() {
+    SNAP_OUT=$("$SREG" snapshot-baseline "$@" 2>/dev/null)
+    SNAP_RC=$?
+}
+
+# Pre-existing dirt that predates the sweep.
+echo operator-edit >> tracked.txt
+echo scratch > pre-existing.txt
+
+LIVE_A=$(spawn_live); LIVE_PIDS+=("$LIVE_A")
+LIVE_B=$(spawn_live); LIVE_PIDS+=("$LIVE_B")
+RID_A=$("$SREG" new --pid "$LIVE_A")
+RID_B=$("$SREG" new --pid "$LIVE_B")
+
+# S1. Success prints exactly the contained absolute path, nothing else.
+snap "$RID_A"; PATH_A="$SNAP_OUT"
+assert_eq "snapshot-baseline exits 0 for a registered run" "0" "$SNAP_RC"
+assert_eq "snapshot-baseline prints the contained absolute path" \
+    "$SDIR/main-clean-baseline-${RID_A}.txt" "$PATH_A"
+if [[ -f "$PATH_A" && ! -L "$PATH_A" ]] && grep -q 'pre-existing.txt' "$PATH_A"; then
+    echo "PASS: baseline is a regular file recording pre-existing dirt"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: baseline missing, a symlink, or lacks pre-existing dirt" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S2. A concurrent registered run gets its own, distinct baseline.
+snap "$RID_B"; PATH_B="$SNAP_OUT"
+assert_eq "second run's snapshot succeeds" "0" "$SNAP_RC"
+assert_eq "second run's baseline is RUN_ID-keyed" \
+    "$SDIR/main-clean-baseline-${RID_B}.txt" "$PATH_B"
+if [[ "$PATH_A" != "$PATH_B" ]]; then
+    echo "PASS: concurrent runs have distinct baselines"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: concurrent runs share a baseline path" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S3. New dirt is reported against the returned baseline; old dirt is not.
+cp "$PATH_A" "$OUTSIDE/orig-A"
+echo contamination > builder-leak.txt
+cmc_out=$(bash .loom/scripts/check-main-clean.sh --baseline "$PATH_A" 2>&1)
+cmc_rc=$?
+assert_eq "check-main-clean flags new dirt against the returned baseline" "3" "$cmc_rc"
+if grep -q 'builder-leak.txt' <<<"$cmc_out" && ! grep -q 'pre-existing.txt' <<<"$cmc_out"; then
+    echo "PASS: only post-snapshot dirt is reported"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: baseline subtraction wrong: $cmc_out" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S4. Repeat after new dirt: same path, original bytes preserved.
+snap "$RID_A"
+assert_eq "repeat snapshot-baseline exits 0" "0" "$SNAP_RC"
+assert_eq "repeat snapshot-baseline returns the same path" "$PATH_A" "$SNAP_OUT"
+if cmp -s "$PATH_A" "$OUTSIDE/orig-A"; then
+    echo "PASS: repeat call preserved the original baseline byte-for-byte"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: repeat call rewrote the baseline (contamination absorbed)" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S5. Malformed / unregistered RUN_IDs: non-zero, no stdout, no new files.
+before=$(find "$SDIR" -mindepth 1 | sort)
+for bad in "" "a/b" ".." "../x" "../../etc/passwd" "a b" "sweep.x" "-" \
+    "$(printf 'x%.0s' {1..129})" "sweep-unregistered-0000"; do
+    snap "$bad"
+    if [[ "$SNAP_RC" -ne 0 && -z "$SNAP_OUT" ]]; then
+        echo "PASS: rejected RUN_ID '${bad:0:24}' (exit $SNAP_RC, no stdout)"
+        PASS=$((PASS + 1))
+    else
+        echo "FAIL: RUN_ID '${bad:0:24}' not rejected (exit $SNAP_RC, out '$SNAP_OUT')" >&2
+        FAIL=$((FAIL + 1))
+    fi
+done
+assert_exit "snapshot-baseline with no RUN_ID is a usage error" 1 "$SREG" snapshot-baseline
+assert_exit "snapshot-baseline rejects a destination argument" 1 \
+    "$SREG" snapshot-baseline "$RID_A" "$OUTSIDE/dest.txt"
+assert_eq "rejected calls created no files" "$before" "$(find "$SDIR" -mindepth 1 | sort)"
+if [[ ! -e "$OUTSIDE/dest.txt" ]]; then
+    echo "PASS: destination argument was never written"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: destination argument was written" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S5b. A registry entry whose run_id does not match its filename is refused.
+RID_T="sweep-tampered-0001"
+printf '{\n  "run_id": "other",\n  "pid": %s\n}\n' "$LIVE_A" > ".loom/sweep-run/${RID_T}.json"
+snap "$RID_T"
+assert_eq "mismatched registry entry refused (exit 2)" "2" "$SNAP_RC"
+rm -f ".loom/sweep-run/${RID_T}.json"
+
+# S6. Symlinked checkpoint directory (escape): refused, outside untouched.
+LIVE_C=$(spawn_live); LIVE_PIDS+=("$LIVE_C")
+RID_C=$("$SREG" new --pid "$LIVE_C")
+mv "$SDIR" "$SNAP_REPO/.loom/sweep-checkpoint.real"
+mkdir -p "$OUTSIDE/escape-dir"
+ln -s "$OUTSIDE/escape-dir" "$SDIR"
+snap "$RID_C"
+assert_eq "symlinked checkpoint dir refused (exit 2)" "2" "$SNAP_RC"
+assert_eq "symlinked checkpoint dir: no stdout" "" "$SNAP_OUT"
+assert_eq "symlinked checkpoint dir: escape target untouched" "" "$(ls -A "$OUTSIDE/escape-dir")"
+# Even a symlink pointing back INSIDE the repo is refused (not a real dir).
+rm -f "$SDIR"
+ln -s "$SNAP_REPO/.loom/sweep-checkpoint.real" "$SDIR"
+snap "$RID_C"
+assert_eq "in-repo symlinked checkpoint dir also refused" "2" "$SNAP_RC"
+rm -f "$SDIR"
+mv "$SNAP_REPO/.loom/sweep-checkpoint.real" "$SDIR"
+
+# S7. Target symlink (live and dangling): refused, never followed or replaced.
+echo outside-original > "$OUTSIDE/victim.txt"
+ln -s "$OUTSIDE/victim.txt" "$SDIR/main-clean-baseline-${RID_C}.txt"
+snap "$RID_C"
+assert_eq "target symlink refused (exit 2)" "2" "$SNAP_RC"
+assert_eq "target symlink: no stdout" "" "$SNAP_OUT"
+assert_eq "target symlink: outside file unchanged" "outside-original" "$(cat "$OUTSIDE/victim.txt")"
+rm -f "$SDIR/main-clean-baseline-${RID_C}.txt"
+ln -s "$OUTSIDE/not-yet-there.txt" "$SDIR/main-clean-baseline-${RID_C}.txt"
+snap "$RID_C"
+assert_eq "dangling target symlink refused (exit 2)" "2" "$SNAP_RC"
+if [[ ! -e "$OUTSIDE/not-yet-there.txt" ]]; then
+    echo "PASS: dangling symlink target was not created"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: write followed a dangling symlink outside the repo" >&2
+    FAIL=$((FAIL + 1))
+fi
+rm -f "$SDIR/main-clean-baseline-${RID_C}.txt"
+
+# S8. Snapshot failure: no path, no baseline, no temp leftover; the caller's
+#     plain check then still hard-fails on the dirty tree (never a success).
+cp .loom/scripts/check-main-clean.sh "$OUTSIDE/cmc.real"
+printf '#!/usr/bin/env bash\necho "stub snapshot failure" >&2\nexit 2\n' > .loom/scripts/check-main-clean.sh
+snap "$RID_C"
+assert_eq "snapshot failure exits 2" "2" "$SNAP_RC"
+assert_eq "snapshot failure prints no path" "" "$SNAP_OUT"
+leftover=$(find "$SDIR" -name "*${RID_C}*" -print)
+assert_eq "snapshot failure leaves no baseline or temp file" "" "$leftover"
+cp "$OUTSIDE/cmc.real" .loom/scripts/check-main-clean.sh
+bash .loom/scripts/check-main-clean.sh >/dev/null 2>&1
+assert_eq "without a baseline the plain check still fails on dirt" "3" "$?"
+# After the failure is cleared, the same run can still snapshot normally.
+snap "$RID_C"
+assert_eq "snapshot succeeds once the failure is cleared" "0" "$SNAP_RC"
+
+# S9. Own-run cleanup removes only that run's baseline.
+"$SREG" cleanup "$RID_A"
+if [[ ! -e "$PATH_A" && -f "$PATH_B" && -f "$SDIR/main-clean-baseline-${RID_C}.txt" ]]; then
+    echo "PASS: cleanup removed own baseline, peers' baselines kept"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: cleanup removed the wrong baselines" >&2
+    FAIL=$((FAIL + 1))
+fi
+
+# S10. Dead-run pruning removes the dead run's baseline, keeps the live peer's.
+kill "$LIVE_B" 2>/dev/null
+wait "$LIVE_B" 2>/dev/null
+"$SREG" peers "$RID_C" >/dev/null
+if [[ ! -e "$PATH_B" && -f "$SDIR/main-clean-baseline-${RID_C}.txt" ]]; then
+    echo "PASS: dead-run prune removed only the dead run's baseline"
+    PASS=$((PASS + 1))
+else
+    echo "FAIL: dead-run prune removed the wrong baselines" >&2
+    FAIL=$((FAIL + 1))
+fi
+"$SREG" cleanup "$RID_C"
+kill "$LIVE_A" "$LIVE_C" 2>/dev/null
+wait "$LIVE_A" "$LIVE_C" 2>/dev/null
+cd "$TMP_REPO" || exit 1
 
 echo
 echo "Results: $PASS passed, $FAIL failed"

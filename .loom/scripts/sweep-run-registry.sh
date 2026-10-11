@@ -16,6 +16,7 @@
 #                 so Stage -1 can print a loud, NON-BLOCKING peer-/sweep warning.
 #   - `cleanup` — remove this run's own entry (and prune dead peers) at sweep end.
 #   - `list`    — dump all registry entries (debug).
+#   - `snapshot-baseline` — create this run's main-clean baseline (see below).
 #
 # Per-run transients (#4450): a run's registry entry is not its only RUN_ID-keyed
 # file — `/loom:sweep` also writes a main-clean baseline at
@@ -25,6 +26,27 @@
 # it removes that run's baseline too. Without this the baselines accumulated
 # forever (200+ dead files observed). Bulk pruning of baselines left behind by a
 # SIGKILLed sweep is `loom-daemon clean`'s job.
+#
+# Baseline CREATION is owned here too (sky130-opamp#188): `snapshot-baseline
+# <RUN_ID>` is the only supported way for `/loom:sweep` to write that file.
+# Before it existed, the sweep skill built the path itself and ran
+# `mkdir -p .loom/sweep-checkpoint` / `check-main-clean.sh --snapshot <path>`
+# as ad-hoc Bash in the main checkout — a write the worktree-isolation guard
+# correctly denies while any managed worktree exists. The helper:
+#   - accepts ONLY a RUN_ID (non-empty, [A-Za-z0-9-], <= 128 chars) that has a
+#     registered entry (`new` must have run); there is NO destination
+#     parameter — the path is derived internally from the repository root;
+#   - verifies canonical containment before writing: `.loom/` and
+#     `.loom/sweep-checkpoint/` must be real (non-symlink) directories that
+#     canonicalize to `<root>/.loom/sweep-checkpoint`, and the target must not
+#     be a symlink;
+#   - takes the snapshot with the existing `check-main-clean.sh --snapshot`
+#     into a private temp file in that directory, then installs it with a
+#     no-clobber hard link, so a REPEAT call never overwrites the original
+#     bytes (later contamination can never be absorbed into the baseline);
+#   - prints the absolute baseline path on stdout ONLY on success; every
+#     diagnostic goes to stderr. A failure prints nothing on stdout, so the
+#     caller keeps the plain whole-status check (never a cleanliness success).
 #
 # That reaping is only safe if "dead" is judged correctly. Before #4691 it was
 # not: the recorded PID was the script's literal `$PPID`, which under an agent
@@ -83,6 +105,9 @@
 #   sweep-run-registry.sh peers <RUN_ID>    # print live peers (one per line), prune dead
 #   sweep-run-registry.sh cleanup <RUN_ID>  # remove own entry + baseline, prune dead peers
 #   sweep-run-registry.sh list              # print all entries (run_id pid timestamp heartbeat)
+#   sweep-run-registry.sh snapshot-baseline <RUN_ID>
+#                                           # create (once) this run's main-clean baseline;
+#                                           # print its absolute path on success
 #
 # `peers` output format (one non-dead entry per line):
 #   <run_id> <pid> <timestamp> <heartbeat> <status>
@@ -106,7 +131,9 @@
 #
 # Exit codes:
 #   0 - success (including "no peers found")
-#   1 - usage error
+#   1 - usage error (including a malformed RUN_ID)
+#   2 - snapshot-baseline refused or failed (unregistered run, containment
+#       violation, symlink, or snapshot failure); nothing printed on stdout
 
 set -euo pipefail
 
@@ -141,13 +168,19 @@ ensure_dir() {
 # Remove every RUN_ID-keyed artifact of one run: the registry entry AND the
 # main-clean baseline the sweep keyed by the same RUN_ID (#4450). Both are
 # per-run transients with a one-invocation lifetime. Missing files are a
-# silent no-op; the RUN_ID charset is restricted to [A-Za-z0-9-] so the path
-# construction is injection-safe.
+# silent no-op. The RUN_ID is re-validated against the [A-Za-z0-9-] charset
+# (valid_run_id) before any path is built, so a tampered registry entry naming
+# e.g. `../x` can never steer a deletion outside these two directories. Also
+# removes a leftover `snapshot-baseline` temp file from an interrupted call
+# (sky130-opamp#188) — never another run's files.
 remove_run_artifacts() {
     local rid="${1:-}"
-    [[ -n "$rid" ]] || return 0
+    valid_run_id "$rid" || return 0
+    local cdir
+    cdir="$(checkpoint_dir)"
     rm -f "$(registry_dir)/${rid}.json"
-    rm -f "$(checkpoint_dir)/main-clean-baseline-${rid}.txt"
+    rm -f "$cdir/main-clean-baseline-${rid}.txt"
+    rm -f "$cdir/.main-clean-baseline-${rid}."??????
 }
 
 # ---------------------------------------------------------------------------
@@ -610,6 +643,134 @@ cmd_list() {
     done
 }
 
+# ---------------------------------------------------------------------------
+# snapshot-baseline (sky130-opamp#188)
+# ---------------------------------------------------------------------------
+
+# Directory holding this helper; check-main-clean.sh ships alongside it.
+HELPER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# A RUN_ID usable as a filename component: non-empty, [A-Za-z0-9-] only (no
+# slash, dot, or whitespace, so no traversal), bounded length.
+valid_run_id() {
+    local rid="${1:-}"
+    [[ -n "$rid" && ${#rid} -le 128 && "$rid" =~ ^[A-Za-z0-9-]+$ ]]
+}
+
+# Print a diagnostic on stderr and exit 2 — the "refused/failed, no path"
+# outcome. Never prints on stdout.
+snapshot_fail() {
+    echo "ERROR: snapshot-baseline: $*" >&2
+    echo "       No baseline path was produced; callers must keep the plain whole-status check." >&2
+    exit 2
+}
+
+cmd_snapshot_baseline() {
+    if [[ $# -ne 1 ]]; then
+        echo "ERROR: snapshot-baseline takes exactly one argument, <RUN_ID> (no destination is accepted)" >&2
+        exit 1
+    fi
+    local rid="$1"
+    if ! valid_run_id "$rid"; then
+        echo "ERROR: snapshot-baseline: invalid RUN_ID '$rid' (need 1-128 chars of [A-Za-z0-9-])" >&2
+        exit 1
+    fi
+
+    local root canon_root
+    root="$(repo_root)"
+    canon_root=$(cd -P -- "$root" 2>/dev/null && pwd -P) ||
+        snapshot_fail "cannot resolve repository root '$root'"
+
+    # The run must be registered (`new` ran) — an arbitrary id can never mint
+    # a baseline file.
+    local entry="$canon_root/.loom/sweep-run/${rid}.json"
+    if [[ -L "$entry" || ! -f "$entry" ]]; then
+        snapshot_fail "RUN_ID '$rid' is not a registered run (no regular file at $entry)"
+    fi
+    if [[ "$(json_field "$entry" run_id)" != "$rid" ]]; then
+        snapshot_fail "registry entry $entry does not name RUN_ID '$rid'"
+    fi
+
+    # Canonical containment: both directory levels must be real directories
+    # (never symlinks) resolving to exactly <root>/.loom/sweep-checkpoint.
+    local loom_dir="$canon_root/.loom"
+    local dir="$canon_root/.loom/sweep-checkpoint"
+    local want_dir="$canon_root/.loom/sweep-checkpoint"
+    if [[ -L "$loom_dir" || ! -d "$loom_dir" ]]; then
+        snapshot_fail "$loom_dir is not a real directory (symlink or missing)"
+    fi
+    if [[ -L "$dir" ]]; then
+        snapshot_fail "$dir is a symlink; refusing to write through it"
+    fi
+    if [[ ! -e "$dir" ]]; then
+        # Single level only (its parent was verified above); a concurrent
+        # creator winning the race is fine and re-verified below.
+        mkdir -- "$dir" 2>/dev/null || true
+    fi
+    if [[ -L "$dir" || ! -d "$dir" ]]; then
+        snapshot_fail "$dir is not a real directory"
+    fi
+    local canon_dir
+    canon_dir=$(cd -P -- "$dir" 2>/dev/null && pwd -P) ||
+        snapshot_fail "cannot resolve $dir"
+    if [[ "$canon_dir" != "$want_dir" ]]; then
+        snapshot_fail "$dir resolves to '$canon_dir', outside $want_dir"
+    fi
+
+    local target="$canon_dir/main-clean-baseline-${rid}.txt"
+    if [[ -L "$target" ]]; then
+        snapshot_fail "$target is a symlink; refusing to use or replace it"
+    fi
+    if [[ -e "$target" ]]; then
+        if [[ ! -f "$target" ]]; then
+            snapshot_fail "$target exists but is not a regular file"
+        fi
+        # Idempotent: the FIRST snapshot is authoritative. Never re-snapshot,
+        # or contamination that landed since would be absorbed into the
+        # "pre-existing" set.
+        echo "snapshot-baseline: existing baseline kept unchanged: $target" >&2
+        printf '%s\n' "$target"
+        return 0
+    fi
+
+    local cmc="$HELPER_DIR/check-main-clean.sh"
+    if [[ ! -f "$cmc" ]]; then
+        snapshot_fail "check-main-clean.sh not found next to this helper ($cmc)"
+    fi
+
+    # Private temp file created O_EXCL by mktemp inside the verified directory
+    # (filtered from main's status by check-main-clean.sh's Loom-owned paths).
+    local tmp
+    tmp=$(mktemp "$canon_dir/.main-clean-baseline-${rid}.XXXXXX" 2>/dev/null) ||
+        snapshot_fail "cannot create a temp file in $canon_dir"
+    SNAP_TMP="$tmp"
+    trap 'if [[ -n "${SNAP_TMP:-}" ]]; then rm -f -- "$SNAP_TMP"; fi' EXIT
+
+    if ! (cd -- "$canon_root" && bash "$cmc" --snapshot "$tmp") >&2; then
+        snapshot_fail "check-main-clean.sh --snapshot failed"
+    fi
+    if [[ -L "$tmp" || ! -f "$tmp" ]]; then
+        snapshot_fail "snapshot temp file $tmp was replaced during the snapshot"
+    fi
+
+    # No-clobber install: `ln` (no -f) fails if ANY entry — file, dangling
+    # symlink, directory — already holds the name, so the original bytes of an
+    # existing baseline can never be overwritten, even by a racing call.
+    if ! ln -- "$tmp" "$target" 2>/dev/null; then
+        if [[ ! -L "$target" && -f "$target" ]]; then
+            echo "snapshot-baseline: a concurrent call created the baseline first; kept: $target" >&2
+            printf '%s\n' "$target"
+            return 0
+        fi
+        snapshot_fail "could not install baseline at $target"
+    fi
+    if [[ -L "$target" || ! -f "$target" ]]; then
+        snapshot_fail "$target is not a regular file after install"
+    fi
+    echo "snapshot-baseline: main-clean baseline written: $target" >&2
+    printf '%s\n' "$target"
+}
+
 main() {
     local cmd="${1:-}"
     shift || true
@@ -619,6 +780,7 @@ main() {
         peers)     cmd_peers "$@" ;;
         cleanup)   cmd_cleanup "$@" ;;
         list)      cmd_list "$@" ;;
+        snapshot-baseline) cmd_snapshot_baseline "$@" ;;
         -h|--help|"") usage ;;
         *) echo "ERROR: unknown command '$cmd'" >&2; usage ;;
     esac
