@@ -1,0 +1,89 @@
+* opamp_core fixed-input-common-mode output-swing diagnostic -- `klt sim` circuit BODY (issue #181)
+*
+* A `klt sim` circuit body (no .control, no .end, no .lib/.temp: klt generates
+* the wrapper, the per-corner `.lib` / `.temp` / `alter vdd` cards and the
+* `dc` analysis card; bin/pvt_sweep.py renders the placeholders and writes the
+* request). Never run directly. The sweep is returned as the klt waveform
+* artifact (options.waveforms) and bin/pvt_sweep.py `fixcm_extract()` applies
+* the extraction and validity rules -- a contiguous-run search cannot be
+* expressed as a .meas card (same reason as opamp_dc_swing.klt.spice.tmpl).
+*
+* ---------------------------------------------------------------- question
+* opamp_dc_swing's unity-gain follower moves the input common mode WITH the
+* output (out = inn ~ inp), so its swing edge can be an input-stage (common-
+* mode) limit or an output-stage limit with no way to tell which. This bench
+* sweeps the OUTPUT operating point while the INPUT common mode stays fixed:
+*
+*   Bcm      cm  = 0.5 * v(vdd)      fixed input common mode (VDD/2: inside
+*                                           the measured 40 dB ICMR at all 15 points,
+*                                           record 20261009-103006-566b9a5)
+*   Bset     set = v(vdd) * v(sw)           swept output set point, 0..VDD (Vsw 0..1)
+*   Be       e   = G * vid                  servo node: vid = v(inp) - v(inn), scaled
+*            e   = EMAX * tanh(KS*G*(v(set) - v(out)) / EMAX)
+*   Binp/inn inp = cm + e/(2G),  inn = cm - e/(2G)
+*
+* so the input common mode (inp + inn)/2 is EXACTLY v(cm) at every sweep point
+* (symmetric drive; KS = 1, G = 100, EMAX = 25 V), and the servo finds the differential input vid the
+* amplifier needs to hold v(out) near v(set). While the amplifier has gain the
+* servo tracks (v(out) ~ v(set)); where the output stage runs out of headroom
+* the required vid grows and the local open-loop gain d v(out)/d vid falls.
+* The servo output is a smooth tanh clamp at +-EMAX/G = +-0.25 V, so
+* beyond the edges the input pair is driven hard but the DC solution stays
+* defined; such points are rejected by the validity rule, never used.
+*
+* e is the scaled (x G = 100) copy of vid so that micro-volt input changes in
+* the high-gain region are resolved well above ngspice's default vntol
+* (DR-006: default solver tolerances -- this body's only .option is scale).
+*
+* -------------------------------------------- extraction (bin/pvt_sweep.py)
+* Local gain A_i = (out[i+1]-out[i-1]) / (vid[i+1]-vid[i-1]) (central
+* difference). From the point nearest v(out) = VDD/2, walk outward over
+* VALID points while A >= floor; the edge is interpolated (in dB) between the
+* last passing and first failing point. Floors: 12.04 dB (A = 4, the gain at
+* which a follower's slope A/(1+A) is 0.8 = the dc_swing rule's threshold;
+* PRIMARY, buffer-equivalent), 40 dB and 60 dB (the ratified gain target).
+* VALIDITY of a point: |vid| <= FIXCM_VID_VALID_V (input pair kept in its
+* small-signal regime; far below the 0.25 V servo clamp, so a valid
+* point is never a clamped one), and out and vid both strictly increasing
+* across the point. VALIDITY of the unit: input CM within FIXCM_CM_TOL_V of
+* v(cm) at every point, the mid-supply point valid with gain >= the primary
+* floor, and each primary edge reached at the gain floor or at the sweep end
+* (rail) -- an edge reached at an invalid point fails the unit (a reported
+* failure, not a limit).
+*
+* ------------------------------------------- headroom indicators (proxies)
+* klt 0.5.0 on the fleet takes .meas cards only, so device operating-point
+* parameters (@m.x..[vdsat], [id]) are NOT probed. The waveform carries every
+* node voltage and source current; the runner reports, at each edge and at
+* mid-supply, these LABELLED PROXIES (not proof of saturation):
+*   v(out)              = M7 (NMOS sink) VDS;  VDD - v(out) = M6 (PMOS) VSD
+*   VDD - v(xdut.d2)    = M6 VSG (rises if M6 must leave saturation at fixed I)
+*   v(xdut.d2) - v(xdut.tail) = M2 VDS (input-pair headroom on the d2 side)
+*   v(xdut.tail)        = M5 (tail) VDS
+*   VDD - v(xdut.d1)    = M3 VSG (mirror diode: tracks the tail current)
+*   -i(vdd)             = supply current; with no DC load on `out`, its change
+*                         from mid-supply is the output-branch (M6 = M7) current change
+*
+* ------------------------------------------------------ shared conventions
+* ibias / Iref = 5 uA and CL = 2 pF as opamp_ac.spice.tmpl; the DUT is the flat
+* xschem netlist wrapped in a local .subckt (ports vdd vss inn inp out ibias),
+* as in the other klt bodies.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Xdut vdd vss inn inp out ibias opamp_dut
+Cload out 0 2p
+
+Vsw sw 0 dc 0
+Bset set 0 V = v(vdd)*v(sw)
+Bcm cm 0 V = 0.5*v(vdd)
+Be e 0 V = 25*tanh(1*100*(v(set) - v(out))/25)
+Binp inp 0 V = v(cm) + v(e)/(2*100)
+Binn inn 0 V = v(cm) - v(e)/(2*100)
