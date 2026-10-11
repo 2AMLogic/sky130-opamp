@@ -235,11 +235,19 @@ def gmid() -> dict:
 
 # --------------------------------------------------------------------- gen --
 
+# The #144 candidates (and the Monte Carlo records already run on them) were
+# derived from the DR-007 canonical widths. Issue #120 / DR-013 moved the
+# canonical netlist to 4.635 / 7.820 um; the committed candidates are immutable,
+# so the derivation base stays pinned to the DR-007 widths they were run from.
+DR007_BASE_W = {**{i: 4.634 for i in PMOS_GROUP}, **{i: 7.819 for i in BIAS_GROUP}}
+
+
 def candidate_geometry(core: dict, cd: dict) -> dict:
     out = {}
     for inst, g in core.items():
         if g["kind"] not in ("nfet", "pfet"):
             continue
+        g = {**g, "w": DR007_BASE_W.get(inst, g["w"])}
         s = cd["pmos_scale"] if inst in PMOS_GROUP else cd["pair_scale"] if inst in PAIR_GROUP else 1
         out[inst] = {"kind": g["kind"], "w": snap(g["w"] * s), "l": snap(g["l"] * s), "mult": g["mult"]}
     return out

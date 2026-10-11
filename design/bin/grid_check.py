@@ -7,12 +7,12 @@ draw it (klt ``*.ongrid.1`` violations; see layout/passive_probes/).
 
 Device classes are checked independently so each owner can opt in:
 
-* ``passive``: ``res_*`` / ``cap_*`` models (XRz, XCc). Enforced by default;
-  this is the mechanism issue #131 adds.
-* ``mos``: ``nfet_*`` / ``pfet_*`` models. NOT enforced by default: the MOS
-  widths (4.634, 7.819) are off-grid today and are owned by #50/#120. #120
-  should switch this on (``--classes passive,mos``) rather than adding a
-  second mechanism.
+* ``passive``: ``res_*`` / ``cap_*`` models (XRz, XCc); added by issue #131.
+* ``mos``: ``nfet_*`` / ``pfet_*`` models. Enforced by default since issue
+  #120 moved the canonical widths onto the grid (see DR-013); a
+  reintroduction of an off-grid MOS width fails this check. ``nf`` fingers are
+  checked as W (nf is 1 in the canonical netlist; the per-finger width is
+  W/nf and is also verified when nf > 1).
 
 Usage:
     python3 design/bin/grid_check.py [--classes passive,mos] [netlist]
@@ -51,6 +51,17 @@ def logical_lines(text: str):
         yield cur
 
 
+def _nf(tokens) -> int:
+    for tok in tokens:
+        key, _, val = tok.partition("=")
+        if key.lower() == "nf" and val:
+            try:
+                return max(int(float(val)), 1)
+            except ValueError:
+                return 1
+    return 1
+
+
 def violations(text: str, classes=("passive",)) -> list[str]:
     out = []
     for line in logical_lines(text):
@@ -74,13 +85,17 @@ def violations(text: str, classes=("passive",)) -> list[str]:
                     continue
                 if not on_grid(num):
                     out.append(f"{name} ({model}): {key}={val} um is not a multiple of {GRID_UM} um")
+                elif kind == "mos" and key.lower() == "w":
+                    nf = _nf(tokens)
+                    if nf > 1 and not on_grid(num / nf):
+                        out.append(f"{name} ({model}): per-finger W/nf={num}/{nf} um is not a multiple of {GRID_UM} um")
     return out
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("netlist", nargs="?", default=str(DEFAULT_NETLIST))
-    ap.add_argument("--classes", default="passive")
+    ap.add_argument("--classes", default="passive,mos")
     args = ap.parse_args(argv)
     classes = tuple(c for c in args.classes.split(",") if c)
     bad = [c for c in classes if c not in CLASS_RE]

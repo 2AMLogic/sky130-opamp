@@ -1,0 +1,110 @@
+{
+  "netlist": "ac-iq-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.62,
+        1.8,
+        1.98
+      ]
+    },
+    "temperature_c": [
+      -40.0,
+      27.0,
+      125.0
+    ]
+  },
+  "exclude": [
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    }
+  ],
+  "analysis": {
+    "kind": "dc",
+    "args": "Vinp 0 1m 1m"
+  },
+  "measurements": [
+    {
+      "name": "i_vdd_a",
+      "unit": "A",
+      "spice": ".meas dc i_vdd_a find i(vdd) at=0"
+    }
+  ],
+  "options": {
+    "timeout_s": 1200,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

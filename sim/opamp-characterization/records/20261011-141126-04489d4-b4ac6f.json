@@ -1,0 +1,723 @@
+{
+  "record_id": "20261011-141126-04489d4-b4ac6f",
+  "timestamp": "2026-10-11T14:28:53.573711+00:00",
+  "git": {
+    "sha": "04489d4"
+  },
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "icmr",
+      "cmrr",
+      "tran_step"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 60,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "icmr",
+        "cmrr",
+        "tran_step"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": false,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+g122d607d5c52",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "icmr-tt",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 240.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-488f23e2f335",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00442a68f00860027",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 188,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/icmr-tt-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-tt-response.json"
+    },
+    {
+      "tag": "icmr-ff",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 302.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-8d63277b5d77",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-02c49b6df16d960c8",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 248,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/icmr-ff-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-ff-response.json"
+    },
+    {
+      "tag": "icmr-ss",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 208.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a71deba78dfe",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0fe09a47762835be4",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 146,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/icmr-ss-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-ss-response.json"
+    },
+    {
+      "tag": "icmr-sf",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 176.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-ddf5e030c43a",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-092346835f04417b1",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 131,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/icmr-sf-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-sf-response.json"
+    },
+    {
+      "tag": "icmr-fs",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 360.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-b5be3a7bd140",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-074f23f343be3d644",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 320,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/icmr-fs-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs-response.json"
+    },
+    {
+      "tag": "cmrr-mid",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 146.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c45ef8afcef7",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0a2ccfa3bd3fc75ab",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 84,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 12
+        },
+        "by_severity": {
+          "warning": 12
+        },
+        "corners_with_diagnostics": 12
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/cmrr-mid-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-cmrr-mid-response.json"
+    },
+    {
+      "tag": "cmrr-window",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 122.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-d137973331af",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-021d154b529f354c7",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 78,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 12
+        },
+        "by_severity": {
+          "warning": 12
+        },
+        "corners_with_diagnostics": 12
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/cmrr-window-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-cmrr-window-response.json"
+    },
+    {
+      "tag": "tran-step",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 299.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-18be9113c19f",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0328382617ecca079",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 238,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g122d607d5c52",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-141126-04489d4-b4ac6f/tran-step-request.json",
+      "response": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-tran-step-response.json"
+    }
+  ],
+  "klt_crosscheck": {
+    "reference_identity": {
+      "source": "historical",
+      "record_id": "20261011-140526-04489d4-7e5893",
+      "dut_sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+      "reference": "sim/opamp-characterization/records/20261011-140526-04489d4-7e5893-ac.csv"
+    },
+    "reference_available": true,
+    "tolerance_gain_db": 0.05,
+    "tolerance_gbw_frac": 0.01,
+    "tolerance_iq_frac": 0.01,
+    "reference_csv": "sim/opamp-characterization/records/20261011-140526-04489d4-7e5893-ac.csv",
+    "cmrr_points_compared": 15,
+    "cmrr_points_unmatched": 0,
+    "max_abs_adm_dc_minus_gain_dc_db": 0.0,
+    "max_rel_gbw_error": 0.0,
+    "icmr_points_compared": 15,
+    "icmr_points_unmatched": 0,
+    "max_rel_iq_error": 7e-05,
+    "diagnostics": [],
+    "all_points_matched": true,
+    "ok": true
+  },
+  "tran_step_pm_crosscheck": {
+    "reference_identity": {
+      "source": "historical",
+      "record_id": "20261011-140526-04489d4-7e5893",
+      "dut_sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+      "reference": "sim/opamp-characterization/records/20261011-140526-04489d4-7e5893-ac.csv"
+    },
+    "reference_available": true,
+    "ac_reference": "sim/opamp-characterization/records/20261011-140526-04489d4-7e5893-ac.csv",
+    "unavailable_reasons": [],
+    "skipped_candidates": [],
+    "summary": {
+      "tolerance_pp": 5.0,
+      "points": 15,
+      "points_with_ac_reference": 15,
+      "points_without_ac_reference": [],
+      "points_disagreeing": [],
+      "max_abs_delta_pp": 0.6639342844293781
+    },
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "ac_pm_deg": 67.48312115000407,
+        "expected_overshoot_pct": 2.950313523333221,
+        "measured_overshoot_pct": 2.8230646129227073,
+        "delta_pp": -0.1272489104105139,
+        "agrees": true,
+        "settle_1pct_ns": 27.25499999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.4296404122552,
+        "expected_overshoot_pct": 4.395594135213544,
+        "measured_overshoot_pct": 3.930982745686469,
+        "delta_pp": -0.46461138952707515,
+        "agrees": true,
+        "settle_1pct_ns": 31.749000000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.28372482199356,
+        "expected_overshoot_pct": 5.262180155946618,
+        "measured_overshoot_pct": 4.666283227887749,
+        "delta_pp": -0.5958969280588695,
+        "agrees": true,
+        "settle_1pct_ns": 38.06500000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.40443728457443,
+        "expected_overshoot_pct": 2.358369703011801,
+        "measured_overshoot_pct": 2.350646427768047,
+        "delta_pp": -0.007723275243753935,
+        "agrees": true,
+        "settle_1pct_ns": 25.643999999999988,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "ac_pm_deg": 65.96363707731712,
+        "expected_overshoot_pct": 4.005266058210746,
+        "measured_overshoot_pct": 3.6015306505261893,
+        "delta_pp": -0.40373540768455696,
+        "agrees": true,
+        "settle_1pct_ns": 30.350000000000005,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.1003783275517,
+        "expected_overshoot_pct": 5.404179359646845,
+        "measured_overshoot_pct": 4.752138462308075,
+        "delta_pp": -0.6520408973387699,
+        "agrees": true,
+        "settle_1pct_ns": 36.852999999999994,
+        "reference_status": "matched",
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "ac_pm_deg": 66.25469963724358,
+        "expected_overshoot_pct": 3.796509973872866,
+        "measured_overshoot_pct": 3.692422918487095,
+        "delta_pp": -0.1040870553857709,
+        "agrees": true,
+        "settle_1pct_ns": 31.150999999999986,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "ac_pm_deg": 64.62807245686717,
+        "expected_overshoot_pct": 4.997887128215293,
+        "measured_overshoot_pct": 4.5714571207314245,
+        "delta_pp": -0.4264300074838685,
+        "agrees": true,
+        "settle_1pct_ns": 34.824,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.55931752145149,
+        "expected_overshoot_pct": 5.050402223814113,
+        "measured_overshoot_pct": 4.608041582327407,
+        "delta_pp": -0.4423606414867063,
+        "agrees": true,
+        "settle_1pct_ns": 40.546,
+        "reference_status": "matched",
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "ac_pm_deg": 65.39812773352301,
+        "expected_overshoot_pct": 4.418911977246848,
+        "measured_overshoot_pct": 3.945789157831762,
+        "delta_pp": -0.4731228194150865,
+        "agrees": true,
+        "settle_1pct_ns": 27.266000000000002,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "ac_pm_deg": 63.93880422932479,
+        "expected_overshoot_pct": 5.5300291557754395,
+        "measured_overshoot_pct": 4.8660948713460614,
+        "delta_pp": -0.6639342844293781,
+        "agrees": true,
+        "settle_1pct_ns": 31.27199999999999,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.14678790895728,
+        "expected_overshoot_pct": 5.368153742016948,
+        "measured_overshoot_pct": 4.7811952988247715,
+        "delta_pp": -0.5869584431921764,
+        "agrees": true,
+        "settle_1pct_ns": 36.765,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "ac_pm_deg": 68.84905253359594,
+        "expected_overshoot_pct": 2.088016497177534,
+        "measured_overshoot_pct": 2.2003850673867693,
+        "delta_pp": 0.11236857020923541,
+        "agrees": true,
+        "settle_1pct_ns": 27.541999999999994,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "ac_pm_deg": 66.5394596614236,
+        "expected_overshoot_pct": 3.595172910493658,
+        "measured_overshoot_pct": 3.303408437320309,
+        "delta_pp": -0.2917644731733491,
+        "agrees": true,
+        "settle_1pct_ns": 32.499,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "ac_pm_deg": 64.63552090820387,
+        "expected_overshoot_pct": 4.992205775604766,
+        "measured_overshoot_pct": 4.433941030835084,
+        "delta_pp": -0.5582647447696827,
+        "agrees": true,
+        "settle_1pct_ns": 39.52099999999997,
+        "reference_status": "matched",
+        "vdd_v": 1.8
+      }
+    ]
+  },
+  "links": {
+    "icmr_csv": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-icmr.csv",
+    "cmrr_csv": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-cmrr.csv",
+    "tran_step_csv": "sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-tran-step.csv"
+  },
+  "errors": [],
+  "elapsed_s": 1047.5
+}

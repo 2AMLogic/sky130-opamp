@@ -1,0 +1,659 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 3,
+  "passed": 3,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 3
+    },
+    "by_severity": {
+      "warning": 3
+    },
+    "corners_with_diagnostics": 3
+  },
+  "metrics": {
+    "sim__corner__count": 3,
+    "sim__corner__passed_count": 3,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-b5be3a7bd140",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-074f23f343be3d644",
+      "instance_type": "c7i.4xlarge",
+      "availability_zone": "us-east-1d",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 320,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g122d607d5c52",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g122d607d5c52; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 3,
+    "measurements_declared": 10,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"fs/1.800V/-40C\",\"hi_30db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"hi_40db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"hi_50db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"iq_mid_a\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"k_mid\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"lo_30db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"lo_40db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"lo_50db\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"vid_mid_v\"]/observation",
+      "measurement:[0,\"fs/1.800V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"hi_30db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"hi_40db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"hi_50db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"iq_mid_a\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"k_mid\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"lo_30db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"lo_40db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"lo_50db\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"vid_mid_v\"]/observation",
+      "measurement:[1,\"fs/1.800V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"hi_30db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"hi_40db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"hi_50db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"iq_mid_a\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"k_mid\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"lo_30db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"lo_40db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"lo_50db\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"vid_mid_v\"]/observation",
+      "measurement:[2,\"fs/1.800V/125C\",\"vout_mid_v\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"hi_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"lo_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"fs/1.800V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"hi_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"lo_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"fs/1.800V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"hi_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"lo_40db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"fs/1.800V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g122d607d5c52",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "vout_mid_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 0.89954,
+        "margin": null
+      }
+    },
+    {
+      "name": "vid_mid_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": -0.000229998,
+        "margin": null
+      }
+    },
+    {
+      "name": "iq_mid_a",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 6.52231e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "k_mid",
+      "unit": null,
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 0.000717366,
+        "margin": null
+      }
+    },
+    {
+      "name": "lo_40db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 0.738782,
+        "margin": null
+      }
+    },
+    {
+      "name": "hi_40db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 1.5052,
+        "margin": null
+      }
+    },
+    {
+      "name": "lo_30db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 0.503619,
+        "margin": null
+      }
+    },
+    {
+      "name": "hi_30db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 1.53859,
+        "margin": null
+      }
+    },
+    {
+      "name": "lo_50db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 0.800946,
+        "margin": null
+      }
+    },
+    {
+      "name": "hi_50db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "fs/1.800V/-40C",
+        "value": 1.47203,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 313.317,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.89954,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": -0.000229998,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.52231e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000717366,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.738782,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.5052,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.503619,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.53859,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.800946,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.47203,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 270.555,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899667,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": -0.000166517,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.54588e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000766804,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.712754,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.56456,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.560715,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.60194,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.783918,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.5194,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 264.804,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899889,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": -5.55905e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.56988e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000927502,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.687689,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.67919,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.521901,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.7249,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.76927,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.61606,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-120/sim/opamp-characterization/records/20261011-141126-04489d4-b4ac6f-logs/klt-icmr-fs/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}
