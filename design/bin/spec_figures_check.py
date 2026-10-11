@@ -18,12 +18,21 @@ starts with the mapping's `row_match` (default: `row`):
     `printed` occurrence, so no stray or hand-edited copy goes unaccounted;
   - the binding corner `at`, rendered as the spec prints it (e.g.
     "SS / \u221240 \u00b0C"), must appear in at least one `printed` string;
+  - when `at.supply_v` (binding supply, volts) is set, any printed string
+    that renders the corner followed by a voltage ("FF / 125 \u00b0C / 1.98 V")
+    must print exactly that voltage; `print_supply: true` requires it;
   - the record id must be cited in that row;
   - `expected`/`tol` must agree with the number and precision printed in
     `printed[0]`, so the mapping cannot drift from its own text.
 Copies of a figure outside the table rows (e.g. a section 2 summary paragraph)
 are not covered. It also verifies every record id cited anywhere in section 2
 exists under sim/*/records/.
+
+Binding point: `at` carries the numeric binding supply `supply_v` (required for
+matrix figures) and is compared, via the matrix's `supply_key`, with the row
+that attains the extremum. Tie policy: all rows equal to the extremum (relative
+1e-9) are valid; the authored point must match one of them, independent of CSV
+row order. Diagnostics give the measured and claimed corner/temp/supply.
 
 Matrix completeness: every figure names a `matrix` in the mapping's top-level
 `matrices` table. A matrix is authored explicitly (never inferred from the CSV)
@@ -132,7 +141,7 @@ def check_text(name, fig, row):
     ct = corner_text(fig["at"])
     if not any(ct in s for s in printed):
         errs.append(f"{name}: binding corner {ct!r} does not appear in any printed string")
-    return errs
+    return errs + check_supply_text(name, fig, printed)
 
 
 def record_exists(root, rid):
@@ -220,13 +229,56 @@ def check_matrix(name, m, rows, keys):
     return errs
 
 
-def worst(fig, rows):
+def worst(fig, rows, supply_key="vdd_v"):
+    """(extremum, tied rows, n). Tied rows all attain the extremum (nonfinite
+    values are ignored here; the matrix check reports them), sorted by
+    (corner, temp_c, supply) so the result never depends on CSV row order."""
     rows = filtered(fig, rows)
     if not rows:
         raise ValueError("no rows after filter")
+    fin = []
+    for r in rows:
+        try:
+            v = float(r[fig["key"]])
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(v):
+            fin.append((v, r))
+    if not fin:
+        raise ValueError(f"no finite {fig['key']} values")
     pick = min if fig["reduce"] == "min" else max
-    r = pick(rows, key=lambda r: float(r[fig["key"]]))
-    return float(r[fig["key"]]) * fig.get("scale", 1.0), r, len(rows)
+    ext = pick(v for v, _ in fin)
+    tied = [r for v, r in fin if math.isclose(v, ext, rel_tol=1e-9, abs_tol=1e-12)]
+    try:
+        tied.sort(key=lambda r: (r["corner"], float(r["temp_c"]), float(r.get(supply_key) or "nan")))
+    except (KeyError, TypeError, ValueError):
+        pass
+    return ext * fig.get("scale", 1.0), tied, len(rows)
+
+
+SUPPLY_RE = r"\s*/\s*(\d+(?:\.\d+)?)\s*V\b"
+
+
+def check_supply_text(name, fig, printed):
+    """Validate the numeric binding supply `at.supply_v` against printed text.
+
+    A printed string that renders the binding corner followed by a voltage
+    ("FF / 125 \u00b0C / 1.98 V") must print exactly `supply_v`. Figures that
+    print no voltage after the corner keep their text unchanged unless the
+    mapping sets `print_supply: true`, which requires that rendering.
+    """
+    sv = fig["at"].get("supply_v")
+    if sv is None:
+        return []
+    errs, ct, found = [], corner_text(fig["at"]), False
+    for s in printed:
+        for m in re.finditer(re.escape(ct) + SUPPLY_RE, s):
+            found = True
+            if not math.isclose(float(m.group(1)), float(sv), rel_tol=0, abs_tol=1e-9):
+                errs.append(f"{name}: printed supply {m.group(1)} V in {s!r} != mapping at.supply_v {sv} V")
+    if fig.get("print_supply") and not found:
+        errs.append(f"{name}: print_supply set but no printed string renders '{ct} / {float(sv):g} V'")
+    return errs
 
 
 def check_figure_matrix(name, fig, matrices, allrows, figures, checked):
@@ -280,7 +332,9 @@ def check(root):
             with path.open(newline="", encoding="utf-8") as f:
                 allrows = list(csv.DictReader(f))
             errs += check_figure_matrix(name, fig, matrices, allrows, mapping["figures"], checked)
-            val, row, n = worst(fig, allrows)
+            m = matrices.get(fig.get("matrix"))
+            sk = (m or {}).get("supply_key", "vdd_v")
+            val, tied, n = worst(fig, allrows, sk)
         except (KeyError, ValueError) as e:
             errs.append(f"{name}: cannot recompute from {path.name}: {e!r}")
             continue
@@ -289,14 +343,43 @@ def check(root):
                 f"{name}: recomputed {fig['reduce']} {fig['key']} = {val:.6g} {fig['unit']}, "
                 f"spec states {fig['expected']} (tol {fig['tol']})"
             )
-        at = fig["at"]
-        if row["corner"] != at["corner"] or float(row["temp_c"]) != float(at["temp_c"]):
-            errs.append(
-                f"{name}: binding corner is {row['corner']}/{row['temp_c']} C, "
-                f"mapping says {at['corner']}/{at['temp_c']} C"
-            )
+        errs += check_binding(name, fig, tied, sk, m is not None)
     errs += check_campaign_figures(root, spec2, mapping)
     return errs
+
+
+def check_binding(name, fig, tied, sk, has_matrix):
+    """The authored binding point must attain the extremum.
+
+    Tie policy: every row equal to the extremum (relative 1e-9) is a valid
+    binding point; the authored `at` passes if it matches any of them, so the
+    result is independent of CSV row order. `at.supply_v` is required for
+    matrix figures and compared with the row's supply column (`supply_key`).
+    """
+    at = fig["at"]
+    sv = at.get("supply_v")
+    if has_matrix and sv is None:
+        return [f"{name}: mapping at.supply_v (binding supply, volts) is required for matrix figures"]
+
+    def supply(r):
+        try:
+            return float(r[sk])
+        except (KeyError, TypeError, ValueError):
+            return None
+
+    def hit(r):
+        s = supply(r)
+        return (r["corner"] == at["corner"] and float(r["temp_c"]) == float(at["temp_c"])
+                and (sv is None or (s is not None and math.isclose(s, float(sv), rel_tol=0, abs_tol=1e-6))))
+
+    if any(hit(r) for r in tied):
+        return []
+    meas = ", ".join(f"{r['corner']}/{r['temp_c']} C/{r.get(sk)} V" for r in tied)
+    claimed = f"{at['corner']}/{at['temp_c']} C" + (f"/{sv} V" if sv is not None else "")
+    return [f"{name}: binding corner is {meas} (measured {sk}), mapping says {claimed} (claimed)"
+            + (f"; measured supply {tied[0].get(sk)} V != claimed supply {sv} V"
+               if sv is not None and len(tied) == 1 and tied[0]["corner"] == at["corner"]
+               and float(tied[0]["temp_c"]) == float(at["temp_c"]) else "")]
 
 
 def check_campaign_figures(root, spec2, mapping):
