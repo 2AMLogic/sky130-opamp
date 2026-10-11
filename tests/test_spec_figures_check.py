@@ -550,10 +550,16 @@ class CommittedTests(unittest.TestCase):
         # Offset evidence has no canonical campaign: it must stay explicitly historical.
         self.assertTrue(all(f["scope"] == "historical" and f.get("legacy_unverified")
                             for f in m["campaign_figures"]))
-        # Deterministic current claims cite the DR-013 canonical records.
+        # Deterministic current claims cite the DR-013 canonical records or
+        # the issue-#110 independent-supply (cartesian) campaign on the same
+        # canonical DUT snapshot.
         for f in m["figures"]:
             if f["scope"] == "current":
-                self.assertIn("04489d4", f["record"])
+                self.assertIn(f["record"], (
+                    "20261011-140526-04489d4-7e5893",  # DR-013 paired ac/tran-sr/dc-swing
+                    "20261011-141126-04489d4-b4ac6f",  # DR-013 paired icmr/cmrr/tran-step
+                    "20261011-194651-046fe81-86146b",  # issue #110 cartesian fleet campaign
+                ))
 
 
 if __name__ == "__main__":

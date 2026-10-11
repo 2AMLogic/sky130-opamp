@@ -1,0 +1,4313 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 45,
+  "passed": 45,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {},
+    "by_severity": {},
+    "corners_with_diagnostics": 0
+  },
+  "metrics": {
+    "sim__corner__count": 45,
+    "sim__corner__passed_count": 45,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "9639642ba06511cd6a12271b60acbaf4a5142cbbf5ac13042fb3a9d6ca7b7729",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "9639642ba06511cd6a12271b60acbaf4a5142cbbf5ac13042fb3a9d6ca7b7729"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-149741eb9cfd",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-05848fa36a7380864",
+      "instance_type": "c7i.4xlarge",
+      "availability_zone": "us-east-1d",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 361,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g1ed1b506d5b6",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g1ed1b506d5b6; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 45,
+    "measurements_declared": 6,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.620V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[0,\"tt/1.620V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[0,\"tt/1.620V/-40C\",\"v_final\"]/observation",
+      "measurement:[0,\"tt/1.620V/-40C\",\"v_init\"]/observation",
+      "measurement:[0,\"tt/1.620V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[0,\"tt/1.620V/-40C\",\"v_peak\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"v_final\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"v_init\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"v_ofs\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"v_peak\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"v_final\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"v_init\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"v_ofs\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"v_peak\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"v_final\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"v_init\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"v_ofs\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"v_peak\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"v_final\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"v_init\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"v_peak\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"v_peak\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"v_final\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"v_init\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"v_ofs\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"v_peak\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"v_final\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"v_init\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"v_peak\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"v_final\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"v_init\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"v_ofs\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"v_peak\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"v_final\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"v_init\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"v_ofs\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"v_peak\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"v_final\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"v_init\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"v_peak\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"v_final\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"v_init\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"v_ofs\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"v_peak\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"v_final\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"v_init\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"v_ofs\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"v_peak\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"v_final\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"v_init\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"v_ofs\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"v_peak\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"v_final\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"v_init\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"v_peak\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"v_peak\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"v_final\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"v_init\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"v_ofs\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"v_peak\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"v_final\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"v_init\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"v_peak\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"v_final\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"v_init\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"v_ofs\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"v_peak\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"v_final\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"v_init\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"v_ofs\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"v_peak\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"v_final\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"v_init\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"v_peak\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"v_final\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"v_init\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"v_ofs\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"v_peak\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"v_final\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"v_init\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"v_ofs\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"v_peak\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"v_final\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"v_init\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"v_peak\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"v_final\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"v_init\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"v_peak\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"v_peak\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"v_final\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"v_init\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"v_ofs\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"v_peak\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"v_final\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"v_init\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"v_peak\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"v_final\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"v_init\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"v_ofs\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"v_peak\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"v_final\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"v_init\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"v_ofs\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"v_peak\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"v_final\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"v_init\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"v_peak\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"v_final\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"v_init\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"v_ofs\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"v_peak\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"v_final\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"v_init\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"v_ofs\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"v_peak\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"v_final\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"v_init\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"v_peak\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"v_peak\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"v_final\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"v_init\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"v_ofs\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"v_peak\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"v_final\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"v_init\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"v_ofs\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"v_peak\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"v_final\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"v_init\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"v_peak\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"v_final\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"v_init\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"v_ofs\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"v_peak\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"v_final\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"v_init\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"v_ofs\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"v_peak\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"v_final\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"v_init\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"v_ofs\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"v_peak\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"v_final\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"v_init\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"v_peak\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"t_hi_cross\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"t_lo_cross\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"v_final\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"v_init\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"v_ofs\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"v_peak\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"t_hi_cross\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"t_lo_cross\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"v_final\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"v_init\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"v_ofs\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"v_peak\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"t_hi_cross\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"t_lo_cross\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"v_final\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"v_init\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"v_ofs\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"v_peak\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"t_hi_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"t_lo_cross\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"v_final\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"v_init\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"v_ofs\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"v_peak\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g1ed1b506d5b6",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:9639642ba06511cd6a12271b60acbaf4a5142cbbf5ac13042fb3a9d6ca7b7729",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "v_init",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": 0.789712,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_ofs",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": -0.000288249,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_final",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": 0.829735,
+        "margin": null
+      }
+    },
+    {
+      "name": "v_peak",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": 0.830936,
+        "margin": null
+      }
+    },
+    {
+      "name": "t_lo_cross",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": 2.14531e-07,
+        "margin": null
+      }
+    },
+    {
+      "name": "t_hi_cross",
+      "unit": "s",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": 2.29487e-07,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.620V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 158.737,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789712,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000288249,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829735,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.830936,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14531e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.29487e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.620V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 132.526,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.78977,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000229902,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.82978,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831405,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15851e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.33549e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.620V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 155.749,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789845,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000154592,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829848,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831734,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18448e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.39706e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 151.437,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879812,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000188122,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919804,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.920933,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14244e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.27755e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 39.571,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879854,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.00014632,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919844,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921416,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15605e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32249e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 158.766,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879925,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -7.53104e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919914,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.92178,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18146e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.38565e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 158.683,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969859,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000141342,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00985,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01096,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14048e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.27184e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 156.878,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969901,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -9.9001e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00989,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01146,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1542e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.31738e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 127.293,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969977,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -2.34316e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00996,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01183,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.17934e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.38008e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/tt_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 56.746,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789722,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000277637,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829726,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.830743,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14412e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.27894e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 42.448,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789786,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000214426,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829783,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831261,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15627e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32245e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 40.206,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789879,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.00012053,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829872,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831782,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18033e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.38691e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 38.71,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879808,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000191671,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919795,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.920753,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14202e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.26628e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 55.34,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879863,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000136502,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919849,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921298,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15411e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.3129e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 48.285,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879959,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -4.13365e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919942,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921839,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.17803e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.37821e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 58.383,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969861,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000139317,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00985,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01079,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14026e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.26144e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 50.312,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969917,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -8.30441e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.0099,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01134,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15228e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.3085e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 48.521,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.970018,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": 1.78913e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.01,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.0119,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1761e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.37353e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 46.467,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789669,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000331408,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829724,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831203,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14741e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.31651e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 47.372,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789736,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.00026381,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829767,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831597,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.16172e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.35324e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 45.709,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789807,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000192938,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829824,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831668,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18958e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.41046e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 41.857,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879808,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000191592,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919805,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921243,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14273e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.2921e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 39.908,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879842,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000157711,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919837,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921631,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1582e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.33511e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 37.436,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879899,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000101265,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919892,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921712,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18622e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.39467e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 38.406,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969855,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.00014528,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00985,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01126,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14059e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.28525e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 38.599,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969888,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000111698,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00988,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01165,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15629e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32877e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 37.496,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969948,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -5.16482e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00994,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01175,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18383e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.38807e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/ss_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 37.942,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789768,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000232114,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829768,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831408,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.13663e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.28757e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.195,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789808,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000191761,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829806,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831785,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15075e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32593e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 37.441,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789862,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000138202,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829857,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831776,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.17758e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.38042e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 38.497,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879832,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000167577,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919824,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921402,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.13439e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.27766e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.544,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879864,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000136202,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919855,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921801,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14867e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.31772e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 38.396,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879915,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -8.51528e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919905,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921817,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.17509e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.37265e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 38.456,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969868,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000131969,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00986,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01143,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1326e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.2733e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.407,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969899,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000100742,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00989,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01183,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14705e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.31351e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 38.203,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969953,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -4.72548e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00994,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01186,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.173e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.36809e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/sf_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 37.255,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789566,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000434257,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.82965,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.830571,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.15674e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.31537e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 37.303,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789678,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000322186,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829724,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.83109,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1684e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.35397e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 37.203,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.789807,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000193195,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.829831,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.831635,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.19371e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.41947e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 38.105,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879772,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000227515,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919765,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.920645,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.1514e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.28042e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 38.005,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.879838,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000162368,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919827,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.921148,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.16464e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32999e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 36.045,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.87995,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -4.95905e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 0.919937,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 0.92171,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18984e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.40021e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 35.841,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.969844,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -0.000155783,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00983,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01068,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.14966e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.27198e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 35.44,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.96991,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": -9.02567e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.00989,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.0112,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.16255e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.32296e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 35.898,
+      "measurements": [
+        {
+          "name": "v_init",
+          "value": 0.97003,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_ofs",
+          "value": 3.03362e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_final",
+          "value": 1.01001,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "v_peak",
+          "value": 1.01178,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_lo_cross",
+          "value": 2.18764e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "t_hi_cross",
+          "value": 2.39318e-07,
+          "unit": "s",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-200341-046fe81-f7ce78-logs/klt-tran-step/fs_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

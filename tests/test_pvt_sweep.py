@@ -210,6 +210,8 @@ class CommittedRecordShapeTests(unittest.TestCase):
                 self.assertEqual(d["matrix"]["n_failed"], len(d["errors"]))
                 m = d["matrix"]
                 grid = len(m["corners"]) * len(m["temps_c"])
+                if m.get("supply_mode") == "cartesian":  # supply is an independent axis
+                    grid *= len(m["supplies_v"])
                 # the cmrr bench is run at two CM bias points -> two rows per grid point
                 units = sum(2 if a == "cmrr" else 1 for a in m["analyses"])
                 if m["n_runs"] != grid * units:

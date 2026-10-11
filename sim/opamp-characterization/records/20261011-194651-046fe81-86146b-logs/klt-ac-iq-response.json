@@ -1,0 +1,1778 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 45,
+  "passed": 45,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 36
+    },
+    "by_severity": {
+      "warning": 36
+    },
+    "corners_with_diagnostics": 36
+  },
+  "metrics": {
+    "sim__corner__count": 45,
+    "sim__corner__passed_count": 45,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "46",
+    "ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "netlist_sha256": "9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-9f850cdd1456",
+      "bucket": "2am-batch-jobs-221082181346",
+      "region": "us-east-1",
+      "instance_id": "i-070d9f454470980f1",
+      "instance_type": "m6i.4xlarge",
+      "availability_zone": "us-east-1b",
+      "ami_id": "ami-0e40e3245f1923ac8",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 363,
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+g04ca88ce427c",
+      "runner_compatibility": "mismatch",
+      "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g04ca88ce427c; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 45,
+    "measurements_declared": 1,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.620V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[1,\"tt/1.620V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[10,\"ff/1.620V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[11,\"ff/1.620V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[12,\"ff/1.800V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[13,\"ff/1.800V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[14,\"ff/1.800V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[15,\"ff/1.980V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[16,\"ff/1.980V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[17,\"ff/1.980V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[18,\"ss/1.620V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[19,\"ss/1.620V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[2,\"tt/1.620V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[20,\"ss/1.620V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[21,\"ss/1.800V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[22,\"ss/1.800V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[23,\"ss/1.800V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[24,\"ss/1.980V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[25,\"ss/1.980V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[26,\"ss/1.980V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[27,\"sf/1.620V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[28,\"sf/1.620V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[29,\"sf/1.620V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[3,\"tt/1.800V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[30,\"sf/1.800V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[31,\"sf/1.800V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[32,\"sf/1.800V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[33,\"sf/1.980V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[34,\"sf/1.980V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[35,\"sf/1.980V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[36,\"fs/1.620V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[37,\"fs/1.620V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[38,\"fs/1.620V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[39,\"fs/1.800V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[4,\"tt/1.800V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[40,\"fs/1.800V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[41,\"fs/1.800V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[42,\"fs/1.980V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[43,\"fs/1.980V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[44,\"fs/1.980V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[5,\"tt/1.800V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[6,\"tt/1.980V/-40C\",\"i_vdd_a\"]/observation",
+      "measurement:[7,\"tt/1.980V/27C\",\"i_vdd_a\"]/observation",
+      "measurement:[8,\"tt/1.980V/125C\",\"i_vdd_a\"]/observation",
+      "measurement:[9,\"ff/1.620V/-40C\",\"i_vdd_a\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.620V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.620V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"ff/1.620V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"ff/1.620V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"ff/1.800V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"ff/1.800V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"ff/1.800V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[15,\"ff/1.980V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[16,\"ff/1.980V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[17,\"ff/1.980V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[18,\"ss/1.620V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[19,\"ss/1.620V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.620V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[20,\"ss/1.620V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[21,\"ss/1.800V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[22,\"ss/1.800V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[23,\"ss/1.800V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[24,\"ss/1.980V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[25,\"ss/1.980V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[26,\"ss/1.980V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[27,\"sf/1.620V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[28,\"sf/1.620V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[29,\"sf/1.620V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"tt/1.800V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[30,\"sf/1.800V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[31,\"sf/1.800V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[32,\"sf/1.800V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[33,\"sf/1.980V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[34,\"sf/1.980V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[35,\"sf/1.980V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[36,\"fs/1.620V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[37,\"fs/1.620V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[38,\"fs/1.620V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[39,\"fs/1.800V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"tt/1.800V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[40,\"fs/1.800V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[41,\"fs/1.800V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[42,\"fs/1.980V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[43,\"fs/1.980V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[44,\"fs/1.980V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"tt/1.800V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"tt/1.980V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"tt/1.980V/27C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"tt/1.980V/125C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"ff/1.620V/-40C\",\"i_vdd_a\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.7.0+g04ca88ce427c",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "i_vdd_a",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.620V/-40C",
+        "value": -6.46498e-05,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.620V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 62.163,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.46498e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.620V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 63.939,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.50436e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.620V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 63.416,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.54042e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 63.688,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.55395e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 63.817,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.57449e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 62.233,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.59654e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 63.787,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.61972e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 62.092,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.62997e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.980V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 59.363,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.64299e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/tt_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 59.573,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.49644e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 59.372,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.53017e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.620V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 60.577,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.5632e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 60.875,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.57642e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 61.026,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.59529e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.800V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 61.479,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.61646e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 61.076,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.64198e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 59.272,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.65069e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 59.472,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.66284e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 59.424,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.42433e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 60.877,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.47358e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 61.125,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.51484e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 61.024,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.53124e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 61.125,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.5535e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.800V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 61.178,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.57644e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 58.668,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.59792e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 59.07,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.60954e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.980V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 58.772,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.62328e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/ss_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 60.177,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.50703e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 60.576,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.53865e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.620V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 60.577,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.5702e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 60.627,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.58438e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 60.628,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.60214e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 58.518,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.62239e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 58.771,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.64938e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 58.769,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.65708e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.980V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 59.722,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.6684e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/sf_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 60.522,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.40509e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 60.07,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.46044e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.620V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 59.97,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.50525e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 60.123,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.52266e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 49.228,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.54613e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 49.005,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.56996e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 49.001,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.59046e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 49.771,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.60296e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.980V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 49.614,
+      "measurements": [
+        {
+          "name": "i_vdd_a",
+          "value": -6.61738e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-110/sim/opamp-characterization/records/20261011-194651-046fe81-86146b-logs/klt-ac-iq/fs_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}
