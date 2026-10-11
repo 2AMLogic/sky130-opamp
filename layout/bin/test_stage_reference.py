@@ -110,7 +110,7 @@ class CommittedNetlist(unittest.TestCase):
             for param in ("L=1.2", "W=6.03", "nf=1", "m=1", "mult=1"):
                 self.assertIn(f" {param}", card)
             # the continuation line's parameters were joined on
-            self.assertIn("nrs=0.04809286898839137", card)
+            self.assertIn("nrs=0.0480928689883914", card)
 
     def test_full_first_stage_selection_preserves_terminal_order(self):
         body = build_reference(
@@ -125,7 +125,7 @@ class CommittedNetlist(unittest.TestCase):
         self.assertTrue(
             body[4].startswith("XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 ")
         )
-        self.assertIn(" W=4.634", body[3])
+        self.assertIn(" W=4.635", body[3])
 
     def test_cards_match_source_tokens_exactly(self):
         # every token of the selected card is a token of the source card

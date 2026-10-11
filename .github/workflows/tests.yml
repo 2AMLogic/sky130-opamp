@@ -48,7 +48,7 @@ jobs:
           python sim/lib/dut_identity.py validate
           python sim/lib/dut_identity.py current
 
-      - name: Compensation-passive grid legality (issue #131)
+      - name: Canonical MOS + compensation-passive grid legality (issues #131, #120)
         run: python design/bin/grid_check.py
 
       - name: Run unit tests

@@ -36,12 +36,12 @@ class CompareUnit(unittest.TestCase):
 
     def test_sch_path_and_format_ignored(self):
         t = NETLIST.read_text()
-        u = t.replace("** sch_path: ", "** sch_path: /elsewhere", 1).replace("W=6.03 ", "W=6.030 ")
+        u = t.replace("** sch_path: ", "** sch_path: /elsewhere", 1).replace("W=6.030 ", "W=6.03 ")
         self.assertEqual(nc.compare(u, t), [])
 
     def test_hand_edited_width_fails(self):
         t = NETLIST.read_text()
-        self.assertTrue(nc.compare(t.replace("W=6.03 ", "W=6.04 "), t))
+        self.assertTrue(nc.compare(t.replace("W=6.030 ", "W=6.04 "), t))
 
     def test_hand_edited_derived_param_fails(self):
         t = NETLIST.read_text()

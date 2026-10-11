@@ -4,7 +4,7 @@
   "evidence": {
     "1": {
       "file": "design/netlist/opamp_core.sources.evidence.json",
-      "content_hash": "sha256:6234ec4b5745ac53091e5a0eecb34633b239d95545585df25c06d01173e84d13"
+      "content_hash": "sha256:fe8735fdcc5055e99a182eff7de7caacf53047394a998a8492c419764bd22093"
     },
     "8": {
       "file": "sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json",

@@ -26,10 +26,46 @@ class PassiveGridTests(unittest.TestCase):
         self.assertEqual(len(found), 1, found)
         self.assertIn("L=15.623", found[0])
 
-    def test_mos_class_is_opt_in(self):
+    def test_mos_class_is_default_and_opt_out(self):
         mos = "XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1\n"
         self.assertEqual(gc.violations(mos, ("passive",)), [])
         self.assertEqual(len(gc.violations(mos, ("passive", "mos"))), 1)
+
+    def test_committed_mos_widths_on_grid(self):
+        self.assertEqual(gc.violations(NETLIST.read_text(), ("passive", "mos")), [])
+
+    def test_prior_dr007_widths_are_rejected(self):
+        for w in ("4.634", "7.819"):
+            card = f"XM sky130_fd_pr__nfet_01v8 L=1.2 W={w} nf=1\n"
+            self.assertEqual(len(gc.violations(card, ("mos",))), 1, w)
+        self.assertNotIn("W=4.634", NETLIST.read_text())
+        self.assertNotIn("W=7.819", NETLIST.read_text())
+
+    def test_default_cli_checks_mos(self):
+        import tempfile, pathlib
+        with tempfile.TemporaryDirectory() as d:
+            f = pathlib.Path(d) / "n.spice"
+            f.write_text("XM3 a b c d sky130_fd_pr__pfet_01v8 L=0.3 W=4.634 nf=1\n")
+            self.assertEqual(gc.main([str(f)]), 1)
+
+    def test_group_widths_and_multiplicities_preserved(self):
+        import re
+        text = NETLIST.read_text().replace("\n+", "")
+        def card(n):
+            m = re.search(rf"^{n} .*$", text, re.M).group(0)
+            return {k.lower(): v for k, v in (t.split("=") for t in m.split() if "=" in t)}
+        for n in ("XM3", "XM4", "XM6"):
+            self.assertEqual(float(card(n)["w"]), 4.635, n)
+        for n in ("XMB1", "XM5", "XM7"):
+            self.assertEqual(float(card(n)["w"]), 7.82, n)
+        self.assertEqual([int(card(n)["m"]) for n in ("XM3", "XM4", "XM6")], [1, 1, 10])
+        self.assertEqual([int(card(n)["m"]) for n in ("XMB1", "XM5", "XM7")], [1, 2, 10])
+
+    def test_per_finger_width_checked(self):
+        bad = "XM sky130_fd_pr__nfet_01v8 L=1 W=4.64 nf=3\n"   # 1.54667 per finger
+        ok = "XM sky130_fd_pr__nfet_01v8 L=1 W=4.65 nf=3\n"    # 1.55 per finger
+        self.assertEqual(len(gc.violations(bad, ("mos",))), 1)
+        self.assertEqual(gc.violations(ok, ("mos",)), [])
 
     def test_candidate_lengths_on_grid(self):
         for ok in (9.765, 9.76, 15.62):

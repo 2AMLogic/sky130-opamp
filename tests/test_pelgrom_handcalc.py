@@ -12,7 +12,7 @@ class Core(unittest.TestCase):
     def test_parse_core_geometry(self):
         c = hc.parse_core()
         self.assertEqual((c["XM1"]["kind"], c["XM1"]["w"], c["XM1"]["l"]), ("nfet", 6.03, 1.2))
-        self.assertEqual((c["XM3"]["kind"], c["XM3"]["w"], c["XM3"]["l"]), ("pfet", 4.634, 0.3))
+        self.assertEqual((c["XM3"]["kind"], c["XM3"]["w"], c["XM3"]["l"]), ("pfet", 4.635, 0.3))
         self.assertEqual(c["XM6"]["mult"], 10.0)
 
 

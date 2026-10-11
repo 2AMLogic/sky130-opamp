@@ -1206,6 +1206,24 @@ worst 1 % settling 40.5 ns (ss, 125 C). Report only; no spec target edited.
 | fs | 27 | 66.5 | 3.60 | 3.30 | -0.29 | 32.5 |
 | fs | 125 | 64.6 | 4.99 | 4.44 | -0.56 | 39.5 |
 
+### Grid-legal canonical widths (issue #120, DR-013)
+
+[`DR-013`](../../spec/decision-records/DR-013-grid-legal-mos-widths.md) moves
+`XM3`/`XM4`/`XM6` 4.634 -> 4.635 um and `XMB1`/`XM5`/`XM7` 7.819 -> 7.820 um
+(the 0.005 um manufacturing grid), superseding only those DR-007 width
+numbers. Fleet records on the new canonical netlist (DUT `sha256:e954d17d...`,
+paired supplies, 0 failed units, jobs listed in each record's `klt_jobs[]`):
+
+- `20261011-140526-04489d4-7e5893` -- `pvt_sweep.py --fleet --backend batch
+  --analyses ac,tran_sr,dc_swing`, 45/45. Every binding corner is unchanged
+  from the DR-007-width baseline `20261010-103340-ba1dfa8-0241c1`: gain 61.64 dB
+  @ FS/125, GBW 17.92 MHz @ SS/125, PM 63.94 deg @ SF/27, SR rise/fall
+  19.88/11.03 V/us @ SS/-40, swing 0.9485 Vpp @ SS/-40, Pq 131.9 uW @ FF/125.
+  Non-binding FS swing points show +/-0.02 V `vout_min` jitter (see DR-013).
+- `20261011-141126-04489d4-b4ac6f` -- `pvt_sweep.py --backend batch --analyses
+  icmr,cmrr,tran_step`, 60/60 (ICMR width 0.4519 V @ SS/-40; CMRR@100 Hz worst
+  55.11 / 69.34 dB mid / window; overshoot 4.87 % @ SF/27; settle 40.5 ns).
+
 ## What this experiment does not do
 
 - **Does not touch `spec/target-spec.md` or the gap-to-T1 tracker

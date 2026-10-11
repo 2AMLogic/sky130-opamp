@@ -77,7 +77,7 @@ E {}
 * M3: first-stage mirror reference (diode-connected), 1 unit PMOS, 5 uA
 C {sky130_fd_pr/pfet_01v8.sym} -800 0 0 0 {name=M3
 L=0.3
-W=4.634
+W=4.635
 nf=1
 mult=1
 model=pfet_01v8
@@ -94,7 +94,7 @@ C {devices/lab_pin.sym} -760 0 0 0 {name=l4 lab=vdd}
 * M4: first-stage mirror output, 1 unit PMOS (1:1 with M3), 5 uA
 C {sky130_fd_pr/pfet_01v8.sym} -400 0 0 0 {name=M4
 L=0.3
-W=4.634
+W=4.635
 nf=1
 mult=1
 model=pfet_01v8
@@ -145,7 +145,7 @@ C {devices/lab_pin.sym} -360 400 0 0 {name=l16 lab=vss}
 * M5: tail current source, 2 unit NMOS (2:1 from MB1), I_SS = 10 uA
 C {sky130_fd_pr/nfet_01v8.sym} -800 800 0 0 {name=M5
 L=1.2
-W=7.819
+W=7.820
 nf=1
 mult=2
 model=nfet_01v8
@@ -162,7 +162,7 @@ C {devices/lab_pin.sym} -760 800 0 0 {name=l20 lab=vss}
 * MB1: diode-connected bias reference, 1 unit NMOS, Iref = 5 uA
 C {sky130_fd_pr/nfet_01v8.sym} -400 800 0 0 {name=MB1
 L=1.2
-W=7.819
+W=7.820
 nf=1
 mult=1
 model=nfet_01v8
@@ -179,7 +179,7 @@ C {devices/lab_pin.sym} -360 800 0 0 {name=l24 lab=vss}
 * M6: Class-A common-source gain device, 10 unit PMOS (10:1 on M3/M4), ID2 = 50 uA
 C {sky130_fd_pr/pfet_01v8.sym} 400 0 0 0 {name=M6
 L=0.3
-W=4.634
+W=4.635
 nf=1
 mult=10
 model=pfet_01v8
@@ -196,7 +196,7 @@ C {devices/lab_pin.sym} 440 0 0 0 {name=l28 lab=vdd}
 * M7: output current sink, 10 unit NMOS (10:1 from MB1), ID2 = 50 uA
 C {sky130_fd_pr/nfet_01v8.sym} 400 400 0 0 {name=M7
 L=1.2
-W=7.819
+W=7.820
 nf=1
 mult=10
 model=nfet_01v8
