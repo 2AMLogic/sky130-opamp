@@ -25,7 +25,9 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -284,9 +286,13 @@ def provenance(payload: dict) -> dict:
 # ------------------------------------------------------------- the ledger ----
 
 def load_ledger(label: str, records: Path | None = None) -> dict[str, list[dict]]:
-    """step -> attempt metas (ordered by attempt), read from committed summaries."""
+    """step -> attempt metas (ordered by record id = time), read from committed
+    summaries. A request file with NO summary (the run was interrupted while
+    the request was in flight) is an orphan attempt: it is counted against the
+    caps, as an unaccepted attempt, because it may have reached the backend."""
     records = Path(records) if records else RECORDS
     led: dict[str, list[dict]] = {}
+    seen = set()
     for p in sorted(records.glob("*.summary.json")):
         try:
             meta = json.loads(p.read_text())
@@ -295,9 +301,20 @@ def load_ledger(label: str, records: Path | None = None) -> dict[str, list[dict]
         d = meta.get("drift") if isinstance(meta, dict) else None
         if isinstance(d, dict) and d.get("label") == label:
             meta["_path"] = str(p)
+            seen.add(meta["record_id"])
             led.setdefault(d["step"], []).append(meta)
+    pat = re.compile(rf"^(\d{{8}}-\d{{6}}-offset-{re.escape(label)}-(?P<step>[A-Za-z0-9_]+?)(?:-r\d+)?-[0-9a-f]{{6}})\.request\.json$")
+    for p in sorted(records.glob("*.request.json")):
+        m = pat.match(p.name)
+        if m and m.group(1) not in seen and m.group("step") in {"B0_ref", "P0_replay", "B1", "B2", "B3", "B4"}:
+            led.setdefault(m.group("step"), []).append(
+                {"record_id": m.group(1), "exit_code": None, "orphan": True,
+                 "stderr": "orphan request: no summary record (run interrupted while in flight)",
+                 "drift": {"label": label, "step": m.group("step"), "attempt": 0}})
     for v in led.values():
-        v.sort(key=lambda m: m["drift"]["attempt"])
+        v.sort(key=lambda m: m["record_id"])
+        for i, m in enumerate(v, 1):
+            m["drift"]["attempt"] = i
     return led
 
 
@@ -480,7 +497,7 @@ def budget_ok(plan: dict, led: dict, step: dict) -> tuple[bool, str]:
 
 
 def execute(plan: dict, label: str, snap_dir: Path, dut: dict, backend: str | None = None,
-            submit=default_submit, records: Path | None = None, log=print) -> dict:
+            submit=default_submit, records: Path | None = None, log=lambda m: print(m, flush=True), retry_wait_s: float = 0) -> dict:
     """Run (or resume) the plan sequentially; return the final report dict.
 
     Retries only whole requests, same IDs, until accepted or the cap. Stops
@@ -500,6 +517,9 @@ def execute(plan: dict, label: str, snap_dir: Path, dut: dict, backend: str | No
                 log(f"STOP {name}: {why}")
                 break
             attempt = len(led.get(name, [])) + 1
+            if attempt > 1 and retry_wait_s:
+                log(f"{name}: attempt {attempt - 1} not accepted; waiting {retry_wait_s}s before the retry")
+                time.sleep(retry_wait_s)
             req = build_step_request(plan, step, netlist)
             extra = {"dut": dut, "drift": {"label": label, "step": name, "attempt": attempt,
                                           "condition": step["condition"], "plan": PLAN_PATH.name}}
@@ -545,6 +565,8 @@ def main(argv=None) -> int:
         p.add_argument("--label", required=True)
         if name != "report":
             p.add_argument("--backend")
+            p.add_argument("--retry-wait-s", type=float, default=300,
+                           help="wait before a retry (fleet-capacity refusals are common); default 300")
         if name == "run":
             p.add_argument("--dry-run", action="store_true",
                            help="capture the DUT, write (not submit) the six request files")
@@ -563,7 +585,7 @@ def main(argv=None) -> int:
                           json.dumps(build_step_request(plan, s, op.snapshot_netlist(snap_dir)), indent=2) + "\n")
                 print(rid)
             return 0
-        rep = execute(plan, a.label, snap_dir, dut, a.backend)
+        rep = execute(plan, a.label, snap_dir, dut, a.backend, retry_wait_s=a.retry_wait_s)
         rep = {"label": a.label, "dut": dut, **rep}
         a.write = True
     if a.write:

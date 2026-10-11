@@ -325,6 +325,28 @@ class Execute(unittest.TestCase):
         self.assertEqual(rep["conditions"]["B1"]["stats"]["n_requested"], 100)   # N not inflated
         self.assertEqual(rep["outcome"], "VERDICTS_ISSUED")
 
+    def test_orphan_request_counts_against_the_cap(self):
+        rec = Path(self.tmp.name)
+        (rec / "20261011-000000-offset-t-B0_ref-aaaaaa.request.json").write_text("{}")     # interrupted, no summary
+        (rec / "20261011-000001-offset-t-B0_ref-r2-bbbbbb.request.json").write_text("{}")
+        led = od.load_ledger("t", rec)
+        self.assertEqual([m["drift"]["attempt"] for m in led["B0_ref"]], [1, 2])
+        fleet = FakeFleet(self.tmp.name)
+        rep = run_plan(fleet, self.tmp.name)
+        self.assertEqual([a for _, s, a in fleet.calls if s == "B0_ref"], [3])           # only one attempt left
+        self.assertEqual(rep["outcome"], "VERDICTS_ISSUED")
+        self.assertEqual(len(rep["accounting"]["attempts"]["B0_ref"]), 3)
+        fleet2 = FakeFleet(self.tmp.name)
+        fleet2.fail_calls = {1}
+        with tempfile.TemporaryDirectory() as t2:
+            r2 = Path(t2)
+            (r2 / "20261011-000000-offset-t-B0_ref-aaaaaa.request.json").write_text("{}")
+            (r2 / "20261011-000001-offset-t-B0_ref-r2-bbbbbb.request.json").write_text("{}")
+            fleet2.records = r2
+            rep2 = od.execute(PLAN, "t", r2 / "d", {"sha256": "x"}, None, submit=fleet2, records=r2, log=lambda *_: None)
+        self.assertEqual(rep2["outcome"], "STOPPED_NO_REFERENCE_OR_PROBE")
+        self.assertEqual(len(fleet2.calls), 1)
+
     def test_resume_does_not_resubmit_and_preserves_attempts(self):
         fleet = FakeFleet(self.tmp.name)
         run_plan(fleet, self.tmp.name)
