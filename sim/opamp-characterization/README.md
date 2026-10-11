@@ -264,6 +264,21 @@ unchanged. The `.include` of the R+C typical files is satisfied by the
 `.lib <sky130.lib.spice> <corner>` section klt appends, which stages correctly
 on the batch backend (verified by the passing fleet record).
 
+### Fixed-input-common-mode swing diagnostic (issue #181)
+
+```bash
+# 45 units = (dc_swing + swing_fixcm) x 15 points, plus icmr (5 requests x 3) -- all on the Spot batch fleet
+python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses dc_swing,swing_fixcm,icmr --timeout-s 600
+```
+
+`swing_fixcm` is **opt-in** and klt-only (zero local ngspice units, like
+`icmr`); the default analysis set and the `dc_swing` bench, rule and CSV are
+unchanged. Run it in the same campaign as `dc_swing` and `icmr`: the record's
+`swing_fixcm_comparison` only joins rows of **this** campaign (same DUT
+snapshot, same fleet, same grid) and lists any point it cannot match. Method,
+validity and extraction rules: "Fixed-input-common-mode swing diagnostic" under
+Methodology; result: "Output-swing attribution (issue #181)" below.
+
 ### Independent supply mode (issue #110)
 
 The default **paired** mode is unchanged: one VDD per process (TT/SF/FS 1.80 V,
@@ -331,6 +346,7 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (and the `icmr,cmrr` `klt sim` path) |
 | `testbench/opamp_icmr.spice.tmpl`, `opamp_cmrr.spice.tmpl` | `klt sim` circuit-body benches: input common-mode range (output held at mid-rail) and CMRR (Adm and Acm in one deck) (issue #53) |
 | `records/<id>-{icmr,cmrr}.csv` | Per-point ICMR edges / CMRR(f) for the issue #53 benches; `<id>-logs/` holds the klt requests, responses and per-corner decks |
+| `testbench/opamp_swing_fixcm.spice.tmpl`, `records/<id>-swing-fixcm.csv` | `klt sim` circuit body and per-point result of the fixed-input-common-mode output-swing diagnostic (issue #181); the record JSON's `swing_fixcm_comparison` sets it against `dc_swing` and `icmr` |
 | `testbench/psrr_vdd.cir`, `psrr_vss.cir`, `noise.cir` | Circuit-body benches (no `.control`/`.end`) for `klt sim`: PSRR+ , PSRR-, input-referred noise (issue #54) |
 | `bin/psrr_noise_sweep.py` | Writes the three `klt sim` requests, runs them on the configured backend, writes the PSRR/noise records |
 | `bin/validate_psrr_noise.py` | Four independent single-corner cross-checks of those benches (DC finite difference, band-limited noise, negative control) |
@@ -563,6 +579,78 @@ a same-deck quantity. Run at two DC common-mode points: `0.5*VDD` and
 `0.956 V` (centre of the 0.888..1.024 V target window). Reported at 1 Hz, 10 Hz,
 100 Hz, 1 kHz, 10 kHz, 100 kHz and 1 MHz plus GBW; the spot frequency named for
 comparison is 1 kHz.
+
+### Fixed-input-common-mode swing diagnostic (`opamp_swing_fixcm.spice.tmpl`, issue #181)
+
+Question: is the unity-buffer swing edge set by the **output stage**, or by the
+**input common mode** moving with the output? The follower cannot say (its
+input CM *is* its output). This bench sweeps the output and holds the input CM.
+
+**Method.** One amplifier, `CL = 2 pF`, `Iref = 5 uA`, no DC load on `out`.
+`v(cm) = 0.5*v(vdd)`; the inputs are driven **symmetrically** about it,
+`inp = cm + vid/2`, `inn = cm - vid/2`, so `(inp + inn)/2 = Vcm` exactly at every
+point. A behavioural DC servo sets
+`vid = 0.25 V * tanh((v(set) - v(out)) / 0.25 V)` (gain 1, smooth clamp at
++-0.25 V); `v(set) = VDD * k/360`, `k = 0..360` (the `dc_swing` input grid). The
+servo node is carried as `e = 100 * vid` so micro-volt `vid` steps sit far above
+ngspice's default `vntol` (DR-006: the body's only `.option` is `scale=1u`). The
+sweep is returned as the klt waveform; `fixcm_extract()` in `bin/pvt_sweep.py`
+applies the rules below. `Vcm = VDD/2` lies inside the 40 dB ICMR window at all
+15 points of record `20261009-103006-566b9a5` (closest: FS/-40 C, 0.90 V in
+0.739..1.505 V; SS/-40 C, 0.81 V in 0.717..1.169 V); each campaign re-checks it
+against its own `icmr` rows (`vcm_inside_icmr`).
+
+**Extraction.** Local open-loop gain `A_i = d out / d vid` by central
+difference. From the point whose `v(out)` is nearest `VDD/2`, walk outward over
+valid points while `A >= floor`; each edge is interpolated in dB between the
+last passing and the first failing point (stop `gain_floor`), or is the last
+swept point if the gain holds to the end of the sweep (stop `sweep_end`, i.e. a
+rail edge). Floors: **12.04 dB (A = 4) is primary**: a follower's slope
+`A/(1+A)` is then 0.8, the `dc_swing` rule's own threshold, so the primary
+edges are directly comparable with the unity-buffer edges. 40 dB and 60 dB (the
+ratified gain target, not edited) form a sensitivity band (`*_40db`,
+`*_60db`; `nan` when the mid-supply gain is below that floor). Also reported:
+the required `vid` at mid-supply (the input offset) and at both primary edges.
+
+**Validity (stated before the 15-point campaign; fixed after the SS/-40 C and
+TT/27 C method probes below).** A point is valid when `|vid| <= 50 mV` (input
+pair in its small-signal regime, far below the 0.25 V clamp, so a valid point is
+never a clamped one) and `out` and `vid` both increase across it. A unit
+**fails** (an error in the record, no row) when: the waveform is missing,
+unreadable, non-finite or short; its supply is not the point's VDD; the set-point
+sweep does not cover 0..VDD; the input CM deviates from `Vcm` by more than 1 uV
+anywhere; `v(inp) - v(inn)` differs from `v(e)/100`; the mid-supply point is
+invalid or has `A` below the primary floor ("invalid operating interval"); or a
+primary walk reaches an invalid point while the gain is still above the floor
+(non-convergence or a broken assumption is a reported failure, never a limit).
+Batch responses without `environment.remote` are refused.
+
+**Headroom indicators (labelled proxies).** The fleet runner (klt 0.5.0) takes
+`.meas` cards only, so no `@m...[vdsat]`/`[id]` is probed; the waveform does
+carry every node voltage and source current. Reported at mid-supply and at both
+primary edges: `m6_vsg = VDD - v(d2)` (output PMOS gate drive; at fixed current
+it rises when M6 leaves saturation), `m2_vds = v(d2) - v(tail)` (input-pair
+headroom on the d2 side), `tail = v(tail)` (tail-source VDS), `m3_vsg =
+VDD - v(d1)` (mirror diode, tracks the tail current), `iq = -i(vdd)` (with no DC
+load on `out`, its change from mid is the output-branch M6 = M7 current change).
+`v(out)` itself is M7's VDS and `VDD - v(out)` M6's VSD. These are **proxies**:
+a saturation claim is never made from them alone. The same proxies are read from
+the same-campaign `dc_swing` waveform at that bench's own edges
+(`buffer_headroom`); the `dc_swing` CSV is untouched.
+
+**Attribution rule** (`swing_fixcm_comparison`, per side, primary floor,
+tolerance 0.02 V = 4 sweep steps at 1.8 V): buffer edge inside the fixed-CM edge
+by more than the tolerance -> `input_cm` (the output stage still has gain there,
+so the follower's moving input CM binds first); within the tolerance ->
+`output_stage`; fixed-CM edge inside the buffer edge -> `inconsistent`. A side
+is `conclusive` only when `Vcm` lies inside that point's ICMR window and the
+result is not `inconsistent`. `buffer_edge_cm_outside_icmr` records whether the
+follower's CM at its edge (= its output) lies outside the same point's 40 dB
+ICMR window -- corroboration, not part of the rule (the ICMR is a 40 dB CMRR
+criterion, the follower's a 20 % slope criterion).
+
+**Not** a rail-clipped open-loop transfer: every reported edge is a local
+small-signal gain crossing at a valid, servo-held operating point.
 
 ## Results by row
 
@@ -1010,6 +1098,43 @@ Two earlier fleet attempts (`20261009-095419-72db8ef`, `20261009-101813-72db8ef`
 each had 7 failed units (fleet-side non-convergence in the per-supply-group
 layout) and are not committed; the per-corner layout with `.nodeset` seeding at
 566b9a5 passed 45 / 45.
+
+## Output-swing attribution (issue #181)
+
+> Record [`records/20261011-101231-39ac614-274895.md`](records/20261011-101231-39ac614-274895.md):
+> `--fleet --backend batch --analyses dc_swing,swing_fixcm,icmr`, one DUT snapshot
+> (`sha256:feb7cff4...`, canonical design), **45 / 45 units on the Spot batch fleet, 0 failed**
+> (jobs `klt-sim-56fb89e886aa` dc-swing, `klt-sim-7f3722a6aa01` swing-fixcm, five icmr jobs;
+> runner klt 0.5.0). Report only: no sizing, topology, target or `dc_swing` figure is changed.
+
+**Method probes first.** Before the grid, the body was run as single-unit local `klt sim`
+probes at SS / -40 C and TT / 27 C (not committed; both points are in the fleet record): the
+servo converged at default tolerances with 0 invalid points, a smooth local gain (67.0 / 65.8 dB at
+mid-supply, equal to the AC bench's `gain_dc_db`), and edge `|vid|` of a few mV, which fixed the
+validity constants above before the 15-point campaign.
+
+**Result** (12.04 dB = follower-equivalent floor; full table, 40 / 60 dB columns and proxies in the
+record):
+
+| Point | Unity buffer | Fixed-CM output stage, A >= 4 | 40 dB | 60 dB | ICMR (40 dB) |
+|---|---|---|---|---|---|
+| SS / -40 C / 1.62 V | 0.254 .. 1.203 V (0.948 Vpp) | 0.003 .. 1.597 V (1.594 Vpp) | 0.053 .. 1.536 V | 0.133 .. 1.442 V | 0.717 .. 1.169 V |
+| TT / 27 C / 1.80 V | 0.126 .. 1.531 V (1.405 Vpp) | 0.004 .. 1.778 V (1.775 Vpp) | 0.066 .. 1.709 V | 0.160 .. 1.602 V | 0.667 .. 1.472 V |
+
+- **High side: `input_cm` at 15 / 15 points.** The output stage holds A >= 4 to within 19-27 mV of
+  VDD at fixed common mode; the follower stops 0.07-0.44 V lower, where `v(d2) - v(tail)` is only
+  57-127 mV (input pair out of drain headroom).
+- **Low side: `input_cm` at 11 / 15**, `output_stage` (both benches within 8 mV of 0 V: the rail) at
+  TT/FF/SS/SF 125 C. At every `input_cm` low edge the tail node is at ~0 V and the mirror-diode VSG
+  has collapsed (tail current starved).
+- **SS / -40 C, the DR-007 open item**: the 0.948 Vpp unity-buffer swing is an input-stage
+  common-mode limit on both sides. A local single-corner device-parameter check of the same bodies
+  (record `-ss-n40-device-check/`) shows M5 in triode with ~0 drain current at the low edge and
+  M1 / M2 entering triode at the high edge while M6 / M7 stay saturated; at fixed `Vcm` the output
+  stage reaches 1.48 Vpp at 40 dB and 1.31 Vpp at 60 dB, bracketing DR-002's ~1.39 Vpp estimate.
+- Reproduction: the same-campaign `dc_swing` matches the fleet baseline `0241c1` (`vout_max_v` within
+  8 uV; `vout_min_v` identical except TT/27 C, +0.026 V, and SF/-40 C, +0.015 V, the known flat
+  0.8-slope crossing) and the `icmr` 40 dB edges match record `566b9a5` exactly.
 
 ## Closed-loop small-step bench: AC phase margin cross-check (issue #86)
 

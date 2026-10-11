@@ -168,7 +168,7 @@ class AggregationTests(unittest.TestCase):
             w.writerow({"bogus": 1})
 
 
-TEXT_COLUMNS = {"corner", "cm_point", "low_limiter", "high_limiter"}
+TEXT_COLUMNS = {"corner", "cm_point", "low_limiter", "high_limiter", "low_stop", "high_stop"}
 
 
 def pvt_records():
@@ -1200,6 +1200,392 @@ class FleetAnalysisTests(unittest.TestCase):
             for a in pvt.FLEET_ANALYSES:
                 self.assertEqual(len(list(csv.DictReader((records / Path(rec["links"][f"{a}_csv"]).name).open()))), 15)
         self.assertEqual(hashlib.sha256(canon.read_bytes()).hexdigest(), canon_hash)
+
+
+def fixcm_sweep(vdd=1.8, a0=2000.0, lo=0.1, hi=None, vos=0.0, n=pvt.SWING_POINTS, proxies=True):
+    """Synthetic fixed-CM sweep that obeys the body's equations exactly: an
+    amplifier out = c + h*tanh(a0*(vid+vos)/h) (rails lo/hi, analytic local gain
+    a0*(1 - tanh^2)) closed by the tanh servo vid = C*tanh(KS*(set-out)/C),
+    set = VDD*k/n. Solved per point by bisection; returns waveform columns."""
+    hi = vdd - 0.1 if hi is None else hi
+    c, h = 0.5 * (lo + hi), 0.5 * (hi - lo)
+    clamp, ks, g = pvt.FIXCM_VID_CLAMP_V, pvt.FIXCM_KS, pvt.FIXCM_G
+    vcm = pvt.FIXCM_VCM_FRAC * vdd
+    cols = {k: [] for k in ("v(sw)", "v(set)", "v(out)", "v(e)", "v(inp)", "v(inn)", "v(vdd)", "v(cm)",
+                            "v(xdut.d1)", "v(xdut.d2)", "v(xdut.tail)", "i(vdd)")}
+    for k in range(n + 1):
+        sw = k / n
+        st = vdd * sw
+        a, b = -1.0, vdd + 1.0  # residual out - F(servo(out)) increases with out
+        for _ in range(200):
+            m = 0.5 * (a + b)
+            vid = clamp * math.tanh(ks * (st - m) / clamp)
+            if m - (c + h * math.tanh(a0 * (vid + vos) / h)) > 0:
+                b = m
+            else:
+                a = m
+        out = 0.5 * (a + b)
+        vid = clamp * math.tanh(ks * (st - out) / clamp)
+        e = g * vid
+        for key, val in (("v(sw)", sw), ("v(set)", st), ("v(out)", out), ("v(e)", e),
+                         ("v(inp)", vcm + e / (2 * g)), ("v(inn)", vcm - e / (2 * g)), ("v(vdd)", vdd),
+                         ("v(cm)", vcm), ("v(xdut.d1)", vdd - 1.0), ("v(xdut.d2)", vdd - 1.0 - 0.1 * (out - vcm)),
+                         ("v(xdut.tail)", 0.2), ("i(vdd)", -6e-5 - 1e-6 * out)):
+            cols[key].append(val)
+    if not proxies:
+        for key in pvt.FIXCM_PROXY_NODES:
+            cols.pop(key)
+    return cols
+
+
+def write_wave(path, cols):
+    names = list(cols)
+    path.write_text(json.dumps({"plotname": "DC transfer characteristic",
+                                "variables": [{"index": i, "name": nm} for i, nm in enumerate(names)],
+                                "points": [list(p) for p in zip(*(cols[nm] for nm in names))]}))
+    return str(path)
+
+
+def analytic_edge(vdd, a0, floor_db, lo=0.1, hi=None):
+    hi = vdd - 0.1 if hi is None else hi
+    c, h = 0.5 * (lo + hi), 0.5 * (hi - lo)
+    x = math.sqrt(1.0 - 10 ** (floor_db / 20.0) / a0)  # a0*(1-x^2) = floor
+    return c - h * x, c + h * x
+
+
+class SwingFixcmTests(unittest.TestCase):
+    """Issue #181: fixed-input-common-mode output-swing diagnostic. Simulator-free."""
+
+    STEP = 1.8 / pvt.SWING_POINTS
+
+    # -- request / deck rendering -------------------------------------------
+    def test_request_and_body_rendering(self):
+        req, body, tag = klt_request("swing_fixcm", temps=(-40.0, 27.0, 125.0))
+        self.assertEqual(tag, "swing-fixcm")
+        self.assertEqual(pvt.body_template("swing_fixcm").name, "opamp_swing_fixcm.spice.tmpl")
+        self.assertEqual(req["analysis"], klt_request("dc_swing")[0]["analysis"])  # same 0..VDD grid as dc_swing
+        self.assertTrue(req["options"]["waveforms"] and req["options"]["keep_artifacts"])
+        self.assertEqual(req["backend"], "batch")
+        self.assertEqual(req["batch"]["runner_version_check"], pvt.RUNNER_VERSION_CHECK[0])
+        self.assertTrue(all("spice" in m and "expr" not in m for m in req["measurements"]))  # klt 0.5.0 runner
+        keep = {(c, v) for c in req["corners"]["process"] for v in req["corners"]["supply_v"]["vdd"]}
+        for ex in req["exclude"]:
+            keep.discard((ex["process"], ex["supply_v"]["vdd"]))
+        self.assertEqual(keep, {(c, pvt.VDD_BY_CORNER[c]) for c in pvt.DEFAULT_CORNERS})
+        live = "\n".join(ln for ln in body.splitlines() if not ln.lstrip().startswith("*")) + "\n"
+        self.assertNotRegex(body, r"\{[A-Za-z_]")  # comments too: every placeholder rendered
+        for forbidden in (".control", ".end\n", ".lib", ".temp", "wrdata"):
+            self.assertNotIn(forbidden, live)
+        self.assertNotRegex(live + json.dumps(req), r"(?i)reltol|abstol|vntol|\.options?\s+(?!scale)")  # DR-006
+        self.assertIn('.include "opamp_core.spice"', live)
+        # symmetric drive about a FIXED common mode; servo scaled by G, clamped by tanh
+        self.assertIn("Bcm cm 0 V = 0.5*v(vdd)", live)
+        self.assertIn("Binp inp 0 V = v(cm) + v(e)/(2*100)", live)
+        self.assertIn("Binn inn 0 V = v(cm) - v(e)/(2*100)", live)
+        self.assertIn("Be e 0 V = 25*tanh(1*100*(v(set) - v(out))/25)", live)
+        self.assertIn("Bset set 0 V = v(vdd)*v(sw)", live)
+
+    def test_cartesian_request_carries_every_supply(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, _t = pvt.build_klt_request("swing_fixcm", None, None, FakeKltPdk(), ["tt"], [27.0], Path(d),
+                                             "batch", "cartesian", None)
+            req = json.loads(path.read_text())
+        self.assertNotIn("exclude", req)
+        self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
+
+    def test_opt_in_and_schema(self):
+        self.assertIn("swing_fixcm", pvt.KLT_ANALYSES)
+        self.assertNotIn("swing_fixcm", pvt.DEFAULT_ANALYSES)
+        self.assertEqual(pvt.FIXCM_PRIMARY, "12db")
+        self.assertAlmostEqual(pvt.FIXCM_GAIN_FLOORS_DB["12db"], 20 * math.log10(4))  # follower slope 0.8
+        self.assertAlmostEqual(4 / (1 + 4), 0.8)
+        self.assertLess(pvt.FIXCM_VID_VALID_V, pvt.FIXCM_VID_CLAMP_V)
+        self.assertEqual(len(pvt.FIELDNAMES["swing_fixcm"]), len(set(pvt.FIELDNAMES["swing_fixcm"])))
+
+    # -- boundary extraction -------------------------------------------------
+    def test_edges_match_the_analytic_gain_floors(self):
+        vdd, a0 = 1.8, 2000.0
+        row = pvt.fixcm_extract(vdd, fixcm_sweep(vdd, a0))
+        self.assertEqual((row["low_stop"], row["high_stop"]), ("gain_floor", "gain_floor"))
+        self.assertAlmostEqual(row["gain_mid_db"], 20 * math.log10(a0), delta=0.05)
+        self.assertAlmostEqual(row["vcm_v"], 0.9)
+        for label, floor in pvt.FIXCM_GAIN_FLOORS_DB.items():
+            sfx = "" if label == pvt.FIXCM_PRIMARY else f"_{label}"
+            lo, hi = analytic_edge(vdd, a0, floor)
+            with self.subTest(floor=label):
+                self.assertAlmostEqual(row[f"out_low_v{sfx}"], lo, delta=self.STEP)
+                self.assertAlmostEqual(row[f"out_high_v{sfx}"], hi, delta=self.STEP)
+                self.assertAlmostEqual(row[f"out_width_v{sfx}"], row[f"out_high_v{sfx}"] - row[f"out_low_v{sfx}"])
+        # wider floors nest: 60 dB inside 40 dB inside 12 dB
+        self.assertLess(row["out_low_v"], row["out_low_v_40db"])
+        self.assertLess(row["out_low_v_40db"], row["out_low_v_60db"])
+        self.assertGreater(row["out_high_v"], row["out_high_v_40db"])
+        # required differential input at the edges, signed, small-signal
+        self.assertLess(row["vid_low_v"], 0)
+        self.assertGreater(row["vid_high_v"], 0)
+        self.assertLess(max(abs(row["vid_low_v"]), abs(row["vid_high_v"])), pvt.FIXCM_VID_VALID_V)
+        self.assertEqual(row["n_invalid_points"] >= 0, True)
+
+    def test_input_offset_is_reported_not_mistaken_for_a_limit(self):
+        row = pvt.fixcm_extract(1.8, fixcm_sweep(1.8, 2000.0, vos=2e-3))
+        self.assertAlmostEqual(row["vid_mid_v"], -2e-3, delta=1e-4)
+        lo, hi = analytic_edge(1.8, 2000.0, pvt.FIXCM_GAIN_FLOORS_DB["12db"])
+        self.assertAlmostEqual(row["out_high_v"], hi, delta=self.STEP)
+
+    def test_gain_held_to_the_sweep_end_is_a_rail_edge(self):
+        # amplifier rails beyond 0..VDD: the gain never falls below 12 dB inside the sweep
+        row = pvt.fixcm_extract(1.8, fixcm_sweep(1.8, 2000.0, lo=-0.5, hi=2.3))
+        self.assertEqual((row["low_stop"], row["high_stop"]), ("sweep_end", "sweep_end"))
+        self.assertAlmostEqual(row["out_low_v"], 0.0, delta=1e-3)
+        self.assertAlmostEqual(row["out_high_v"], 1.8, delta=1e-3)
+
+    def test_mid_gain_below_a_secondary_floor_reports_nan_not_a_width(self):
+        row = pvt.fixcm_extract(1.8, fixcm_sweep(1.8, 300.0))  # 49.5 dB: no 60 dB interval exists
+        self.assertTrue(math.isnan(row["out_width_v_60db"]))
+        self.assertFalse(math.isnan(row["out_width_v_40db"]))
+
+    def test_headroom_proxies_are_derived_from_saved_nodes(self):
+        row = pvt.fixcm_extract(1.8, fixcm_sweep(1.8))
+        self.assertAlmostEqual(row["m6_vsg_mid_v"], 1.0, delta=1e-3)  # VDD - v(d2) at out ~ Vcm
+        self.assertAlmostEqual(row["m2_vds_mid_v"], 1.8 - 1.0 - 0.2, delta=1e-3)
+        self.assertAlmostEqual(row["tail_high_v"], 0.2)
+        self.assertGreater(row["m6_vsg_high_v"], row["m6_vsg_mid_v"])  # the synthetic d2 falls as out rises
+        self.assertAlmostEqual(row["iq_mid_a"], 6e-5 + 0.9e-6, delta=1e-8)
+        bare = pvt.fixcm_extract(1.8, fixcm_sweep(1.8, proxies=False))  # node names absent (candidate netlist)
+        self.assertTrue(all(math.isnan(bare[k]) for k in bare if k.startswith(("m6_", "m2_", "tail_", "m3_", "iq_"))))
+        self.assertEqual(bare["out_low_v"], row["out_low_v"])
+
+    # -- malformed / incomplete data -----------------------------------------
+    def test_malformed_and_incomplete_waveforms_fail_the_unit(self):
+        good = fixcm_sweep(1.8)
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            cases = {"missing file": str(d / "none.json"), "no artifact": None}
+            junk = d / "junk.json"
+            junk.write_text("{not json")
+            cases["junk"] = str(junk)
+            cases["short"] = write_wave(d / "short.json", {k: v[:40] for k, v in good.items()})
+            cases["no v(e)"] = write_wave(d / "noe.json", {k: v for k, v in good.items() if k != "v(e)"})
+            nan = dict(good, **{"v(out)": good["v(out)"][:100] + [float("nan")] + good["v(out)"][101:]})
+            cases["nan"] = write_wave(d / "nan.json", nan)
+            cases["truncated sweep"] = write_wave(d / "trunc.json", {k: v[:300] for k, v in good.items()})
+            cm = dict(good, **{"v(inp)": [x + 1e-3 for x in good["v(inp)"]]})
+            cases["cm not held"] = write_wave(d / "cm.json", cm)
+            inc = dict(good, **{"v(e)": [x * 1.01 for x in good["v(e)"]]})
+            cases["vid inconsistent"] = write_wave(d / "inc.json", inc)
+            for label, wf in cases.items():
+                with self.subTest(label), self.assertRaises(sh.HarnessError):
+                    pvt.swing_fixcm_row("tt", 27.0, {"artifacts": {"waveform": wf}, "status": "pass", "runtime_s": 1.0})
+            ok = write_wave(d / "ok.json", good)
+            with self.assertRaises(sh.HarnessError):  # a 1.8 V sweep presented as the 1.98 V ff corner
+                pvt.swing_fixcm_row("ff", 27.0, {"artifacts": {"waveform": ok}, "status": "pass", "runtime_s": 1.0})
+            row = pvt.swing_fixcm_row("tt", 27.0, {"artifacts": {"waveform": ok}, "status": "pass", "runtime_s": 2.0})
+        self.assertEqual(set(row), set(pvt.FIELDNAMES["swing_fixcm"]))
+        self.assertEqual(row["elapsed_s"], 2.0)
+
+    # -- invalid operating interval ------------------------------------------
+    def test_invalid_operating_interval_is_a_failure_not_a_limit(self):
+        with self.assertRaisesRegex(sh.HarnessError, "invalid operating interval"):
+            pvt.fixcm_extract(1.8, fixcm_sweep(1.8, a0=2.0))  # no point anywhere reaches the primary floor
+        with self.assertRaisesRegex(sh.HarnessError, "invalid operating interval"):
+            pvt.fixcm_extract(1.8, fixcm_sweep(1.8, vos=0.08))  # mid needs |vid| > the small-signal bound
+        glitch = fixcm_sweep(1.8)
+        m = min(range(len(glitch["v(out)"])), key=lambda i: abs(glitch["v(out)"][i] - 0.9))
+        glitch["v(out)"][m + 1] = glitch["v(out)"][m - 1] - 0.01  # non-monotonic at mid-supply
+        with self.assertRaisesRegex(sh.HarnessError, "invalid operating interval"):
+            pvt.fixcm_extract(1.8, glitch)
+
+    def test_edge_reached_at_an_invalid_point_fails_instead_of_reporting_a_limit(self):
+        w = fixcm_sweep(1.8)
+        i = min(range(len(w["v(out)"])), key=lambda k: abs(w["v(out)"][k] - 1.3))  # deep in the high-gain region
+        w["v(out)"][i] = w["v(out)"][i - 2]  # convergence glitch: out not increasing
+        with self.assertRaisesRegex(sh.HarnessError, "high edge not measurable"):
+            pvt.fixcm_extract(1.8, w)
+
+    # -- comparison ----------------------------------------------------------
+    @staticmethod
+    def rows(f_lo, f_hi, b_lo, b_hi, i_lo=0.7, i_hi=1.2, vdd=1.62, corner="ss", temp=-40.0):
+        k = {"corner": corner, "temp_c": temp, "vdd_v": vdd}
+        fix = dict(k, vcm_v=0.5 * vdd, out_low_v=f_lo, out_high_v=f_hi, out_width_v=f_hi - f_lo,
+                   low_stop="gain_floor", high_stop="gain_floor", vid_low_v=-1e-3, vid_high_v=2e-3)
+        buf = dict(k, vout_min_v=b_lo, vout_max_v=b_hi, vpp_v=b_hi - b_lo)
+        icmr = dict(k, icmr_low_v=i_lo, icmr_high_v=i_hi)
+        return fix, buf, icmr
+
+    def test_attribution_rules(self):
+        fix, buf, icmr = self.rows(0.01, 1.59, 0.254, 1.203, 0.717, 1.169)
+        c = pvt.swing_fixcm_comparison([fix], [buf], [icmr])
+        r = c["table"][0]
+        self.assertEqual((r["low"]["attribution"], r["high"]["attribution"]), ("input_cm", "input_cm"))
+        self.assertTrue(r["vcm_inside_icmr"] and r["low"]["conclusive"] and r["high"]["conclusive"])
+        self.assertEqual((r["low"]["buffer_edge_cm_outside_icmr"], r["high"]["buffer_edge_cm_outside_icmr"]),
+                         (True, True))
+        self.assertEqual(c["summary"], {"low: input_cm": 1, "high: input_cm": 1})
+        # edges agreeing within tolerance -> output stage; a fixed-CM edge inside the buffer's -> inconsistent
+        fix, buf, icmr = self.rows(0.25, 1.15, 0.254, 1.203)
+        r = pvt.swing_fixcm_comparison([fix], [buf], [icmr])["table"][0]
+        self.assertEqual((r["low"]["attribution"], r["high"]["attribution"]), ("output_stage", "inconsistent"))
+        self.assertFalse(r["high"]["conclusive"])
+
+    def test_attribution_without_icmr_or_with_vcm_outside_is_inconclusive(self):
+        fix, buf, icmr = self.rows(0.01, 1.59, 0.254, 1.203, i_lo=0.85, i_hi=1.2)  # Vcm 0.81 outside
+        r = pvt.swing_fixcm_comparison([fix], [buf], [icmr])["table"][0]
+        self.assertFalse(r["vcm_inside_icmr"])
+        self.assertFalse(r["low"]["conclusive"] or r["high"]["conclusive"])
+        r = pvt.swing_fixcm_comparison([fix], [buf], None)["table"][0]
+        self.assertIsNone(r["vcm_inside_icmr"])
+        self.assertFalse(r["low"]["conclusive"])
+
+    def test_unmatched_points_are_listed_not_compared(self):
+        fix, buf, _i = self.rows(0.01, 1.59, 0.254, 1.203)
+        c = pvt.swing_fixcm_comparison([fix], [dict(buf, temp_c=27.0)], [])
+        self.assertEqual((c["points"], len(c["unmatched"])), (0, 1))
+        self.assertEqual(pvt.swing_fixcm_comparison([fix], None, None)["points"], 0)
+
+    # -- dc_swing is unchanged -----------------------------------------------
+    def test_dc_swing_rule_and_schema_unchanged(self):
+        self.assertEqual(pvt.FIELDNAMES["dc_swing"],
+                         ["corner", "temp_c", "vdd_v", "vout_min_v", "vout_max_v", "vpp_v",
+                          "vpp_pct_of_vdd", "sweep_vout_min_v", "sweep_vout_max_v", "elapsed_s"])
+        self.assertEqual(pvt.DEFAULT_ANALYSES, ("ac", "tran_sr", "dc_swing"))
+        rec = "20261010-103340-ba1dfa8-0241c1"  # committed fleet baseline: recompute from its own waveform
+        wf = RECORDS / f"{rec}-logs" / "klt-dc-swing" / "ss_1p620V_n40C" / "waveform.raw.json"
+        if not wf.is_file():
+            self.skipTest("baseline waveform artifact not present")
+        want = next(r for r in csv.DictReader((RECORDS / f"{rec}-dc-swing.csv").open())
+                    if (r["corner"], r["temp_c"]) == ("ss", "-40.0"))
+        got = pvt.dc_swing_row("ss", -40.0, {"artifacts": {"waveform": str(wf)}, "status": "pass", "runtime_s": 0})
+        for k in ("vout_min_v", "vout_max_v", "vpp_v"):
+            self.assertEqual(repr(got[k]), want[k], k)
+        hr = pvt.buffer_edge_headroom({"artifacts": {"waveform": str(wf)}}, got)
+        self.assertEqual(hr["low"]["vout_v"], got["vout_min_v"])
+        self.assertEqual(hr["high"]["vout_v"], got["vout_max_v"])
+
+    # -- campaign against a mocked fleet -------------------------------------
+    def _fake_klt(self, d, mutate=None, env=None):
+        d = Path(d)
+
+        def fake(req_path, out_dir, bk):
+            Path(out_dir).mkdir(parents=True, exist_ok=True)
+            req = json.loads(Path(req_path).read_text())
+            kind = req["netlist"].split("-body")[0]
+            excl = {(e["process"], e["supply_v"]["vdd"]) for e in req.get("exclude", [])}
+            units = []
+            for c in req["corners"]["process"]:
+                for t in req["corners"]["temperature_c"]:
+                    for v in req["corners"]["supply_v"]["vdd"]:
+                        if (c, v) in excl:
+                            continue
+                        if kind == "swing-fixcm":
+                            wave = fixcm_sweep(v, n=60)
+                            meas = [{"name": "vout_mid_v", "value": 0.5 * v}]
+                        else:  # dc-swing: a follower clipped 0.25 V from each rail
+                            vin = [v * k / pvt.SWING_POINTS for k in range(pvt.SWING_POINTS + 1)]
+                            wave = {"v(inp)": vin, "v(out)": [min(max(x, 0.25), v - 0.25) for x in vin]}
+                            meas = [{"name": "vout_mid_v", "value": 0.5 * v}]
+                        unit = {"process": c, "temperature_c": t, "supply_v": {"vdd": v}, "status": "pass",
+                                "runtime_s": 1.0, "diagnostics": [], "measurements": meas,
+                                "artifacts": {"waveform": write_wave(d / f"{kind}-{c}-{t:g}-{v:g}.json", wave)}}
+                        if mutate:
+                            unit = mutate(kind, unit)
+                            if unit is None:
+                                continue
+                        units.append(unit)
+            return {"status": "pass", "corner_count": len(units), "corners": units,
+                    "environment": {"remote": {"job_id": f"j-{kind}"}} if env is None else env}
+        return fake
+
+    def _campaign(self, d, analyses, **kw):
+        from unittest import mock
+        d = Path(d)
+        (d / "snap").mkdir()
+        (d / "logs").mkdir()
+        results, errors, jobs = {a: [] for a in analyses}, [], []
+        with mock.patch.object(pvt, "run_klt_sim", self._fake_klt(d, **kw)), \
+                FleetAnalysisTests._armed(self):
+            pvt.run_klt_analyses(analyses, FakeKltPdk(), list(pvt.DEFAULT_CORNERS), [-40.0, 27.0, 125.0], "batch",
+                                 d / "req", d / "logs", d / "snap", results, errors, jobs)
+        return results, errors, jobs
+
+    def test_campaign_rows_and_buffer_headroom_without_local_sim(self):
+        # the synthetic fixcm sweep has only 61 points: relax the completeness floor for this mock
+        from unittest import mock
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(pvt, "SWING_POINTS", 60):
+            results, errors, jobs = self._campaign(d, ["swing_fixcm"])
+        self.assertEqual(errors, [])
+        self.assertEqual(len(results["swing_fixcm"]), 15)
+        self.assertTrue(all(set(r) == set(pvt.FIELDNAMES["swing_fixcm"]) for r in results["swing_fixcm"]))
+        self.assertEqual([j["remote"]["job_id"] for j in jobs], ["j-swing-fixcm"])
+
+    def test_campaign_failures_are_errors_and_no_remote_is_refused(self):
+        from unittest import mock
+
+        def mutate(kind, u):
+            if u["process"] == "ss" and u["temperature_c"] == -40.0:
+                return None  # absent unit
+            if u["process"] == "tt":
+                u["artifacts"] = {"waveform": None}  # missing waveform
+            if u["process"] == "ff" and u["temperature_c"] == 125.0:
+                u["status"] = "error"
+                u["diagnostics"] = [{"severity": "error", "code": "timeout", "message": "corner timed out"}]
+            return u
+
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(pvt, "SWING_POINTS", 60):
+            results, errors, _j = self._campaign(d, ["swing_fixcm"], mutate=mutate)
+        self.assertEqual(len(results["swing_fixcm"]), 15 - 1 - 3 - 1)
+        self.assertEqual(len(errors), 5)
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(pvt, "SWING_POINTS", 60):
+            results, errors, _j = self._campaign(d, ["swing_fixcm"], env={})
+        self.assertEqual(results["swing_fixcm"], [])
+        self.assertTrue(errors and all("no environment.remote" in e for e in errors))
+
+    def test_end_to_end_record_carries_settings_and_same_campaign_comparison(self):
+        from unittest import mock
+
+        class Pdk:
+            matches_pin, variant, root, installed_commit = True, "sky130A", Path("/pdk"), "abc"
+            pin = {"open_pdks_commit": "abc"}
+            own_pin = {"rc_corner": {"choice": "typical"}}
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            root.mkdir()
+            records, snaps = root / "records", root / "snaps"
+            patches = [
+                mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
+                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), mock.patch.object(pvt, "resolve_pdk", lambda: Pdk()),
+                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
+                mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
+                mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
+                mock.patch.object(pvt, "run_klt_sim", self._fake_klt(Path(d))),
+                mock.patch.object(pvt, "ACTIVE_DUT", [pvt.DESIGN_NETLIST]),
+                mock.patch.object(pvt, "SWING_POINTS", 60),
+            ]
+            cand = root / "dut.spice"
+            cand.write_text("* dut\n")
+            with FleetAnalysisTests._armed(self):
+                for p in patches:
+                    p.start()
+                try:
+                    rc = pvt.main(["--fleet", "--backend", "batch", "--analyses", "dc_swing,swing_fixcm",
+                                   "--netlist", str(cand)])
+                finally:
+                    mock.patch.stopall()
+                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
+            self.assertEqual(rc, 0)
+            rec = json.loads(next(records.glob("*.json")).read_text())
+            rows = list(csv.DictReader((records / Path(rec["links"]["swing_fixcm_csv"]).name).open()))
+        self.assertEqual(rec["matrix"]["n_runs"], 30)
+        self.assertEqual(rec["matrix"]["swing_fixcm"]["primary_floor"], "12db")
+        self.assertEqual(rec["matrix"]["swing_fixcm"]["vcm_frac_of_vdd"], 0.5)
+        self.assertEqual(rec["matrix"]["swing_fixcm"]["solver_settings"]["policy"], "DR-006")
+        self.assertEqual(len(rows), 15)
+        self.assertEqual(list(rows[0]), pvt.FIELDNAMES["swing_fixcm"])
+        cmp_ = rec["swing_fixcm_comparison"]
+        self.assertEqual((cmp_["points"], cmp_["unmatched"]), (15, []))
+        # the mocked follower clips 0.25 V from each rail, the mocked output stage only 0.1 V from it
+        self.assertEqual(cmp_["summary"], {"low: input_cm (inconclusive)": 15, "high: input_cm (inconclusive)": 15})
+        self.assertIsNotNone(cmp_["table"][0]["low"]["buffer_headroom"])
 
 
 class EffectiveBackendTests(unittest.TestCase):

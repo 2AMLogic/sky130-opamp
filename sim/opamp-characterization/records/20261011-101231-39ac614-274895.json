@@ -1,0 +1,1454 @@
+{
+  "record_id": "20261011-101231-39ac614-274895",
+  "timestamp": "2026-10-11T10:24:23.304641+00:00",
+  "git": {
+    "sha": "39ac614"
+  },
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/opamp_core.spice",
+    "sha256": "sha256:feb7cff49291aa308cbe3c07f5ea207f73fdf73110ac24647aacdb4753db9530"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "dc_swing",
+      "swing_fixcm",
+      "icmr"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 45,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "dc_swing",
+        "swing_fixcm",
+        "icmr"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    },
+    "swing_fixcm": {
+      "vcm_frac_of_vdd": 0.5,
+      "servo_scale_g": 100.0,
+      "servo_gain_ks": 1.0,
+      "vid_clamp_v": 0.25,
+      "vid_valid_v": 0.05,
+      "cm_tol_v": 1e-06,
+      "gain_floors_db": {
+        "12db": 12.041199826559248,
+        "40db": 40.0,
+        "60db": 60.0
+      },
+      "primary_floor": "12db",
+      "attribution_tol_v": 0.02,
+      "sweep": "Vsw 0 1.000001 0.00277777777778 (v(set) = VDD*v(sw))",
+      "load": {
+        "cl_f": "2p",
+        "dc_load": "none (Cload only)"
+      },
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+g0301a1404ce8",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "dc-swing",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 116.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-56fb89e886aa",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0ae87dbb385d2cf41",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 78,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 4
+        },
+        "by_severity": {
+          "warning": 4
+        },
+        "corners_with_diagnostics": 4
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/dc-swing-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-dc-swing-response.json"
+    },
+    {
+      "tag": "swing-fixcm",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 116.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-7f3722a6aa01",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-07a5cc456a341e4fb",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 82,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/swing-fixcm-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-swing-fixcm-response.json"
+    },
+    {
+      "tag": "icmr-tt",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 211.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-273502fc6170",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-072e819e8b136081a",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 165,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/icmr-tt-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-icmr-tt-response.json"
+    },
+    {
+      "tag": "icmr-ff",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 180.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-155320ef5529",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-011df7e228be143b1",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 130,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/icmr-ff-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-icmr-ff-response.json"
+    },
+    {
+      "tag": "icmr-ss",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 145.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-5fe67a5a76ea",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00d6263a2453a96b1",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 107,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/icmr-ss-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-icmr-ss-response.json"
+    },
+    {
+      "tag": "icmr-sf",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 145.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a0b1b49cc91f",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-008f548c0aa337deb",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 104,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/icmr-sf-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-icmr-sf-response.json"
+    },
+    {
+      "tag": "icmr-fs",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 269.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-d1b8b4d3ded3",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-07af70a1265331bf0",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 232,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+g0301a1404ce8",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+g0301a1404ce8; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261011-101231-39ac614-274895/icmr-fs-request.json",
+      "response": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-logs/klt-icmr-fs-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "swing_fixcm_comparison": {
+    "rule": {
+      "primary_floor": "12db",
+      "primary_floor_db": 12.041199826559248,
+      "tolerance_v": 0.02,
+      "input_cm": "buffer edge inside the fixed-CM edge by > tolerance",
+      "output_stage": "edges agree within tolerance",
+      "inconsistent": "fixed-CM edge inside the buffer edge by > tolerance",
+      "conclusive": "fixed Vcm inside the same point's 40 dB ICMR window and not inconsistent"
+    },
+    "points": 15,
+    "unmatched": [],
+    "summary": {
+      "low: input_cm": 11,
+      "high: input_cm": 15,
+      "low: output_stage": 4
+    },
+    "icmr_available": true,
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6969,
+        "icmr_high_v": 1.426,
+        "buffer_vpp_v": 1.193631585727187,
+        "fixcm_vpp_v": 1.7772139695708555,
+        "low": {
+          "buffer_edge_v": 0.2437832254224759,
+          "fixcm_edge_v": 0.002982732389138012,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0029825908696132198,
+            "m6_vsg_v": 0.9528633071049443,
+            "m6_vsg_mid_v": 1.1097888551428636,
+            "m2_vds_v": 0.6694549054805351,
+            "tail_v": 0.1776817874145207,
+            "iq_a": 1.754427433736661e-05,
+            "iq_mid_a": 6.553965787919891e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2437832254224759,
+            "vcm_v": 0.260000000000208,
+            "m6_vsg_v": 1.094040114286105,
+            "m2_vds_v": 0.7059598142274222,
+            "tail_v": 7.148647293707843e-08,
+            "m3_vsg_v": 0.5539890755677361,
+            "iq_a": 5.207415962512479e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.437414811149663,
+          "fixcm_edge_v": 1.7801967019599936,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0041969139407773,
+            "m6_vsg_v": 1.3027270023538342,
+            "m6_vsg_mid_v": 1.1097888551428636,
+            "m2_vds_v": 0.32049717012466145,
+            "tail_v": 0.17677582752150447,
+            "iq_a": 7.009613802892999e-05,
+            "iq_mid_a": 6.553965787919891e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.437414811149663,
+            "vcm_v": 1.445000000001151,
+            "m6_vsg_v": 1.1235450094104167,
+            "m2_vds_v": 0.059608886294914454,
+            "tail_v": 0.6168461042946689,
+            "m3_vsg_v": 1.1042898825386875,
+            "iq_a": 6.903208220143675e-05
+          }
+        }
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6668,
+        "icmr_high_v": 1.4723,
+        "buffer_vpp_v": 1.404951984725248,
+        "fixcm_vpp_v": 1.7746036072493205,
+        "low": {
+          "buffer_edge_v": 0.1260371400338728,
+          "fixcm_edge_v": 0.003741252299527452,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0037409730385526392,
+            "m6_vsg_v": 0.795616160813509,
+            "m6_vsg_mid_v": 0.9841406244088224,
+            "m2_vds_v": 0.7936590300764764,
+            "tail_v": 0.2107248091100146,
+            "iq_a": 1.787942107434048e-05,
+            "iq_mid_a": 6.574495328570684e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.1260371400338728,
+            "vcm_v": 0.144999999999681,
+            "m6_vsg_v": 0.9622433424555397,
+            "m2_vds_v": 0.8377564624032393,
+            "tail_v": 1.951412210976539e-07,
+            "m3_vsg_v": 0.39051894108822904,
+            "iq_a": 5.037714697072454e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.530989124759121,
+          "fixcm_edge_v": 1.778344859548848,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004741037662804733,
+            "m6_vsg_v": 1.2049583902631251,
+            "m6_vsg_mid_v": 0.9841406244088224,
+            "m2_vds_v": 0.3853133745237808,
+            "tail_v": 0.20972823521309397,
+            "iq_a": 6.954966705864444e-05,
+            "iq_mid_a": 6.574495328570684e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.530989124759121,
+            "vcm_v": 1.539999999996606,
+            "m6_vsg_v": 1.0018419122315796,
+            "m2_vds_v": 0.07021972104606644,
+            "tail_v": 0.727938366722354,
+            "m3_vsg_v": 0.9813301175661232,
+            "iq_a": 6.916054895729495e-05
+          }
+        }
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.634,
+        "icmr_high_v": 1.5774,
+        "buffer_vpp_v": 1.6467976493707286,
+        "fixcm_vpp_v": 1.770666809770225,
+        "low": {
+          "buffer_edge_v": 0.005263819703059447,
+          "fixcm_edge_v": 0.00490787006771329,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004907239675336428,
+            "m6_vsg_v": 0.5800144138658201,
+            "m6_vsg_mid_v": 0.798363438941283,
+            "m2_vds_v": 0.9665459107117591,
+            "tail_v": 0.2534396754224208,
+            "iq_a": 1.82555294150899e-05,
+            "iq_mid_a": 6.596539675962632e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.005263819703059447,
+            "vcm_v": 0.020000000000016,
+            "m6_vsg_v": 0.5850181582237641,
+            "m2_vds_v": 1.214980519164297,
+            "tail_v": 1.322611938951498e-06,
+            "m3_vsg_v": 0.18955396933963198,
+            "iq_a": 8.90152767296648e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.652061469073788,
+          "fixcm_edge_v": 1.7755746798379382,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.005616895087640983,
+            "m6_vsg_v": 1.0498592835845095,
+            "m6_vsg_mid_v": 0.798363438941283,
+            "m2_vds_v": 0.49778524099093807,
+            "tail_v": 0.2523554754245524,
+            "iq_a": 6.908648003773109e-05,
+            "iq_mid_a": 6.596539675962632e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.652061469073788,
+            "vcm_v": 1.660000000001322,
+            "m6_vsg_v": 0.8258353615772134,
+            "m2_vds_v": 0.10023226004511265,
+            "tail_v": 0.873932378377674,
+            "m3_vsg_v": 0.7999558741256281,
+            "iq_a": 6.93003536584233e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6801,
+        "icmr_high_v": 1.6208,
+        "buffer_vpp_v": 1.430020721590449,
+        "fixcm_vpp_v": 1.9576971268445706,
+        "low": {
+          "buffer_edge_v": 0.2293852261084339,
+          "fixcm_edge_v": 0.003318763627201214,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0033185686889675857,
+            "m6_vsg_v": 0.911638979648137,
+            "m6_vsg_mid_v": 1.0678389737862264,
+            "m2_vds_v": 0.7966996475151504,
+            "tail_v": 0.2716613728367125,
+            "iq_a": 1.817098123191307e-05,
+            "iq_mid_a": 6.641987097272262e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2293852261084339,
+            "vcm_v": 0.2475000000001981,
+            "m6_vsg_v": 1.048065533951831,
+            "m2_vds_v": 0.9319343859420398,
+            "tail_v": 8.010612913319733e-08,
+            "m3_vsg_v": 0.4643654674539319,
+            "iq_a": 5.199199654405684e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.659405947698883,
+          "fixcm_edge_v": 1.9610158904717718,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004327755809010012,
+            "m6_vsg_v": 1.2562927133362494,
+            "m6_vsg_mid_v": 1.0678389737862264,
+            "m2_vds_v": 0.4528699200907103,
+            "tail_v": 0.2708373665730403,
+            "iq_a": 7.157314826323989e-05,
+            "iq_mid_a": 6.641987097272262e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.659405947698883,
+            "vcm_v": 1.666500000001327,
+            "m6_vsg_v": 1.0865209786924512,
+            "m2_vds_v": 0.06264561128401425,
+            "tail_v": 0.8308334100235345,
+            "m3_vsg_v": 1.0651852042456023,
+            "iq_a": 7.070292806336809e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6505,
+        "icmr_high_v": 1.6845,
+        "buffer_vpp_v": 1.6640328984533368,
+        "fixcm_vpp_v": 1.9550234746278166,
+        "low": {
+          "buffer_edge_v": 0.08742724514453924,
+          "fixcm_edge_v": 0.004171107066193239,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004170720072056939,
+            "m6_vsg_v": 0.7511125739159901,
+            "m6_vsg_mid_v": 0.940377062922173,
+            "m2_vds_v": 0.9229807145876048,
+            "tail_v": 0.3059067114964051,
+            "iq_a": 1.85047605643085e-05,
+            "iq_mid_a": 6.650690991710784e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.08742724514453924,
+            "vcm_v": 0.110000000000088,
+            "m6_vsg_v": 0.909111384964415,
+            "m2_vds_v": 1.0708885029292805,
+            "tail_v": 1.121063045097121e-07,
+            "m3_vsg_v": 0.26933834751586105,
+            "iq_a": 4.748290784512693e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.751460143597876,
+          "fixcm_edge_v": 1.9591945816940097,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004842955435581786,
+            "m6_vsg_v": 1.154672431295022,
+            "m6_vsg_mid_v": 0.940377062922173,
+            "m2_vds_v": 0.5203363066765867,
+            "tail_v": 0.3049912620283911,
+            "iq_a": 7.079934850266712e-05,
+            "iq_mid_a": 6.650690991710784e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.751460143597876,
+            "vcm_v": 1.760000000001402,
+            "m6_vsg_v": 0.963726280851926,
+            "m2_vds_v": 0.07340269784077647,
+            "tail_v": 0.9428710213072975,
+            "m3_vsg_v": 0.9408623364136,
+            "iq_a": 7.057530812542429e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6191,
+        "icmr_high_v": 1.7967,
+        "buffer_vpp_v": 1.858259223192379,
+        "fixcm_vpp_v": 1.9499375603710618,
+        "low": {
+          "buffer_edge_v": 0.004479423631233105,
+          "fixcm_edge_v": 0.006284818045674281,
+          "fixcm_stop": "gain_floor",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0054466217343671465,
+            "m6_vsg_v": 0.5300636303631314,
+            "m6_vsg_mid_v": 0.74990331292855,
+            "m2_vds_v": 1.0999311571748112,
+            "tail_v": 0.3500052124620575,
+            "iq_a": 1.946753822678323e-05,
+            "iq_mid_a": 6.662836170878705e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.004479423631233105,
+            "vcm_v": 0.0220000000000176,
+            "m6_vsg_v": 0.5062229102681459,
+            "m2_vds_v": 1.4737752042672159,
+            "tail_v": 1.885464638226221e-06,
+            "m3_vsg_v": 0.10736989979136591,
+            "iq_a": 8.377340294879465e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.862738646823612,
+          "fixcm_edge_v": 1.956222378416736,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.00575637368853867,
+            "m6_vsg_v": 0.9963032075779827,
+            "m6_vsg_mid_v": 0.74990331292855,
+            "m2_vds_v": 0.6347070607090707,
+            "tail_v": 0.3489897317129468,
+            "iq_a": 7.01339279375389e-05,
+            "iq_mid_a": 6.662836170878705e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.862738646823612,
+            "vcm_v": 1.870000000001489,
+            "m6_vsg_v": 0.788479355681585,
+            "m2_vds_v": 0.10833624053974589,
+            "tail_v": 1.083184403778669,
+            "m3_vsg_v": 0.7555023173237929,
+            "iq_a": 7.045439455262426e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.7168,
+        "icmr_high_v": 1.1686,
+        "buffer_vpp_v": 0.9484676756475507,
+        "fixcm_vpp_v": 1.5939209267691068,
+        "low": {
+          "buffer_edge_v": 0.2544767653500912,
+          "fixcm_edge_v": 0.002765583537068616,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.002765470729612388,
+            "m6_vsg_v": 0.9927030900748465,
+            "m6_vsg_mid_v": 1.1532464406559744,
+            "m2_vds_v": 0.5396404200047581,
+            "tail_v": 0.0876564899203955,
+            "iq_a": 1.662200354890508e-05,
+            "iq_mid_a": 6.424530180920707e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2544767653500912,
+            "vcm_v": 0.2700000000002158,
+            "m6_vsg_v": 1.140372008688824,
+            "m2_vds_v": 0.47962793332793724,
+            "tail_v": 5.798323886359267e-08,
+            "m3_vsg_v": 0.62236902272735,
+            "iq_a": 5.212135042338001e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.202944440997642,
+          "fixcm_edge_v": 1.5966865103061754,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004119068875354178,
+            "m6_vsg_v": 1.33276894522307,
+            "m6_vsg_mid_v": 1.1532464406559744,
+            "m2_vds_v": 0.200568260749004,
+            "tail_v": 0.08666279402792608,
+            "iq_a": 6.822735786905306e-05,
+            "iq_mid_a": 6.424530180920707e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.202944440997642,
+            "vcm_v": 1.210500000000964,
+            "m6_vsg_v": 1.162926629808803,
+            "m2_vds_v": 0.058835599205883216,
+            "tail_v": 0.3982377709853139,
+            "m3_vsg_v": 1.1448775603185393,
+            "iq_a": 6.73339727065847e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6862,
+        "icmr_high_v": 1.2741,
+        "buffer_vpp_v": 1.1886668120964767,
+        "fixcm_vpp_v": 1.5923042524005313,
+        "low": {
+          "buffer_edge_v": 0.1115760395122152,
+          "fixcm_edge_v": 0.003423964402945544,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.003423750334002963,
+            "m6_vsg_v": 0.8409953629906931,
+            "m6_vsg_mid_v": 1.028560769016703,
+            "m2_vds_v": 0.6603748589344484,
+            "tail_v": 0.1186297780748586,
+            "iq_a": 1.710379792491112e-05,
+            "iq_mid_a": 6.47367248245434e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.1115760395122152,
+            "vcm_v": 0.1305000000001044,
+            "m6_vsg_v": 1.0080266304776613,
+            "m2_vds_v": 0.6119732831145834,
+            "tail_v": 8.640775539038777e-08,
+            "m3_vsg_v": 0.4297889489470881,
+            "iq_a": 4.953095192379575e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.300242851608692,
+          "fixcm_edge_v": 1.5957282168034768,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004682900977069158,
+            "m6_vsg_v": 1.241604291279239,
+            "m6_vsg_mid_v": 1.028560769016703,
+            "m2_vds_v": 0.26085011311958456,
+            "tail_v": 0.11754559560117654,
+            "iq_a": 6.808021216150254e-05,
+            "iq_mid_a": 6.47367248245434e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.300242851608692,
+            "vcm_v": 1.309500000001043,
+            "m6_vsg_v": 1.0418561558940753,
+            "m2_vds_v": 0.06869139780820033,
+            "tail_v": 0.5094524462977245,
+            "m3_vsg_v": 1.022660508063844,
+            "iq_a": 6.773814331231809e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6512,
+        "icmr_high_v": 1.3563,
+        "buffer_vpp_v": 1.4268962600930293,
+        "fixcm_vpp_v": 1.5893305329730956,
+        "low": {
+          "buffer_edge_v": 0.007254584663290765,
+          "fixcm_edge_v": 0.004420532137202152,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004420071490507944,
+            "m6_vsg_v": 0.6390843086631778,
+            "m6_vsg_mid_v": 0.8482600472827341,
+            "m2_vds_v": 0.8216404545756022,
+            "tail_v": 0.1592752367612201,
+            "iq_a": 1.75272985564745e-05,
+            "iq_mid_a": 6.514874542790094e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.007254584663290765,
+            "vcm_v": 0.022500000000018,
+            "m6_vsg_v": 0.6695784088453491,
+            "m2_vds_v": 0.9504205979655721,
+            "tail_v": 9.931890788805217e-07,
+            "m3_vsg_v": 0.2521042902529971,
+            "iq_a": 1.02552813393067e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.43415084475632,
+          "fixcm_edge_v": 1.5937510651102977,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.00557903820851871,
+            "m6_vsg_v": 1.0954014237617569,
+            "m6_vsg_mid_v": 0.8482600472827341,
+            "m2_vds_v": 0.3664680897836087,
+            "tail_v": 0.15813048645463454,
+            "iq_a": 6.791170768850844e-05,
+            "iq_mid_a": 6.514874542790094e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.43415084475632,
+            "vcm_v": 1.444500000001151,
+            "m6_vsg_v": 0.8693863897994376,
+            "m2_vds_v": 0.08920435617759293,
+            "tail_v": 0.6614092540229696,
+            "m3_vsg_v": 0.8463597238549324,
+            "iq_a": 6.815605837362515e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6597,
+        "icmr_high_v": 1.3661,
+        "buffer_vpp_v": 1.1268645104060617,
+        "fixcm_vpp_v": 1.775251866509127,
+        "low": {
+          "buffer_edge_v": 0.2159322229351943,
+          "fixcm_edge_v": 0.002642080487966759,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.002641982128207485,
+            "m6_vsg_v": 1.0048348243177854,
+            "m6_vsg_mid_v": 1.165939953201462,
+            "m2_vds_v": 0.591046094232742,
+            "tail_v": 0.2041190814494726,
+            "iq_a": 1.732263163328751e-05,
+            "iq_mid_a": 6.584388555425091e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2159322229351943,
+            "vcm_v": 0.2300000000001841,
+            "m6_vsg_v": 1.1506685403104229,
+            "m2_vds_v": 0.649331404866787,
+            "tail_v": 5.482279017104318e-08,
+            "m3_vsg_v": 0.65475385766833,
+            "iq_a": 5.190155604779118e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.342796733341256,
+          "fixcm_edge_v": 1.7778939469970938,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": false,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.003980179795738869,
+            "m6_vsg_v": 1.3666842162151909,
+            "m6_vsg_mid_v": 1.165939953201462,
+            "m2_vds_v": 0.23027125751014302,
+            "tail_v": 0.2030445262746662,
+            "iq_a": 7.051391668563893e-05,
+            "iq_mid_a": 6.584388555425091e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.342796733341256,
+            "vcm_v": 1.350000000001076,
+            "m6_vsg_v": 1.176250675271226,
+            "m2_vds_v": 0.056707316832737886,
+            "tail_v": 0.5670420078960361,
+            "m3_vsg_v": 1.1596666900705408,
+            "iq_a": 6.879254369545479e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6256,
+        "icmr_high_v": 1.3822,
+        "buffer_vpp_v": 1.3427694447204208,
+        "fixcm_vpp_v": 1.773395595857155,
+        "low": {
+          "buffer_edge_v": 0.09319253728696718,
+          "fixcm_edge_v": 0.003193713402175794,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0031935396793325134,
+            "m6_vsg_v": 0.8574574161185493,
+            "m6_vsg_mid_v": 1.043366603689705,
+            "m2_vds_v": 0.7042366982511302,
+            "tail_v": 0.2383058856303205,
+            "iq_a": 1.752523697418074e-05,
+            "iq_mid_a": 6.6021403687333e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.09319253728696718,
+            "vcm_v": 0.109999999999758,
+            "m6_vsg_v": 1.0191923554805442,
+            "m2_vds_v": 0.7808075080586948,
+            "tail_v": 1.364607610647118e-07,
+            "m3_vsg_v": 0.4887270934759731,
+            "iq_a": 4.826647087075725e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.435961982007388,
+          "fixcm_edge_v": 1.7765893092593308,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004515380921671503,
+            "m6_vsg_v": 1.2757344501130745,
+            "m6_vsg_mid_v": 1.043366603689705,
+            "m2_vds_v": 0.28710097524077266,
+            "tail_v": 0.2371645746461529,
+            "iq_a": 6.992038587318568e-05,
+            "iq_mid_a": 6.6021403687333e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.435961982007388,
+            "vcm_v": 1.444999999996816,
+            "m6_vsg_v": 1.0568297292388442,
+            "m2_vds_v": 0.06488646060270753,
+            "tail_v": 0.6782838101584483,
+            "m3_vsg_v": 1.039505313970718,
+            "iq_a": 6.899413688751799e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.5841,
+        "icmr_high_v": 1.473,
+        "buffer_vpp_v": 1.5645580889068267,
+        "fixcm_vpp_v": 1.770362815978603,
+        "low": {
+          "buffer_edge_v": 0.004707377369862265,
+          "fixcm_edge_v": 0.00406003324264339,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004059676346924922,
+            "m6_vsg_v": 0.6612017023681331,
+            "m6_vsg_mid_v": 0.8676819936508451,
+            "m2_vds_v": 0.8563760810567322,
+            "tail_v": 0.2824222165751347,
+            "iq_a": 1.777512706052642e-05,
+            "iq_mid_a": 6.622390593352678e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.004707377369862265,
+            "vcm_v": 0.015000000000012,
+            "m6_vsg_v": 0.6698479737827541,
+            "m2_vds_v": 1.1301501144279926,
+            "tail_v": 1.911789253301962e-06,
+            "m3_vsg_v": 0.31054020584698905,
+            "iq_a": 8.564982294533008e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.569265466276689,
+          "fixcm_edge_v": 1.7744228492212464,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.005335312500739661,
+            "m6_vsg_v": 1.131280455655131,
+            "m6_vsg_mid_v": 0.8676819936508451,
+            "m2_vds_v": 0.3874874039295793,
+            "tail_v": 0.2812321404152898,
+            "iq_a": 6.942099795983915e-05,
+            "iq_mid_a": 6.622390593352678e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.569265466276689,
+            "vcm_v": 1.580000000001259,
+            "m6_vsg_v": 0.8870173821665877,
+            "m2_vds_v": 0.08024632113221286,
+            "tail_v": 0.8327362967011995,
+            "m3_vsg_v": 0.8676289748040622,
+            "iq_a": 6.925714823959733e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.7388,
+        "icmr_high_v": 1.5052,
+        "buffer_vpp_v": 1.2297105719593093,
+        "fixcm_vpp_v": 1.777015097210022,
+        "low": {
+          "buffer_edge_v": 0.2973495796427417,
+          "fixcm_edge_v": 0.003555646761703855,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.00355540703334627,
+            "m6_vsg_v": 0.8999451075924022,
+            "m6_vsg_mid_v": 1.054931719643711,
+            "m2_vds_v": 0.7482151594424845,
+            "tail_v": 0.1518397329651133,
+            "iq_a": 1.798645867401305e-05,
+            "iq_mid_a": 6.522686123289212e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2973495796427417,
+            "vcm_v": 0.3149999999993067,
+            "m6_vsg_v": 1.038397884517056,
+            "m2_vds_v": 0.7616018957589631,
+            "tail_v": 2.197239808772808e-07,
+            "m3_vsg_v": 0.445842172036955,
+            "iq_a": 5.244983854177376e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.527060151602051,
+          "fixcm_edge_v": 1.780570743971726,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004521826771350902,
+            "m6_vsg_v": 1.2302932791688217,
+            "m6_vsg_mid_v": 1.054931719643711,
+            "m2_vds_v": 0.4186455790020697,
+            "tail_v": 0.15106114182910865,
+            "iq_a": 6.963935693359091e-05,
+            "iq_mid_a": 6.522686123289212e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.527060151602051,
+            "vcm_v": 1.534999999996617,
+            "m6_vsg_v": 1.0739442140624689,
+            "m2_vds_v": 0.06366659335599567,
+            "tail_v": 0.6623891925815355,
+            "m3_vsg_v": 1.0500341382721197,
+            "iq_a": 6.920137158743928e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.7127,
+        "icmr_high_v": 1.5645,
+        "buffer_vpp_v": 1.486982969481798,
+        "fixcm_vpp_v": 1.773720501835096,
+        "low": {
+          "buffer_edge_v": 0.1297814829255231,
+          "fixcm_edge_v": 0.004859526769260967,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004424685534343931,
+            "m6_vsg_v": 0.7412735417861434,
+            "m6_vsg_mid_v": 0.9258076822373021,
+            "m2_vds_v": 0.8751710771121353,
+            "tail_v": 0.18355538110172145,
+            "iq_a": 1.8697132568876338e-05,
+            "iq_mid_a": 6.546139456081734e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.1297814829255231,
+            "vcm_v": 0.1550000000001241,
+            "m6_vsg_v": 0.9011240364626432,
+            "m2_vds_v": 0.8988758264158414,
+            "tail_v": 1.371215154295484e-07,
+            "m3_vsg_v": 0.21161060125578812,
+            "iq_a": 5.040742420740069e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.616764452407321,
+          "fixcm_edge_v": 1.7785800286043572,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.005100464387887636,
+            "m6_vsg_v": 1.1270276013815024,
+            "m6_vsg_mid_v": 0.9258076822373021,
+            "m2_vds_v": 0.4902821691321992,
+            "tail_v": 0.18269022948629857,
+            "iq_a": 6.914641860263495e-05,
+            "iq_mid_a": 6.546139456081734e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.616764452407321,
+            "vcm_v": 1.625000000001295,
+            "m6_vsg_v": 0.9503344436116967,
+            "m2_vds_v": 0.07975047096341648,
+            "tail_v": 0.7699150854248868,
+            "m3_vsg_v": 0.9241410709373369,
+            "iq_a": 6.92430425331611e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6877,
+        "icmr_high_v": 1.6792,
+        "buffer_vpp_v": 1.624627710931262,
+        "fixcm_vpp_v": 1.7663502505040727,
+        "low": {
+          "buffer_edge_v": 0.08417234053897006,
+          "fixcm_edge_v": 0.009169324165444135,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.005384479975663376,
+            "m6_vsg_v": 0.5340754915514098,
+            "m6_vsg_mid_v": 0.7320809745546359,
+            "m2_vds_v": 1.0413644476184307,
+            "tail_v": 0.22456006083015972,
+            "iq_a": 2.105966885857191e-05,
+            "iq_mid_a": 6.569958417551591e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.08417234053897006,
+            "vcm_v": 0.110000000000088,
+            "m6_vsg_v": 0.690094852477702,
+            "m2_vds_v": 1.1099004136187596,
+            "tail_v": 4.733903538588726e-06,
+            "m3_vsg_v": 0.080241328800426,
+            "iq_a": 4.422063329866111e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.708800051470232,
+          "fixcm_edge_v": 1.7755195746695167,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.006075968894631892,
+            "m6_vsg_v": 0.9640676033251138,
+            "m6_vsg_mid_v": 0.7320809745546359,
+            "m2_vds_v": 0.6122971453890765,
+            "tail_v": 0.22363525128580966,
+            "iq_a": 6.872349605563349e-05,
+            "iq_mid_a": 6.569958417551591e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.708800051470232,
+            "vcm_v": 1.715000000001366,
+            "m6_vsg_v": 0.782170915182905,
+            "m2_vds_v": 0.1268870759536359,
+            "tail_v": 0.8909420088634591,
+            "m3_vsg_v": 0.7355944899858051,
+            "iq_a": 6.920495232741464e-05
+          }
+        }
+      }
+    ]
+  },
+  "links": {
+    "dc_swing_csv": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-dc-swing.csv",
+    "swing_fixcm_csv": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-swing-fixcm.csv",
+    "icmr_csv": "sim/opamp-characterization/records/20261011-101231-39ac614-274895-icmr.csv"
+  },
+  "errors": [],
+  "elapsed_s": 711.8
+}

@@ -40,8 +40,9 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --check-env        report tool/PDK availability and exit (no simulation)
     --corners C,C       subset of {tt,ff,ss,sf,fs}      (default: all five)
     --temps T,T          temperatures in degC             (default: -40,27,125)
-    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step}
-                         (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step are opt-in)
+    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step,swing_fixcm}
+                         (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step/swing_fixcm
+                         are opt-in klt analyses)
     --backend NAME       effective `klt sim` backend for the icmr/cmrr/tran_step
                          requests AND the local-grid guard, resolved once per
                          run as explicit --backend > nonempty $KLT_SIM_BACKEND
@@ -77,7 +78,12 @@ are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
 `klt sim` request (corner/supply/temperature axes) and submitted with
 `klt sim <request> --backend batch`, and the per-corner measurement values in
 klt's JSON response are mapped into the same CSV/record scheme. No ngspice loop
-is ever run for them. Requires `klt` on PATH.
+is ever run for them. Requires `klt` on PATH. `swing_fixcm` (issue #181) is a
+klt analysis of the same kind: an output sweep at a FIXED input common mode,
+returned as a waveform and reduced by `fixcm_extract`; run it together with
+`--fleet --analyses dc_swing,swing_fixcm,icmr` so the record's
+`swing_fixcm_comparison` sets it against the unchanged unity-buffer metric and
+the ICMR window of the same DUT snapshot.
 """
 
 from __future__ import annotations
@@ -446,7 +452,7 @@ def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
 # `.lib`/`.temp`/`alter vdd` cards and the measurements live in the request.
 # --------------------------------------------------------------------------
 
-KLT_ANALYSES = ("icmr", "cmrr", "tran_step")
+KLT_ANALYSES = ("icmr", "cmrr", "tran_step", "swing_fixcm")
 SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
 
 # ICMR bench constants -- fixed before any batch result existed; the README's
@@ -666,6 +672,13 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         measurements = swing_measurements()
         vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = "dc-swing"
+    elif analysis == "swing_fixcm":
+        body_subs.update(fixcm_body_subs())
+        # same set-point grid as dc_swing's input grid: v(set) = VDD * k/360
+        analysis_card = {"kind": "dc", "args": f"Vsw 0 {SWING_END:.8g} {1.0 / SWING_POINTS:.12g}"}
+        measurements = swing_fixcm_measurements()
+        vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
+        tag = "swing-fixcm"
     else:
         body_subs.update({"VCM_EXPR": CMRR_CM_POINTS[cm_point][0], "RFB": "1e12", "CFB": "1"})
         analysis_card = {"kind": "ac", "args": "dec 20 1 1g"}
@@ -686,7 +699,7 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         "analysis": analysis_card,
         "measurements": measurements,
         "options": {"timeout_s": KLT_TIMEOUT_S[0], "keep_artifacts": True,
-                    **({"waveforms": True} if analysis == "dc_swing" else {})},
+                    **({"waveforms": True} if analysis in ("dc_swing", "swing_fixcm") else {})},
     }
     if backend == "batch":
         # The fleet image's klt (0.5.0 when this was written) is older than any
@@ -1218,6 +1231,322 @@ def pm_overshoot_summary(table: list[dict], tol_pp: float = STEP_PM_TOL_PP) -> d
             "max_abs_delta_pp": max((abs(r["delta_pp"]) for r in cmp_rows), default=None)}
 
 
+# --------------------------------------------------------------------------
+# swing_fixcm (issue #181): fixed-input-common-mode output-swing diagnostic.
+# Opt-in klt analysis (like icmr/cmrr/tran_step). The body
+# ../testbench/opamp_swing_fixcm.spice.tmpl holds the input common mode at
+# FIXCM_VCM_FRAC*VDD and servos the output across 0..VDD; the sweep comes back
+# as the klt waveform artifact and `fixcm_extract` applies the rules below.
+# It answers one question the unity-buffer dc_swing bench cannot: is that
+# bench's edge set by the output stage, or by the input common mode moving
+# with the output? `swing_fixcm_comparison` puts the two (and icmr) side by
+# side. dc_swing itself, its rule and its CSV are unchanged.
+# --------------------------------------------------------------------------
+
+FIXCM_VCM_FRAC = 0.5  # Vcm = VDD/2: inside the 40 dB ICMR at all 15 points (record 20261009-103006-566b9a5)
+FIXCM_G = 100.0  # servo node e = G * vid (resolves uV-scale vid above ngspice's default vntol, DR-006)
+FIXCM_KS = 1.0  # servo: vid = KS * (v(set) - v(out)) before the clamp
+FIXCM_VID_CLAMP_V = 0.25  # smooth tanh clamp of the servo's vid (input pair fully steered beyond it)
+FIXCM_VID_VALID_V = 0.05  # point validity: |vid| <= this keeps the input pair in its small-signal regime
+FIXCM_CM_TOL_V = 1e-6  # unit validity: |(v(inp)+v(inn))/2 - Vcm| at every point
+FIXCM_VID_CONSISTENCY_V = 1e-9  # v(inp)-v(inn) must equal v(e)/G (the body is what the extractor assumes)
+# Local open-loop gain floors. 12.04 dB = A of 4: a follower's slope A/(1+A) is
+# then 0.8, the dc_swing rule's threshold, so it is the PRIMARY (buffer-
+# equivalent) floor; 40 dB and 60 dB (the ratified gain target, not edited)
+# form the sensitivity band.
+FIXCM_GAIN_FLOORS_DB = {"12db": 20.0 * math.log10(4.0), "40db": 40.0, "60db": 60.0}
+FIXCM_PRIMARY = "12db"
+# Attribution tolerance: buffer and fixed-CM edges within this are "the same
+# edge". 4 sweep steps of VDD/360 at 1.8 V (the dc_swing fleet-vs-local lower
+# edge moved by up to 3 steps, README "Baseline fleet record").
+FIXCM_ATTRIB_TOL_V = 0.02
+FIXCM_REQUIRED = ("v(sw)", "v(out)", "v(e)", "v(inp)", "v(inn)", "v(vdd)")
+# Headroom proxies (saved node voltages / source currents; NOT device
+# operating-point parameters -- klt 0.5.0 on the fleet takes .meas cards only).
+FIXCM_PROXY_NODES = ("v(xdut.d1)", "v(xdut.d2)", "v(xdut.tail)", "i(vdd)")
+assert FIXCM_VID_VALID_V < 0.5 * FIXCM_VID_CLAMP_V  # a valid point is never a clamped one
+
+
+def fixcm_body_subs() -> dict:
+    return {"VCM_FRAC": f"{FIXCM_VCM_FRAC:g}", "G": f"{FIXCM_G:g}", "KS": f"{FIXCM_KS:g}",
+            "EMAX": f"{FIXCM_G * FIXCM_VID_CLAMP_V:g}", "VID_CLAMP": f"{FIXCM_VID_CLAMP_V:g}"}
+
+
+def swing_fixcm_measurements() -> list[dict]:
+    """Sanity `.meas` cards only; the sweep itself is the waveform artifact."""
+    return [{"name": "vout_mid_v", "unit": "V", "spice": ".meas dc vout_mid_v find v(out) at=0.5"},
+            {"name": "vcm_v", "unit": "V", "spice": ".meas dc vcm_v find v(cm) at=0.5"}]
+
+
+def load_wave(info: dict, label: str, required: Iterable[str], optional: Iterable[str] = ()) -> dict[str, list[float]]:
+    """Named columns of a unit's waveform artifact. A missing artifact, a missing
+    required column, a non-finite value or a short sweep raises HarnessError;
+    an absent optional column is simply left out."""
+    wf = (info.get("artifacts") or {}).get("waveform")
+    if not wf or not Path(wf).is_file():
+        raise HarnessError(f"{label}: missing waveform artifact ({wf!r})")
+    try:
+        doc = json.loads(Path(wf).read_text())
+        names = [str(v["name"]).lower() for v in doc["variables"]]
+        points = doc["points"]
+        out = {}
+        for k in (*required, *optional):
+            if k not in names:
+                if k in required:
+                    raise HarnessError(f"{label}: waveform lacks {k}")
+                continue
+            i = names.index(k)
+            out[k] = [float(pt[i]) for pt in points]
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as exc:
+        raise HarnessError(f"{label}: unreadable waveform artifact {wf}: {exc}") from exc
+    n = len(points)
+    if n < SWING_POINTS // 2:
+        raise HarnessError(f"{label}: incomplete sweep ({n} of ~{SWING_POINTS + 1} points)")
+    bad = [k for k, col in out.items() if not all(math.isfinite(x) for x in col)]
+    if bad:
+        raise HarnessError(f"{label}: non-finite waveform values in {bad}")
+    return out
+
+
+def _interp(xs: list[float], i: int, j: int, t: float) -> float:
+    return xs[i] + t * (xs[j] - xs[i])
+
+
+def fixcm_proxy_columns(vdd: float, wave: dict[str, list[float]]) -> dict[str, list[float] | None]:
+    """Headroom PROXIES from saved node voltages / the supply current (None when
+    the DUT has no such node, e.g. a --netlist candidate with other names):
+    m6_vsg = VDD - v(d2) (output PMOS gate drive), m2_vds = v(d2) - v(tail)
+    (input-pair headroom on the d2 side), tail = v(tail) (tail-source VDS),
+    m3_vsg = VDD - v(d1) (mirror diode, tracks the tail current), iq = -i(vdd)."""
+    d1, d2, tail, ivdd = (wave.get(k) for k in FIXCM_PROXY_NODES)
+    return {
+        "m6_vsg": None if d2 is None else [vdd - v for v in d2],
+        "m2_vds": None if d2 is None or tail is None else [a - b for a, b in zip(d2, tail)],
+        "tail": tail,
+        "m3_vsg": None if d1 is None else [vdd - v for v in d1],
+        "iq": None if ivdd is None else [-v for v in ivdd],
+    }
+
+
+def fixcm_extract(vdd: float, wave: dict[str, list[float]], label: str = "swing_fixcm") -> dict:
+    """Edges, required vid, local gain and headroom proxies of one fixed-CM sweep.
+
+    Rules (README "Fixed-input-common-mode swing diagnostic"):
+    - unit validity: supply equals `vdd`, the set-point sweep covers 0..VDD
+      monotonically, the input common mode is within FIXCM_CM_TOL_V of
+      FIXCM_VCM_FRAC*VDD at every point, and v(inp)-v(inn) == v(e)/G;
+    - local gain A_i = d out / d vid (central difference; one-sided at the ends);
+    - a point is VALID when |vid| <= FIXCM_VID_VALID_V and out and vid both
+      increase across it (A_i > 0, finite);
+    - from the point whose v(out) is nearest VDD/2 (must be valid with A >=
+      the primary floor -- else the operating interval is invalid), walk
+      outward over valid points with A >= floor; the edge is interpolated in
+      dB between the last passing and the first failing point (stop
+      "gain_floor"), or is the last swept point (stop "sweep_end": the gain
+      held to the end of the sweep);
+    - a primary edge whose walk stops at an INVALID point fails the unit.
+    Raises HarnessError for every failure; never returns a guessed edge."""
+    n = len(wave["v(out)"])
+    if n < 5:
+        raise HarnessError(f"{label}: too few sweep points ({n})")
+    sw, out, e = wave["v(sw)"], wave["v(out)"], wave["v(e)"]
+    if any(abs(v - vdd) > 1e-6 * max(1.0, vdd) for v in wave["v(vdd)"]):
+        raise HarnessError(f"{label}: waveform supply is not {vdd:g} V")
+    if any(b <= a for a, b in zip(sw, sw[1:])) or sw[0] > 1e-9 or sw[-1] < 1.0 - 1e-6:
+        raise HarnessError(f"{label}: set-point sweep does not cover 0..VDD monotonically")
+    vcm = FIXCM_VCM_FRAC * vdd
+    cm_err = max(abs(0.5 * (p + q) - vcm) for p, q in zip(wave["v(inp)"], wave["v(inn)"]))
+    if cm_err > FIXCM_CM_TOL_V:
+        raise HarnessError(f"{label}: input common mode not held (max error {cm_err:.3g} V)")
+    vid = [x / FIXCM_G for x in e]
+    mism = max(abs((p - q) - v) for p, q, v in zip(wave["v(inp)"], wave["v(inn)"], vid))
+    if mism > FIXCM_VID_CONSISTENCY_V:
+        raise HarnessError(f"{label}: v(inp)-v(inn) differs from v(e)/G by {mism:.3g} V")
+
+    gain, valid, why = [], [], []
+    for i in range(n):
+        a, b = max(i - 1, 0), min(i + 1, n - 1)
+        d_out, d_vid = out[b] - out[a], vid[b] - vid[a]
+        g = d_out / d_vid if d_vid > 0 else float("nan")
+        gain.append(g)
+        if not (d_out > 0 and d_vid > 0 and math.isfinite(g)):
+            valid.append(False)
+            why.append("non-monotonic")
+        elif abs(vid[i]) > FIXCM_VID_VALID_V:
+            valid.append(False)
+            why.append(f"|vid| {abs(vid[i]):.3g} V > {FIXCM_VID_VALID_V:g} V")
+        else:
+            valid.append(True)
+            why.append("")
+    gdb = [20.0 * math.log10(g) if valid[i] else float("nan") for i, g in enumerate(gain)]
+    m = min(range(n), key=lambda i: abs(out[i] - 0.5 * vdd))
+    floor_p = FIXCM_GAIN_FLOORS_DB[FIXCM_PRIMARY]
+    if not valid[m] or gdb[m] < floor_p:
+        raise HarnessError(f"{label}: invalid operating interval -- mid-supply point (v(out)={out[m]:.4g} V) "
+                           + (f"is invalid ({why[m]})" if not valid[m] else
+                              f"has gain {gdb[m]:.1f} dB < {floor_p:.2f} dB"))
+
+    def walk(floor: float, step: int):
+        """(edge_v, stop, (i_pass, i_fail, t)) walking from m in direction step."""
+        i = m
+        while True:
+            j = i + step
+            if j < 0 or j >= n:
+                return out[i], "sweep_end", (i, i, 0.0)
+            if not valid[j]:
+                return out[i], "invalid", (i, j, 0.0)
+            if gdb[j] < floor:
+                t = (gdb[i] - floor) / (gdb[i] - gdb[j])
+                return _interp(out, i, j, t), "gain_floor", (i, j, t)
+            i = j
+
+    row: dict = {"vcm_v": vcm, "gain_mid_db": gdb[m], "vid_mid_v": vid[m]}
+    for label_f, floor in FIXCM_GAIN_FLOORS_DB.items():
+        sfx = "" if label_f == FIXCM_PRIMARY else f"_{label_f}"
+        if gdb[m] < floor:  # mid gain below this (secondary) floor: no interval exists
+            row[f"out_low_v{sfx}"] = row[f"out_high_v{sfx}"] = row[f"out_width_v{sfx}"] = float("nan")
+            continue
+        lo, lo_stop, lo_at = walk(floor, -1)
+        hi, hi_stop, hi_at = walk(floor, +1)
+        if label_f == FIXCM_PRIMARY:
+            for side, stop, at in (("low", lo_stop, lo_at), ("high", hi_stop, hi_at)):
+                if stop == "invalid":
+                    raise HarnessError(f"{label}: {side} edge not measurable -- the walk reached an invalid point "
+                                       f"at v(out)={out[at[1]]:.4g} V ({why[at[1]]}) with gain still >= "
+                                       f"{floor:.2f} dB")
+            row["low_stop"], row["high_stop"] = lo_stop, hi_stop
+            row["vid_low_v"] = _interp(vid, *lo_at)
+            row["vid_high_v"] = _interp(vid, *hi_at)
+            for name, col in fixcm_proxy_columns(vdd, wave).items():
+                unit = "a" if name == "iq" else "v"
+                for where, at in (("mid", (m, m, 0.0)), ("low", lo_at), ("high", hi_at)):
+                    row[f"{name}_{where}_{unit}"] = _interp(col, *at) if col is not None else float("nan")
+        row[f"out_low_v{sfx}"], row[f"out_high_v{sfx}"] = lo, hi
+        row[f"out_width_v{sfx}"] = hi - lo
+    row["n_points"] = n
+    row["n_invalid_points"] = valid.count(False)
+    return row
+
+
+def fixcm_settings() -> dict:
+    """Every constant the fixed-CM diagnostic's result depends on (recorded)."""
+    return {"vcm_frac_of_vdd": FIXCM_VCM_FRAC, "servo_scale_g": FIXCM_G, "servo_gain_ks": FIXCM_KS,
+            "vid_clamp_v": FIXCM_VID_CLAMP_V, "vid_valid_v": FIXCM_VID_VALID_V, "cm_tol_v": FIXCM_CM_TOL_V,
+            "gain_floors_db": FIXCM_GAIN_FLOORS_DB, "primary_floor": FIXCM_PRIMARY,
+            "attribution_tol_v": FIXCM_ATTRIB_TOL_V,
+            "sweep": f"Vsw 0 {SWING_END:.8g} {1.0 / SWING_POINTS:.12g} (v(set) = VDD*v(sw))",
+            "load": {"cl_f": CL_F, "dc_load": "none (Cload only)"}, "solver_settings": SOLVER_SETTINGS}
+
+
+def swing_fixcm_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
+    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
+    label = f"swing_fixcm[{corner}/{temp:g}C]"
+    wave = load_wave(info, label, FIXCM_REQUIRED, FIXCM_PROXY_NODES)
+    row = {"corner": corner, "temp_c": temp, "vdd_v": vdd}
+    row.update(fixcm_extract(vdd, wave, label))
+    row["elapsed_s"] = round(info.get("runtime_s") or 0.0, 2)
+    return row
+
+
+# Unity-buffer (dc_swing) headroom proxies at that bench's own edges, read from
+# the same waveform artifact the unchanged swing_row() rule ran on. Filled by
+# run_klt_analyses for same-campaign dc_swing units; feeds the comparison only
+# (the dc_swing CSV is unchanged).
+BUFFER_HEADROOM: dict[tuple, dict] = {}
+
+
+def buffer_edge_headroom(info: dict, row: dict, label: str = "dc_swing") -> dict:
+    """Input-stage headroom proxies of the unity-buffer sweep at its reported
+    edges (the sample whose v(out) equals the row's vout_min_v / vout_max_v,
+    nearest mid-supply). Values are None when a node is absent."""
+    wave = load_wave(info, label, ("v(inp)", "v(out)"), FIXCM_PROXY_NODES)
+    vout, vdd = wave["v(out)"], float(row["vdd_v"])
+    cols = fixcm_proxy_columns(vdd, wave)
+    center = min(range(len(vout)), key=lambda i: abs(wave["v(inp)"][i] - 0.5 * vdd))
+    out = {}
+    for where, val in (("low", float(row["vout_min_v"])), ("high", float(row["vout_max_v"])), ("mid", None)):
+        i = center if val is None else min(range(len(vout)), key=lambda k: (abs(vout[k] - val), abs(k - center)))
+        out[where] = {"vout_v": vout[i], "vcm_v": wave["v(inp)"][i]}
+        for name, col in cols.items():
+            out[where][f"{name}_{'a' if name == 'iq' else 'v'}"] = None if col is None else col[i]
+    return out
+
+
+def _attribute(side: str, buffer_edge: float, fixcm_edge: float, tol: float) -> str:
+    """Rule: a buffer edge INSIDE the fixed-CM (output-stage) range by more than
+    `tol` cannot be an output-stage limit -> "input_cm" (the follower's moving
+    input common mode binds first); within `tol` -> "output_stage"; a fixed-CM
+    edge inside the buffer edge is contradictory -> "inconsistent"."""
+    inside = (buffer_edge - fixcm_edge) if side == "low" else (fixcm_edge - buffer_edge)
+    if inside > tol:
+        return "input_cm"
+    if inside >= -tol:
+        return "output_stage"
+    return "inconsistent"
+
+
+def swing_fixcm_comparison(fixcm_rows: list[dict], swing_rows: list[dict] | None, icmr_rows: list[dict] | None,
+                           buffer_headroom: dict | None = None, tol: float = FIXCM_ATTRIB_TOL_V) -> dict:
+    """Per-point comparison of the fixed-CM diagnostic with the unchanged
+    unity-buffer metric and the ICMR (40 dB) window at matching (process,
+    temperature, supply). Report only: no spec target or dc_swing figure is
+    edited or re-graded. A point lacking a buffer row is not attributed; a
+    point whose fixed Vcm is outside its ICMR window (or has no ICMR row) is
+    attributed with `vcm_inside_icmr` False/None and `conclusive` False."""
+    def key(r):
+        return (r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6))
+
+    sw = {key(r): r for r in swing_rows or []}
+    ic = {key(r): r for r in icmr_rows or []}
+    bh = buffer_headroom or {}
+    table, unmatched = [], []
+    for f in fixcm_rows:
+        k = key(f)
+        b = sw.get(k)
+        name = f"{k[0]}/{k[1]:g}C/{k[2]:g}V"
+        if b is None:
+            unmatched.append(f"{name}: no unity-buffer (dc_swing) row in this campaign")
+            continue
+        i = ic.get(k)
+        vcm = float(f["vcm_v"])
+        inside = None if i is None else float(i["icmr_low_v"]) <= vcm <= float(i["icmr_high_v"])
+        row = {"corner": k[0], "temp_c": k[1], "vdd_v": k[2], "vcm_v": vcm, "vcm_inside_icmr": inside,
+               "icmr_low_v": None if i is None else float(i["icmr_low_v"]),
+               "icmr_high_v": None if i is None else float(i["icmr_high_v"]),
+               "buffer_vpp_v": float(b["vpp_v"]),
+               "fixcm_vpp_v": float(f["out_width_v"])}
+        for side, bcol, fcol in (("low", "vout_min_v", "out_low_v"), ("high", "vout_max_v", "out_high_v")):
+            be, fe = float(b[bcol]), float(f[fcol])
+            att = _attribute(side, be, fe, tol)
+            outside = None if i is None else (be < float(i["icmr_low_v"]) if side == "low"
+                                              else be > float(i["icmr_high_v"]))
+            row[side] = {
+                "buffer_edge_v": be, "fixcm_edge_v": fe, "fixcm_stop": f.get(f"{side}_stop"),
+                "attribution": att,
+                "buffer_edge_cm_outside_icmr": outside,
+                "conclusive": bool(inside) and att != "inconsistent",
+                "fixcm_headroom": {"vid_v": f.get(f"vid_{side}_v"),
+                                   "m6_vsg_v": f.get(f"m6_vsg_{side}_v"), "m6_vsg_mid_v": f.get("m6_vsg_mid_v"),
+                                   "m2_vds_v": f.get(f"m2_vds_{side}_v"), "tail_v": f.get(f"tail_{side}_v"),
+                                   "iq_a": f.get(f"iq_{side}_a"), "iq_mid_a": f.get("iq_mid_a")},
+                "buffer_headroom": (bh.get(k) or {}).get(side),
+            }
+        table.append(row)
+    counts: dict[str, int] = {}
+    for r in table:
+        for side in ("low", "high"):
+            c = r[side]["attribution"] + ("" if r[side]["conclusive"] else " (inconclusive)")
+            counts[f"{side}: {c}"] = counts.get(f"{side}: {c}", 0) + 1
+    return {"rule": {"primary_floor": FIXCM_PRIMARY, "primary_floor_db": FIXCM_GAIN_FLOORS_DB[FIXCM_PRIMARY],
+                     "tolerance_v": tol,
+                     "input_cm": "buffer edge inside the fixed-CM edge by > tolerance",
+                     "output_stage": "edges agree within tolerance",
+                     "inconsistent": "fixed-CM edge inside the buffer edge by > tolerance",
+                     "conclusive": "fixed Vcm inside the same point's 40 dB ICMR window and not inconsistent"},
+            "points": len(table), "unmatched": unmatched, "summary": counts,
+            "icmr_available": bool(icmr_rows), "table": table}
+
+
 def latest_ac_rows(before_id: str, dut_sha256: str, repo_root: Path | None = None,
                    records_dir: Path | None = None) -> dict:
     """Verified-identity historical AC reference (see select_ac_reference)."""
@@ -1239,6 +1568,14 @@ FIELDNAMES = {
              "vid_mid_v", "cmrr_mid_db", "vout_mid_v", "iq_mid_a", "elapsed_s"],
     "cmrr": klt_fieldnames_cmrr(),
     "tran_step": ["corner", "temp_c", "vdd_v", "step_v", "overshoot_pct", "settle_1pct_ns", "v_ofs_uv", "elapsed_s"],
+    "swing_fixcm": (["corner", "temp_c", "vdd_v", "vcm_v", "out_low_v", "out_high_v", "out_width_v",
+                     "low_stop", "high_stop"]
+                    + [f"out_{c}_v_{f}" for f in FIXCM_GAIN_FLOORS_DB if f != FIXCM_PRIMARY
+                       for c in ("low", "high", "width")]
+                    + ["gain_mid_db", "vid_mid_v", "vid_low_v", "vid_high_v"]
+                    + [f"{p}_{w}_{'a' if p == 'iq' else 'v'}" for p in ("m6_vsg", "m2_vds", "tail", "m3_vsg", "iq")
+                       for w in ("mid", "low", "high")]
+                    + ["n_points", "n_invalid_points", "elapsed_s"]),
 }
 
 
@@ -1248,6 +1585,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     """Submit one `klt sim` request per (analysis[, CM point]) and fold the
     responses into `results`/`errors`. A failed submit is reported as errors;
     there is deliberately NO fallback to a local ngspice loop."""
+    BUFFER_HEADROOM.clear()
     plan = []
     for a in klt_analyses:
         if a == "icmr":
@@ -1259,7 +1597,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                 plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
         elif a == "ac":
             plan.extend([("ac_iq", None, None, corners), ("ac", None, None, corners)])  # companion first
-        elif a in ("tran_step", *FLEET_ANALYSES):
+        elif a in ("tran_step", "swing_fixcm", *FLEET_ANALYSES):
             plan.append((a, None, None, corners))
         else:
             plan.extend(("cmrr", cp, None, corners) for cp in CMRR_CM_POINTS)
@@ -1316,7 +1654,8 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
         if "error" in report:
             errors.append(f"{tag}: klt error: {report['error'].get('message')}")
             continue
-        if (analysis in FLEET_ANALYSES or analysis == "ac_iq") and backend == "batch" and not env.get("remote"):
+        if (analysis in FLEET_ANALYSES or analysis in ("ac_iq", "swing_fixcm")) and backend == "batch" \
+                and not env.get("remote"):
             # A batch response with no remote provenance did not run on the fleet:
             # refuse it rather than accept numbers of unknown origin (no silent local fallback).
             errors.append(f"{tag}: batch response carries no environment.remote provenance -- refusing")
@@ -1348,6 +1687,14 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                         row = ac_row(corner, temp, info, vdd, iq_units.get((corner, float(temp), round(vdd, 6))))
                     elif analysis in FLEET_ANALYSES:
                         row = {"tran_sr": tran_sr_row, "dc_swing": dc_swing_row}[analysis](corner, temp, info, vdd)
+                        if analysis == "dc_swing":
+                            try:  # comparison-only proxies; never fails or alters the dc_swing row
+                                BUFFER_HEADROOM[(corner, float(temp), round(vdd, 6))] = buffer_edge_headroom(
+                                    info, row, label)
+                            except HarnessError as exc:
+                                print(f"{label}: buffer headroom proxies unavailable: {exc}", file=sys.stderr)
+                    elif analysis == "swing_fixcm":
+                        row = swing_fixcm_row(corner, temp, info, vdd)
                     elif analysis == "icmr":
                         row = icmr_row(corner, temp, info, vdd)
                     else:
@@ -1539,6 +1886,7 @@ def main(argv=None) -> int:
     klt_jobs: list[dict] = []
     klt_crosscheck = None
     pm_crosscheck = None
+    fixcm_comparison = None
     if klt_analyses:
         n_klt_errors0 = len(errors)
         with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
@@ -1560,6 +1908,15 @@ def main(argv=None) -> int:
             }
             print(f"AC-PM vs overshoot ({pm_crosscheck['ac_reference'] or 'reference unavailable'}): "
                   f"{json.dumps(pm_crosscheck['summary'] or ac_ref['unavailable_reasons'])}", file=sys.stderr)
+        if "swing_fixcm" in klt_analyses:
+            # Same-campaign evidence only: same DUT snapshot, same fleet, same grid (issue #181).
+            fixcm_comparison = swing_fixcm_comparison(results["swing_fixcm"], results.get("dc_swing"),
+                                                      results.get("icmr"), BUFFER_HEADROOM)
+            if "dc_swing" not in results:
+                fixcm_comparison["unavailable_reasons"] = [
+                    "dc_swing not run in this campaign (add it to --analyses: the unity-buffer reference must "
+                    "share this record's DUT snapshot)"]
+            print(f"swing_fixcm vs unity buffer: {json.dumps(fixcm_comparison['summary'])}", file=sys.stderr)
         if not len(errors) > n_klt_errors0 and "icmr" in klt_analyses and "cmrr" in klt_analyses:
             mid_rows = [r for r in results["cmrr"] if r["cm_point"] == "mid"]
             klt_crosscheck = crosscheck(ac_ref, mid_rows, results["icmr"])
@@ -1611,6 +1968,7 @@ def main(argv=None) -> int:
                 "consumer_sense_v": CONSUMER_SENSE_V,
                 "cmrr_cm_points": {k: v[0] for k, v in CMRR_CM_POINTS.items()}}
                if klt_analyses else {}),
+            **({"swing_fixcm": fixcm_settings()} if "swing_fixcm" in analyses else {}),
         },
         "pdk": {
             "variant": pdk.variant, "root": str(pdk.root),
@@ -1629,6 +1987,7 @@ def main(argv=None) -> int:
         },
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
         **({"tran_step_pm_crosscheck": pm_crosscheck} if pm_crosscheck else {}),
+        **({"swing_fixcm_comparison": fixcm_comparison} if fixcm_comparison is not None else {}),
         "links": {
             f"{a}_csv": f"sim/opamp-characterization/records/{record_id}-{a.replace('_', '-')}.csv"
             for a in results if results[a]
