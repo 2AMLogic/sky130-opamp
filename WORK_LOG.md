@@ -4,6 +4,29 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-11
 
+- **PR #187**: Bind spec section 2 figures to DUT scope and identity (#186)
+- **PR #184**: DR-013: grid-legal canonical MOS widths (4.635/7.820 um) with fleet PVT evidence (#120)
+- **PR #183**: Fixed-input-common-mode output-swing diagnostic and 5x3 fleet attribution record
+- **PR #182**: fix: refuse multi-unit local ngspice grids on the batch backend in pvt_sweep
+- **PR #180**: fix: reject non-object JSON reports at the klt_sim boundary
+- **PR #177**: Keep generic signoff evidence paths inside the checkout
+- **PR #174**: spec figures: verify the supply attributed to binding extrema
+- **Issue #186** (closed): Verify current-design DUT provenance for spec figure citations
+- **Issue #181** (closed): Diagnose output-stage swing limits at fixed input common-mode
+- **Issue #179** (closed): Reject non-object JSON reports at the shared klt simulation boundary
+- **Issue #176** (closed): Keep generic signoff evidence paths inside the checkout
+- **Issue #175** (closed): Auditor: preserve unresolved recursive deletion protection
+- **Issue #172** (closed): spec figures: verify the supply attributed to binding extrema
+- **Issue #171** (closed): Auditor guard review: keep stash-scope:create-redirect flagged
+- **Issue #170** (closed): Auditor guard review: keep worktree-write-confinement-unresolved-var flagged
+- **Issue #169** (closed): Auditor guard review: keep gh-api-rawfield-body-literal-at flagged
+- **Issue #163** (closed): pvt_sweep: refuse a multi-unit local ngspice grid when the backend is batch
+- **Issue #120** (closed): Select and verify grid-legal canonical widths for the DR-007 mirror and output groups
+- **Issue #47** (closed): T1 item 5: evaluate the two structural fixes DR-007 names for the falling slew-rate gap and draft the superseding topology record
+
+
+### 2026-10-11
+
 - **PR #168**: Layout: routed Rz/Cc compensation block with passive LVS verification (#167)
 - **Issue #167** (closed): Layout: build a routed Rz/Cc compensation block with passive LVS verification
 
