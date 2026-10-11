@@ -3,7 +3,12 @@
 Plan (committed before execution, commit dc665c0): [`offset-drift-plan-196.json`](offset-drift-plan-196.json).
 Driver: `bin/offset_drift.py` (label `drift196`). Machine-readable result, recomputable from the raw
 records with `offset_drift.py report --label drift196`:
-`20261011-232842-drift-drift196-ae367c.drift.json`. DUT: the canonical `design/netlist/opamp_core.spice`
+[`20261011-233532-drift-drift196-1e74b9.drift.json`](20261011-233532-drift-drift196-1e74b9.drift.json)
+(outcome `VERDICTS_PARTIAL`, exit code 2). It supersedes the outcome flag of the earlier record
+[`20261011-232842-drift-drift196-ae367c.drift.json`](20261011-232842-drift-drift196-ae367c.drift.json),
+which read `VERDICTS_ISSUED` although three of four conditions were `NOT_MEASURED`; that record is kept
+unchanged (append-only). The new record is a pure recompute from the same raw records (no new
+simulation); its statistics, verdicts and pairing evidence are identical to the earlier record's. DUT: the canonical `design/netlist/opamp_core.spice`
 (DR-013 widths), `sha256:e954d17d...ce79`, captured once into `dut-drift196/`; every request used that copy.
 Backend: `klt sim --backend batch` (fleet), client klt 0.7.0, **runner klt 0.5.0** (`runner_compatibility: mismatch`,
 identical on all accepted jobs), ngspice 46, one models-lib hash. No local ngspice was run.
@@ -46,6 +51,12 @@ Interpretation, within the stated limits:
 - The proposed 0.275 mV allocation is untouched; this is not an offset-compliance or consumer-integration claim.
   Trim DAC mismatch, trim-induced operating-point changes, calibration error and noise remain unmeasured.
 - Evidence level: exploratory, N=100 at one process corner (TT), one condition measured.
+- **The FAIL_SCREEN depends on the pairing being exact.** The residual is only the drift of one device
+  realization if the reference and B1 samples with the same ID are the same realization. If pairing were
+  imperfect, part of the measured 1.006 mV would be decorrelation between realizations, not drift, and the
+  measured residual would overstate the true drift. The pairing evidence below supports exact pairing (equal
+  echoed seeds, exact replay, Corr 0.9918, residual sigma 13% of reference sigma; the sigma lower bound is 4.6x the
+  screen), so a spurious fail is unlikely, but this is a condition of the result, not a footnote.
 
 ## Pairing evidence (required for any verdict; all held)
 
@@ -69,21 +80,32 @@ realization could hide inside the 13%, which would inflate the measured residual
 Requests recorded: 14 of the maximum 18 (B0_ref 3, P0_replay 1, B1 1, B2 3, B3 3, B4 3 = 14). Unique samples measured:
 100 reference + 1 probe + 100 B1 = 201 of the plan's 501. Every attempt is retained:
 
-- B0_ref attempt 1: refused by the fleet cap (no report). Attempt 2: **an orphan request** with no summary record -
-  the first launch of the driver was wrapped in a 590 s `timeout` by mistake and killed seconds after submitting
-  attempt 2; it has no klt report or job id. It is counted against the cap (the driver counts request files with no
-  summary as attempts), so B0_ref had one real attempt left, which succeeded. The driver was then resumed from
-  the same DUT snapshot and committed plan (`resume`), with a 300 s wait between retries added.
+- B0_ref attempt 1 (request written 22:24:54): refused by the fleet cap ("10 instance(s) already running + 1
+  requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8"; summary written 22:25:00, no report). Attempt 2: **an orphan
+  request**. Its request file was written at 22:25:00, immediately after the refusal (the first driver version had no
+  wait between retries), and its artifacts directory is empty: there is no summary, stderr, klt report or job id. The
+  driver process therefore ended within seconds of writing that request, before `klt sim` recorded anything; the
+  orphan-counting fix (commit 9ae1488) was committed at 22:25:42, under 50 s after the run started. The records do not
+  show why the process ended, so **the cause is undetermined**. (An earlier version of this record attributed it to a
+  590 s `timeout`; the timestamps rule that out and the claim is withdrawn.) Whether attempt 2 reached the fleet is
+  also undetermined; submitted 6 s after a refusal with 10 instances already running, it was most likely refused too.
+  It is counted against the cap anyway (the driver counts request files with no summary as attempts), the
+  conservative choice, so B0_ref had one attempt left, which was submitted at 22:30:43 and succeeded. The driver was resumed from the
+  same DUT snapshot and committed plan (`resume`), with a 300 s wait between retries added.
 - B2, B3, B4: each three attempts, each refused with "N instance(s) already running + 1 requested exceeds
   BATCH_MAX_CONCURRENT_INSTANCES=8" (N = 8..12 other jobs from concurrent sweeps). Retry spacing 300 s. Per the plan the
   batches are recorded as FAILED_BATCH and were not retried further; the grid was NOT run locally. No sample is
   zero-filled; the three conditions are NOT_MEASURED.
 
-The drift report's outcome flag reads `VERDICTS_ISSUED` because the pairing evidence held and every step reached
-a terminal state; read it with the table above: three of four verdicts are `NOT_MEASURED`.
+The drift report's outcome flag reads `VERDICTS_PARTIAL` (exit code 2): the pairing evidence held for the measured
+condition and every step reached a terminal state, but three of four conditions are `NOT_MEASURED`. The earlier
+record's `VERDICTS_ISSUED` flag overstated this and is superseded (see the top of this record).
 
 ## Follow-up
 
+Issue #196 stays open: its acceptance criteria require paired statistics at every declared condition, and this
+plan's own stop-expansion rule says the remaining declared conditions still run after a failing condition (the rule
+forbids expansion beyond the plan, it does not cancel declared conditions). So the B1 fail does not discharge C2-C4.
 Measuring C2-C4 needs a new committed plan (the caps of this plan are spent) and fleet capacity; waiting longer
 between attempts or a queueing submit would avoid the same outcome. The tool gaps (no queue/wait on capacity
 refusals, runner/client version skew, implicit corner-index-keyed paired draws) are already tracked at

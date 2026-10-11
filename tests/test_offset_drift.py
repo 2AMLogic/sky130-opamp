@@ -313,9 +313,58 @@ class Execute(unittest.TestCase):
         self.assertEqual(len(rep["accounting"]["attempts"]["B1"]), 3)
         self.assertFalse(any(a["accepted"] for a in rep["accounting"]["attempts"]["B1"]))
         self.assertLessEqual(rep["accounting"]["requests_submitted"], PLAN["budget"]["max_requests"])
-        # one batch not measured: its absence leaves the rest of the evidence intact
-        self.assertEqual(rep["outcome"], "VERDICTS_ISSUED")
+        # one batch not measured: its absence leaves the rest of the evidence intact,
+        # but the run is PARTIAL (never reported as a complete VERDICTS_ISSUED run)
+        self.assertEqual(rep["outcome"], "VERDICTS_PARTIAL")
+        self.assertEqual(rep["exit_code"], 2)
+        self.assertEqual(rep["conditions_not_measured"], ["B1"])
+        self.assertEqual(rep["conditions_measured"], ["B2", "B3", "B4"])
         self.assertEqual(rep["verdicts"]["B1"]["verdict"], "NOT_MEASURED")
+        self.assertEqual(rep["verdicts"]["B2"]["verdict"], "PASS_SCREEN")
+
+    def test_partial_run_like_drift196_is_partial_with_nonzero_exit(self):
+        """B1 measured, B2-B4 refused at every attempt (the drift196 shape)."""
+        fleet = FakeFleet(self.tmp.name, drift_fn=lambda i, T, V: 1e-3 * math.sin(i) if T != 27.0 else 0.0)
+        fleet.fail_calls = set(range(4, 13))         # B2, B3, B4: 3 refused attempts each
+        rep = run_plan(fleet, self.tmp.name)
+        self.assertEqual(len(fleet.calls), 12)
+        self.assertEqual(rep["outcome"], "VERDICTS_PARTIAL")
+        self.assertNotEqual(rep["exit_code"], 0)
+        self.assertEqual(rep["pairing_evidence"]["failed_items"], [])
+        self.assertEqual(rep["pairing_evidence"]["unevaluated_items"], [])
+        self.assertEqual(rep["verdicts"]["B1"]["verdict"], "FAIL_SCREEN")
+        self.assertEqual({rep["verdicts"][n]["verdict"] for n in ("B2", "B3", "B4")}, {"NOT_MEASURED"})
+        self.assertEqual(rep["conditions_not_measured"], ["B2", "B3", "B4"])
+
+    def test_all_conditions_refused_is_not_a_capability_gap(self):
+        fleet = FakeFleet(self.tmp.name)
+        fleet.fail_calls = set(range(3, 15))         # B1..B4: 3 refused attempts each
+        rep = run_plan(fleet, self.tmp.name)
+        self.assertEqual(len(fleet.calls), 14)
+        self.assertEqual(rep["outcome"], "NO_CONDITION_MEASURED")
+        self.assertEqual(rep["exit_code"], 1)
+        self.assertIsNone(rep["verdicts"])
+        self.assertEqual(rep["conditions_measured"], [])
+        self.assertEqual(rep["pairing_evidence"]["failed_items"], [])
+        self.assertEqual(set(rep["pairing_evidence"]["unevaluated_items"]),
+                         {"echoed_seeds_equal", "statistical_sanity_gate"})
+        self.assertTrue(rep["pairing_evidence"]["items"]["replay_probe"]["ok"])
+
+    def test_report_cli_exit_code_follows_outcome(self):
+        import contextlib
+        import io
+        from unittest import mock
+        fleet = FakeFleet(self.tmp.name)
+        fleet.fail_calls = set(range(4, 13))
+        run_plan(fleet, self.tmp.name)
+        with mock.patch.object(od, "RECORDS", Path(self.tmp.name)), contextlib.redirect_stdout(io.StringIO()) as out:
+            code = od.main(["report", "--label", "t"])
+        self.assertEqual(code, 2)
+        self.assertEqual(json.loads(out.getvalue())["outcome"], "VERDICTS_PARTIAL")
+        self.assertEqual(od.exit_code("VERDICTS_ISSUED"), 0)
+        for o in ("NO_CONDITION_MEASURED", "CAPABILITY_GAP_NO_VERDICT", "INCOMPLETE", "NOT_RUN",
+                  "STOPPED_NO_REFERENCE_OR_PROBE"):
+            self.assertEqual(od.exit_code(o), 1)
 
     def test_retry_then_success_uses_one_accepted_attempt(self):
         fleet = FakeFleet(self.tmp.name)

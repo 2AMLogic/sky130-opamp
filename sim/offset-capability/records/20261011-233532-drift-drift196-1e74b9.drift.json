@@ -1,0 +1,337 @@
+{
+  "plan": "sim/offset-capability/records/offset-drift-plan-196.json",
+  "outcome": "VERDICTS_PARTIAL",
+  "exit_code": 2,
+  "conditions_measured": [
+    "B1"
+  ],
+  "conditions_not_measured": [
+    "B2",
+    "B3",
+    "B4"
+  ],
+  "step_status": {
+    "B0_ref": "ACCEPTED",
+    "P0_replay": "ACCEPTED",
+    "B1": "ACCEPTED",
+    "B2": "FAILED_BATCH",
+    "B3": "FAILED_BATCH",
+    "B4": "FAILED_BATCH"
+  },
+  "pairing_evidence": {
+    "items": {
+      "echoed_seeds_equal": {
+        "ok": true,
+        "checked_conditions": [
+          "B1"
+        ],
+        "detail": null
+      },
+      "replay_probe": {
+        "ok": true,
+        "sample_id": "20261085/0",
+        "vos_diff_uv": 0.0,
+        "tolerance_uv": 40.0,
+        "seed_equal": true
+      },
+      "provenance_identical": {
+        "ok": true,
+        "values": {
+          "runner_klt_version": [
+            "0.5.0"
+          ],
+          "engine_version": [
+            "46"
+          ],
+          "models_lib_sha256": [
+            "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"
+          ],
+          "netlist_sha256": [
+            "0bafe511031853990cbaefa9cb8267ad474be76315b07e7e8dc4f7817ec0d41d"
+          ]
+        },
+        "steps_missing_provenance": []
+      },
+      "statistical_sanity_gate": {
+        "ok": true,
+        "per_condition": {
+          "B1": {
+            "ok": true,
+            "residual_sigma_mv": 1.0061433618756628,
+            "reference_sigma_mv": 7.559757823996397,
+            "limit_mv": 3.7798789119981984
+          }
+        }
+      }
+    },
+    "failed_items": [],
+    "unevaluated_items": []
+  },
+  "reference": {
+    "n_requested": 100,
+    "n_ok": 100,
+    "sigma_mv": 7.559757823996397
+  },
+  "conditions": {
+    "B1": {
+      "condition": {
+        "process": "tt_mm",
+        "temperature_c": -40.0,
+        "vdd_v": 1.62
+      },
+      "step": "B1",
+      "status": "ACCEPTED",
+      "attempts": 1,
+      "stats": {
+        "n_requested": 100,
+        "n_returned": 100,
+        "n_valid_pairs": 100,
+        "n_dropped": 0,
+        "n_failed_condition": 0,
+        "n_failed_reference": 0,
+        "dropped": {},
+        "seed_mismatch_ids": [],
+        "mean_mv": -0.06879999999999775,
+        "sigma_mv": 1.0061433618756628,
+        "max_abs_mv": 2.4719999999999187,
+        "mean_ci_mv": [
+          -0.2684406714359821,
+          0.1308406714359866
+        ],
+        "sigma_ci_mv": [
+          0.8834007591844956,
+          1.1688118467698996
+        ],
+        "confidence": 0.95,
+        "sigma_screen_mv": 0.19,
+        "min_valid_pairs": 80,
+        "verdict": "FAIL_SCREEN",
+        "verdict_reason": "sigma lower bound 0.8834 > 0.19 mV"
+      }
+    },
+    "B2": {
+      "condition": {
+        "process": "tt_mm",
+        "temperature_c": -40.0,
+        "vdd_v": 1.98
+      },
+      "step": "B2",
+      "status": "FAILED_BATCH",
+      "attempts": 3,
+      "stats": null,
+      "verdict": "NOT_MEASURED"
+    },
+    "B3": {
+      "condition": {
+        "process": "tt_mm",
+        "temperature_c": 125.0,
+        "vdd_v": 1.62
+      },
+      "step": "B3",
+      "status": "FAILED_BATCH",
+      "attempts": 3,
+      "stats": null,
+      "verdict": "NOT_MEASURED"
+    },
+    "B4": {
+      "condition": {
+        "process": "tt_mm",
+        "temperature_c": 125.0,
+        "vdd_v": 1.98
+      },
+      "step": "B4",
+      "status": "FAILED_BATCH",
+      "attempts": 3,
+      "stats": null,
+      "verdict": "NOT_MEASURED"
+    }
+  },
+  "verdicts": {
+    "B1": {
+      "verdict": "FAIL_SCREEN",
+      "reason": "sigma lower bound 0.8834 > 0.19 mV"
+    },
+    "B2": {
+      "verdict": "NOT_MEASURED"
+    },
+    "B3": {
+      "verdict": "NOT_MEASURED"
+    },
+    "B4": {
+      "verdict": "NOT_MEASURED"
+    }
+  },
+  "accounting": {
+    "requests_submitted": 14,
+    "max_requests": 18,
+    "attempts": {
+      "B0_ref": [
+        {
+          "record_id": "20261011-222454-offset-drift196-B0_ref-9d2ec4",
+          "attempt": 1,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 10 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-222500-offset-drift196-B0_ref-r2-b86253",
+          "attempt": 2,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit None; orphan request: no summary record (run interrupted while in flight))"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-223043-offset-drift196-B0_ref-r3-92ab00",
+          "attempt": 3,
+          "accepted": true,
+          "problems": [],
+          "job_id": "klt-sim-59f75072ec89"
+        }
+      ],
+      "P0_replay": [
+        {
+          "record_id": "20261011-224524-offset-drift196-P0_replay-4f4c2e",
+          "attempt": 1,
+          "accepted": true,
+          "problems": [],
+          "job_id": "klt-sim-d39676a0725a"
+        }
+      ],
+      "B1": [
+        {
+          "record_id": "20261011-224645-offset-drift196-B1-7527c3",
+          "attempt": 1,
+          "accepted": true,
+          "problems": [],
+          "job_id": "klt-sim-9128edec529b"
+        }
+      ],
+      "B2": [
+        {
+          "record_id": "20261011-225750-offset-drift196-B2-a9ebdd",
+          "attempt": 1,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 12 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-230255-offset-drift196-B2-r2-575f36",
+          "attempt": 2,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 11 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-230801-offset-drift196-B2-r3-c083c3",
+          "attempt": 3,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 10 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        }
+      ],
+      "B3": [
+        {
+          "record_id": "20261011-230806-offset-drift196-B3-169653",
+          "attempt": 1,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 10 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-231312-offset-drift196-B3-r2-34445a",
+          "attempt": 2,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mmand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 9 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-231818-offset-drift196-B3-r3-d15d6c",
+          "attempt": 3,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mmand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 8 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        }
+      ],
+      "B4": [
+        {
+          "record_id": "20261011-231823-offset-drift196-B4-1bcf63",
+          "attempt": 1,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mmand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 8 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-232331-offset-drift196-B4-r2-95d0fe",
+          "attempt": 2,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mmand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 8 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        },
+        {
+          "record_id": "20261011-232837-offset-drift196-B4-r3-f94f6b",
+          "attempt": 3,
+          "accepted": false,
+          "problems": [
+            "no usable klt report (exit 1; mmand\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 8 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+          ],
+          "job_id": null
+        }
+      ]
+    }
+  },
+  "provenance": {
+    "B0_ref": {
+      "job_id": "klt-sim-59f75072ec89",
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+gfc35718e4add",
+      "runner_compatibility": "mismatch",
+      "instance_type": "c7i.4xlarge",
+      "engine": "ngspice",
+      "engine_version": "46",
+      "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "netlist_sha256": "0bafe511031853990cbaefa9cb8267ad474be76315b07e7e8dc4f7817ec0d41d"
+    },
+    "P0_replay": {
+      "job_id": "klt-sim-d39676a0725a",
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+gfc35718e4add",
+      "runner_compatibility": "mismatch",
+      "instance_type": "c7i.4xlarge",
+      "engine": "ngspice",
+      "engine_version": "46",
+      "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "netlist_sha256": "0bafe511031853990cbaefa9cb8267ad474be76315b07e7e8dc4f7817ec0d41d"
+    },
+    "B1": {
+      "job_id": "klt-sim-9128edec529b",
+      "runner_klt_version": "0.5.0",
+      "client_klt_version": "0.7.0+gfc35718e4add",
+      "runner_compatibility": "mismatch",
+      "instance_type": "m7i.4xlarge",
+      "engine": "ngspice",
+      "engine_version": "46",
+      "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "netlist_sha256": "0bafe511031853990cbaefa9cb8267ad474be76315b07e7e8dc4f7817ec0d41d"
+    }
+  }
+}

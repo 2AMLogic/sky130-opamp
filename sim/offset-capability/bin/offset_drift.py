@@ -18,6 +18,17 @@ recompute everything from raw records and nothing is rewritten (append-only).
 
 A drift verdict is issued only when the pairing evidence of the plan holds;
 otherwise the result is a CAPABILITY GAP and no drift conclusion is drawn.
+
+Report `outcome` (and the exit code of every subcommand):
+  VERDICTS_ISSUED               every declared condition measured, evidence held   exit 0
+  VERDICTS_PARTIAL              evidence held for the measured conditions, but at
+                                least one condition is NOT_MEASURED (its batch hit
+                                the attempt cap)                                    exit 2
+  NO_CONDITION_MEASURED         reference and probe accepted, every condition batch
+                                hit the attempt cap (e.g. fleet-capacity refusals);
+                                not a pairing capability gap                         exit 1
+  CAPABILITY_GAP_NO_VERDICT     pairing evidence failed or is unevaluable            exit 1
+  STOPPED_NO_REFERENCE_OR_PROBE / INCOMPLETE / NOT_RUN                               exit 1
 Stdlib only.
 """
 from __future__ import annotations
@@ -39,6 +50,14 @@ from spice_harness import allocate_record_id, write_new  # noqa: E402
 
 PLAN_PATH = RECORDS / "offset-drift-plan-196.json"
 SAMPLE_REPLAY_TOL_V = op.CONTROL_TOL_V   # 40 uV, plan: pairing_evidence
+# Pairing-evidence items that can only be evaluated on a measured condition.
+CONDITION_DEPENDENT_ITEMS = frozenset({"echoed_seeds_equal", "statistical_sanity_gate"})
+VERDICT_OUTCOMES = ("VERDICTS_ISSUED", "VERDICTS_PARTIAL")
+
+
+def exit_code(outcome: str) -> int:
+    """0 only for a complete run; 2 for a partial one; 1 for everything else."""
+    return {"VERDICTS_ISSUED": 0, "VERDICTS_PARTIAL": 2}.get(outcome, 1)
 
 
 class DriftError(RuntimeError):
@@ -451,6 +470,8 @@ def drift_report(plan: dict, led: dict, records: Path | None = None) -> dict:
     ev["failed_items"] = sorted(k for k, v in items.items() if v["ok"] is False)
     ev["unevaluated_items"] = sorted(k for k, v in items.items() if v["ok"] is None)
     steps_done = {n: r["status"] for n, r in res.items()}
+    measured = sorted(n for n, c in conds.items() if c["stats"] is not None)
+    not_measured = sorted(n for n, c in conds.items() if c["stats"] is None)
     if steps_done["B0_ref"] == "FAILED_BATCH" or steps_done["P0_replay"] == "FAILED_BATCH":
         outcome = "STOPPED_NO_REFERENCE_OR_PROBE"
     elif ev["failed_items"]:
@@ -459,16 +480,24 @@ def drift_report(plan: dict, led: dict, records: Path | None = None) -> dict:
         outcome = "NOT_RUN"
     elif any(x in ("PENDING", "RETRYING") for x in steps_done.values()):
         outcome = "INCOMPLETE"
+    elif not measured and set(ev["unevaluated_items"]) <= CONDITION_DEPENDENT_ITEMS:
+        # every condition batch hit its cap unaccepted: the condition-dependent
+        # evidence is unevaluable for lack of data, not because pairing failed
+        outcome = "NO_CONDITION_MEASURED"
     elif ev["unevaluated_items"]:
         outcome = "CAPABILITY_GAP_NO_VERDICT"
+    elif not_measured:
+        outcome = "VERDICTS_PARTIAL"
     else:
         outcome = "VERDICTS_ISSUED"
     verdicts = ({n: ({"verdict": c["stats"]["verdict"], "reason": c["stats"]["verdict_reason"]}
                      if c.get("stats") else {"verdict": "NOT_MEASURED"}) for n, c in conds.items()}
-                if outcome == "VERDICTS_ISSUED" else None)
+                if outcome in VERDICT_OUTCOMES else None)
     requests = sum(len(r["attempts"]) for r in res.values())
     return {"plan": str(PLAN_PATH.relative_to(REPO)) if PLAN_PATH.is_absolute() else str(PLAN_PATH),
-            "outcome": outcome, "step_status": steps_done, "pairing_evidence": ev,
+            "outcome": outcome, "exit_code": exit_code(outcome),
+            "conditions_measured": measured, "conditions_not_measured": not_measured,
+            "step_status": steps_done, "pairing_evidence": ev,
             "reference": {"n_requested": len(ids), "n_ok": sum(1 for s in (ref or {"samples": {}})["samples"].values() if s["ok"]),
                           "sigma_mv": ref_sigma_mv},
             "conditions": conds, "verdicts": verdicts,
@@ -593,8 +622,9 @@ def main(argv=None) -> int:
         write_new(RECORDS / f"{rid}.drift.json", json.dumps(rep, indent=2) + "\n")
         print(f"wrote {rid}.drift.json")
     print(json.dumps({"outcome": rep["outcome"], "verdicts": rep["verdicts"],
+                      "conditions_not_measured": rep["conditions_not_measured"],
                       "failed_pairing_items": rep["pairing_evidence"]["failed_items"]}, indent=2))
-    return 0 if rep["outcome"] == "VERDICTS_ISSUED" else 1
+    return exit_code(rep["outcome"])
 
 
 if __name__ == "__main__":

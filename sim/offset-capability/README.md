@@ -210,3 +210,9 @@ python3 sim/offset-capability/bin/offset_drift.py report --label drift196       
 
 Residual = Vos(condition) - Vos(reference) per sample ID; pairing evidence (equal echoed
 seeds, replay probe, identical runner provenance, statistical sanity gate) gates any verdict.
+Machine-readable result: [`records/20261011-233532-drift-drift196-1e74b9.drift.json`](records/20261011-233532-drift-drift196-1e74b9.drift.json)
+(outcome `VERDICTS_PARTIAL`, exit 2). It supersedes the outcome flag of the earlier
+[`records/20261011-232842-drift-drift196-ae367c.drift.json`](records/20261011-232842-drift-drift196-ae367c.drift.json)
+(`VERDICTS_ISSUED`, which overstated a 1-of-4 run); same raw records, identical statistics.
+The B1 FAIL_SCREEN holds only if pairing is exact; imperfect pairing would inflate the
+measured residual. Issue #196 stays open for the three unmeasured conditions.
