@@ -20,6 +20,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import math
 import re
 import sys
 from pathlib import Path
@@ -51,15 +52,25 @@ def logical_lines(text: str):
         yield cur
 
 
-def _nf(tokens) -> int:
+def _nf(tokens):
+    """Return (nf, error). Omitted nf is 1; an explicit nf must be finite,
+    integral and positive (``2.0`` is accepted, ``2.5``/``0``/``nan`` are not)."""
     for tok in tokens:
         key, _, val = tok.partition("=")
-        if key.lower() == "nf" and val:
-            try:
-                return max(int(float(val)), 1)
-            except ValueError:
-                return 1
-    return 1
+        if key.lower() != "nf" or "=" not in tok:
+            continue
+        try:
+            num = float(val)
+        except ValueError:
+            return None, f"nf={val} is not a plain number"
+        if not math.isfinite(num):
+            return None, f"nf={val} is not finite"
+        if num != int(num):
+            return None, f"nf={val} is not an integer"
+        if num <= 0:
+            return None, f"nf={val} must be positive"
+        return int(num), None
+    return 1, None
 
 
 def violations(text: str, classes=("passive",)) -> list[str]:
@@ -75,6 +86,11 @@ def violations(text: str, classes=("passive",)) -> list[str]:
         kind = next((k for k in classes if CLASS_RE[k].fullmatch(model)), None)
         if kind is None:
             continue
+        nf = 1
+        if kind == "mos":
+            nf, err = _nf(tokens)
+            if err:
+                out.append(f"{name} ({model}): {err}")
         for tok in tokens:
             key, _, val = tok.partition("=")
             if key.lower() in DIMS and val:
@@ -83,11 +99,13 @@ def violations(text: str, classes=("passive",)) -> list[str]:
                 except ValueError:
                     out.append(f"{name}: {key}={val} is not a plain number")
                     continue
+                if not math.isfinite(num) or num <= 0:
+                    out.append(f"{name} ({model}): {key}={val} must be finite and positive")
+                    continue
                 if not on_grid(num):
                     out.append(f"{name} ({model}): {key}={val} um is not a multiple of {GRID_UM} um")
                 elif kind == "mos" and key.lower() == "w":
-                    nf = _nf(tokens)
-                    if nf > 1 and not on_grid(num / nf):
+                    if nf is not None and nf > 1 and not on_grid(num / nf):
                         out.append(f"{name} ({model}): per-finger W/nf={num}/{nf} um is not a multiple of {GRID_UM} um")
     return out
 
