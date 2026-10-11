@@ -14,7 +14,11 @@ and every entry must be a non-empty path string, {"file": non-empty str[,
 "content_hash": str]} or {"command": non-empty list of str} (skipped).
 
 Resolution order (matches klt): relative to the envelope's own directory
-first, then repo-relative. Skipped: {"command": [...]} entries (no file) and
+first, then repo-relative. Envelopes and artifacts are canonicalised
+(realpath) and must stay inside the checkout: external absolute paths, '..'
+escapes and symlink escapes are item errors (an escaping envelope-relative
+candidate is never silently replaced by the repo-relative one); contained
+symlinks and internal '..' segments are accepted. Skipped: {"command": [...]} entries (no file) and
 envelopes whose kind is not "generic" (klt computed those hashes itself).
 
 Used by .github/workflows/signoff.yml and design/bin/check_ci.py; the klt
@@ -52,15 +56,56 @@ def sha256_of(path):
         return "sha256:" + hashlib.sha256(handle.read()).hexdigest()
 
 
+class EvidencePathError(Exception):
+    """A cited path is not a usable, checkout-contained evidence file."""
+
+
+def _contained(root_real, path):
+    """True if canonical `path` is root_real or lies beneath it."""
+    try:
+        return os.path.commonpath([root_real, path]) == root_real
+    except ValueError:
+        return False
+
+
+def _canonical(root_real, candidate, what):
+    """Return realpath of `candidate`, raising EvidencePathError if it leaves root."""
+    try:
+        real = os.path.realpath(candidate)
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise EvidencePathError(f"cannot resolve {what} {candidate!r}: {exc}")
+    if not _contained(root_real, real):
+        raise EvidencePathError(
+            f"{what} {candidate!r} resolves to {real}, outside the repository "
+            f"checkout {root_real}; evidence must be committed inside the repo")
+    return real
+
+
+def resolve_envelope(root, envelope_rel):
+    """Canonical envelope path, which must stay inside the checkout."""
+    root_real = os.path.realpath(root)
+    return _canonical(root_real, os.path.join(root, envelope_rel), "evidence envelope")
+
+
 def resolve_artifact(root, envelope_rel, artifact):
-    """Envelope directory first, then repo-relative; None if neither is a file."""
-    root = Path(root)
-    first = os.path.normpath(os.path.join(root, os.path.dirname(envelope_rel), artifact))
-    if os.path.isfile(first):
-        return first
-    second = os.path.normpath(os.path.join(root, artifact))
-    if os.path.isfile(second):
-        return second
+    """Envelope directory first, then repo-relative; None if neither is a file.
+
+    Every candidate is canonicalised (symlinks followed) and must stay inside
+    the checkout. A candidate that escapes raises EvidencePathError (never a
+    silent fall back to the other lookup branch). Contained symlinks and
+    internal '..' segments are fine.
+    """
+    root_real = os.path.realpath(root)
+    envelope_dir = os.path.dirname(envelope_rel)
+    for base in (os.path.join(root, envelope_dir), root):
+        candidate = os.path.join(base, artifact)
+        real = _canonical(root_real, candidate, "provenance.input.path")
+        if os.path.isfile(real):
+            return real
+        if os.path.islink(os.path.normpath(candidate)) and not os.path.exists(real):
+            raise EvidencePathError(
+                f"provenance.input.path {artifact!r} is a dangling symlink "
+                f"({os.path.normpath(candidate)} -> {real})")
     return None
 
 
@@ -127,8 +172,12 @@ def check_manifest(manifest, root=REPO):
             continue
         path = value
         try:
-            with open(root / path) as handle:
+            env_real = resolve_envelope(root, path)
+            with open(env_real) as handle:
                 envelope = json.load(handle)
+        except EvidencePathError as exc:
+            failures.append(f"item {item}: {path}: {exc}")
+            continue
         except Exception as exc:
             failures.append(f"item {item}: cannot read evidence envelope {path}: {exc}")
             continue
@@ -150,15 +199,23 @@ def check_manifest(manifest, root=REPO):
                 "artifact it cites can be re-hashed here")
             continue
 
-        resolved = resolve_artifact(root, path, artifact)
+        try:
+            resolved = resolve_artifact(root, path, artifact)
+        except EvidencePathError as exc:
+            failures.append(f"item {item}: {path}: {exc}")
+            continue
         if resolved is None:
             failures.append(
                 f"item {item}: {path} names provenance.input.path {artifact!r}, "
                 "which resolves to no file")
             continue
-        actual = sha256_of(resolved)
+        shown = os.path.relpath(resolved, os.path.realpath(root))
+        try:
+            actual = sha256_of(resolved)
+        except OSError as exc:
+            failures.append(f"item {item}: cannot read cited artifact {shown}: {exc}")
+            continue
         checked += 1
-        shown = os.path.relpath(resolved, root)
         if actual == declared:
             oks.append(f"item {item}: OK {shown} -> {declared}")
         else:

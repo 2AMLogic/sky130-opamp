@@ -192,6 +192,15 @@ python3 design/bin/generic_evidence_check.py     # exit 0 = fresh, 1 = drift/mal
 python3 design/bin/check_ci.py                   # default gate; includes the above
 ```
 
+Evidence must live inside the checkout: envelope and artifact paths are
+canonicalised (symlinks followed) and any external absolute path, `..`
+traversal or symlink that leaves the repository root is rejected as an
+item error, since a fresh checkout would lack that file. When the
+envelope-relative candidate escapes, the reference is reported invalid
+rather than falling back to the repo-relative lookup. Contained symlinks
+and internal `..` segments remain valid; dangling links and unreadable
+artifacts are reported per item.
+
 It aggregates every item-specific failure (malformed or unreadable
 envelope, missing `provenance.input.path`/`content_hash`, unresolvable
 file, hash disagreement). It skips well-formed `{"command": [...]}`
