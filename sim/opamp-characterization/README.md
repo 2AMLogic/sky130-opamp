@@ -279,6 +279,21 @@ snapshot, same fleet, same grid) and lists any point it cannot match. Method,
 validity and extraction rules: "Fixed-input-common-mode swing diagnostic" under
 Methodology; result: "Output-swing attribution (issue #181)" below.
 
+### ICMR-aware slew diagnostic (issue #185)
+
+```bash
+# single-point method probe (one point of each; local klt backend is allowed for single units)
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local --fleet --corners ss --temps -40 --analyses icmr,tran_sr,tran_sr_icmr
+# canonical 15-point paired-supply campaign: icmr (5 requests) + tran_sr (1) + tran_sr_icmr (<= 15 single-unit requests), Spot batch fleet
+python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses icmr,tran_sr,tran_sr_icmr --timeout-s 600
+```
+
+`tran_sr_icmr` is **opt-in**, klt-only, and needs `icmr` (and, for the standard
+reference, `tran_sr`) in the **same campaign**, so the ICMR window, the standard
+slew and the diagnostic share one DUT snapshot and one supply point. The
+standard `tran_sr` bench, definition and CSV are unchanged. Rules: "ICMR-aware
+slew diagnostic" under Methodology.
+
 ### Independent supply mode (issue #110)
 
 The default **paired** mode is unchanged: one VDD per process (TT/SF/FS 1.80 V,
@@ -346,6 +361,7 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (and the `icmr,cmrr` `klt sim` path) |
 | `testbench/opamp_icmr.spice.tmpl`, `opamp_cmrr.spice.tmpl` | `klt sim` circuit-body benches: input common-mode range (output held at mid-rail) and CMRR (Adm and Acm in one deck) (issue #53) |
 | `records/<id>-{icmr,cmrr}.csv` | Per-point ICMR edges / CMRR(f) for the issue #53 benches; `<id>-logs/` holds the klt requests, responses and per-corner decks |
+| `testbench/opamp_tran_sr_icmr.spice.tmpl`, `records/<id>-tran-sr-icmr.csv` | `klt sim` circuit body and per-point result of the opt-in ICMR-aware slew diagnostic (issue #185); the record JSON's `tran_sr_icmr_summary` counts the verdicts |
 | `testbench/opamp_swing_fixcm.spice.tmpl`, `records/<id>-swing-fixcm.csv` | `klt sim` circuit body and per-point result of the fixed-input-common-mode output-swing diagnostic (issue #181); the record JSON's `swing_fixcm_comparison` sets it against `dc_swing` and `icmr` |
 | `testbench/psrr_vdd.cir`, `psrr_vss.cir`, `noise.cir` | Circuit-body benches (no `.control`/`.end`) for `klt sim`: PSRR+ , PSRR-, input-referred noise (issue #54) |
 | `bin/psrr_noise_sweep.py` | Writes the three `klt sim` requests, runs them on the configured backend, writes the PSRR/noise records |
@@ -651,6 +667,61 @@ criterion, the follower's a 20 % slope criterion).
 
 **Not** a rail-clipped open-loop transfer: every reported edge is a local
 small-signal gain crossing at a valid, servo-held operating point.
+
+### ICMR-aware slew diagnostic (`opamp_tran_sr_icmr.spice.tmpl`, issue #185)
+
+Question: how much of the falling-slew gap to the standard unity-buffer step is
+**input-range loss** (the standard step's low level, `0.3*VDD`, lies below the
+point's measured ICMR) rather than output-current limitation? The standard
+stimulus is kept as the reference; this is an additional step, never a
+replacement.
+
+**Amplitude selection** (`select_icmr_step`, per point, from that point's `icmr`
+row: the 40 dB window): the step is the standard stimulus (`0.3..0.7*VDD`)
+intersected with `[ICMR_low + 0.05 V, ICMR_high - 0.05 V]` (guard band
+`ICMR_SR_GUARD_V`). If the intersection is narrower than `0.20 V` the point is
+reported `no_useful_step` (reason in the CSV, nothing simulated, nothing
+clamped). A window that already contains the standard stimulus gives
+`standard_inside_icmr` (the diagnostic repeats the standard step; no input-range
+attribution is possible).
+
+**Measurement.** Same unity buffer (Rshort 1 mOhm), CL = 2 pF, pulse timing
+(200 ns delay, 1 ns edges, 1 us width) and `tran 2n 2.2u` as `tran_sr`; the
+levels are literal per point so each point is its own single-unit request. The
+waveform artifact is analysed in `icmr_sr_extract`: levels are taken from the
+**settled endpoints** (20 %/80 % of the measured settled change; offset-immune).
+
+**Validity rules** (each edge; failure -> `invalid`, no SR number is recorded
+in `*_sr_avg`/`*_sr_claim`):
+1. the settled output change must equal the commanded step within 10 %;
+2. settled: the output moves < 1 % of the step over the last 10 % of the region
+   (the rise region ends 10 ns before the falling edge);
+3. both the 20 % and the 80 % crossing exist, in order;
+4. segment shape: dv/dt (6 ns window) is sampled across the 20-80 % transit;
+   the fraction of it spent at >= 90 % of the peak rate is >= 0.40 ->
+   `slew_limited`; < 0.15 -> `linear` (a single-pole response spends ~0.08 there);
+   otherwise `inconclusive`.
+Only `slew_limited` edges fill `*_sr_claim_v_per_us`; a smaller amplitude alone
+never counts as improved slew.
+
+**Headroom/current records** (proxies, not proof of saturation; klt on the fleet
+takes `.meas` cards only, so device currents are not probed): `*_i_load_peak_ua` =
+`CL*dv/dt` at the peak rate (a lower bound on the output sink/source current; the
+Cc current is excluded), `*_i_supply_excess_{peak,pre}_ua` = `-i(vdd) - Iref` at
+the peak rate and before the edge (tracks the tail + mirror + output-branch
+current), `*_tail_min_v` (M5 VDS), `*_pair_vds_min_v` (min of M1/M2 VDS),
+`*_m3_vsg_peak_v` (mirror diode VSG, tracks the tail current), over the 20-80 %
+transit. `*_input_headroom_loss` = 1 when the tail VDS < 0.10 V or the pair VDS
+< 0.10 V (both thresholds are method constants, `ICMR_SR_TAIL_VDS_LOSS_V`,
+`ICMR_SR_PAIR_VDS_LOSS_V`).
+
+**Verdict per point** (falling edge; `icmr_sr_verdict`): `input_range_contributes`
+when the ICMR-step fall is `slew_limited`, the standard stimulus lies outside the
+ICMR window, and its SR is >= 1.10x the same point's standard fall SR;
+`no_input_range_effect` for a ratio in [0.90, 1.10); otherwise `inconclusive`
+(linear / inconclusive / invalid fall, or ratio < 0.90), `no_useful_step`,
+`standard_inside_icmr` or `no_standard_reference`. It is a diagnostic metric: no
+target closure, spec change or topology adoption follows from it.
 
 ## Results by row
 
@@ -1098,6 +1169,33 @@ Two earlier fleet attempts (`20261009-095419-72db8ef`, `20261009-101813-72db8ef`
 each had 7 failed units (fleet-side non-convergence in the per-supply-group
 layout) and are not committed; the per-corner layout with `.nodeset` seeding at
 566b9a5 passed 45 / 45.
+
+## ICMR-aware slew attribution (issue #185)
+
+Fleet record `20261011-201913-046fe81-7c5771` (batch backend, 15 paired-supply
+points, one DUT snapshot; `icmr`, `tran_sr` and `tran_sr_icmr` share it; every
+unit carries `environment.remote`). Method probes beforehand on the local klt
+backend: `20261011-201453-046fe81-c857e5` (SS/-40 C) and
+`20261011-201655-046fe81-7349fb` (TT/27 C) reproduce the fleet rows to the digit
+shown. Rules: "ICMR-aware slew diagnostic" under Methodology.
+
+| Result | Value |
+|---|---|
+| Usable ICMR-contained steps | 15 / 15 (all steps >= 0.35 V) |
+| Fall edge class | 15 slew_limited, 0 linear / inconclusive / invalid |
+| `input_range_contributes` (fall SR >= 1.10x standard) | 1: **SS/-40 C**, 13.94 vs 11.02 V/us (x1.26) |
+| `no_input_range_effect` | 14 (ratio 0.993 .. 1.053; largest: SS/27 C x1.053, FS/-40 C x1.052) |
+| `*_input_headroom_loss` flag (tail or pair VDS < 0.10 V) | 0 of 15 |
+
+Reading: the standard step's low level lies below the measured ICMR at every
+point (by 0.025..0.23 V), yet only at SS/-40 C does moving it
+inside the window raise the falling slew rate (+26 %); the SS/-40 C fall tail VDS
+dips to 0.110 V, just above the proxy threshold. At the other 14 points the
+falling slew is output-current limited to within 5 %. Input-range loss therefore
+explains the SS/-40 C part of the falling-slew gap only; it does not explain the
+remaining gap at the other corners. This is a diagnostic metric: no target is
+claimed closed, no topology adopted, and independent supply expansion remains
+issue #110.
 
 ## Output-swing attribution (issue #181)
 

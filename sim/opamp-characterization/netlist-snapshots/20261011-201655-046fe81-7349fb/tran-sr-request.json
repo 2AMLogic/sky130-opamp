@@ -1,0 +1,52 @@
+{
+  "netlist": "tran-sr-body.spice",
+  "engine": "ngspice",
+  "backend": "local",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.8
+      ]
+    },
+    "temperature_c": [
+      27.0
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "2n 2.2u"
+  },
+  "measurements": [
+    {
+      "name": "t20_rise",
+      "unit": "s",
+      "spice": ".meas tran t20_rise when v(out)=v(l20) rise=1"
+    },
+    {
+      "name": "t80_rise",
+      "unit": "s",
+      "spice": ".meas tran t80_rise when v(out)=v(l80) rise=1"
+    },
+    {
+      "name": "t80_fall",
+      "unit": "s",
+      "spice": ".meas tran t80_fall when v(out)=v(l80) fall=1"
+    },
+    {
+      "name": "t20_fall",
+      "unit": "s",
+      "spice": ".meas tran t20_fall when v(out)=v(l20) fall=1"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true
+  }
+}

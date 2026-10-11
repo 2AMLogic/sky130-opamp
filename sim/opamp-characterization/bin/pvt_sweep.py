@@ -40,7 +40,7 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --check-env        report tool/PDK availability and exit (no simulation)
     --corners C,C       subset of {tt,ff,ss,sf,fs}      (default: all five)
     --temps T,T          temperatures in degC             (default: -40,27,125)
-    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step,swing_fixcm}
+    --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step,swing_fixcm,tran_sr_icmr}
                          (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step/swing_fixcm
                          are opt-in klt analyses)
     --backend NAME       effective `klt sim` backend for the icmr/cmrr/tran_step
@@ -452,7 +452,7 @@ def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
 # `.lib`/`.temp`/`alter vdd` cards and the measurements live in the request.
 # --------------------------------------------------------------------------
 
-KLT_ANALYSES = ("icmr", "cmrr", "tran_step", "swing_fixcm")
+KLT_ANALYSES = ("icmr", "cmrr", "tran_step", "swing_fixcm", "tran_sr_icmr")
 SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
 
 # ICMR bench constants -- fixed before any batch result existed; the README's
@@ -672,6 +672,15 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         measurements = swing_measurements()
         vdds, exclude = vdd_pairing(corners, supply_mode, supplies)
         tag = "dc-swing"
+    elif analysis == "tran_sr_icmr":
+        step = ICMR_SR_STEPS[(corners[0], float(temps[0]), round(vdd_group, 6))]
+        if not step["usable"]:
+            raise HarnessError(f"tran_sr_icmr[{corners[0]}/{temps[0]:g}C/{vdd_group:g}V]: no useful step ({step['reason']})")
+        body_subs.update({"V_LOW": f"{step['v_low_v']:.6f}", "V_HIGH": f"{step['v_high_v']:.6f}", **SR_TIMING})
+        analysis_card = {"kind": "tran", "args": SR_TRAN_ARGS}
+        measurements = [{"name": "vout_pre_v", "unit": "V", "spice": ".meas tran vout_pre_v find v(out) at=190n"}]
+        vdds, exclude = [vdd_group], []
+        tag = f"tran-sr-icmr-{corners[0]}-{temps[0]:g}C-{vdd_group:g}V"
     elif analysis == "swing_fixcm":
         body_subs.update(fixcm_body_subs())
         # same set-point grid as dc_swing's input grid: v(set) = VDD * k/360
@@ -699,7 +708,7 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
         "analysis": analysis_card,
         "measurements": measurements,
         "options": {"timeout_s": KLT_TIMEOUT_S[0], "keep_artifacts": True,
-                    **({"waveforms": True} if analysis in ("dc_swing", "swing_fixcm") else {})},
+                    **({"waveforms": True} if analysis in ("dc_swing", "swing_fixcm", "tran_sr_icmr") else {})},
     }
     if backend == "batch":
         # The fleet image's klt (0.5.0 when this was written) is older than any
@@ -1553,6 +1562,351 @@ def latest_ac_rows(before_id: str, dut_sha256: str, repo_root: Path | None = Non
     return select_ac_reference(before_id, dut_sha256, repo_root, records_dir)
 
 
+# --------------------------------------------------------------------------
+# ICMR-aware unity-buffer slew diagnostic (issue #185). Opt-in klt analysis
+# `tran_sr_icmr`; the standard `tran_sr` stimulus, definition and CSV are
+# unchanged. It needs the SAME campaign's `icmr` rows (same DUT snapshot, same
+# supply points): per point it steps the buffer between two levels chosen inside
+# that point's measured ICMR window (`select_icmr_step`) and applies explicit
+# validity rules (`icmr_sr_extract`) so a missing crossing, an unsettled
+# response or a linear (non-slewing) step can never become a slew claim.
+# README "ICMR-aware slew diagnostic" documents the rules.
+# --------------------------------------------------------------------------
+
+ICMR_SR_GUARD_V = 0.05  # guard band kept between the step and each measured ICMR edge
+ICMR_SR_MIN_SPAN_V = 0.20  # smaller steps are not "large-signal" (20-80 % segment would be < 0.12 V)
+ICMR_SR_T_DELAY_S, ICMR_SR_T_EDGE_S, ICMR_SR_T_PW_S, ICMR_SR_T_STOP_S = 200e-9, 1e-9, 1e-6, 2.2e-6  # = SR_TIMING / SR_TRAN_ARGS
+ICMR_SR_CL_F, ICMR_SR_IBIAS_A = 2e-12, 5e-6  # numeric twins of CL_F / IBIAS_A
+ICMR_SR_END_MARGIN_S = 10e-9  # the rise region ends this long before the falling edge starts
+ICMR_SR_REACH_TOL = 0.10  # settled output change must equal the commanded step within this fraction
+ICMR_SR_SETTLE_TOL = 0.01  # output moves < 1 % of the step over the last 10 % of the observation region
+ICMR_SR_RATE_WINDOW_S = 6e-9  # finite-difference window of dv/dt
+ICMR_SR_PLATEAU_FRAC = 0.9  # a sample is "at the slew rate" when |dv/dt| >= this fraction of the peak
+ICMR_SR_SLEW_MIN_FRAC = 0.40  # >= this fraction of the 20-80 % transit at the plateau rate: slew_limited
+ICMR_SR_LINEAR_MAX_FRAC = 0.15  # < this fraction: linear settling (a single pole gives ~0.08); between: inconclusive
+ICMR_SR_TAIL_VDS_LOSS_V = 0.10  # proxy: tail-source VDS below this = tail current at risk
+ICMR_SR_PAIR_VDS_LOSS_V = 0.10  # proxy: input-pair VDS below this = pair leaving saturation
+ICMR_SR_GAIN_RATIO = 1.10  # ICMR-step fall SR >= this x the standard fall SR (same point): input range contributes
+ICMR_SR_SAME_BAND = 0.90  # ratio in [this, GAIN_RATIO): no input-range effect; below: inconclusive
+ICMR_SR_REQUIRED = ("time", "v(out)", "v(inp)", "i(vdd)")
+ICMR_SR_PROXY_NODES = ("v(xdut.d1)", "v(xdut.d2)", "v(xdut.tail)")
+ICMR_SR_STEPS: dict[tuple, dict] = {}  # (corner, temp, rounded vdd) -> select_icmr_step() result, set by main
+ICMR_SR_CLASSES = ("slew_limited", "linear", "inconclusive", "invalid")
+
+
+def select_icmr_step(vdd: float, icmr_low: float, icmr_high: float, guard: float = ICMR_SR_GUARD_V,
+                     min_span: float = ICMR_SR_MIN_SPAN_V) -> dict:
+    """Step levels inside one point's measured ICMR window: the standard stimulus
+    (SR_FRAC_LOW..SR_FRAC_HIGH x VDD) intersected with [icmr_low + guard,
+    icmr_high - guard]. `usable` is False -- with a reason, never a clamped
+    guess -- when the window is missing/inverted or the intersection is narrower
+    than `min_span`. `same_as_standard` marks a window that already contains the
+    standard stimulus (the diagnostic then repeats the standard step)."""
+    std_lo, std_hi = SR_FRAC_LOW * vdd, SR_FRAC_HIGH * vdd
+    out = {"std_low_v": std_lo, "std_high_v": std_hi, "icmr_low_v": icmr_low, "icmr_high_v": icmr_high,
+           "guard_v": guard, "usable": False, "reason": "", "v_low_v": float("nan"), "v_high_v": float("nan"),
+           "same_as_standard": False}
+    if not all(math.isfinite(x) for x in (vdd, icmr_low, icmr_high)) or icmr_high <= icmr_low:
+        out["reason"] = "ICMR window missing or empty"
+        return out
+    out["std_below_icmr_v"] = max(0.0, icmr_low - std_lo)
+    out["std_above_icmr_v"] = max(0.0, std_hi - icmr_high)
+    out["std_inside_icmr"] = out["std_below_icmr_v"] == 0.0 and out["std_above_icmr_v"] == 0.0
+    lo, hi = max(std_lo, icmr_low + guard), min(std_hi, icmr_high - guard)
+    if hi - lo < min_span:
+        out["reason"] = (f"no useful large-signal step: usable window {max(hi - lo, 0.0):.3f} V "
+                         f"< {min_span:g} V after the {guard:g} V guard bands")
+        return out
+    out.update({"usable": True, "v_low_v": lo, "v_high_v": hi,
+                "same_as_standard": abs(lo - std_lo) < 1e-12 and abs(hi - std_hi) < 1e-12})
+    return out
+
+
+def _at(t: list[float], v: list[float], x: float) -> float:
+    if x <= t[0]:
+        return v[0]
+    for i in range(1, len(t)):
+        if t[i] >= x:
+            return v[i - 1] + (v[i] - v[i - 1]) * (x - t[i - 1]) / (t[i] - t[i - 1]) if t[i] > t[i - 1] else v[i]
+    return v[-1]
+
+
+def _first_cross(t: list[float], v: list[float], level: float, t0: float, t1: float, rising: bool) -> float | None:
+    """First interpolated crossing of `level` in [t0, t1], in the stated direction."""
+    for i in range(1, len(t)):
+        if t[i] < t0 or t[i - 1] > t1:
+            continue
+        a, b = v[i - 1] - level, v[i] - level
+        if (a < 0.0 <= b) if rising else (a > 0.0 >= b):
+            return t[i - 1] + (t[i] - t[i - 1]) * (0.0 - a) / (b - a)
+    return None
+
+
+def _empty_edge(cls: str, reason: str) -> dict:
+    nan = float("nan")
+    return {"class": cls, "reason": reason, "sr_avg": nan, "sr_peak": nan, "sr_claim": nan, "plateau_frac": nan,
+            "t2080_s": nan, "v_start": nan, "v_end": nan, "i_load_peak_a": nan, "tail_min_v": nan,
+            "pair_vds_min_v": nan, "m3_vsg_peak_v": nan, "i_supply_excess_peak_a": nan,
+            "i_supply_excess_pre_a": nan, "input_headroom_loss": ""}
+
+
+def icmr_sr_edge(wave: dict[str, list[float]], v_from: float, v_to: float, t0: float, t1: float,
+                 vdd: float) -> dict:
+    """Validity rules and metrics of ONE edge of the ICMR-aware step (observation
+    region [t0, t1]; the input commanded v_from -> v_to). Never raises for a
+    response problem: it returns class "invalid" with the reason and no slew
+    numbers. Order: step reached -> settled -> both crossings -> segment shape."""
+    t, v = wave["time"], wave["v(out)"]
+    if len(t) < 10 or any(b < a for a, b in zip(t, t[1:])):
+        return _empty_edge("invalid", "time axis too short or non-monotonic")
+    if t[0] > t0 or t[-1] < t1 - 1e-12:
+        return _empty_edge("invalid", "waveform does not cover the observation region")
+    rising = v_to > v_from
+    v_start, v_end = _at(t, v, t0), _at(t, v, t1)
+    d_cmd, d_out = v_to - v_from, v_end - v_start
+    if not all(math.isfinite(x) for x in (v_start, v_end)):
+        return _empty_edge("invalid", "non-finite output")
+    if abs(d_out - d_cmd) > ICMR_SR_REACH_TOL * abs(d_cmd):
+        e = _empty_edge("invalid", f"step not reached (output moved {d_out:.4g} V of {d_cmd:.4g} V commanded)")
+        e.update(v_start=v_start, v_end=v_end)
+        return e
+    drift = _at(t, v, t1) - _at(t, v, t1 - 0.1 * (t1 - t0))
+    if abs(drift) > ICMR_SR_SETTLE_TOL * abs(d_out):
+        e = _empty_edge("invalid", f"unsettled (still moving {drift:.3g} V over the last 10 % of the region)")
+        e.update(v_start=v_start, v_end=v_end)
+        return e
+    v20, v80 = v_start + 0.2 * d_out, v_start + 0.8 * d_out
+    t20 = _first_cross(t, v, v20, t0, t1, rising)
+    t80 = _first_cross(t, v, v80, t0, t1, rising)
+    if t20 is None or t80 is None:
+        e = _empty_edge("invalid", "missing 20 % / 80 % crossing")
+        e.update(v_start=v_start, v_end=v_end)
+        return e
+    if t80 <= t20:
+        e = _empty_edge("invalid", "inconsistent crossings (80 % level not after 20 % level)")
+        e.update(v_start=v_start, v_end=v_end)
+        return e
+    # dv/dt on a uniform grid across the 20-80 % transit (central difference over the rate window)
+    n, h = 200, 0.5 * ICMR_SR_RATE_WINDOW_S
+    ts = [t20 + (t80 - t20) * (k + 0.5) / n for k in range(n)]
+    sign = 1.0 if rising else -1.0
+    rate = [sign * (_at(t, v, x + h) - _at(t, v, x - h)) / (2 * h) for x in ts]
+    peak = max(rate)
+    plateau = sum(1 for r in rate if r >= ICMR_SR_PLATEAU_FRAC * peak) / n if peak > 0 else 0.0
+    cls = ("slew_limited" if plateau >= ICMR_SR_SLEW_MIN_FRAC else
+           "linear" if plateau < ICMR_SR_LINEAR_MAX_FRAC else "inconclusive")
+    sr_avg = 0.6 * abs(d_out) / (t80 - t20)
+    k_peak = rate.index(peak)
+    t_peak = ts[k_peak]
+    out = _empty_edge(cls, "" if cls == "slew_limited" else
+                      "linear settling (no sustained slew-limited segment)" if cls == "linear" else
+                      "inconclusive (plateau fraction between the linear and slew-limited bounds)")
+    out.update(sr_avg=sr_avg, sr_peak=peak, sr_claim=sr_avg if cls == "slew_limited" else float("nan"),
+               plateau_frac=plateau, t2080_s=t80 - t20, v_start=v_start, v_end=v_end,
+               i_load_peak_a=ICMR_SR_CL_F * peak)
+    ivdd = wave["i(vdd)"]
+    out["i_supply_excess_peak_a"] = -_at(t, ivdd, t_peak) - ICMR_SR_IBIAS_A
+    out["i_supply_excess_pre_a"] = -_at(t, ivdd, t0) - ICMR_SR_IBIAS_A
+    d1, d2, tail = (wave.get(k) for k in ICMR_SR_PROXY_NODES)
+    if tail is not None:
+        idx = [i for i, x in enumerate(t) if t20 <= x <= t80] or [min(range(len(t)), key=lambda i: abs(t[i] - t_peak))]
+        out["tail_min_v"] = min(tail[i] for i in idx)
+        if d1 is not None and d2 is not None:
+            out["pair_vds_min_v"] = min(min(d1[i], d2[i]) - tail[i] for i in idx)
+            out["m3_vsg_peak_v"] = vdd - _at(t, d1, t_peak)
+        loss = out["tail_min_v"] < ICMR_SR_TAIL_VDS_LOSS_V or (
+            math.isfinite(out["pair_vds_min_v"]) and out["pair_vds_min_v"] < ICMR_SR_PAIR_VDS_LOSS_V)
+        out["input_headroom_loss"] = int(loss)
+    return out
+
+
+def icmr_sr_verdict(step: dict, fall_class: str, fall_claim: float, std_fall: float | None) -> str:
+    """Attribution of the falling-edge result at one point. Only a slew_limited
+    ICMR-step fall can support a claim; a smaller amplitude alone never does."""
+    if not step["usable"]:
+        return "no_useful_step"
+    if step.get("std_inside_icmr"):
+        return "standard_inside_icmr"
+    if fall_class != "slew_limited" or not math.isfinite(fall_claim):
+        return "inconclusive"
+    if std_fall is None or not math.isfinite(std_fall) or std_fall <= 0:
+        return "no_standard_reference"
+    ratio = fall_claim / std_fall
+    if ratio >= ICMR_SR_GAIN_RATIO:
+        return "input_range_contributes"
+    return "no_input_range_effect" if ratio >= ICMR_SR_SAME_BAND else "inconclusive"
+
+
+def icmr_sr_extract(vdd: float, step: dict, wave: dict[str, list[float]], std_fall: float | None = None,
+                    std_rise: float | None = None) -> dict:
+    """Both edges + verdict of one point from its waveform (pure; no simulator)."""
+    lo, hi = step["v_low_v"], step["v_high_v"]
+    t_r0 = ICMR_SR_T_DELAY_S
+    t_f0 = ICMR_SR_T_DELAY_S + ICMR_SR_T_EDGE_S + ICMR_SR_T_PW_S
+    rise = icmr_sr_edge(wave, lo, hi, t_r0, t_f0 - ICMR_SR_END_MARGIN_S, vdd)
+    fall = icmr_sr_edge(wave, hi, lo, t_f0 + ICMR_SR_T_EDGE_S, ICMR_SR_T_STOP_S, vdd)
+    return icmr_sr_row_fields(vdd, step, rise, fall, std_rise, std_fall)
+
+
+def _us(x: float) -> float:
+    return x / 1e6
+
+
+def icmr_sr_row_fields(vdd: float, step: dict, rise: dict, fall: dict, std_rise: float | None,
+                       std_fall: float | None) -> dict:
+    nan = float("nan")
+    row = {
+        "icmr_low_v": step["icmr_low_v"], "icmr_high_v": step["icmr_high_v"], "guard_v": step["guard_v"],
+        "std_low_v": step["std_low_v"], "std_high_v": step["std_high_v"],
+        "std_below_icmr_v": step.get("std_below_icmr_v", nan), "std_above_icmr_v": step.get("std_above_icmr_v", nan),
+        "step_low_v": step["v_low_v"], "step_high_v": step["v_high_v"],
+        "step_usable": int(step["usable"]), "same_as_standard": int(step["same_as_standard"]),
+        "std_sr_rise_v_per_us": nan if std_rise is None else std_rise,
+        "std_sr_fall_v_per_us": nan if std_fall is None else std_fall,
+    }
+    for name, e in (("rise", rise), ("fall", fall)):
+        row.update({
+            f"{name}_class": e["class"], f"{name}_reason": e["reason"],
+            f"{name}_sr_avg_v_per_us": _us(e["sr_avg"]), f"{name}_sr_peak_v_per_us": _us(e["sr_peak"]),
+            f"{name}_sr_claim_v_per_us": _us(e["sr_claim"]), f"{name}_plateau_frac": e["plateau_frac"],
+            f"{name}_t2080_ns": e["t2080_s"] * 1e9, f"{name}_v_start_v": e["v_start"], f"{name}_v_end_v": e["v_end"],
+            f"{name}_i_load_peak_ua": e["i_load_peak_a"] * 1e6,
+            f"{name}_i_supply_excess_peak_ua": e["i_supply_excess_peak_a"] * 1e6,
+            f"{name}_i_supply_excess_pre_ua": e["i_supply_excess_pre_a"] * 1e6,
+            f"{name}_tail_min_v": e["tail_min_v"], f"{name}_pair_vds_min_v": e["pair_vds_min_v"],
+            f"{name}_m3_vsg_peak_v": e["m3_vsg_peak_v"], f"{name}_input_headroom_loss": e["input_headroom_loss"],
+        })
+    ratio = row["fall_sr_claim_v_per_us"] / std_fall if std_fall and math.isfinite(row["fall_sr_claim_v_per_us"]) else nan
+    row["fall_sr_ratio_to_std"] = ratio
+    row["verdict"] = icmr_sr_verdict(step, fall["class"], row["fall_sr_claim_v_per_us"], std_fall)
+    return row
+
+
+def icmr_sr_unusable_row(vdd: float, step: dict, std_rise: float | None, std_fall: float | None) -> dict:
+    """Row of a point whose ICMR window admits no useful step (nothing simulated)."""
+    e = _empty_edge("invalid", step["reason"])
+    return icmr_sr_row_fields(vdd, step, e, dict(e), std_rise, std_fall)
+
+
+def tran_sr_icmr_settings() -> dict:
+    return {"guard_v": ICMR_SR_GUARD_V, "min_span_v": ICMR_SR_MIN_SPAN_V,
+            "stimulus": "standard 0.3..0.7*VDD intersected with [ICMR_low+guard, ICMR_high-guard] of the same point",
+            "end_margin_s": ICMR_SR_END_MARGIN_S, "timing": {"delay_s": ICMR_SR_T_DELAY_S, "edge_s": ICMR_SR_T_EDGE_S, "pw_s": ICMR_SR_T_PW_S,
+                       "stop_s": ICMR_SR_T_STOP_S}, "reach_tol": ICMR_SR_REACH_TOL,
+            "settle_tol": ICMR_SR_SETTLE_TOL, "rate_window_s": ICMR_SR_RATE_WINDOW_S,
+            "plateau_frac_of_peak": ICMR_SR_PLATEAU_FRAC, "slew_limited_min_fraction": ICMR_SR_SLEW_MIN_FRAC,
+            "linear_max_fraction": ICMR_SR_LINEAR_MAX_FRAC, "tail_vds_loss_v": ICMR_SR_TAIL_VDS_LOSS_V,
+            "pair_vds_loss_v": ICMR_SR_PAIR_VDS_LOSS_V, "gain_ratio": ICMR_SR_GAIN_RATIO,
+            "same_band_ratio": ICMR_SR_SAME_BAND, "solver_settings": SOLVER_SETTINGS}
+
+
+def tran_sr_icmr_row(corner: str, temp: float, info: dict, vdd: float,
+                     std_rise: float | None = None, std_fall: float | None = None) -> dict:
+    """Row from a fleet unit; the step comes from ICMR_SR_STEPS (the levels the request used)."""
+    label = f"tran_sr_icmr[{corner}/{temp:g}C/{vdd:g}V]"
+    step = ICMR_SR_STEPS.get((corner, float(temp), round(vdd, 6)))
+    if step is None:
+        raise HarnessError(f"{label}: no step plan for this point")
+    wave = load_wave(info, label, ICMR_SR_REQUIRED, ICMR_SR_PROXY_NODES)
+    row = {"corner": corner, "temp_c": temp, "vdd_v": vdd}
+    row.update(icmr_sr_extract(vdd, step, wave, std_fall, std_rise))
+    row["elapsed_s"] = round(info.get("runtime_s") or 0.0, 2)
+    return row
+
+
+def plan_icmr_steps(icmr_rows: list[dict]) -> dict[tuple, dict]:
+    """select_icmr_step for every icmr row of the campaign, keyed (corner, temp, vdd)."""
+    return {(r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6)):
+            select_icmr_step(float(r["vdd_v"]), float(r["icmr_low_v"]), float(r["icmr_high_v"]))
+            for r in icmr_rows}
+
+
+def tran_sr_icmr_summary(rows: list[dict]) -> dict:
+    counts: dict[str, int] = {}
+    for r in rows:
+        counts[r["verdict"]] = counts.get(r["verdict"], 0) + 1
+    return {"points": len(rows), "verdict_counts": counts,
+            "fall_class_counts": {c: sum(1 for r in rows if r["fall_class"] == c) for c in ICMR_SR_CLASSES},
+            "note": "diagnostic metric only; no target closure or topology adoption is implied"}
+
+
+def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir, results, errors, klt_jobs,
+                     supply_mode, supplies, icmr_rows, std_rows) -> None:
+    """Second phase (needs the campaign's icmr rows): one single-unit `klt sim`
+    request per usable point; unusable points become explicit no_useful_step
+    rows. Batch failures are reported, never retried locally."""
+    ICMR_SR_STEPS.clear()
+    ICMR_SR_STEPS.update(plan_icmr_steps(icmr_rows))
+    std = {(r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6)): r for r in std_rows or []}
+    out = results["tran_sr_icmr"]
+    todo = []
+    for (corner, temp, vdd), step in ICMR_SR_STEPS.items():
+        s = std.get((corner, temp, vdd))
+        sr, sf = (None, None) if s is None else (float(s["sr_rise_v_per_us"]), float(s["sr_fall_v_per_us"]))
+        if step["usable"]:
+            todo.append((corner, temp, vdd, sr, sf))
+        else:
+            out.append({"corner": corner, "temp_c": temp, "vdd_v": vdd,
+                        **icmr_sr_unusable_row(vdd, step, sr, sf), "elapsed_s": 0.0})
+    def submit(item):
+        corner, temp, vdd = item[:3]
+        req_path, tag = build_klt_request("tran_sr_icmr", None, vdd, pdk, [corner], [temp], req_dir, backend,
+                                          supply_mode, supplies)
+        shutil.copy(req_path, snapshot_run_dir / req_path.name)
+        shutil.copy(req_path.with_name(f"{tag}-body.spice"), snapshot_run_dir / f"{tag}-body.spice")
+        print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
+        t0 = time.monotonic()
+        exc = None
+        for attempt in range(CAPACITY_RETRIES + 1):
+            try:
+                return tag, req_path, run_klt_sim(req_path, log_dir / f"klt-{tag}", backend), time.monotonic() - t0, None
+            except HarnessError as e:
+                exc = e
+                if "BATCH_MAX_CONCURRENT_INSTANCES" not in str(e) or attempt == CAPACITY_RETRIES:
+                    break
+                time.sleep(CAPACITY_WAIT_S)
+        return tag, req_path, None, time.monotonic() - t0, exc
+
+    with ThreadPoolExecutor(max_workers=max(1, min(len(todo), KLT_MAX_PARALLEL_SUBMITS))) as pool:
+        outcomes = list(pool.map(submit, todo))
+    for (corner, temp, vdd, sr, sf), (tag, req_path, report, wall, exc) in zip(todo, outcomes):
+        label = f"{tag}"
+        if exc is not None:
+            errors.append(f"{label}: {exc}")
+            print(f"{label}: FAIL {exc}", file=sys.stderr)
+            continue
+        (log_dir / f"klt-{tag}-response.json").write_text(json.dumps(report, indent=2) + "\n")
+        env = report.get("environment", {})
+        klt_jobs.append({
+            "tag": tag, "backend": backend, "status": report.get("status"),
+            "corner_count": report.get("corner_count"), "wall_s": round(wall, 1), "remote": env.get("remote"),
+            "diagnostic_counts": report.get("diagnostic_counts"),
+            "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
+            "response": f"sim/opamp-characterization/records/{log_dir.name}/klt-{tag}-response.json",
+        })
+        if "error" in report:
+            errors.append(f"{label}: klt error: {report['error'].get('message')}")
+            continue
+        if backend == "batch" and not env.get("remote"):
+            errors.append(f"{label}: batch response carries no environment.remote provenance -- refusing")
+            continue
+        info = _corner_values(report, by_supply=True).get((corner, float(temp), round(vdd, 6)))
+        try:
+            if info is None:
+                raise HarnessError("not in the klt response")
+            bad = [d for d in info["diagnostics"] if d.get("severity") == "error"]
+            if bad:
+                raise HarnessError("; ".join(f"{d.get('code')}: {d.get('message')}"[:160] for d in bad[:2]))
+            if info.get("status") not in ("pass", "fail"):
+                raise HarnessError(f"unit status {info.get('status')!r} (timeout / error / incomplete)")
+            out.append(tran_sr_icmr_row(corner, temp, info, vdd, sr, sf))
+        except HarnessError as exc:
+            errors.append(f"{label}: {exc}")
+            print(f"{label:<28} FAIL {exc}", file=sys.stderr)
+    order = {c: i for i, c in enumerate(corners)}
+    out.sort(key=lambda r: (order[r["corner"]], r["temp_c"], r["vdd_v"]))
+
+
 ANALYSES = {"ac": run_ac, "tran_sr": run_tran_sr, "dc_swing": run_dc_swing}
 FIELDNAMES = {
     "ac": ["corner", "temp_c", "vdd_v", "vcm_v", "iq_a", "pq_w", "gain_dc_db",
@@ -1568,6 +1922,15 @@ FIELDNAMES = {
              "vid_mid_v", "cmrr_mid_db", "vout_mid_v", "iq_mid_a", "elapsed_s"],
     "cmrr": klt_fieldnames_cmrr(),
     "tran_step": ["corner", "temp_c", "vdd_v", "step_v", "overshoot_pct", "settle_1pct_ns", "v_ofs_uv", "elapsed_s"],
+    "tran_sr_icmr": ["corner", "temp_c", "vdd_v", "icmr_low_v", "icmr_high_v", "guard_v", "std_low_v", "std_high_v",
+                     "std_below_icmr_v", "std_above_icmr_v", "step_low_v", "step_high_v", "step_usable",
+                     "same_as_standard", "std_sr_rise_v_per_us", "std_sr_fall_v_per_us"]
+                    + [f"{d}_{c}" for d in ("rise", "fall") for c in (
+                        "class", "reason", "sr_avg_v_per_us", "sr_peak_v_per_us", "sr_claim_v_per_us",
+                        "plateau_frac", "t2080_ns", "v_start_v", "v_end_v", "i_load_peak_ua",
+                        "i_supply_excess_peak_ua", "i_supply_excess_pre_ua", "tail_min_v", "pair_vds_min_v",
+                        "m3_vsg_peak_v", "input_headroom_loss")]
+                    + ["fall_sr_ratio_to_std", "verdict", "elapsed_s"],
     "swing_fixcm": (["corner", "temp_c", "vdd_v", "vcm_v", "out_low_v", "out_high_v", "out_width_v",
                      "low_stop", "high_stop"]
                     + [f"out_{c}_v_{f}" for f in FIXCM_GAIN_FLOORS_DB if f != FIXCM_PRIMARY
@@ -1597,6 +1960,8 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                 plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
         elif a == "ac":
             plan.extend([("ac_iq", None, None, corners), ("ac", None, None, corners)])  # companion first
+        elif a == "tran_sr_icmr":
+            continue  # second phase (run_tran_sr_icmr): needs this campaign's icmr rows
         elif a in ("tran_step", "swing_fixcm", *FLEET_ANALYSES):
             plan.append((a, None, None, corners))
         else:
@@ -1786,6 +2151,10 @@ def main(argv=None) -> int:
         if a not in ANALYSES and a not in KLT_ANALYSES:
             print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
             return 1
+    if "tran_sr_icmr" in analyses and "icmr" not in analyses:
+        print("ERROR: tran_sr_icmr needs the same campaign's icmr rows (add icmr to --analyses; issue #185)",
+              file=sys.stderr)
+        return 1
     # --fleet routes the three formerly-local analyses through `klt sim` (issue #77)
     klt_analyses = [a for a in analyses if a in KLT_ANALYSES or (args.fleet and a in ANALYSES)]
     ngspice_analyses = [a for a in analyses if a in ANALYSES and a not in klt_analyses]
@@ -1887,6 +2256,7 @@ def main(argv=None) -> int:
     klt_crosscheck = None
     pm_crosscheck = None
     fixcm_comparison = None
+    sr_icmr_summary = None
     if klt_analyses:
         n_klt_errors0 = len(errors)
         with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
@@ -1894,6 +2264,21 @@ def main(argv=None) -> int:
                 klt_analyses, pdk, corners, temps, args.backend, Path(req_tmp),
                 log_dir, snapshot_run_dir, results, errors, klt_jobs, supply_mode, supplies,
             )
+        if "tran_sr_icmr" in klt_analyses:
+            missing = [f"{c}/{t:g}C/{v:g}V" for c, t, v in expected
+                       if not any(r["corner"] == c and r["temp_c"] == t and abs(r["vdd_v"] - v) < 1e-6
+                                  for r in results["icmr"])]
+            if missing:
+                errors.append(f"tran_sr_icmr: no icmr row (failed or absent) for {', '.join(missing)} -- skipped")
+            with tempfile.TemporaryDirectory(prefix="opamp-klt-sr-") as req_tmp:
+                run_tran_sr_icmr(pdk, corners, temps, args.backend, Path(req_tmp), log_dir, snapshot_run_dir,
+                                 results, errors, klt_jobs, supply_mode, supplies, results["icmr"],
+                                 results.get("tran_sr"))
+            sr_icmr_summary = tran_sr_icmr_summary(results["tran_sr_icmr"])
+            if "tran_sr" not in analyses:
+                sr_icmr_summary["unavailable_reasons"] = [
+                    "tran_sr not run in this campaign (add it to --analyses): no same-DUT standard reference"]
+            print(f"tran_sr_icmr: {json.dumps(sr_icmr_summary)}", file=sys.stderr)
         # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
         n_runs += sum(len(expected) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
         ac_ref = choose_ac_reference(record_id, dut_meta, results.get("ac"))
@@ -1969,6 +2354,7 @@ def main(argv=None) -> int:
                 "cmrr_cm_points": {k: v[0] for k, v in CMRR_CM_POINTS.items()}}
                if klt_analyses else {}),
             **({"swing_fixcm": fixcm_settings()} if "swing_fixcm" in analyses else {}),
+            **({"tran_sr_icmr": tran_sr_icmr_settings()} if "tran_sr_icmr" in analyses else {}),
         },
         "pdk": {
             "variant": pdk.variant, "root": str(pdk.root),
@@ -1988,6 +2374,7 @@ def main(argv=None) -> int:
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
         **({"tran_step_pm_crosscheck": pm_crosscheck} if pm_crosscheck else {}),
         **({"swing_fixcm_comparison": fixcm_comparison} if fixcm_comparison is not None else {}),
+        **({"tran_sr_icmr_summary": sr_icmr_summary} if sr_icmr_summary is not None else {}),
         "links": {
             f"{a}_csv": f"sim/opamp-characterization/records/{record_id}-{a.replace('_', '-')}.csv"
             for a in results if results[a]
