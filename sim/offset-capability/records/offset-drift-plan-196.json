@@ -1,0 +1,106 @@
+{
+  "issue": 196,
+  "date": "2026-10-11",
+  "status": "PREDECLARED. Committed before any request is submitted. Immutable; later revisions are new dated files.",
+  "scope": "E2 of offset-technique-plan-147.json: screen the drift of an IDEAL single-point (constant input-offset) correction on the current DR-013 DUT. Residual = Vos(condition, sample) - Vos(reference, same sample), joined by sample ID. Not a physical trim circuit: DAC mismatch, trim-induced operating-point changes, calibration error and noise are unmeasured. A failure rejects this constant-correction model under the stated screen, not every trim architecture. A pass is not an offset-compliance claim. The 0.275 mV allocation (DR-009) remains proposed. Canonical design and spec targets are unchanged.",
+  "base_commit": "5d572ef",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+    "rule": "The driver captures the netlist ONCE into records/dut-<label>/ and refuses to run unless the snapshot hash equals this value. Every batch, retry, probe and resumed submission uses that one rendered bench. No committed record measures this DUT at the offset bench with mismatch, so no historical result (DR-007 widths, sizing144 candidates) is subtracted from or pooled with these results."
+  },
+  "bench": {
+    "file": "sim/offset-capability/bench/offset_dc.cir (rendered into the DUT snapshot)",
+    "definition": "open-loop V(inp)-V(inn) at the rising v(out)=0.9 V crossing on a Vd sweep of -30 mV..+30 mV in 20 uV steps; inn held at 0.9 V; ideal 5 uA Iref; 2 pF load; `tt_mm` library section, monte_carlo vary=mismatch",
+    "held_constant_across_conditions": {
+      "output_crossing_v": 0.9,
+      "input_common_mode_v": 0.9,
+      "sweep_v": [-0.03, 0.03, 2e-05],
+      "iref_a": 5e-06,
+      "note": "the crossing and common mode do NOT scale with VDD: at 1.62 V and 1.98 V the crossing stays 0.9 V (VDD/2 only at 1.8 V). Only the temperature and the Vdd source change. Deliberate: reference and condition samples then measure the same quantity (input offset at one fixed output level and input common mode); the cost is that the output sits 0.09 V off mid-supply at the supply extremes."
+    }
+  },
+  "seed_and_sample_mapping": {
+    "monte_carlo": {"n": 100, "seed": 20261085, "vary": "mismatch"},
+    "sample_id": "<seed>/<sample_index>, index 0..99; the same 100 IDs in the reference and in every condition",
+    "mapping": "klt derives each sample's rndseed (and process/mismatch seeds) from (monte_carlo.seed, corner_index within the request, sample_index) by SHA-256 (klayout_tools.sim._derive_mc_seed, client klt 0.7.0). Every request here has exactly one corner, so corner_index is 0 and the per-sample rndseed depends only on the request seed and the sample index, not on temperature, supply or n. The seed equals the base seed of the #147 E2 sketch and chunk 0 of the earlier campaigns.",
+    "caveat": "The fleet runner may run an older klt (0.5.0 was seen). The derivation is therefore never assumed: it is checked from echoed per-sample seeds (pairing evidence below)."
+  },
+  "conditions": {
+    "REF": {"process": "tt_mm", "temperature_c": 27.0, "vdd_v": 1.8},
+    "C1": {"process": "tt_mm", "temperature_c": -40.0, "vdd_v": 1.62},
+    "C2": {"process": "tt_mm", "temperature_c": -40.0, "vdd_v": 1.98},
+    "C3": {"process": "tt_mm", "temperature_c": 125.0, "vdd_v": 1.62},
+    "C4": {"process": "tt_mm", "temperature_c": 125.0, "vdd_v": 1.98}
+  },
+  "sequence": [
+    {"step": "B0_ref", "kind": "batch", "condition": "REF", "n": 100, "seed": 20261085},
+    {"step": "P0_replay", "kind": "probe", "condition": "REF", "n": 1, "seed": 20261085, "note": "repeats reference sample ID 20261085/0 as a separate request; must run after B0_ref and before any condition batch"},
+    {"step": "B1", "kind": "batch", "condition": "C1", "n": 100, "seed": 20261085},
+    {"step": "B2", "kind": "batch", "condition": "C2", "n": 100, "seed": 20261085},
+    {"step": "B3", "kind": "batch", "condition": "C3", "n": 100, "seed": 20261085},
+    {"step": "B4", "kind": "batch", "condition": "C4", "n": 100, "seed": 20261085}
+  ],
+  "budget": {
+    "logical_batches": 5,
+    "reference_unique_samples": 100,
+    "environmental_unique_samples": 400,
+    "pairing_probe": {
+      "requests": "1 logical probe (P0_replay), n = 1",
+      "unique_sample_runs": 1,
+      "accounting": "The probe is NOT a sixth logical batch and is not part of the 100 + 400 unique samples. It is counted separately and explicitly: 1 unique sample run. Total unique sample runs = 100 + 400 + 1 = 501. Reviewers who read the issue caps as hard 500 sample runs in total should treat this as a declared +1 probe allowance; no other addition exists."
+    },
+    "max_attempts_per_logical_batch": 3,
+    "max_attempts_probe": 3,
+    "attempt_definition": "initial submission plus at most two retries. A retry resubmits the SAME request (same seed, same n, same sample IDs, same DUT snapshot); it replaces a failed attempt and never adds samples or redraws individual samples. Every attempt, failed or not, is retained as its own record.",
+    "max_requests": 18,
+    "max_requests_derivation": "5 batches x 3 + 1 probe x 3",
+    "max_sample_runs_including_retries": 1503,
+    "backend": "batch (KLT_SIM_BACKEND=batch, fleet). No local ngspice grids. If a submit fails, the failure is reported and the grid is NOT run locally.",
+    "stop_after_cap": "after the attempt cap a batch is recorded as FAILED_BATCH and is not retried again. A failed B0_ref or P0_replay ends the run (no reference or no pairing evidence). A failed condition batch leaves that condition NOT MEASURED; the others continue."
+  },
+  "attempt_acceptance": {
+    "rule": "An attempt is accepted (and is the one used for statistics) iff the response (a) has corners[], (b) echoes monte_carlo n / seed / vary=mismatch exactly, (c) returns exactly n samples with sample_index 0..n-1 (no duplicate, no absent), (d) echoes process tt_mm and the requested temperature_c and supply_v.vdd on every sample. The FIRST accepted attempt per step is used; later attempts do not exist because the driver stops retrying on acceptance.",
+    "per_sample_failures": "A sample in an accepted attempt whose status is not pass, whose vos_inp / out_lo / out_hi is missing or non-finite, or whose output does not bracket 0.9 V (unbracketed crossing) is a FAILED SAMPLE. It is listed with its ID and reason, is never replaced by zero, and is never redrawn or retried individually."
+  },
+  "pairing_evidence": {
+    "required_for_any_verdict": [
+      "per-sample rndseed (corners[].monte_carlo.seed), process_seed and mismatch_seed of every condition sample equal those of the reference sample with the same ID",
+      "P0_replay returns rndseed equal to B0_ref sample 0 AND |Vos replay - Vos reference| <= 40 uV (two sweep steps, the existing CONTROL_TOL_V); the reported value is the actual difference",
+      "runner_klt_version, ngspice engine_version and models_lib_sha256 are identical across all accepted attempts used (a differing runner could change how seeds map to devices)",
+      "statistical sanity gate: for each condition the paired residual sigma is below 0.5 x the reference sigma. Independent device realizations would give about sqrt(2) x sigma_ref (about 12 mV at the earlier 8.6 mV); drift of a correlated realization cannot approach it (corner-to-corner Pearson 0.9989..0.9996, DR-009)"
+    ],
+    "limits": "Equal echoed seeds and a reproducible replay show the seed inputs are held constant; they do not by themselves prove device-level draws are invariant to temperature and supply inside the simulator. The statistical sanity gate is the independent check of that. All four are required; if any fails, or cannot be evaluated because the backend does not provide the evidence, the run reports a CAPABILITY GAP and issues NO drift verdict.",
+    "on_failure": "stop; write the capability-gap report; draw no drift conclusion"
+  },
+  "statistics": {
+    "residual": "r_i = Vos(condition, i) - Vos(REF, i) in mV, joined by sample ID; row order is irrelevant; independently sorted arrays and aggregate means are invalid",
+    "reported_per_condition": ["n_requested", "n_returned", "n_valid_pairs", "failed_condition_samples", "failed_reference_samples_invalidating_pairs", "mean_mv", "sample_sigma_mv (ddof=1)", "max_abs_residual_mv", "confidence intervals", "verdict"],
+    "valid_pair": "reference sample ok AND condition sample ok AND IDs equal AND rndseeds equal. A reference failure invalidates that ID at every condition. Complete-case analysis over valid pairs only; the pairs dropped are counted and their IDs listed. Failures may be non-random, so dropped counts are shown beside every statistic.",
+    "confidence_level": 0.95,
+    "interval_method": {
+      "mean": "two-sided Student t interval on n_valid_pairs - 1 degrees of freedom",
+      "sigma": "two-sided chi-square interval on n_valid_pairs - 1 degrees of freedom",
+      "assumptions": "residuals i.i.d. and approximately normal; the sigma interval is sensitive to non-normal tails. Samples are exploratory, N = 100 at one process corner (TT), not N >= 300 per corner."
+    },
+    "minimum_valid_pairs": 80,
+    "minimum_valid_pairs_rule": "fewer valid pairs than this makes the condition INCONCLUSIVE regardless of the estimate"
+  },
+  "screen": {
+    "sigma_screen_mv": 0.19,
+    "origin": "variance headroom left in the #147 trim worksheet (0.275 mV proposed target vs 0.20 mV partial residual); a screen, not a requirement",
+    "verdict_rule": {
+      "PASS_SCREEN": "95% upper bound of sigma < 0.19 mV",
+      "FAIL_SCREEN": "95% lower bound of sigma > 0.19 mV",
+      "INCONCLUSIVE": "otherwise (the interval contains 0.19 mV), or too few valid pairs; near-threshold results remain inconclusive with their uncertainty shown"
+    },
+    "not_bounded_by_screen": "the sigma screen does not bound the mean drift or the maximum residual; they are reported separately and are not given a pass/fail limit here",
+    "stop_expansion_rule": "if any condition's sigma point estimate or interval exceeds 0.19 mV the experiment is NOT expanded (no extra samples, seeds, corners or retries beyond the caps above). The remaining declared conditions in this plan still run because they are inside the budget; the verdict for ideal single-point correction becomes 'needs re-trim across temperature/supply' for the failing condition(s)."
+  },
+  "claims_not_made": [
+    "offset compliance (0.275 mV remains proposed)",
+    "consumer integration",
+    "adoption of any trim technique (needs its own decision record)",
+    "behaviour at process corners other than TT, or at N >= 300"
+  ]
+}

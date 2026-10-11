@@ -123,8 +123,14 @@ def snapshot_netlist(snap_dir: Path) -> str:
 
 def build_request(bench: str, mismatch: bool, mc: dict | None,
                   corner: str = "tt", keep_artifacts: bool = True,
-                  netlist: str | None = None) -> dict:
-    """`netlist` (offset bench only) overrides the bench path: #113 uses it for the
+                  netlist: str | None = None, temperature_c: float = 27.0,
+                  vdd: float = VDD) -> dict:
+    """`temperature_c` / `vdd` (issue #196) select the environmental condition;
+    the defaults (27 C, 1.8 V) reproduce every pre-existing request byte for byte.
+    The output crossing VREF and the input common mode VCM are fixed constants
+    and do NOT scale with `vdd`, so the bench definition is identical across
+    conditions (only the supply source and temperature move).
+    `netlist` (offset bench only) overrides the bench path: #113 uses it for the
     per-campaign DUT snapshot, #107 for per-device-group gated variants from
     bin/attribution.py; analysis and measurements are unchanged."""
     cir = {"pair": "../bench/pair_diag.cir", "offset": netlist or "../bench/offset_dc.cir"}[bench]
@@ -147,8 +153,8 @@ def build_request(bench: str, mismatch: bool, mc: dict | None,
         "models": {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"},
         "corners": {
             "process": [f"{corner}_mm" if mismatch else corner],
-            "supply_v": {"vdd": [VDD]},
-            "temperature_c": [27.0],
+            "supply_v": {"vdd": [vdd]},
+            "temperature_c": [temperature_c],
         },
         "analysis": analysis,
         "measurements": meas,

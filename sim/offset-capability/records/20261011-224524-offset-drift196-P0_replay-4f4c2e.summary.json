@@ -1,0 +1,81 @@
+{
+  "record_id": "20261011-224524-offset-drift196-P0_replay-4f4c2e",
+  "bench": "offset",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/offset-capability/records/dut-drift196/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "drift": {
+    "label": "drift196",
+    "step": "P0_replay",
+    "attempt": 1,
+    "condition": "REF",
+    "plan": "offset-drift-plan-196.json"
+  },
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-196/sim/offset-capability/records/20261011-224524-offset-drift196-P0_replay-4f4c2e.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-196/sim/offset-capability/records/20261011-224524-offset-drift196-P0_replay-4f4c2e-artifacts",
+    "--backend",
+    "batch",
+    "--format",
+    "json"
+  ],
+  "exit_code": 0,
+  "stderr": "",
+  "env_KLT_SIM_BACKEND": "batch",
+  "client_klt_version": "klt 0.7.0+gfc35718e4add",
+  "git_sha": "9ae1488a8c9e9b3a01c9e24ea1c3096ed604e79c",
+  "remote": {
+    "provider": "aws-batch-fleet",
+    "job_id": "klt-sim-d39676a0725a",
+    "bucket": "2am-batch-jobs-221082181346",
+    "region": "us-east-1",
+    "instance_id": "i-02e5ae8469b63209d",
+    "instance_type": "c7i.4xlarge",
+    "availability_zone": "us-east-1d",
+    "ami_id": "ami-0e40e3245f1923ac8",
+    "lifecycle": "spot",
+    "spot": true,
+    "state": "done",
+    "exit_code": "0",
+    "concurrency": "1",
+    "physical_cores": "8",
+    "elapsed_seconds": 43,
+    "runner_klt_version": "0.5.0",
+    "client_klt_version": "0.7.0+gfc35718e4add",
+    "runner_compatibility": "mismatch",
+    "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+  },
+  "monte_carlo_echo": {
+    "n": 1,
+    "seed": 20261085,
+    "vary": "mismatch",
+    "family_mismatch": [
+      {
+        "family": "capacitor",
+        "active": null,
+        "note": "mismatch activity for the 'capacitor' family is not independently verified for PDK family 'sky130'; treat any sampled spread for it as unconfirmed."
+      }
+    ]
+  },
+  "echo_problems": [],
+  "samples": [
+    {
+      "corner_id": "tt_mm/1.800V/27C/mc0",
+      "klt_status": "pass",
+      "monte_carlo": {
+        "sample_index": 0,
+        "seed": 1498631954,
+        "process_seed": 1282563354,
+        "mismatch_seed": 1100039409
+      },
+      "ok": true,
+      "reason": null,
+      "vos_v": -0.003630000000000022
+    }
+  ]
+}

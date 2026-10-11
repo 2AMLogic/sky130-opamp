@@ -1,0 +1,32 @@
+{
+  "record_id": "20261011-230806-offset-drift196-B3-169653",
+  "bench": "offset",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/offset-capability/records/dut-drift196/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "drift": {
+    "label": "drift196",
+    "step": "B3",
+    "attempt": 1,
+    "condition": "C3",
+    "plan": "offset-drift-plan-196.json"
+  },
+  "command": [
+    "klt",
+    "sim",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-196/sim/offset-capability/records/20261011-230806-offset-drift196-B3-169653.request.json",
+    "-o",
+    "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-196/sim/offset-capability/records/20261011-230806-offset-drift196-B3-169653-artifacts",
+    "--backend",
+    "batch",
+    "--format",
+    "json"
+  ],
+  "exit_code": 1,
+  "stderr": "{\n  \"schema_version\": 1,\n  \"error\": {\n    \"command\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 10 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n}\n",
+  "env_KLT_SIM_BACKEND": "batch",
+  "client_klt_version": "klt 0.7.0+gfc35718e4add",
+  "git_sha": "9ae1488a8c9e9b3a01c9e24ea1c3096ed604e79c"
+}

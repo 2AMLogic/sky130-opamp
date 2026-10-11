@@ -189,3 +189,30 @@ input-switch headroom problem at 1.8 V; digital trim (0.20 mV partial) and
 nulling-path auto-zero (0.06 to 0.21 mV) fit only if the unquantified terms
 stay small. Canonical design, spec and the proposed status of DR-009 and
 DR-011 are unchanged; any adoption needs its own decision record.
+
+## Paired offset drift after ideal single-point correction (#196)
+
+Screen of whether one constant input-offset correction survives temperature and
+supply: [`records/offset-drift-study-196.md`](records/offset-drift-study-196.md), with the
+predeclared plan [`records/offset-drift-plan-196.json`](records/offset-drift-plan-196.json)
+(committed before execution; 5 logical batches, 3 attempts each, explicit replay probe).
+**Partial result: 1 of 4 conditions measured (-40 C / 1.62 V: residual sigma 1.006 mV,
+CI [0.883, 1.169], fails the 0.19 mV screen); 3 conditions NOT MEASURED because the fleet
+refused all attempts.** Exploratory N = 100, TT only; not an offset-compliance claim, and
+the proposed 0.275 mV allocation is unchanged. A pass would not cover DAC mismatch,
+trim-induced operating-point change, calibration error or noise.
+
+```
+python3 sim/offset-capability/bin/offset_drift.py run    --label NAME --backend batch   # fleet only
+python3 sim/offset-capability/bin/offset_drift.py resume --label NAME --backend batch   # same DUT snapshot and plan
+python3 sim/offset-capability/bin/offset_drift.py report --label drift196               # recompute from raw records
+```
+
+Residual = Vos(condition) - Vos(reference) per sample ID; pairing evidence (equal echoed
+seeds, replay probe, identical runner provenance, statistical sanity gate) gates any verdict.
+Machine-readable result: [`records/20261011-233532-drift-drift196-1e74b9.drift.json`](records/20261011-233532-drift-drift196-1e74b9.drift.json)
+(outcome `VERDICTS_PARTIAL`, exit 2). It supersedes the outcome flag of the earlier
+[`records/20261011-232842-drift-drift196-ae367c.drift.json`](records/20261011-232842-drift-drift196-ae367c.drift.json)
+(`VERDICTS_ISSUED`, which overstated a 1-of-4 run); same raw records, identical statistics.
+The B1 FAIL_SCREEN holds only if pairing is exact; imperfect pairing would inflate the
+measured residual. Issue #196 stays open for the three unmeasured conditions.
