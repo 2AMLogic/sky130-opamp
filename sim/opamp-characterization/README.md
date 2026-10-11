@@ -55,10 +55,11 @@ below.
 
 ## Cold-start invocation
 
-Given the pinned PDK (below) is installed:
+Given the pinned PDK (below) is installed, regenerate the full local evidence
+set with an explicit local backend:
 
 ```bash
-python3 sim/opamp-characterization/bin/pvt_sweep.py
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local
 ```
 
 Renders `testbench/opamp_{ac,tran_sr,dc_swing}.spice.tmpl` once per
@@ -73,9 +74,26 @@ any run's `.meas` measurement is missing or ngspice itself errors (see
 point before reporting the aggregate failure — a genuinely useful property
 for triage, since one broken point should not hide 44 good ones).
 
+**Migration (issue #163)**: the bare `pvt_sweep.py` invocation no longer runs
+that local grid — on any host, with or without an environment override. The
+effective backend is resolved once per invocation as `--backend` > nonempty
+`$KLT_SIM_BACKEND` > `batch`, and on the `batch` backend a request needing
+more than **one local ngspice execution unit** (local analyses × supply
+points; the default campaign is 3 × 15 = 45) is refused up front — before any
+tool/PDK check, DUT capture, record allocation or klt submission — with a
+diagnostic naming the count and pointing at `--fleet --backend batch`. Local
+users must choose one of:
+
+- `--fleet --backend batch` — the whole campaign as `klt sim` requests on the
+  Spot batch fleet (the next section);
+- `--backend local` (or `$KLT_SIM_BACKEND=local`) — direct local `ngspice -b`
+  execution of any grid, on a machine that is meant to simulate;
+- a single-unit probe such as `--corners tt --temps 27 --analyses ac` (one
+  supply point × one local analysis), which stays allowed on `batch`.
+
 ```bash
-python3 sim/opamp-characterization/bin/pvt_sweep.py --check-env   # tool/PDK check, no simulation
-python3 sim/opamp-characterization/bin/pvt_sweep.py --corners ss --temps -40,125 --analyses ac
+python3 sim/opamp-characterization/bin/pvt_sweep.py --check-env   # tool/PDK/backend report, no simulation
+python3 sim/opamp-characterization/bin/pvt_sweep.py --corners ss --temps -40,125 --analyses ac --backend local
 ```
 
 ### Fleet execution of ac / tran_sr / dc_swing, selectable netlist (issue #77)
@@ -91,8 +109,9 @@ python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend local --co
 
 `--fleet` moves the three formerly-local analyses onto `klt sim` requests
 (`testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl` are the circuit
-**bodies**; the default without `--fleet` is unchanged and still drives local
-`ngspice -b`). On the batch backend no simulator subprocess is started: the
+**bodies**; without `--fleet` the local path still exists but is bounded by
+the one-unit guard of issue #163 — see Cold-start above). On the batch
+backend no simulator subprocess is started: the
 runner does not even run `ngspice -v` (the record says `not invoked`), the
 local runner raises if anything reaches it, and a batch response with no
 `environment.remote` is refused. A submit that fails (including
@@ -101,6 +120,15 @@ there is no local fallback. Each analysis is one request over the whole grid
 (`exclude` encodes the paired supply table; cartesian mode has none), except
 `ac`, which is two: `ac` (gain / GBW / phase `.meas` cards) and an `ac-iq`
 companion (`dc Vinp 0 1m 1m`, `.meas dc i_vdd_a find i(vdd) at=0`) for Iq/Pq.
+The same one-unit guard (issue #163) bounds every non-fleet invocation: the
+effective backend resolves as `--backend` > nonempty `$KLT_SIM_BACKEND` >
+`batch`, and on `batch` at most one local ngspice execution unit — local
+analyses × supply points, cartesian supplies included — may run; anything
+larger refuses before any tool check, DUT capture, record allocation or klt
+submission. `--fleet` itself counts zero local units, as do the klt-only
+`icmr`/`cmrr`/`tran_step` analyses; a mixed selection consumes only its local
+portion. `--backend local` (or `$KLT_SIM_BACKEND=local`) keeps direct local
+execution of any grid.
 
 Definitions are the local ones (same CSV columns), re-expressed where the fleet
 requires it:
@@ -223,12 +251,15 @@ python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses icmr,cmrr --backe
 Their templates are `klt sim` circuit **bodies** (`testbench/opamp_icmr.spice.tmpl`,
 `opamp_cmrr.spice.tmpl`); the runner writes `klt sim` requests (one per corner
 for ICMR, because VDD is tied to the corner and `klt` sweeps arrays together by
-index; one per CM bias point for CMRR), submits them with `--backend batch`
-(default; `$KLT_SIM_BACKEND`) and maps the response into
+index; one per CM bias point for CMRR), submits them on the effective
+backend (`--backend` > nonempty `$KLT_SIM_BACKEND` > `batch`) and maps the
+response into
 `records/<id>-{icmr,cmrr}.csv`. It never loops `ngspice` for these points and
 does not fall back to a local grid if a batch submit fails. Expected wall-clock
-on the fleet: about 11 min for both analyses (record below: 639 s). The three
-legacy analyses were not retrofitted and their records and CSV columns are
+on the fleet: about 11 min for both analyses (record below: 639 s). These
+analyses count zero local ngspice units, so the one-unit guard of issue #163
+never applies to them. The three legacy analyses were not retrofitted and
+their records and CSV columns are
 unchanged. The `.include` of the R+C typical files is satisfied by the
 `.lib <sky130.lib.spice> <corner>` section klt appends, which stages correctly
 on the batch backend (verified by the passing fleet record).
@@ -242,10 +273,11 @@ mode treats the supply as an independent axis:
 
 ```bash
 # 5 processes x 3 temperatures x 3 supplies = 45 tuples per analysis
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses ac,tran_sr,dc_swing
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses icmr,cmrr,tran_step   # klt request(s)
+# (135 local units: needs --fleet --backend batch, or --backend local -- issue #163)
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --fleet --analyses ac,tran_sr,dc_swing
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses icmr,cmrr,tran_step   # klt request(s), zero local units
 # cheap probe: any subset of processes / temperatures / supplies
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --supplies 1.98 --corners ss --temps 27 --analyses ac
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --supplies 1.98 --corners ss --temps 27 --analyses ac   # exactly one local unit: allowed even on batch
 ```
 
 `--supplies` defaults to `1.62,1.8,1.98`. In cartesian mode the actual point

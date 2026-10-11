@@ -3,7 +3,7 @@
 
 The single documented cold-start invocation named in ../README.md:
 
-    python3 sim/opamp-characterization/bin/pvt_sweep.py
+    python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local
 
 Regenerates the full evidence set for this experiment from a clean checkout
 (given the pinned PDK in ../gm-id-characterization/pdk.json is installed):
@@ -42,8 +42,15 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --temps T,T          temperatures in degC             (default: -40,27,125)
     --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step}
                          (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step are opt-in)
-    --backend NAME       `klt sim` backend for icmr/cmrr/tran_step (default: batch;
-                         `local` for a single-point debug probe)
+    --backend NAME       effective `klt sim` backend for the icmr/cmrr/tran_step
+                         requests AND the local-grid guard, resolved once per
+                         run as explicit --backend > nonempty $KLT_SIM_BACKEND
+                         > batch (empty/unset env falls back to batch; the CLI
+                         always wins, in both directions). On batch, a run
+                         needing more than ONE local ngspice execution unit
+                         (local analyses x supply points) is refused up front;
+                         use --fleet --backend batch, or select local to run a
+                         local grid on purpose (issue #163)
     --klt-cmd CMD        the klt invocation for icmr/cmrr (default: `klt`, or
                          $KLT_CMD). The batch fleet refuses a client whose
                          `klt --version` differs from the fleet image's
@@ -52,7 +59,10 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
                          --klt-cmd 'uvx --from klayout-tools==0.5.0 klt'
     --fleet             run ac,tran_sr,dc_swing as `klt sim` requests on --backend
                         (default batch) too -- no local ngspice subprocess at all
-                        (issue #77); default off, the local path is unchanged
+                        (issue #77); default off. Without it, a batch-backend
+                        run executes at most one local ngspice unit: the default
+                        45-unit local campaign refuses and asks for
+                        --fleet --backend batch (or --backend local; issue #163)
     --netlist PATH      characterize this flat DUT netlist (ports vdd vss inn inp
                         out ibias) instead of design/netlist/opamp_core.spice; the
                         record snapshots it, the canonical design is not touched
@@ -60,7 +70,9 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
 
 `ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
 decks and drives `ngspice -b` itself, one subprocess per (corner, temperature)
-point. `icmr`, `cmrr` (issue #53) and `tran_step` (issue #86) are different by design: their templates
+point -- but only under an effective `local` backend, or as a single-unit probe
+on batch: a multi-unit local grid on the batch backend is refused before any
+work starts (issue #163). `icmr`, `cmrr` (issue #53) and `tran_step` (issue #86) are different by design: their templates
 are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
 `klt sim` request (corner/supply/temperature axes) and submitted with
 `klt sim <request> --backend batch`, and the per-corner measurement values in
@@ -215,7 +227,7 @@ def resolve_pdk() -> OpampPdk:
     return pdk
 
 
-def check_env() -> int:
+def check_env(backend: str | None = None) -> int:
     status = report_tool_status()
     if not DESIGN_NETLIST.is_file():
         print(f"netlist : MISSING {DESIGN_NETLIST}")
@@ -230,8 +242,10 @@ def check_env() -> int:
     klt = klt_available()
     if klt:
         print(f"klt     : OK   {' '.join(KLT_CMD)} ({klt_version()})")
-        print(f"  klt sim backend for icmr/cmrr: {DEFAULT_KLT_BACKEND}"
-              f" (env KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '<unset>')}; override with --backend)")
+        print(f"  klt sim backend: {resolve_backend(backend)} (precedence: --backend > "
+              f"nonempty KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '<unset>')!r} > "
+              f"{DEFAULT_KLT_BACKEND}; at most one local ngspice unit runs on batch, "
+              "issue #163)")
     else:
         print("klt     : MISSING (not on PATH) -- needed only for --analyses icmr,cmrr")
     return status | pdk_status
@@ -1349,14 +1363,28 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
         results[a].sort(key=lambda r: (r.get("cm_point", ""), order[r["corner"]], r["temp_c"], r["vdd_v"]))
 
 
+def resolve_backend(cli_value: str | None) -> str:
+    """Effective `klt sim` backend (issue #163), resolved once per invocation:
+    an explicit ``--backend`` value wins, then a nonempty ``$KLT_SIM_BACKEND``,
+    then the batch default. An empty or unset environment value falls back to
+    the default; the CLI always wins, in both directions."""
+    if cli_value:
+        return cli_value
+    env = os.environ.get("KLT_SIM_BACKEND")
+    return env if env else DEFAULT_KLT_BACKEND
+
+
 def parse_args(argv):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--check-env", action="store_true")
     p.add_argument("--corners", default=",".join(DEFAULT_CORNERS))
     p.add_argument("--temps", default=",".join(str(t) for t in DEFAULT_TEMPS_C))
     p.add_argument("--analyses", default=",".join(DEFAULT_ANALYSES))
-    p.add_argument("--backend", default=DEFAULT_KLT_BACKEND,
-                   help="`klt sim` backend for the icmr/cmrr analyses (default: batch; local = single-point probe)")
+    p.add_argument("--backend", default=None,
+                   help="effective `klt sim` backend, resolved as --backend > nonempty $KLT_SIM_BACKEND > "
+                        "batch; on batch at most ONE local ngspice unit (local analyses x supply points) "
+                        "is allowed -- a larger local grid refuses with a pointer at "
+                        "'--fleet --backend batch'; select local to run a local grid on purpose (issue #163)")
     p.add_argument("--batch-runner-check", choices=("warn", "enforce"), default="warn",
                    help="klt batch.runner_version_check (default: warn -- the fleet image's klt is older than "
                         "any client that can submit to it; the skew is recorded in the record's klt_jobs)")
@@ -1374,13 +1402,16 @@ def parse_args(argv):
     p.add_argument("--fleet", action="store_true",
                    help="run ac,tran_sr,dc_swing as `klt sim` requests on --backend (default batch) instead of "
                         "local ngspice subprocesses; with the batch backend NO local simulator is ever invoked "
-                        "(issue #77). Default off: the local-ngspice path is unchanged")
+                        "(issue #77). Default off; without it a batch-backend run may execute at most one local "
+                        "unit -- larger local grids need --backend local (issue #163)")
     p.add_argument("--netlist", default=None,
                    help="DUT netlist to characterize (default: design/netlist/opamp_core.spice). A flat netlist "
                         "with ports vdd vss inn inp out ibias; snapshotted into the record, the canonical design "
                         "is never edited")
     p.add_argument("--keep-work", action="store_true")
-    return p.parse_args(argv)
+    args = p.parse_args(argv)
+    args.backend = resolve_backend(args.backend)
+    return args
 
 
 def main(argv=None) -> int:
@@ -1392,7 +1423,7 @@ def main(argv=None) -> int:
         KLT_CMD[:] = shlex.split(args.klt_cmd)
 
     if args.check_env:
-        return check_env()
+        return check_env(args.backend)
 
     corners = [c.strip() for c in args.corners.split(",") if c.strip()]
     temps = [float(t) for t in args.temps.split(",") if t.strip()]
@@ -1411,6 +1442,24 @@ def main(argv=None) -> int:
     # --fleet routes the three formerly-local analyses through `klt sim` (issue #77)
     klt_analyses = [a for a in analyses if a in KLT_ANALYSES or (args.fleet and a in ANALYSES)]
     ngspice_analyses = [a for a in analyses if a in ANALYSES and a not in klt_analyses]
+    # Issue #163: with the effective backend `batch`, refuse a multi-unit local
+    # ngspice grid up front -- before any tool/PDK check, klt probe, DUT capture,
+    # record allocation or klt submission, so nothing is partially launched. One
+    # local unit stays allowed as a debug probe; an explicit `local` backend (CLI
+    # or $KLT_SIM_BACKEND) keeps direct local execution of any grid. The count is
+    # the local loop's own workload: local analyses (repeats included) crossed
+    # with the supply planner's points; klt-only and --fleet selections count 0.
+    local_units = len(expected) * len(ngspice_analyses)
+    if args.backend == "batch" and local_units > 1:
+        print(
+            f"ERROR: backend '{args.backend}' would execute {local_units} local ngspice unit(s) "
+            f"({len(ngspice_analyses)} local analysis(es) x {len(expected)} supply point(s)) -- "
+            "a multi-unit local grid is refused on the batch backend. Use "
+            "'--fleet --backend batch' to send these analyses as klt requests, or "
+            "'--backend local' to run the grid locally on purpose (issue #163).",
+            file=sys.stderr,
+        )
+        return 1
     if klt_analyses and not klt_available():
         print("ERROR: klt not found on PATH (needed for the klt analyses and --fleet; see --check-env)", file=sys.stderr)
         return 1
