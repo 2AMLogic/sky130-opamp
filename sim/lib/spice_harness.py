@@ -316,7 +316,8 @@ KLT_CMD: list[str] = shlex.split(os.environ.get("KLT_CMD", "klt"))
 
 
 class KltSimError(HarnessError):
-    """`klt sim` printed no JSON report on stdout. Carries the invocation."""
+    """`klt sim` produced no usable report: stdout was not JSON, or its root was
+    not a JSON object. Carries the invocation (cmd, returncode, stderr)."""
 
     def __init__(self, message: str, cmd: list[str], returncode: int, stderr: str):
         super().__init__(message)
@@ -339,7 +340,8 @@ def klt_sim(request: Path, outdir: Path, backend: str | None = None) -> KltSim:
     and created; klt's stderr is saved to `<outdir>/<request stem>.stderr.txt`.
     Returns the invocation, exit code, parsed JSON report and stderr -- gate on
     the report's `status`, not the exit code. Raises `KltSimError` if stdout is
-    not a JSON report.
+    not JSON or the decoded root is not an object (dict); the contents of a dict
+    report (including `{}`) are not validated here.
     """
     outdir = Path(outdir).resolve()
     outdir.mkdir(parents=True, exist_ok=True)
@@ -356,6 +358,12 @@ def klt_sim(request: Path, outdir: Path, backend: str | None = None) -> KltSim:
             f"klt sim exit {proc.returncode}: no JSON report on stdout ({proc.stderr.strip()[:500]})",
             cmd, proc.returncode, proc.stderr,
         ) from exc
+    if not isinstance(payload, dict):
+        raise KltSimError(
+            f"klt sim exit {proc.returncode}: JSON report root is {type(payload).__name__}, "
+            f"expected object ({proc.stderr.strip()[:500]})",
+            cmd, proc.returncode, proc.stderr,
+        )
     return KltSim(cmd, proc.returncode, payload, proc.stderr)
 
 
