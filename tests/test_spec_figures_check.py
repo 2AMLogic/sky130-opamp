@@ -30,7 +30,7 @@ MATRIX = {"record": RID, "csv": "ac", "supply_key": "vdd_v", "points": [
 MAPPING = {"matrices": {"m": MATRIX}, "figures": [{
     "matrix": "m", "row": "Open-loop DC gain", "record": RID, "csv": "ac", "key": "gain_dc_db", "reduce": "min",
     "expected": 61.64, "tol": 0.005, "unit": "dB",
-    "at": {"corner": "fs", "temp_c": 125}, "printed": ["61.64 dB @ FS / 125 °C"],
+    "at": {"corner": "fs", "temp_c": 125, "supply_v": 1.8}, "printed": ["61.64 dB @ FS / 125 °C"],
 }]}
 
 
@@ -139,7 +139,7 @@ class FixtureTests(unittest.TestCase):
         self.assertTrue(any("recomputed" in e for e in sf.check(self.tmp)))
 
     def test_wrong_binding_corner_fails(self):
-        self.fig(at={"corner": "ss", "temp_c": 125})
+        self.fig(at={"corner": "ss", "temp_c": 125, "supply_v": 1.8})
         self.assertTrue(any("binding corner" in e for e in sf.check(self.tmp)))
 
     def test_cited_record_id_missing_fails(self):
@@ -153,6 +153,103 @@ class FixtureTests(unittest.TestCase):
     def test_unknown_key_fails(self):
         self.fig(key="nope")
         self.assertTrue(any("cannot recompute" in e for e in sf.check(self.tmp)))
+
+
+class SupplyBindingTests(unittest.TestCase):
+    """Binding supply (issue #172). Fixture: power-like max with two supplies at ff/125."""
+    PSPEC = SPEC.replace("| Other row |", f"| Quiescent power | **131.92 µW @ FF / 125 °C / 1.98 V** `{RID}` |\n| Other row |")
+    HDR = "corner,temp_c,vdd_v,gain_dc_db,pq_w\n"
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+        rec = self.tmp / sf.OPAMP_RECORDS
+        rec.mkdir(parents=True)
+        (rec / f"{RID}.json").write_text("{}")
+        (self.tmp / "spec").mkdir()
+        (self.tmp / "manifests").mkdir()
+        self.write_spec(self.PSPEC)
+        self.rows = ["tt,27.0,1.8,66.0,0.00005", "fs,125.0,1.8,61.6392,0.00006",
+                     "ss,-40.0,1.62,68.0,0.00004", "ff,125.0,1.98,70.0,0.00013192",
+                     "ff,125.0,1.62,70.0,0.00010"]
+        self.points = [{"corner": c, "temp_c": t, "vdd_v": v} for c, t, v in
+                       [("tt", 27, 1.8), ("fs", 125, 1.8), ("ss", -40, 1.62), ("ff", 125, 1.98), ("ff", 125, 1.62)]]
+        self.set_map()
+
+    def set_map(self, at=None, printed=None, **kw):
+        m = json.loads(json.dumps(MAPPING))
+        m["matrices"]["m"]["points"] = self.points
+        f = dict(m["figures"][0], row="Quiescent power", key="pq_w", reduce="max", scale=1e6,
+                 expected=131.92, tol=0.005, unit="uW", print_supply=True,
+                 at=at or {"corner": "ff", "temp_c": 125, "supply_v": 1.98},
+                 printed=printed or ["131.92 µW @ FF / 125 °C / 1.98 V"])
+        f.update(kw)
+        m["figures"].append(f)
+        m["figures"] = m["figures"][1:]
+        self.write_map(m)
+
+    def write_spec(self, t):
+        (self.tmp / sf.SPEC).write_text(t, encoding="utf-8")
+
+    def write_map(self, m):
+        (self.tmp / sf.MAPPING).write_text(json.dumps(m), encoding="utf-8")
+
+    def write_rows(self, rows=None):
+        (self.tmp / sf.OPAMP_RECORDS / f"{RID}-ac.csv").write_text(self.HDR + "\n".join(rows or self.rows) + "\n")
+
+    def test_distinguishes_actual_supply_and_passes(self):
+        self.write_rows()
+        self.assertEqual(sf.check(self.tmp), [])
+
+    def test_row_order_irrelevant(self):
+        self.write_rows(self.rows[::-1])
+        self.assertEqual(sf.check(self.tmp), [])
+
+    def test_coordinated_edit_to_162_fails_with_both_supplies(self):
+        self.write_spec(self.PSPEC.replace("1.98 V", "1.62 V"))
+        self.set_map(at={"corner": "ff", "temp_c": 125, "supply_v": 1.62},
+                     printed=["131.92 µW @ FF / 125 °C / 1.62 V"])
+        self.write_rows()
+        errs = [e for e in sf.check(self.tmp) if "binding" in e]
+        self.assertEqual(len(errs), 1, errs)
+        self.assertIn("1.98", errs[0])
+        self.assertIn("1.62", errs[0])
+
+    def test_printed_voltage_must_match_numeric_supply(self):
+        self.write_spec(self.PSPEC.replace("1.98 V", "1.62 V"))
+        self.set_map(printed=["131.92 µW @ FF / 125 °C / 1.62 V"])
+        self.write_rows()
+        errs = sf.check(self.tmp)
+        self.assertTrue(any("printed supply 1.62 V" in e and "1.98" in e for e in errs), errs)
+
+    def test_print_supply_requires_voltage_rendering(self):
+        self.write_spec(self.PSPEC.replace(" / 1.98 V", ""))
+        self.set_map(printed=["131.92 µW @ FF / 125 °C"])
+        self.write_rows()
+        self.assertTrue(any("print_supply" in e for e in sf.check(self.tmp)))
+
+    def test_missing_supply_v_fails(self):
+        self.set_map(at={"corner": "ff", "temp_c": 125})
+        self.write_rows()
+        self.assertTrue(any("at.supply_v" in e for e in sf.check(self.tmp)))
+
+    def test_tie_any_tied_point_attains_extremum(self):
+        tie = [r.replace("0.00010", "0.00013192") for r in self.rows]
+        for order in (tie, tie[::-1]):
+            for sv, txt in ((1.98, "1.98"), (1.62, "1.62")):
+                self.write_spec(self.PSPEC.replace("1.98 V", f"{txt} V"))
+                self.set_map(at={"corner": "ff", "temp_c": 125, "supply_v": sv},
+                             printed=[f"131.92 µW @ FF / 125 °C / {txt} V"])
+                self.write_rows(order)
+                self.assertEqual(sf.check(self.tmp), [], (sv, order))
+
+    def test_non_extremum_point_with_same_corner_fails(self):
+        # ff/125/1.62 is not the max, so it cannot be authored as binding.
+        self.write_spec(self.PSPEC.replace("1.98 V", "1.62 V"))
+        self.set_map(at={"corner": "ff", "temp_c": 125, "supply_v": 1.62},
+                     printed=["131.92 µW @ FF / 125 °C / 1.62 V"])
+        self.write_rows()
+        self.assertTrue(any("claimed" in e for e in sf.check(self.tmp)))
 
 
 class MatrixTests(FixtureTests):
