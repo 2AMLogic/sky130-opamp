@@ -1,0 +1,13 @@
+* extracted by klt extract --deck sky130
+
+* cell opamp_comp
+* pin cz
+* pin d2
+* pin out
+* pin vss
+.SUBCKT opamp_comp cz d2 out vss
+* device instance $1 r0 *1 8.31,8.31 sky130_fd_pr__model__cap_mim
+C$1 out cz 4.9984e-13
+* device instance $2 r0 *1 7.307,22.705 res_high_po
+X$2 d2 cz vss res_high_po r=2629.30659215 L=9.765U W=1.41U
+.ENDS opamp_comp

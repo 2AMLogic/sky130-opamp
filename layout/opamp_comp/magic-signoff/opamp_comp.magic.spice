@@ -1,0 +1,7 @@
+* NGSPICE file created from opamp_comp.ext - technology: sky130A
+
+.subckt opamp_comp cz d2 vss out
+X0 cz out sky130_fd_pr__cap_mim_m3_1 l=15.62 w=15.62
+X1 d2 cz vss sky130_fd_pr__res_high_po_1p41 l=9.765
+.ends
+

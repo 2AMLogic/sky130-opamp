@@ -1,0 +1,51 @@
+{
+  "schema": "sky130-opamp/magic-signoff/1",
+  "gds": "opamp_comp.gds",
+  "tools": {
+    "magic": "8.3.683",
+    "netgen": "1.5.133",
+    "pdk": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "magic_tech": "sky130A.tech",
+    "drc_style": "drc(full)",
+    "netgen_setup": "sky130A_setup.tcl"
+  },
+  "magic_types_seen": [
+    "pwell",
+    "psubdiff",
+    "psubdiffcont",
+    "xpolycontact",
+    "ppolyres",
+    "locali",
+    "viali",
+    "metal1",
+    "via1",
+    "metal2",
+    "via2",
+    "metal3",
+    "via3",
+    "mimcap",
+    "mimcapcontact",
+    "metal4"
+  ],
+  "missing_expected_types": [],
+  "drc_total": 2,
+  "drc_by_rule": [
+    {
+      "count": 2,
+      "rule": "poly contact extends poly resistor by < 2.16um (licon.1c + li.5)"
+    },
+    {
+      "count": 1,
+      "rule": "poly resistor contact length < 2.0um (licon.1c)"
+    }
+  ],
+  "netgen": {
+    "netlists_match_uniquely": true,
+    "pins_matched": true,
+    "result_lines": [
+      "Circuits match uniquely.",
+      "Netlists match uniquely.",
+      "Circuits match uniquely."
+    ]
+  }
+}

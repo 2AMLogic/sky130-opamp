@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "generator": "gen-compose",
+  "cell_name": "opamp_comp",
+  "gds_path": "opamp_comp.gds",
+  "pdk": {
+    "name": "sky130A",
+    "variant": "sky130A",
+    "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+  },
+  "dbu_um": 0.001,
+  "bbox_um": {
+    "x0": -6.0,
+    "y0": 0.0,
+    "x1": 39.5,
+    "y1": 25.965
+  },
+  "ports": [
+    {
+      "name": "d2",
+      "net": "d2",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 22.705000000000002,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_d2",
+      "port": "PAD"
+    },
+    {
+      "name": "out",
+      "net": "out",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 8.31,
+      "width_um": 0.42,
+      "direction_deg": 180,
+      "block": "pin_out",
+      "port": "PAD"
+    },
+    {
+      "name": "cz",
+      "net": "cz",
+      "layer": {
+        "layer": 71,
+        "datatype": 20
+      },
+      "x_um": 21.5,
+      "y_um": 18.21,
+      "width_um": 0.42,
+      "direction_deg": 0,
+      "block": "pin_cz",
+      "port": "PAD"
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": 39.5,
+      "y_um": 23.92,
+      "width_um": 0.42,
+      "direction_deg": 0,
+      "block": "pin_vss",
+      "port": "PAD"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "rz",
+      "source": "generator_report",
+      "generator": "res_array",
+      "cell_name": "comp_rz",
+      "source_path": "gen/rz.gds",
+      "source_digest": "sha256:3af3fd32d060903ef82c5b2f70d491a3e632fc20f758f7d43806ede3af617c93",
+      "offset_um": {
+        "x": 2.005,
+        "y": 22.0
+      },
+      "bbox_um": {
+        "x0": 2.005,
+        "y0": 22.0,
+        "x1": 12.61,
+        "y1": 23.41
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "cc",
+      "source": "generator_report",
+      "generator": "cap_array",
+      "cell_name": "comp_cc",
+      "source_path": "gen/cc.gds",
+      "source_digest": "sha256:000c371b9e0646692d47e2ba3a2f5b463e896f9f5b08da0154c3cbdcd493d76e",
+      "offset_um": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "bbox_um": {
+        "x0": 0.0,
+        "y0": 0.0,
+        "x1": 16.62,
+        "y1": 17.54
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "tap",
+      "source": "generator_report",
+      "generator": "guard_ring",
+      "cell_name": "comp_tap",
+      "source_path": "gen/tap.gds",
+      "source_digest": "sha256:b6732eb77a0a33876dc59487d348d01798d3bd50526205280591ee08021c0116",
+      "offset_um": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "bbox_um": {
+        "x0": 22.0,
+        "y0": 22.0,
+        "x1": 34.84,
+        "y1": 25.84
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "tap_masks",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "comp_tap_masks",
+      "source_path": "gen/tap_masks.gds",
+      "source_digest": "sha256:45d9b9a2d8b40a5e8cdc870656cc99959006a4c4ebdfba16e2bc2e107775e425",
+      "offset_um": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "bbox_um": {
+        "x0": 21.875,
+        "y0": 21.875,
+        "x1": 34.965,
+        "y1": 25.965
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "rz_masks",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "comp_rz_masks",
+      "source_path": "gen/rz_masks.gds",
+      "source_digest": "sha256:266871f334acb2148f2ebb344a9ac244e85b05ffa4f36697f95a766b65707a34",
+      "offset_um": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "bbox_um": {
+        "x0": 2.005,
+        "y0": 22.0,
+        "x1": 12.61,
+        "y1": 23.41
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_d2",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal",
+      "source_path": "gen/pin_d2.gds",
+      "source_digest": "sha256:d2aa49a6ccaf3196c2191d7a232f7335774a4a07b391ceab861e0e49c61546a8",
+      "offset_um": {
+        "x": -6.0,
+        "y": 22.495
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": 22.495,
+        "x1": -4.5,
+        "y1": 22.915000000000003
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_out",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal4",
+      "source_path": "gen/pin_out.gds",
+      "source_digest": "sha256:c364760d13215061a2b104dc2f08b65f593bfd597bfefed89f03c56ba602f8ba",
+      "offset_um": {
+        "x": -6.0,
+        "y": 8.1
+      },
+      "bbox_um": {
+        "x0": -6.0,
+        "y0": 8.1,
+        "x1": -4.5,
+        "y1": 8.52
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_cz",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal5",
+      "source_path": "gen/pin_cz.gds",
+      "source_digest": "sha256:6c3218937d162b2433a7dec065d3c0ffb2ec2d2f04e1b7dbd7473b57d28d4897",
+      "offset_um": {
+        "x": 20.0,
+        "y": 18.0
+      },
+      "bbox_um": {
+        "x0": 20.0,
+        "y0": 18.0,
+        "x1": 21.5,
+        "y1": 18.42
+      },
+      "orientation": "none",
+      "abuts": []
+    },
+    {
+      "id": "pin_vss",
+      "source": "cell",
+      "generator": null,
+      "cell_name": "stub_metal",
+      "source_path": "gen/pin_vss.gds",
+      "source_digest": "sha256:d2aa49a6ccaf3196c2191d7a232f7335774a4a07b391ceab861e0e49c61546a8",
+      "offset_um": {
+        "x": 38.0,
+        "y": 23.71
+      },
+      "bbox_um": {
+        "x0": 38.0,
+        "y0": 23.71,
+        "x1": 39.5,
+        "y1": 24.130000000000003
+      },
+      "orientation": "none",
+      "abuts": []
+    }
+  ],
+  "nets": [
+    {
+      "net": "cz",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_B"
+        },
+        {
+          "block": "cc",
+          "port": "C0_TOP"
+        },
+        {
+          "block": "pin_cz",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 21.56,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "rz",
+              "port": "R0_B"
+            },
+            {
+              "block": "cc",
+              "port": "C0_TOP"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 9.465,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        },
+        {
+          "pins": [
+            {
+              "block": "rz",
+              "port": "R0_B"
+            },
+            {
+              "block": "pin_cz",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 12.094999999999999,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_A"
+        },
+        {
+          "block": "pin_d2",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 6.715000000000003,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "rz",
+              "port": "R0_A"
+            },
+            {
+              "block": "pin_d2",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 6.715000000000003,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "out",
+      "pins": [
+        {
+          "block": "cc",
+          "port": "C0_BOT"
+        },
+        {
+          "block": "pin_out",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 4.500000000000002,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "cc",
+              "port": "C0_BOT"
+            },
+            {
+              "block": "pin_out",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 4.500000000000002,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "pins": [
+        {
+          "block": "tap",
+          "port": "TAP_E"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ],
+      "routed": true,
+      "route_length_um": 3.3700000000000045,
+      "status": "routed",
+      "landed_on_block": true,
+      "legs": [
+        {
+          "pins": [
+            {
+              "block": "tap",
+              "port": "TAP_E"
+            },
+            {
+              "block": "pin_vss",
+              "port": "CONN"
+            }
+          ],
+          "routed": true,
+          "route_length_um": 3.3700000000000045,
+          "reason": null,
+          "channel_track": 0,
+          "landed_on_block": true
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "d2",
+      "block": "pin_d2",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "out",
+      "block": "pin_out",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "cz",
+      "block": "pin_cz",
+      "port": "PAD",
+      "labelled": true
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD",
+      "labelled": true
+    }
+  ],
+  "unrouted_nets": [],
+  "drc_hints": {
+    "min_spacing_um": null,
+    "matched_groups": [
+      {
+        "matched_group_id": "res_array:1",
+        "blocks": [
+          "rz"
+        ],
+        "placement_symmetric": null
+      },
+      {
+        "matched_group_id": "cap_array:1",
+        "blocks": [
+          "cc"
+        ],
+        "placement_symmetric": null
+      }
+    ],
+    "notes": []
+  },
+  "warnings": [
+    "block 'rz_masks' is placed 0.00um from block 'rz' (strategy: explicit), closer than rz's own declared drc_hints.foreign_clearance_um of 0.40um",
+    "block 'tap_masks' is placed 0.00um from block 'tap' (strategy: explicit), closer than tap's own declared drc_hints.min_spacing_um of 0.40um"
+  ],
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.volare",
+      "version": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+    },
+    "deck": null,
+    "input": null
+  }
+}

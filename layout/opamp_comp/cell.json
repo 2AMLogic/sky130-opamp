@@ -1,0 +1,478 @@
+{
+  "cell": "opamp_comp",
+  "_comment": [
+    "Cell descriptor for layout/bin/compose-cell.py (issue #167). See",
+    "layout/opamp_comp/README.md for the floorplan, conventions and results.",
+    "",
+    "SCOPE: the Miller compensation network of design/netlist/opamp_core.spice,",
+    "XRz (res_high_po_1p41, L=9.765, model-default W=1.41) in series with XCc",
+    "(cap_mim_m3_1, W=L=15.62) at node cz: d2 -XRz- cz -XCc- out, XRz substrate",
+    "on vss. Passive sub-block only; NOT the full core.",
+    "",
+    "BLOCKS: rz = klt res_array (num=1, dummy=0, flavor high), cc = klt",
+    "cap_array (num=1, 15.62 x 15.62 top plate), tap = klt guard_ring p-tap ring",
+    "(add_well=false) giving the resistor substrate a vss contact, tap_masks =",
+    "klt-draw psdm 94/20 over the ring (the klt generators do not draw sky130",
+    "implants; klayout-tools#2934). The ring is a sibling of Rz, not a guard",
+    "ring around it: the extractor ties the resistor body to the substrate net,",
+    "which the ring then names vss.",
+    "",
+    "PINS: d2 (li1, west), out (met3 = cap bottom plate, west), cz (met4 = cap",
+    "top plate, observation pin: the LVS flow has no internal-only nets so the",
+    "shared node is exposed), vss (li1, east of the ring).",
+    "cz plates: cz is the top (capm / met4) plate, out the bottom (met3) plate;",
+    "klt LVS treats the plates as interchangeable, so this is a floorplan choice.",
+    "",
+    "rz_masks: RPM 86/20, PSDM 94/20 and NPC 95/20 over the whole poly outline.",
+    "res_array draws RPM/PSDM over the body only and no NPC; without these the",
+    "PDK Magic sees no resistor (klayout-tools#3077).",
+    "rz x = 2.005: Magic extracts the 9.765 um body only when its edges sit at a",
+    "5 nm offset from its 10 nm input scale. pin_cz x = 20.0 keeps the cz",
+    "backbone centre line (midway between R0_B and the stub) on the 0.005 grid.",
+    "lvs.layout_input = gds: the pre-extracted netlist form cannot read the",
+    "resistor (klayout-tools#3078)."
+  ],
+  "pdk": {
+    "variant": "sky130A",
+    "deck": "sky130"
+  },
+  "blocks": [
+    {
+      "id": "rz",
+      "generator": "res_array",
+      "cell_name": "comp_rz",
+      "params": {
+        "length_um": 9.765,
+        "width_um": 1.41,
+        "num": 1,
+        "dummy": 0,
+        "flavor": "high"
+      }
+    },
+    {
+      "id": "cc",
+      "generator": "cap_array",
+      "cell_name": "comp_cc",
+      "params": {
+        "plate_w_um": 15.62,
+        "plate_h_um": 15.62,
+        "num": 1
+      }
+    },
+    {
+      "id": "tap",
+      "generator": "guard_ring",
+      "cell_name": "comp_tap",
+      "params": {
+        "inner_width_um": 12,
+        "inner_height_um": 3,
+        "contacts_per_side": 4,
+        "add_well": false
+      }
+    },
+    {
+      "id": "tap_masks",
+      "draw": {
+        "cell_name": "comp_tap_masks",
+        "shapes": [
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              -0.125,
+              -0.125,
+              12.965,
+              3.965
+            ]
+          }
+        ],
+        "ports": []
+      }
+    },
+    {
+      "id": "rz_masks",
+      "draw": {
+        "cell_name": "comp_rz_masks",
+        "shapes": [
+          {
+            "layer": [
+              86,
+              20
+            ],
+            "rect_um": [
+              2.005,
+              22.0,
+              12.61,
+              23.41
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              2.005,
+              22.0,
+              12.61,
+              23.41
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              2.005,
+              22.0,
+              12.61,
+              23.41
+            ]
+          }
+        ],
+        "ports": []
+      }
+    },
+    {
+      "id": "pin_d2",
+      "draw": {
+        "cell_name": "stub_metal",
+        "shapes": [
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_out",
+      "draw": {
+        "cell_name": "stub_metal4",
+        "shapes": [
+          {
+            "layer": [
+              70,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_cz",
+      "draw": {
+        "cell_name": "stub_metal5",
+        "shapes": [
+          {
+            "layer": [
+              71,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 71,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 71,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vss",
+      "draw": {
+        "cell_name": "stub_metal",
+        "shapes": [
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    }
+  ],
+  "placement": {
+    "strategy": "explicit",
+    "order": [
+      "rz",
+      "cc",
+      "tap",
+      "tap_masks",
+      "rz_masks",
+      "pin_d2",
+      "pin_out",
+      "pin_cz",
+      "pin_vss"
+    ],
+    "origins_um": {
+      "cc": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "rz": {
+        "x": 2.005,
+        "y": 22.0
+      },
+      "tap": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "tap_masks": {
+        "x": 22.0,
+        "y": 22.0
+      },
+      "pin_d2": {
+        "x": -6.0,
+        "y": 22.495
+      },
+      "pin_out": {
+        "x": -6.0,
+        "y": 8.1
+      },
+      "pin_cz": {
+        "x": 20.0,
+        "y": 18.0
+      },
+      "pin_vss": {
+        "x": 38.0,
+        "y": 23.71
+      },
+      "rz_masks": {
+        "x": 0.0,
+        "y": 0.0
+      }
+    }
+  },
+  "routing": {
+    "layer_role": "metal",
+    "width_um": 0.3
+  },
+  "connectivity": [
+    {
+      "net": "cz",
+      "layer_role": "metal5",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_B"
+        },
+        {
+          "block": "cc",
+          "port": "C0_TOP"
+        },
+        {
+          "block": "pin_cz",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "layer_role": "metal",
+      "pins": [
+        {
+          "block": "rz",
+          "port": "R0_A"
+        },
+        {
+          "block": "pin_d2",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "out",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "cc",
+          "port": "C0_BOT"
+        },
+        {
+          "block": "pin_out",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "layer_role": "metal",
+      "pins": [
+        {
+          "block": "tap",
+          "port": "TAP_E"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "d2",
+      "block": "pin_d2",
+      "port": "PAD"
+    },
+    {
+      "net": "out",
+      "block": "pin_out",
+      "port": "PAD"
+    },
+    {
+      "net": "cz",
+      "block": "pin_cz",
+      "port": "PAD"
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    }
+  ],
+  "lvs": {
+    "reference": "design/netlist/opamp_core.spice",
+    "subckt": "opamp_comp",
+    "devices": [
+      "XRz",
+      "XCc"
+    ],
+    "pins": [
+      "d2",
+      "out",
+      "cz",
+      "vss"
+    ],
+    "layout_input": "gds"
+  },
+  "expect": {
+    "extracted_devices": 2,
+    "magic_types": [
+      "ppolyres",
+      "mimcap"
+    ]
+  }
+}

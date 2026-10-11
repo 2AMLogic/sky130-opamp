@@ -6,7 +6,10 @@ sub-block lives in its own `layout/<cell>/` directory. That directory holds
 the recipe (`cell.json`), every intermediate request/response, the composed
 GDS, and the reports that back each claim in the cell's README.
 
-**Status: one sub-block, `opamp_stage1/` (the NMOS input pair `XM1`/`XM2`).**
+**Status: two sub-blocks. `opamp_stage1/` (the NMOS input pair
+`XM1`/`XM2`) and `opamp_comp/` (the routed `XRz`/`XCc` compensation network;
+klt DRC/LVS and netgen pass, Magic `drc(full)` fails on the resistor heads,
+see `opamp_comp/README.md`).**
 That is not the op-amp's layout. T1 item 2 is `unmet`, and nothing in
 `manifests/` cites this directory.
 
@@ -31,7 +34,10 @@ fails. The checks are:
 
 - DRC `clean` with 0 violations.
 - The extracted devices, grouped by terminal nets, reproduce each reference
-  card's `L` exactly and its `W` exactly as a sum of drawn units.
+  card's `L` exactly and its `W` exactly as a sum of drawn units (MOS). For
+  passives: the resistor's `L`/`W`/body count and the MiM capacitor's plate
+  area and perimeter, with the resistor substrate part of the grouping key
+  (so a substrate miswire is a "no extracted device" failure).
 - Every LVS pin is a composed-cell port and a named extracted net.
 - LVS `status: "match"`.
 
@@ -67,8 +73,11 @@ sub-block covers only some of its devices. `layout/bin/stage_reference.py`
 therefore selects the cards named in `cell.json` `lvs.devices` and joins
 their continuations. It copies them **verbatim** (terminal order, model,
 every parameter) into `.subckt <cell> <lvs.pins>`. No device parameter is
-hand-written. A missing or duplicated card, a duplicate selection, a
-non-MOS card, a terminal net outside the pin list, or a pin no card uses is
+hand-written. Supported cards are four-terminal sky130 MOS cards and the
+two compensation passives (`res_high_po_1p41`, three terminals including
+substrate; `cap_mim_m3_1`, two terminals); any other model is rejected. A
+missing or duplicated card, a duplicate selection, an unsupported or
+wrong-arity card, a passive without `L`/`W`, a terminal net outside the pin list, or a pin no card uses is
 a hard error. Bare sky130 geometry literals (`L=1.2`) are read as
 micrometres because the request names `reference.deck: "sky130"`
 (klayout-tools#1492/#1505). The sibling's `u`-suffix rewrite is therefore
@@ -124,6 +133,13 @@ and `sky130A_setup.tcl` from the same pinned PDK.
   devices).
 - `expect.extracted_devices`: the extracted unit count the cell must
   produce.
+- `expect.magic_types`: Magic types `magic-signoff.py` must see (the
+  anti-vacuous guard); default is the MOS set `nmos ndiff psubdiff poly`.
+- `lvs.layout_input: "gds"`: LVS the GDS with inline extraction instead of
+  the pre-extracted netlist. Required for cells with a resistor
+  (klayout-tools#3078).
+- `--negative-control` terminal letters follow the card: MOS `d/g/s/b`,
+  resistor `a/b/w` (`w` = substrate), capacitor `a/b`.
 
 ## Plan for the remaining groups
 
@@ -155,7 +171,13 @@ directory or an extension of one, with the same evidence set.
    `bin/probe-passives.py`. **These are single-element passive probes, not
    full-core layout**: they show the elements can be drawn and what length
    extracts, nothing about routing, guard rings, LVS or placement. The
-   real `Rz`/`Cc` placement is still to do.
+   routed, LVS-verified network is now [`opamp_comp/`](opamp_comp/README.md)
+   (issue #167): klt DRC clean, klt LVS and netgen match, negative control
+   fails as required, but the PDK's Magic `drc(full)` reports `licon.1c`
+   resistor-head violations (klayout-tools#3077), so it is not foundry-DRC
+   clean. Its placement is reusable; final integration may reposition it.
+   The probes' Magic "clean" result did not see the resistor
+   (`opamp_comp/README.md`, "Magic DRC blocker").
 5. **Top-level assembly `opamp_core`.** The sub-blocks are placed as
    committed cells (`blocks[].cell`, a sibling feature this port has not
    needed yet), with supply rails, the six `opamp_core` pins and full-cell

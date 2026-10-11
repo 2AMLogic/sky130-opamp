@@ -84,8 +84,12 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from _klt_common import BuildError, run_klt, write_json  # noqa: E402
 from stage_reference import (  # noqa: E402
+    PASSIVE_MODELS,
     ReferenceError,
+    card_kind,
     card_terminals,
+    passive_geometry,
+    terminal_names,
     write_reference,
 )
 
@@ -288,8 +292,17 @@ def run_lvs(
     out_dir: Path,
     prefix: str = "",
 ) -> dict:
+    # Passives: the pre-extracted ``layout.netlist`` form reads klt's
+    # resistor ``X`` card as an undefined subcircuit (the compare then fails
+    # on topology and verifies no body connection), so a cell whose
+    # reference holds passives names ``lvs.layout_input: "gds"`` and klt
+    # extracts inline with the same deck.
+    if lvs_spec.get("layout_input", "netlist") == "gds":
+        layout = {"file": f"{lvs_spec['cell_gds']}", "deck": deck}
+    else:
+        layout = {"netlist": Path(extract["netlist_path"]).name}
     request = {
-        "layout": {"netlist": Path(extract["netlist_path"]).name},
+        "layout": layout,
         "reference": {
             "netlist": reference_name,
             "form": "subckt-call",
@@ -302,58 +315,141 @@ def run_lvs(
     return run_klt(["lvs", f"{prefix}lvs.request.json"], env=env, cwd=out_dir)
 
 
+def _net(name: str) -> str:
+    return name.lstrip("\\")
+
+
+def _extracted_key(dev: dict) -> tuple | None:
+    """Canonical connectivity key of an extracted device (None = unsupported).
+
+    MOS source/drain, resistor ends and capacitor plates are each
+    interchangeable, so those terminal pairs are sorted; the resistor's
+    substrate net is part of the key, so a miswired substrate never groups
+    with its reference card.
+    """
+    nets = {k: _net(v) for k, v in dev["nets"].items()}
+    cls = dev["class"]
+    if cls in ("nfet", "pfet"):
+        return (cls, *min((nets["d"], nets["s"]), (nets["s"], nets["d"])), nets["g"], nets["b"])
+    for info in PASSIVE_MODELS.values():
+        if cls == info["extract_class"]:
+            ends = tuple(sorted((nets["a"], nets["b"])))
+            return (cls, *ends, nets["w"]) if info["kind"] == "resistor" else (cls, *ends)
+    return None
+
+
+def _reference_key(card: str) -> tuple:
+    name, terms, model = card_terminals(card)
+    if card_kind(model) == "mos":
+        d, g, s, b = terms
+        cls = "nfet" if "nfet" in model.lower() else "pfet"
+        return (cls, *min((d, s), (s, d)), g, b)
+    info = PASSIVE_MODELS[model.lower()]
+    ends = tuple(sorted(terms[:2]))
+    if info["kind"] == "resistor":
+        return (info["extract_class"], *ends, terms[2])
+    return (info["extract_class"], *ends)
+
+
+#: Passive geometry tolerances (um / um^2). The klt extract rounds lengths to
+#: 1e-6 um and areas to 1e-4 um^2; anything beyond that is a real difference.
+LENGTH_TOL_UM = 1e-6
+AREA_REL_TOL = 1e-6
+PERIMETER_TOL_UM = 1e-4
+
+
+def _check_mos(card: str, units: list[dict]) -> list[str]:
+    name, _terms, _model = card_terminals(card)
+    params = {
+        k.lower(): v for k, v in (t.split("=", 1) for t in card.split() if "=" in t)
+    }
+    want_l = float(params["l"])
+    want_w = (
+        float(params["w"]) * float(params.get("m", 1)) * float(params.get("mult", 1))
+    )
+    problems = []
+    got_l = {round(u["params"]["l_um"], 6) for u in units}
+    got_w = round(sum(u["params"]["w_um"] for u in units), 6)
+    if got_l != {round(want_l, 6)}:
+        problems.append(f"{name}: extracted L {sorted(got_l)} != netlist L={want_l}")
+    if got_w != round(want_w, 6):
+        problems.append(
+            f"{name}: extracted total W {got_w} ({len(units)} units) != "
+            f"netlist W={want_w}"
+        )
+    return problems
+
+
+def _check_passive(card: str, units: list[dict]) -> list[str]:
+    """Resistor: L and W of every body, count = m*mult. Capacitor: summed
+    plate area and perimeter. Resistance/capacitance values are not compared
+    (klt LVS excludes them as placeholders, and the extractor's R/C come
+    from the extraction deck's own sheet data, not the SPICE model)."""
+    name, _terms, _model = card_terminals(card)
+    want = passive_geometry(card)
+    problems = []
+    if want["kind"] == "resistor":
+        if len(units) != want["units"]:
+            problems.append(
+                f"{name}: {len(units)} extracted resistor bodies != "
+                f"netlist m*mult={want['units']}"
+            )
+        for u in units:
+            if abs(u["params"]["l_um"] - want["l_um"]) > LENGTH_TOL_UM:
+                problems.append(
+                    f"{name}: extracted L {u['params']['l_um']} != netlist L={want['l_um']}"
+                )
+            if abs(u["params"]["w_um"] - want["w_um"]) > LENGTH_TOL_UM:
+                problems.append(
+                    f"{name}: extracted W {u['params']['w_um']} != netlist W={want['w_um']}"
+                )
+        return problems
+    area = sum(u["params"]["area_um2"] for u in units)
+    perimeter = sum(u["params"]["perimeter_um"] for u in units)
+    if abs(area - want["area_um2"]) > AREA_REL_TOL * want["area_um2"]:
+        problems.append(
+            f"{name}: extracted plate area {area} um2 != netlist W*L*MF*m="
+            f"{want['area_um2']} um2"
+        )
+    if abs(perimeter - want["perimeter_um"]) > PERIMETER_TOL_UM:
+        problems.append(
+            f"{name}: extracted plate perimeter {perimeter} um != netlist "
+            f"{want['perimeter_um']} um"
+        )
+    return problems
+
+
 def verify_extraction(
     extract: dict, reference_body: list[str], pins: list[str]
 ) -> list[str]:
-    """Extracted devices vs. reference cards; returns a list of problems."""
+    """Extracted devices vs. reference cards; returns a list of problems.
+
+    MOS: L exactly and W as the sum of unit widths. Passives: see
+    :func:`_check_passive` (resistor L/W/body count, capacitor plate
+    area/perimeter). Every device is grouped by terminal nets first, so a
+    miswired net (including the resistor substrate) is a "no extracted
+    device on nets" problem before any geometry is compared.
+    """
     problems: list[str] = []
     groups: dict[tuple, list[dict]] = {}
     for dev in extract.get("devices", []):
-        nets = dev["nets"]
-        key = (
-            dev["class"],
-            nets["d"].lstrip("\\"),
-            nets["g"].lstrip("\\"),
-            nets["s"].lstrip("\\"),
-            nets["b"].lstrip("\\"),
-        )
-        # source/drain are interchangeable on a MOS device
-        alt = (key[0], key[3], key[2], key[1], key[4])
-        groups.setdefault(min(key, alt), []).append(dev)
-    for card in reference_body[1:-1]:
-        name, (d, g, s, b), model = card_terminals(card)
-        params = {
-            k.lower(): v for k, v in (t.split("=", 1) for t in card.split() if "=" in t)
-        }
-        cls = "nfet" if "nfet" in model else "pfet"
-        key = (cls, d, g, s, b)
-        alt = (cls, s, g, d, b)
-        units = groups.pop(min(key, alt), [])
-        if not units:
-            problems.append(
-                f"{name}: no extracted {cls} on nets d={d} g={g} s={s} b={b}"
-            )
+        key = _extracted_key(dev)
+        if key is None:
+            problems.append(f"extracted device class {dev['class']!r} is unsupported")
             continue
-        want_l = float(params["l"])
-        want_w = (
-            float(params["w"])
-            * float(params.get("m", 1))
-            * float(params.get("mult", 1))
-        )
-        got_l = {round(u["params"]["l_um"], 6) for u in units}
-        got_w = round(sum(u["params"]["w_um"] for u in units), 6)
-        if got_l != {round(want_l, 6)}:
-            problems.append(
-                f"{name}: extracted L {sorted(got_l)} != netlist L={want_l}"
-            )
-        if got_w != round(want_w, 6):
-            problems.append(
-                f"{name}: extracted total W {got_w} ({len(units)} units) != "
-                f"netlist W={want_w}"
-            )
+        groups.setdefault(key, []).append(dev)
+    for card in reference_body[1:-1]:
+        name, _terms, model = card_terminals(card)
+        key = _reference_key(card)
+        units = groups.pop(key, [])
+        if not units:
+            problems.append(f"{name}: no extracted {key[0]} on nets {key[1:]}")
+            continue
+        check = _check_mos if card_kind(model) == "mos" else _check_passive
+        problems += check(card, units)
     for key, units in groups.items():
         problems.append(f"extracted device(s) on {key} match no reference card")
-    names = {str(n.get("name", "")).lstrip("\\") for n in extract.get("nets", [])}
+    names = {_net(str(n.get("name", ""))) for n in extract.get("nets", [])}
     missing = [p for p in pins if p not in names]
     if missing:
         problems.append(f"pin net(s) {missing} not named in the extracted netlist")
@@ -413,6 +509,7 @@ def compose_cell(
         )
     except ReferenceError as exc:
         raise BuildError(f"reference: {exc}") from exc
+    lvs_spec = {**lvs_spec, "cell_gds": f"{cell}.gds"}
     lvs = run_lvs(
         extract=extract,
         reference_name=reference_path.name,
@@ -526,6 +623,10 @@ def check_cell(spec: dict, spec_dir: Path, *, allow_unpinned: bool) -> int:
     return 0
 
 
+#: Every terminal letter any supported card kind accepts in a rewire.
+_REWIRE_TERMINALS = ("d", "g", "s", "b", "a", "w")
+
+
 def parse_rewire(text: str) -> tuple[str, str, str]:
     try:
         device, rest = text.split(":", 1)
@@ -534,9 +635,11 @@ def parse_rewire(text: str) -> tuple[str, str, str]:
         raise BuildError(
             f"--negative-control wants DEVICE:TERMINAL=NET, got {text!r}"
         ) from exc
-    if terminal not in ("d", "g", "s", "b"):
+    if terminal not in _REWIRE_TERMINALS:
         raise BuildError(
-            f"--negative-control terminal must be d/g/s/b, got {terminal!r}"
+            "--negative-control terminal must be one of "
+            f"{'/'.join(_REWIRE_TERMINALS)} (MOS d/g/s/b, resistor a/b/w, "
+            f"capacitor a/b), got {terminal!r}"
         )
     return device, terminal, net
 
@@ -550,6 +653,25 @@ def is_genuine_mismatch(lvs: dict) -> bool:
         and count > 0
         and not lvs.get("error")
     )
+
+
+def rewire_card(card: str, terminal: str, net: str) -> tuple[str, str]:
+    """``(new card, original net)`` with one terminal moved onto *net*.
+
+    Terminal letters are per card kind: MOS d/g/s/b, resistor a/b/w (w =
+    substrate), capacitor a/b.
+    """
+    name, _terms, model = card_terminals(card)
+    names = terminal_names(model)
+    if terminal not in names:
+        raise BuildError(f"{name} has terminals {'/'.join(names)}, not {terminal!r}")
+    tokens = card.split()
+    index = 1 + names.index(terminal)
+    original = tokens[index]
+    if original == net:
+        raise BuildError(f"{name}.{terminal} is already {net}")
+    tokens[index] = net
+    return " ".join(tokens), original
 
 
 def negative_control(
@@ -568,15 +690,9 @@ def negative_control(
         if summary["problems"]:
             raise BuildError(f"positive rebuild is not clean: {summary['problems']}")
         body = list(summary["reference_body"])
-        index = {"d": 1, "g": 2, "s": 3, "b": 4}[terminal]
         for i, card in enumerate(body[1:-1], start=1):
-            tokens = card.split()
-            if tokens[0].upper() == device.upper():
-                original = tokens[index]
-                if original == net:
-                    raise BuildError(f"{device}.{terminal} is already {net}")
-                tokens[index] = net
-                body[i] = " ".join(tokens)
+            if card.split()[0].upper() == device.upper():
+                body[i], original = rewire_card(card, terminal, net)
                 break
         else:
             raise BuildError(f"{device} is not in the reference")
@@ -599,7 +715,7 @@ def negative_control(
             extract=summary["extract_json"],
             reference_name=scratch_ref.name,
             deck=summary["deck"],
-            lvs_spec=lvs_spec,
+            lvs_spec={**lvs_spec, "cell_gds": f"{cell}.gds"},
             env=summary["env"],
             out_dir=tmp_dir,
             prefix="negctl.",

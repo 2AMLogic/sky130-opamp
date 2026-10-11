@@ -92,8 +92,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("spec", type=Path)
     parser.add_argument(
         "--expect-types",
-        default="nmos,ndiff,psubdiff,poly",
-        help="comma-separated Magic types that must be present (anti-vacuous guard)",
+        default=None,
+        help="comma-separated Magic types that must be present (anti-vacuous "
+        "guard); default: the cell.json's expect.magic_types, else "
+        "nmos,ndiff,psubdiff,poly",
     )
     args = parser.parse_args(argv)
     spec_path = args.spec.resolve()
@@ -101,6 +103,9 @@ def main(argv: list[str] | None = None) -> int:
     cell_dir = spec_path.parent
     cell = spec["cell"]
     variant = spec["pdk"]["variant"]
+    expect_types = args.expect_types or ",".join(
+        spec.get("expect", {}).get("magic_types", ["nmos", "ndiff", "psubdiff", "poly"])
+    )
 
     pdk = run_klt(["pdk", "find", "--pdk", variant], env=dict(os.environ))
     magic_tech = Path(pdk["assets"]["magic"]) / f"{variant}.tech"
@@ -152,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
             {"count": int(m.group(1)), "rule": m.group(2)}
             for m in re.finditer(r"^MAGIC_DRC_WHY: (\d+) :: (.*)$", log, re.MULTILINE)
         ]
-        missing = [t for t in args.expect_types.split(",") if t and t not in types]
+        missing = [t for t in expect_types.split(",") if t and t not in types]
 
         (tmp_dir / "ref.spice").write_text((cell_dir / f"{cell}.ref.spice").read_text())
         netgen_log = run(
