@@ -4,6 +4,18 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-11
 
+- **PR #198**: Reject malformed MOS geometry before manufacturing-grid arithmetic
+- **PR #195**: Offset technique study: trim, chopping, auto-zero, consumer-side (#147)
+- **PR #194**: sim+spec: independent-supply cartesian PVT baseline campaigns and section-2 coverage figures (#110)
+- **PR #193**: Measure input-range contribution to the falling slew gap (tran_sr_icmr)
+- **PR #192**: layout: PMOS mirror XM3/XM4 and seven-pin LVS signoff in opamp_stage1 (#121)
+- **Issue #190** (closed): Reject malformed MOS geometry before manufacturing-grid arithmetic
+- **Issue #189** (closed): Auditor: retain stash-scope:create-redirect guard
+- **Issue #185** (closed): Measure input-range contribution to the falling slew gap
+- **Issue #147** (closed): Offset closure: scoped technique study (trim / chopping / auto-zero) after sizing was found insufficient
+- **Issue #121** (closed): Extend opamp_stage1 with the grid-legal PMOS mirror and seven-pin LVS signoff
+- **Issue #110** (closed): sim: evaluate independent supply extremes across the PVT process grid
+- **Issue #50** (closed): Sizing on the 0.005 um grid: M3/M4/M6 (W=4.634) and MB1/M5/M7 (W=7.819) cannot be drawn DRC-clean; decide grid-legal widths, then lay out the PMOS mirror into layout/opamp_stage1
 - **PR #187**: Bind spec section 2 figures to DUT scope and identity (#186)
 - **PR #184**: DR-013: grid-legal canonical MOS widths (4.635/7.820 um) with fleet PVT evidence (#120)
 - **PR #183**: Fixed-input-common-mode output-swing diagnostic and 5x3 fleet attribution record
