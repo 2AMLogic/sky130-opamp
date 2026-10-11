@@ -73,5 +73,65 @@ class PassiveGridTests(unittest.TestCase):
         self.assertFalse(gc.on_grid(9.763))
 
 
+class MalformedGeometryTests(unittest.TestCase):
+    @staticmethod
+    def mos(extra, name="XM"):
+        return f"{name} d g s b sky130_fd_pr__nfet_01v8 L=1 W=4.65 {extra}\n"
+
+    def test_invalid_explicit_nf_rejected_with_instance_name(self):
+        for nf in ("0", "-1", "2.5", "abc", "nan", "inf", "-inf", ""):
+            found = gc.violations(self.mos(f"nf={nf}", "XBAD"), ("mos",))
+            self.assertTrue(found, nf)
+            self.assertTrue(all("XBAD" in f for f in found), (nf, found))
+            self.assertTrue(any("nf=" in f for f in found), (nf, found))
+
+    def test_valid_nf_forms(self):
+        for extra in ("", "nf=1", "nf=3", "nf=3.0"):
+            self.assertEqual(gc.violations(self.mos(extra), ("mos",)), [], extra)
+
+    def test_nf_2_0_still_checks_per_finger(self):
+        bad = "XM d g s b sky130_fd_pr__nfet_01v8 L=1 W=4.635 nf=2.0\n"  # 2.3175/finger
+        self.assertEqual(len(gc.violations(bad, ("mos",))), 1)
+
+    def test_invalid_dimensions_rejected(self):
+        for dim in ("L", "W"):
+            for v in ("0", "-0.5", "nan", "inf", "-inf"):
+                text = self.mos(f"{dim}={v}", "XD")
+                found = gc.violations(text, ("mos",))
+                self.assertTrue(found, (dim, v))
+                self.assertTrue(all("XD" in f for f in found), found)
+
+    def test_passive_dimensions_validated_too(self):
+        found = gc.violations("XR a b sky130_fd_pr__res_high_po_1p41 L=nan\n", ("passive",))
+        self.assertEqual(len(found), 1, found)
+
+    def test_ordinary_off_grid_unchanged(self):
+        found = gc.violations("XM d g s b sky130_fd_pr__nfet_01v8 L=1 W=4.634 nf=1\n", ("mos",))
+        self.assertEqual(len(found), 1)
+        self.assertIn("not a multiple", found[0])
+
+    def test_multiple_invalid_instances_aggregate(self):
+        text = (self.mos("nf=0", "XA") + self.mos("nf=1.5", "XB")
+                + "XC d g s b sky130_fd_pr__pfet_01v8 L=0 W=4.65\n"
+                + "XD d g s b sky130_fd_pr__pfet_01v8 L=1 W=nan\n" + self.mos("nf=2", "XOK"))
+        found = gc.violations(text, ("passive", "mos"))
+        for n in ("XA", "XB", "XC", "XD"):
+            self.assertTrue(any(f.startswith(n) for f in found), (n, found))
+        self.assertFalse(any(f.startswith("XOK") for f in found), found)
+
+    def test_cli_fails_on_malformed_and_passes_canonical(self):
+        import contextlib, io, pathlib, tempfile
+        with tempfile.TemporaryDirectory() as d:
+            f = pathlib.Path(d) / "n.spice"
+            f.write_text(self.mos("nf=0", "XA") + self.mos("nf=nan", "XB"))
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                self.assertEqual(gc.main([str(f)]), 1)
+            self.assertIn("XA", err.getvalue())
+            self.assertIn("XB", err.getvalue())
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(gc.main([str(NETLIST)]), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
