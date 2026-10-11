@@ -19,13 +19,13 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-_None._
+- **#110**: sim: evaluate independent supply extremes across the PVT process grid
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#185**: Measure input-range contribution to the falling slew gap
 
 ## PRs Awaiting Review
 
@@ -45,14 +45,14 @@ Issues carrying `loom:curated`.
 
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
 - **#46**: T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched *(curated)*
-- **#47**: T1 item 5: evaluate the two structural fixes DR-007 names for the falling slew-rate gap and draft the superseding topology record *(curated)*
 - **#49**: Install ratification/ee-key and ratification/market-key reviewer trees (product#151) *(curated)*
+- **#121**: Extend opamp_stage1 with the grid-legal PMOS mirror and seven-pin LVS signoff *(curated)*
+- **#147**: Offset closure: scoped technique study (trim / chopping / auto-zero) after sizing was found insufficient *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
-- **#163**: pvt_sweep: refuse a multi-unit local ngspice grid when the backend is batch *(architect)*
-- **#172**: spec figures: verify the supply attributed to binding extrema *(architect)*
+- **#190**: Reject malformed MOS geometry before manufacturing-grid arithmetic *(architect)*
 
 ## Epics
 
@@ -64,11 +64,11 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 1 |
 | Operator priority | 0 |
-| Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 0 |
+| Ready (`loom:issue`) | 1 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 4 |
-| Architect / Hermit proposals | 3 |
+| Curated | 5 |
+| Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
