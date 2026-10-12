@@ -221,7 +221,9 @@ The topology comparison against the #78 tail-clamp result is the proposed
 #### Sink bias-margin study (issue #197): partial, no candidate recommended
 
 Lower-overhead I_C margins of the rebased sink (`ic090` reference, `ic075`, `ic060`) were screened on the
-batch fleet; `ic060` stopped on useful-slew, `ic075` expanded to the 15-point paired grid. Power savings
+batch fleet; `ic060` stopped on useful-slew. `ic075` (TT/27 ICMR-aware fall edge `inconclusive`) is stopped
+under a strict reading of the plan's condition 1, but was expanded to the 15-point paired grid anyway. That off-plan
+deviation is disclosed in the study and in an appended PLAN.md note. Power savings
 vs the original sink are only 1.1 to 1.9 uW (still ~18 uW over canonical, worst 153.2 uW), fall SR stays below
 20 V/us, the TT/27 mismatch probe shows 6/100 samples with static boost > 1 uA, and the FF/125 mismatch
 probe was refused by the fleet (unresolved). Plan: [`variants/bias-margin/PLAN.md`](variants/bias-margin/PLAN.md);

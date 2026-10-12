@@ -21,8 +21,11 @@ Complete: all three designs, 5 pvt_sweep requests + 1 static (15-unit) request e
 - Standard fall SR gain over canonical: ic090 +3.98 V/us (TT/27), +1.01 (SS/-40); ic075 +2.24, +0.97;
   ic060 +0.70, +0.76.
 - **ic060 stopped** (screening condition 4): TT/27 gain +0.70 < 1.5 V/us. Its evidence is kept.
-- ic075 passes all conditions (gain >= 61.64 dB, PM >= 62.32 deg at screen points, static v(out) never within
-  0.10 V of a rail, max static |I(XMS)| 0.0114 uA).
+- **ic075 stopped** (screening condition 1, strict reading): its TT/27 `tran_sr_icmr` fall edge classifies
+  `inconclusive` (avg 15.36 V/us, no slew claim), so it is not slew-limited. The `ic090` reference is stopped
+  for the same reason. ic075 meets conditions 2-4 (gain >= 61.64 dB, PM >= 62.32 deg at screen points,
+  TT/27 fall SR gain +2.24, SS/-40 +0.97) and the static checks (v(out) never within 0.10 V of a rail, max
+  static |I(XMS)| 0.0114 uA).
 - Power saved by lowering I_C is small: TT/27 Pq 137.3 (ic090) -> 136.2 (ic075) -> 135.1 uW (ic060);
   FF/125 154.9 -> 153.0 -> 151.4 uW. ic075 saves 1.1 uW at TT/27 and 1.9 uW at FF/125 versus the
   original sink and still sits 14.9 to 21.6 uW (mean 18.1) above canonical at the 15 points, because the
@@ -30,9 +33,19 @@ Complete: all three designs, 5 pvt_sweep requests + 1 static (15-unit) request e
 - Unintended static boost (XMS DC current) is negligible for all designs (ic090 max 0.2501 uA at FF/125).
   The overhead is the always-on replica and bias legs, not DC boost.
 
-Survivor chosen by the pre-declared rule (lowest FF/125 Pq among non-stopped candidates): **ic075**.
+Under the pre-declared rule, **no candidate survives Stage 1 and nothing should have been expanded**
+(`stage1.out.md`, regenerated).
 
-## Stage 2: ic075 on the 15-point paired matrix
+**Plan deviation: Stage 2 ran despite the Stage 1 stop condition.** The screening helper first used for this
+study checked missing/failed units, gain, PM, falling-slew gain and static railing. It did not check the
+`tran_sr`/`tran_sr_icmr` slew-limited/invalid part of PLAN.md condition 1, so it reported ic075 as a survivor,
+and ic075 was expanded on that basis. The helper now enforces the whole of condition 1: missing
+`tran_sr_icmr` unit, rise or fall class other than `slew_limited`, and non-finite or non-positive standard
+slew. The plan itself is unchanged; only a dated post-run note was appended. The Stage 2 and mismatch results
+below are kept as disclosed, off-plan evidence. They are not plan-compliant expansion results and do not
+support any viability claim.
+
+## Stage 2 (off-plan, see deviation above): ic075 on the 15-point paired matrix
 
 Records: `20261012-002038-7d10f60-12f3e2` (tran_sr, dc_swing, icmr, tran_sr_icmr, 15/15 each) and
 `20261012-015900-5ab2a6b-ca069b` (ac, 15/15).
@@ -74,7 +87,8 @@ A deterministic seeded sample is sensitivity evidence, not a yield estimate.
 ## Budget accounting (against PLAN.md caps)
 
 Stage 2 first submissions: 24 pvt_sweep + 2 mc = 26 (cap 26). Resubmissions: ac+ac-iq (2), FF mismatch (1) = 3
-(cap 4). Stage 1 as planned. Total within the plan's hard cap.
+(cap 4). Stage 1 as planned. Total within the plan's hard cap. Under a strict reading of condition 1, Stage 2 should
+have spent nothing; all 26 Stage 2 first submissions and 3 resubmissions are the off-plan expansion.
 
 ## Conclusion and recommendation
 
@@ -82,5 +96,6 @@ Lowering I_C from 0.90 to 0.75 of the unit current keeps gain and PM above 60 an
 at all 15 paired points, but saves only 1.1 to 1.9 uW against ic090; the sink still costs ~18 uW over canonical
 and worst-case power (153.2 uW) is well over the ~128.7 uW target, with fall SR below 20 V/us everywhere.
 The TT mismatch probe shows static boost above 1 uA in 6 % of samples, and FF/125 mismatch is unresolved.
-**Recommendation: no candidate is recommended for further qualification** (mismatch limit failed at TT/27;
-hot-corner mismatch unresolved; power cost unrecovered). Independent-supply qualification (#110) is not covered.
+**Recommendation: no candidate is recommended for further qualification.** Under a strict reading of the plan,
+no candidate passes the Stage 1 screen. The off-plan ic075 expansion fails the mismatch limit at TT/27, leaves
+hot-corner mismatch unresolved, and does not recover the power cost. Independent-supply qualification (#110) is not covered.

@@ -41,8 +41,10 @@
 
 ## Screening verdicts (PLAN.md conditions 1-4)
 
-- ic090 (reference): passes all screening conditions
-- ic075 (candidate): passes all screening conditions
+- ic090 (reference): STOPPED: tran_sr_icmr fall class inconclusive (not slew_limited) at TT/27
+- ic075 (candidate): STOPPED: tran_sr_icmr fall class inconclusive (not slew_limited) at TT/27
 - ic060 (candidate): STOPPED: fall SR gain 0.70 V/us < 1.5 at TT/27
 
-Survivors: ic075; expanded (lowest FF/125 Pq): **ic075**
+Survivors: none; under PLAN.md nothing is expanded.
+
+**Plan deviation:** Stage 2 records exist for ic075, which is STOPPED above. That expansion ran despite the Stage 1 stop condition (strict reading of PLAN.md condition 1); it is not plan-compliant and is kept as disclosed evidence only.

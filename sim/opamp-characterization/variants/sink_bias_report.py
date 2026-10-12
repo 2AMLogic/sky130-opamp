@@ -9,7 +9,7 @@ Points are keyed by the full (corner, temp_c, vdd_v) tuple. Failed/missing units
 never dropped.
 
     python3 sim/opamp-characterization/variants/sink_bias_report.py screen   # Stage 1 table + verdicts
-    python3 sim/opamp-characterization/variants/sink_bias_report.py full TAG # 15-point table for a survivor
+    python3 sim/opamp-characterization/variants/sink_bias_report.py full TAG # 15-point table for an expanded design
     python3 sim/opamp-characterization/variants/sink_bias_report.py mc TAG   # mismatch probe summary
 """
 from __future__ import annotations
@@ -122,9 +122,23 @@ def screen_verdict(tag, canon, dat):
             reasons.append(f"PM {f(pm)} deg < 60 at {lab}")
     for lab in SLEW_POINTS:
         k = SCREEN_POINTS[lab]
+        # PLAN.md condition 1: a missing Stage-1 slew unit, or a tran_sr / tran_sr_icmr unit that is
+        # not slew-limited or is invalid, stops the candidate.
+        ic = d["tran-sr-icmr"].get(k)
+        if ic is None:
+            reasons.append(f"missing tran_sr_icmr unit {lab}")
+        else:
+            for edge in ("rise", "fall"):
+                cls = ic.get(f"{edge}_class") or "n/a"
+                if cls != "slew_limited":
+                    reasons.append(f"tran_sr_icmr {edge} class {cls} (not slew_limited) at {lab}")
         if k not in d["tran-sr"]:
             reasons.append(f"missing tran_sr unit {lab}")
             continue
+        for col in ("sr_rise_v_per_us", "sr_fall_v_per_us"):
+            v = val(d["tran-sr"], k, col)
+            if not (math.isfinite(v) and v > 0):
+                reasons.append(f"tran_sr {col} invalid ({f(v)}) at {lab}")
         gain = val(d["tran-sr"], k, "sr_fall_v_per_us") - val(canon["tran-sr"], k, "sr_fall_v_per_us")
         need = FALL_GAIN_TT_MIN if lab == "TT/27" else FALL_GAIN_SS_MIN
         if not gain >= need:
@@ -194,7 +208,12 @@ def cmd_screen():
         pick = min(pw, key=pw.get)
         print(f"\nSurvivors: {', '.join(surv)}; expanded (lowest FF/125 Pq): **{pick}**")
     else:
-        print("\nSurvivors: none; nothing is expanded.")
+        print("\nSurvivors: none; under PLAN.md nothing is expanded.")
+    off_plan = [t for t in data if t not in surv and m["variants"][t].get("stage2")]
+    for t in off_plan:
+        print(f"\n**Plan deviation:** Stage 2 records exist for {t}, which is STOPPED above. That expansion ran "
+              f"despite the Stage 1 stop condition (strict reading of PLAN.md condition 1); it is not "
+              f"plan-compliant and is kept as disclosed evidence only.")
 
 
 def cmd_full(tag):

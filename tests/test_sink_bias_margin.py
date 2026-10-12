@@ -87,10 +87,48 @@ class ReportAndAccountingTests(unittest.TestCase):
                 meta = json.loads((self.rep.REC / f"{rid}.json").read_text())
                 self.assertEqual(meta["dut"]["sha256"], self.rep.variant_sha(tag), rid)
 
-    def test_screen_stops_ic060_and_keeps_ic075(self):
+    def test_screen_stops_every_candidate_under_plan_condition_1(self):
+        # Strict reading of PLAN.md condition 1: the TT/27 tran_sr_icmr fall edge of ic075 (and of the
+        # ic090 reference) is "inconclusive", so it is stopped; ic060 stops on condition 4.
         m, canon, data = self.rep.get_all()
-        self.assertTrue(self.rep.screen_verdict("ic060", canon, data["ic060"]))
-        self.assertEqual(self.rep.screen_verdict("ic075", canon, data["ic075"]), [])
+        tt = self.rep.SCREEN_POINTS["TT/27"]
+        self.assertEqual(data["ic075"]["d"]["tran-sr-icmr"][tt]["fall_class"], "inconclusive")
+        for tag in ("ic090", "ic075"):
+            why = self.rep.screen_verdict(tag, canon, data[tag])
+            self.assertIn("tran_sr_icmr fall class inconclusive (not slew_limited) at TT/27", why, tag)
+        self.assertTrue(any("fall SR gain 0.70" in r for r in self.rep.screen_verdict("ic060", canon, data["ic060"])))
+
+    def _clean_ic075(self):
+        """ic075 Stage-1 data with the TT/27 fall edge forced to slew_limited: then nothing stops it."""
+        import copy
+        m, canon, data = self.rep.get_all()
+        dat = copy.deepcopy(data["ic075"])
+        tt = self.rep.SCREEN_POINTS["TT/27"]
+        dat["d"]["tran-sr-icmr"][tt]["fall_class"] = "slew_limited"
+        self.assertEqual(self.rep.screen_verdict("ic075", canon, dat), [])
+        return canon, dat, tt
+
+    def test_screen_stops_on_missing_tran_sr_icmr_unit(self):
+        canon, dat, tt = self._clean_ic075()
+        del dat["d"]["tran-sr-icmr"][tt]
+        self.assertIn("missing tran_sr_icmr unit TT/27", self.rep.screen_verdict("ic075", canon, dat))
+
+    def test_screen_stops_on_non_slew_limited_rise_or_fall(self):
+        ss = self.rep.SCREEN_POINTS["SS/-40"]
+        for edge in ("rise", "fall"):
+            for cls in ("inconclusive", "linear", "invalid", ""):
+                canon, dat, tt = self._clean_ic075()
+                dat["d"]["tran-sr-icmr"][ss][f"{edge}_class"] = cls
+                why = self.rep.screen_verdict("ic075", canon, dat)
+                self.assertTrue(any(r.startswith(f"tran_sr_icmr {edge} class") and r.endswith("SS/-40")
+                                    for r in why), (edge, cls, why))
+
+    def test_screen_stops_on_invalid_standard_slew(self):
+        for col, bad in (("sr_rise_v_per_us", "nan"), ("sr_rise_v_per_us", "-1.0"), ("sr_fall_v_per_us", "nan")):
+            canon, dat, tt = self._clean_ic075()
+            dat["d"]["tran-sr"][tt][col] = bad
+            why = self.rep.screen_verdict("ic075", canon, dat)
+            self.assertTrue(any(r.startswith(f"tran_sr {col} invalid") for r in why), (col, bad, why))
 
     def test_stage2_full_grid_has_15_unique_points_and_keeps_failed_attempt_errors(self):
         m, canon, data = self.rep.get_all(stage2=True)

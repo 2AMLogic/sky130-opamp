@@ -88,3 +88,13 @@ If both are stopped, nothing is expanded and the report recommends no candidate.
   unresolved). Independent-supply qualification (#110) is explicitly out of scope and remains additional work.
 * The standard fall-slew target (~20 V/us) is not claimed closed by an ICMR-contained step; saved bias current is
   judged against the existing power target (~128.7 uW) and the canonical 131.9 uW worst case.
+
+## Post-run note (2026-10-12, appended; the plan above is unchanged)
+
+Stage 2 ran despite the Stage 1 stop condition under a strict reading of screening condition 1. At TT/27 C
+the `tran_sr_icmr` fall edge of `ic075` (and of the `ic090` reference) classifies `inconclusive`, not
+slew-limited, so `ic075` should have been stopped; `ic060` stopped on condition 4. With both candidates
+stopped, the survivor rule above says nothing is expanded. The original screening helper did not enforce
+the classification part of condition 1 and reported `ic075` as passing. The helper now enforces it, and
+`stage1.out.md` is regenerated: no survivors. The `ic075` Stage 2 and mismatch records stay as disclosed,
+off-plan evidence. They are not presented as plan-compliant, and the recommendation is still "no candidate".
