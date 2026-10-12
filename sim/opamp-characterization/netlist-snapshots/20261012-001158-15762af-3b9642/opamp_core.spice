@@ -1,0 +1,48 @@
+** EXPERIMENTAL VARIANT (issue #197) -- NOT the canonical design. Tag ic090: I_C = 0.90 x 5 uA.
+** Base: design/netlist/opamp_core.spice (DR-013 grid-legal widths), cards copied verbatim,
+**       plus the SIX sink devices of variants/signal-dependent-sink.spice (issue #79) and ONE
+**       zero-volt probe source Vxms (in series with the XMS source; electrically inert, it
+**       exposes the static boost current I(XMS)). Only XMC's width differs between variants.
+** Boost law I_S = 10 * max(0, I_C - I(M6)/10); quiescent legs I_6c + I_C are NOT free (+~9.5 uA at f=0.9).
+** Flat netlist, ports vdd vss inn inp out ibias, as the canonical file. Generator and checks:
+** variants/sink_bias_margin.py (generate / check). All widths on the 0.005 um grid, nf = 1.
+**.subckt opamp_core vdd vss inn inp out ibias
+*.iopin vdd
+*.iopin vss
+*.iopin inn
+*.iopin inp
+*.iopin out
+*.iopin ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.030 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.0480928689883914
++ nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.030 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.0480928689883914
++ nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=2 m=2
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=10 m=10
+XM7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=10 m=10
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+XMP6C na d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.06256742179072276
++ nrs=0.06256742179072276 sa=0 sb=0 sd=0 mult=1 m=1
+XMA na na vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMA2 nx na vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMC nx d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.170 nf=1 ad=1.2093 as=1.2093 pd=8.92 ps=8.92 nrd=0.06954436450839328
++ nrs=0.06954436450839328 sa=0 sb=0 sd=0 mult=1 m=1
+XMD nx nx vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=1 m=1
+XMS out nx xs vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.03708439897698209
++ nrs=0.03708439897698209 sa=0 sb=0 sd=0 mult=10 m=10
+Vxms xs vss 0
+**.ends
+.end

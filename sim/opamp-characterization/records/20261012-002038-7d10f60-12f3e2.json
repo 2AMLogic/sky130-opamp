@@ -1,0 +1,1038 @@
+{
+  "record_id": "20261012-002038-7d10f60-12f3e2",
+  "timestamp": "2026-10-12T01:30:31.924384+00:00",
+  "git": {
+    "sha": "7d10f60"
+  },
+  "dut": {
+    "source_path": "sim/opamp-characterization/variants/bias-margin/sink-ic075.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/opamp_core.spice",
+    "sha256": "sha256:ad39c3f71af821a8e25974f96661392f5c143f2bbf25418da913d81832a7aee3"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "ac",
+      "tran_sr",
+      "dc_swing",
+      "icmr",
+      "tran_sr_icmr"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 75,
+    "n_failed": 2,
+    "execution": {
+      "klt_analyses": [
+        "ac",
+        "tran_sr",
+        "dc_swing",
+        "icmr",
+        "tran_sr_icmr"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    },
+    "tran_sr_icmr": {
+      "guard_v": 0.05,
+      "min_span_v": 0.2,
+      "stimulus": "standard 0.3..0.7*VDD intersected with [ICMR_low+guard, ICMR_high-guard] of the same point",
+      "end_margin_s": 1e-08,
+      "timing": {
+        "delay_s": 2e-07,
+        "edge_s": 1e-09,
+        "pw_s": 1e-06,
+        "stop_s": 2.2e-06
+      },
+      "reach_tol": 0.1,
+      "settle_tol": 0.01,
+      "rate_window_s": 6e-09,
+      "plateau_frac_of_peak": 0.9,
+      "slew_limited_min_fraction": 0.4,
+      "linear_max_fraction": 0.15,
+      "tail_vds_loss_v": 0.1,
+      "pair_vds_loss_v": 0.1,
+      "gain_ratio": 1.1,
+      "same_band_ratio": 0.9,
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.7.0+gfc35718e4add",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "tran-sr",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 239.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-0f81f793c5a5",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-03a63d01afaa90d6a",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 121,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-response.json"
+    },
+    {
+      "tag": "dc-swing",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 209.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-8847e8347d34",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-03ca8925447782ff4",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 108,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 4
+        },
+        "by_severity": {
+          "warning": 4
+        },
+        "corners_with_diagnostics": 4
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/dc-swing-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-dc-swing-response.json"
+    },
+    {
+      "tag": "icmr-tt",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 394.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-5874a7112833",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0622bf37ec50dec46",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 294,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/icmr-tt-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-icmr-tt-response.json"
+    },
+    {
+      "tag": "icmr-ff",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 452.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a036d8a62027",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0a0d6e963cdd86c6c",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 404,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/icmr-ff-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-icmr-ff-response.json"
+    },
+    {
+      "tag": "icmr-ss",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 518.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-19af96ad36be",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00e96f86afc72863d",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1a",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 462,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/icmr-ss-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-icmr-ss-response.json"
+    },
+    {
+      "tag": "icmr-sf",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 484.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c2b4e1caef94",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00c5adf1f4d54a2da",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 440,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/icmr-sf-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-icmr-sf-response.json"
+    },
+    {
+      "tag": "icmr-fs",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 420.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-250bfa99e95e",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-02a4aaaf1ebafd5da",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 384,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/icmr-fs-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-icmr-fs-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-ab2c9d0ef6db",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-00bb7e7d9d8df5f37",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 45,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-tt--40C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-tt--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-39001c50fb39",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0e2681a1271b0300a",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 42,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-tt-27C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-tt-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 81.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-da00436cc0da",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-05fe7389e546ab045",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1a",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 42,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-tt-125C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-tt-125C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff--40C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 81.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-0ca0b5b4df7e",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-081c6dba2974a6902",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 46,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ff--40C-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ff--40C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff-27C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 84.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c8af25771328",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0db4fe7916c61438c",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 47,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ff-27C-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ff-27C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff-125C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 84.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a308980d11fb",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-03977ad1202f3d762",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 42,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ff-125C-1.98V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ff-125C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss--40C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c7240352da00",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0273d29bcf3db6968",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 43,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ss--40C-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ss--40C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss-27C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-870f2aafefd8",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-03c0f8b0b20b33972",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 48,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ss-27C-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ss-27C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss-125C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-ffb35eee7437",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0785daaf0d8932684",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 46,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-ss-125C-1.62V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-ss-125C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 113.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-2e1d5b22ad9c",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0d7800d13d9e52263",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 68,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-sf--40C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-sf--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-3de72708aaa4",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0c3b96deaa6f23485",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 43,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-sf-27C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-sf-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 82.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-67f611819173",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-009aa9663d1c0add0",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 40,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-sf-125C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-sf-125C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 88.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-1032a6ef1055",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-0159a2f0689582c9b",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 43,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-fs--40C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-fs--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 89.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-bb836d2b90fc",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-05b990c7b38cfa61d",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 43,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-fs-27C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-fs-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 84.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-d2278e57fdef",
+        "bucket": "2am-batch-jobs-221082181346",
+        "region": "us-east-1",
+        "instance_id": "i-09280c76105baa234",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0e40e3245f1923ac8",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 45,
+        "runner_klt_version": "0.5.0",
+        "client_klt_version": "0.7.0+gfc35718e4add",
+        "runner_compatibility": "mismatch",
+        "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261012-002038-7d10f60-12f3e2/tran-sr-icmr-fs-125C-1.8V-request.json",
+      "response": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-logs/klt-tran-sr-icmr-fs-125C-1.8V-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "tran_sr_icmr_summary": {
+    "points": 15,
+    "verdict_counts": {
+      "inconclusive": 10,
+      "no_input_range_effect": 4,
+      "input_range_contributes": 1
+    },
+    "fall_class_counts": {
+      "slew_limited": 5,
+      "linear": 0,
+      "inconclusive": 10,
+      "invalid": 0
+    },
+    "note": "diagnostic metric only; no target closure or topology adoption is implied"
+  },
+  "links": {
+    "tran_sr_csv": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-tran-sr.csv",
+    "dc_swing_csv": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-dc-swing.csv",
+    "icmr_csv": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-icmr.csv",
+    "tran_sr_icmr_csv": "sim/opamp-characterization/records/20261012-002038-7d10f60-12f3e2-tran-sr-icmr.csv"
+  },
+  "errors": [
+    "ac-iq: klt sim exit 1: no JSON report on stdout ({\n  \"schema_version\": 1,\n  \"error\": {\n    \"command\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 9 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})",
+    "ac: klt sim exit 1: no JSON report on stdout ({\n  \"schema_version\": 1,\n  \"error\": {\n    \"command\": \"sim\",\n    \"message\": \"batch backend failed: batch-fleet-provision.sh launch failed (exit 1): error: 9 instance(s) already running + 1 requested exceeds BATCH_MAX_CONCURRENT_INSTANCES=8\"\n  }\n})"
+  ],
+  "elapsed_s": 4193.6
+}

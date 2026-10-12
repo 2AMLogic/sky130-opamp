@@ -1,0 +1,41 @@
+{
+  "netlist": "tran-sr-icmr-ff-125C-1.98V-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "ff"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.98
+      ]
+    },
+    "temperature_c": [
+      125.0
+    ]
+  },
+  "analysis": {
+    "kind": "tran",
+    "args": "2n 2.2u"
+  },
+  "measurements": [
+    {
+      "name": "vout_pre_v",
+      "unit": "V",
+      "spice": ".meas tran vout_pre_v find v(out) at=190n"
+    }
+  ],
+  "options": {
+    "timeout_s": 600,
+    "keep_artifacts": true,
+    "waveforms": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

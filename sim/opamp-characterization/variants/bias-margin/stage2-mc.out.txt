@@ -1,0 +1,1 @@
+20261012-013032-7d10f60-375ebb-sink-mc-ic075 tt_mm/27C n=100: units 100, ok 100, failed 0, |I(XMS)|>1uA 6, railed 0, |I(XMS)| median 0.0001 p95 1.0999 max 5.6293 uA
