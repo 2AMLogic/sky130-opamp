@@ -9,9 +9,11 @@ open-source xschem + ngspice flow.
 [gm/ID study](sim/gm-id-characterization/README.md) informs the
 [op-amp schematic](design/README.md), whose resized design has
 [PVT characterization records](sim/opamp-characterization/README.md).
-The [layout flow](layout/README.md) includes the NMOS input pair, the bias/tail mirror and routed
-Rz/Cc compensation block with committed DRC and LVS evidence; the full-core
-layout remains pending.
+The [layout flow](layout/README.md) includes four sub-blocks: the input pair
+and PMOS mirror, the bias/tail mirror, the output stage, and the routed Rz/Cc
+compensation network. All have committed klt DRC/LVS evidence; the compensation
+block's Magic DRC check fails on resistor-head violations
+([details](layout/opamp_comp/README.md)). The full-core layout remains pending.
 Performance gaps remain, including falling slew rate; the
 [target specification](spec/target-spec.md) is partially ratified.
 The 3.3 V I/O flavor is not served
