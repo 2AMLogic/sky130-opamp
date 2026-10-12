@@ -225,6 +225,10 @@ class CommittedRecordShapeTests(unittest.TestCase):
             m = d["matrix"]
             for analysis in m["analyses"]:
                 with self.subTest(record=p.name, analysis=analysis):
+                    if f"{analysis}_csv" not in d["links"]:
+                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors
+                        self.assertTrue(any(e.startswith(f"{analysis}:") for e in d["errors"]), analysis)
+                        continue
                     rel = d["links"][f"{analysis}_csv"]
                     path = REPO / rel
                     self.assertTrue(path.is_file(), rel)
@@ -255,7 +259,7 @@ class CommittedRecordShapeTests(unittest.TestCase):
 
     def test_ac_rows_are_self_consistent(self):
         for p, d in pvt_records():
-            if "ac" not in d["matrix"]["analyses"]:
+            if "ac" not in d["matrix"]["analyses"] or "ac_csv" not in d["links"]:
                 continue
             for r in csv.DictReader((REPO / d["links"]["ac_csv"]).read_text().splitlines()):
                 with self.subTest(record=p.name, corner=r["corner"], t=r["temp_c"]):

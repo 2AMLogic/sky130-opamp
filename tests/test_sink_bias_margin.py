@@ -1,7 +1,11 @@
 """Simulator-free tests for variants/sink_bias_margin.py and its committed netlists (issue #197)."""
 
+import csv
+import json
 import re
+import sys
 import unittest
+from pathlib import Path
 
 from _paths import EXP, load_module
 
@@ -65,3 +69,44 @@ class BiasMargin(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReportAndAccountingTests(unittest.TestCase):
+    """Simulator-free checks over the committed manifest and plan (issue #197)."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "sim/opamp-characterization/variants"))
+        import sink_bias_report
+        cls.rep = sink_bias_report
+
+    def test_manifest_dut_hashes_match_variants(self):
+        m = self.rep.manifest()
+        for tag, e in m["variants"].items():
+            for rid in e["ids"] + e.get("stage2", []):
+                meta = json.loads((self.rep.REC / f"{rid}.json").read_text())
+                self.assertEqual(meta["dut"]["sha256"], self.rep.variant_sha(tag), rid)
+
+    def test_screen_stops_ic060_and_keeps_ic075(self):
+        m, canon, data = self.rep.get_all()
+        self.assertTrue(self.rep.screen_verdict("ic060", canon, data["ic060"]))
+        self.assertEqual(self.rep.screen_verdict("ic075", canon, data["ic075"]), [])
+
+    def test_stage2_full_grid_has_15_unique_points_and_keeps_failed_attempt_errors(self):
+        m, canon, data = self.rep.get_all(stage2=True)
+        d = data["ic075"]
+        for sfx in ("ac", "tran-sr", "tran-sr-icmr"):
+            self.assertEqual(len(d["d"][sfx]), 15, sfx)
+        self.assertTrue(any("BATCH_MAX_CONCURRENT_INSTANCES" in e for e in d["errs"]))
+
+    def test_power_delta_sign_ic075_above_canonical(self):
+        m, canon, data = self.rep.get_all(stage2=True)
+        for k, r in data["ic075"]["d"]["ac"].items():
+            self.assertGreater(float(r["pq_w"]), float(canon["ac"][k]["pq_w"]))
+
+    def test_mismatch_probe_flags_tt_boost_violation(self):
+        m = self.rep.manifest()
+        rid = m["variants"]["ic075"]["mc"][0]
+        rows = list(csv.DictReader(open(self.rep.REC / f"{rid}.csv", newline="")))
+        self.assertEqual(len(rows), 100)
+        self.assertEqual(sum(1 for r in rows if abs(float(r["i_xms_ua"])) > 1.0), 6)

@@ -86,12 +86,12 @@ def variant_sha(tag):
     return dut_identity.sha256_file(HERE / "bias-margin" / f"sink-{tag}.spice")
 
 
-def get_all():
+def get_all(stage2=False):
     m = manifest()
     canon, _ = load(m["canonical"]["ids"], m["canonical"]["sha256"])
     data = {}
     for tag, e in m["variants"].items():
-        d, errs = load(e["ids"], variant_sha(tag))
+        d, errs = load(e["ids"] + (e.get("stage2", []) if stage2 else []), variant_sha(tag))
         stat = {}
         for sid in e.get("static", []):
             stat.update(static_rows(sid))
@@ -198,7 +198,7 @@ def cmd_screen():
 
 
 def cmd_full(tag):
-    m, canon, data = get_all()
+    m, canon, data = get_all(stage2=True)
     d = data[tag]
     print(f"# 15-point comparison, {tag} vs canonical (generated)\n")
     print("| Point | Gain dB (c / v) | PM deg (c / v) | Pq uW (c / v) | Fall SR (c / v / d) | Rise SR (c / v) | "

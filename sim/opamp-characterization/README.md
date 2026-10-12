@@ -218,6 +218,16 @@ power rises 17 % (worst 154.9 uW). Gain, GBW, rise SR and PM >= 60 deg stay met.
 The topology comparison against the #78 tail-clamp result is the proposed
 [DR-012](../../spec/decision-records/DR-012-output-topology-comparison.md).
 
+#### Sink bias-margin study (issue #197): partial, no candidate recommended
+
+Lower-overhead I_C margins of the rebased sink (`ic090` reference, `ic075`, `ic060`) were screened on the
+batch fleet; `ic060` stopped on useful-slew, `ic075` expanded to the 15-point paired grid. Power savings
+vs the original sink are only 1.1 to 1.9 uW (still ~18 uW over canonical, worst 153.2 uW), fall SR stays below
+20 V/us, the TT/27 mismatch probe shows 6/100 samples with static boost > 1 uA, and the FF/125 mismatch
+probe was refused by the fleet (unresolved). Plan: [`variants/bias-margin/PLAN.md`](variants/bias-margin/PLAN.md);
+report: [`records/sink-bias-study-197.md`](records/sink-bias-study-197.md); regenerate tables with
+`python3 sim/opamp-characterization/variants/sink_bias_report.py screen|full ic075|mc ic075`.
+
 ### PSRR and noise benches (issue #54)
 
 ```bash
