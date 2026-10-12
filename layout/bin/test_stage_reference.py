@@ -16,6 +16,9 @@ from stage_reference import (  # noqa: E402
     ReferenceError,
     build_reference,
     card_terminals,
+    effective_multiplicity,
+    expand_body,
+    expand_multiplicity,
     logical_lines,
     passive_geometry,
     select_cards,
@@ -238,6 +241,57 @@ class Passives(unittest.TestCase):
             build_reference(
                 self.text, cell="t", pins=[*self.PINS, "x"], devices=["XRz", "XCc"]
             )
+
+
+class MultiplicityExpansion(unittest.TestCase):
+    M2 = (
+        "XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 "
+        "ad=2.2678 sa=0 mult=2 m=2"
+    )
+    M1 = M2.replace("XM5", "XMB1").replace("mult=2 m=2", "mult=1 m=1")
+
+    def test_effective_multiplicity_is_m_not_m_times_mult(self):
+        self.assertEqual(effective_multiplicity(self.M2), 2)
+        self.assertEqual(effective_multiplicity(self.M1), 1)
+
+    def test_non_integer_m_rejected(self):
+        with self.assertRaisesRegex(ReferenceError, "not a positive integer"):
+            effective_multiplicity(self.M2.replace("m=2", "m=1.5"))
+
+    def test_unit_card_untouched(self):
+        self.assertEqual(expand_multiplicity(self.M1), [self.M1])
+
+    def test_m2_becomes_two_unit_cards(self):
+        cards = expand_multiplicity(self.M2)
+        self.assertEqual(len(cards), 2)
+        self.assertEqual([c.split()[0] for c in cards], ["XM5_1", "XM5_2"])
+        for card in cards:
+            self.assertIn("m=1", card.split())
+            self.assertIn("mult=1", card.split())
+            self.assertIn("W=7.820", card.split())
+            self.assertEqual(card.split()[1:6], self.M2.split()[1:6])
+
+    def test_passive_never_expanded(self):
+        card = "XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1"
+        self.assertEqual(expand_multiplicity(card), [card])
+
+    def test_expand_body_keeps_header_and_footer(self):
+        body = [".subckt t ibias tail vss", self.M1, self.M2, ".ends t"]
+        out = expand_body(body)
+        self.assertEqual(out[0], body[0])
+        self.assertEqual(out[-1], body[-1])
+        self.assertEqual(len(out), 5)
+
+    def test_canonical_bias_group_is_three_units(self):
+        body = build_reference(
+            SOURCE.read_text(),
+            cell="t",
+            pins=["ibias", "tail", "vss"],
+            devices=["XMB1", "XM5"],
+        )
+        units = sum(effective_multiplicity(c) for c in body[1:-1])
+        self.assertEqual(units, 3)
+        self.assertEqual(len(expand_body(body)) - 2, 3)
 
 
 if __name__ == "__main__":

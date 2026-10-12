@@ -119,6 +119,20 @@ class ExtractionCheck(unittest.TestCase):
             cc.verify_extraction(self.extract(devs), self.BODY, self.PINS), []
         )
 
+    def test_mult_equal_m_counts_m_units_not_m_squared(self):
+        body = [
+            ".subckt t ibias tail vss",
+            "XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.82 nf=1 mult=2 m=2",
+            ".ends t",
+        ]
+        pins = ["ibias", "tail", "vss"]
+        ext = {"devices": [], "nets": [{"name": n} for n in pins]}
+        two = [_dev("nfet", "tail", "ibias", "vss", "vss", 7.82, 1.2)] * 2
+        ext["devices"] = two
+        self.assertEqual(cc.verify_extraction(ext, body, pins), [])
+        ext["devices"] = two * 2  # four units would be the old m*mult reading
+        self.assertTrue(cc.verify_extraction(ext, body, pins))
+
     def test_width_shortfall_reported(self):
         devs = [
             _dev("nfet", "d1", "inn", "tail", "vss", 3.015, 1.2),

@@ -88,6 +88,8 @@ from stage_reference import (  # noqa: E402
     ReferenceError,
     card_kind,
     card_terminals,
+    effective_multiplicity,
+    expand_body,
     passive_geometry,
     terminal_names,
     write_reference,
@@ -364,9 +366,10 @@ def _check_mos(card: str, units: list[dict]) -> list[str]:
         k.lower(): v for k, v in (t.split("=", 1) for t in card.split() if "=" in t)
     }
     want_l = float(params["l"])
-    want_w = (
-        float(params["w"]) * float(params.get("m", 1)) * float(params.get("mult", 1))
-    )
+    # Effective parallel copies are the instance m only; mult is a
+    # mismatch-statistics parameter of the sky130 subckt (see
+    # stage_reference.effective_multiplicity), so mult=2 m=2 is 2 units.
+    want_w = float(params["w"]) * effective_multiplicity(card)
     problems = []
     got_l = {round(u["params"]["l_um"], 6) for u in units}
     got_w = round(sum(u["params"]["w_um"] for u in units), 6)
@@ -705,7 +708,7 @@ def negative_control(
                         f"{device}.{terminal} rewired {original} -> {net}"
                     ),
                     "* Must NOT match the layout. Not a design artifact.",
-                    *body,
+                    *expand_body(body),
                     ".end",
                     "",
                 ]

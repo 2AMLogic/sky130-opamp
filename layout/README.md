@@ -6,10 +6,12 @@ sub-block lives in its own `layout/<cell>/` directory. That directory holds
 the recipe (`cell.json`), every intermediate request/response, the composed
 GDS, and the reports that back each claim in the cell's README.
 
-**Status: two sub-blocks. `opamp_stage1/` (the NMOS input pair
-`XM1`/`XM2` and the PMOS mirror `XM3`/`XM4`) and `opamp_comp/` (the routed `XRz`/`XCc` compensation network;
-klt DRC/LVS and netgen pass, Magic `drc(full)` fails on the resistor heads,
-see `opamp_comp/README.md`).**
+**Status: three sub-blocks. `opamp_stage1/` (the NMOS input pair
+`XM1`/`XM2` and the PMOS mirror `XM3`/`XM4`), `opamp_bias/` (the bias/tail
+mirror `XMB1`/`XM5`; klt DRC/LVS, Magic `drc(full)` and netgen all pass, see
+`opamp_bias/README.md`) and `opamp_comp/` (the routed `XRz`/`XCc`
+compensation network; klt DRC/LVS and netgen pass, Magic `drc(full)` fails on
+the resistor heads, see `opamp_comp/README.md`).**
 That is not the op-amp's layout. T1 item 2 is `unmet`, and nothing in
 `manifests/` cites this directory.
 
@@ -73,7 +75,15 @@ sub-block covers only some of its devices. `layout/bin/stage_reference.py`
 therefore selects the cards named in `cell.json` `lvs.devices` and joins
 their continuations. It copies them **verbatim** (terminal order, model,
 every parameter) into `.subckt <cell> <lvs.pins>`. No device parameter is
-hand-written. Supported cards are four-terminal sky130 MOS cards and the
+hand-written. One exception, written into the file header when it applies:
+`klt lvs` rejects a card with `m` > 1 (or `mult` > 1), so a MOS card with
+`m=N` is written as `N` cards `<name>_1`..`<name>_N` with `m=1 mult=1`
+(`expand_multiplicity`). The geometry check still uses the verbatim card. It
+counts the instance `m` only, not `m * mult`: in the sky130 model subckt
+`mult` feeds the mismatch formulas and the inner device has no `m`, so
+`mult=2 m=2` (as on `XM5`) is two units. A one-point ngspice check on the
+pinned PDK (tt, W=7.82, L=1.2, Vgs=0.8, Vds=0.9) gave 45.99 uA for
+`m=1` with `mult` 1 or 2 and 91.99 uA for `m=2` with `mult` 1 or 2. Supported cards are four-terminal sky130 MOS cards and the
 two compensation passives (`res_high_po_1p41`, three terminals including
 substrate; `cap_mim_m3_1`, two terminals); any other model is rejected. A
 missing or duplicated card, a duplicate selection, an unsupported or
@@ -153,15 +163,19 @@ directory or an extension of one, with the same evidence set.
    devices, klt and Magic DRC clean, klt and netgen LVS matched. The mirror
    block is drawn with `klt draw`, not `klt gen` (klayout-tools#3115);
    see `opamp_stage1/README.md`.
-2. **Bias and tail mirror `XMB1`/`XM5` (1 : 2 units, nfet, L=1.2).** This
-   is a three-unit common-centroid row (B T B, or T B T with dummies). Its
-   W=7.819 is off-grid too (#50). It also depends on #47, which may change
-   the tail topology.
+2. **Bias and tail mirror `XMB1`/`XM5` (1 : 2 units, nfet, L=1.2): done
+   (#204).** Separate cell `opamp_bias/` at the grid-legal W=7.820 um of
+   DR-013 (the old off-grid-width prerequisite is resolved by DR-013). Three
+   equal 7.82 um units in one row, `XM5 | XMB1 | XM5` (T B T), with a p-tap
+   ring to `vss`. It is the canonical sub-block as netlisted; whether the
+   output topology under evaluation in #47 changes the tail or sink is not
+   decided here. klt and Magic DRC clean, klt LVS and netgen matched, negative
+   control and `--check` pass. See `opamp_bias/README.md`.
 3. **Output stage `XM6` (10 PMOS units of the `XM3`/`XM4` device) and `XM7`
    (10 NMOS units of the `XMB1` device).** These are interdigitated arrays
    sharing the mirror groups' unit devices, each with its own guard ring.
-   Their size and topology wait on #47 (slew-rate topology evaluation) and
-   #50.
+   Their topology still waits on #47 (slew-rate topology evaluation); their
+   widths are the grid-legal ones of DR-013.
 4. **`Rz` (`res_high_po_1p41`, L=9.765) and `Cc` (`cap_mim_m3_1`, 15.62 x
    15.62).** These use `res_array` (`flavor: "high"`) and `cap_array` (MiM
    on met3/capm). Grid representability was checked first (issue #131,
