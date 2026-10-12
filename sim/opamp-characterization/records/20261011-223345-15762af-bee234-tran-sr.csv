@@ -1,0 +1,2 @@
+corner,temp_c,vdd_v,v_low_v,v_high_v,sr_rise_v_per_us,sr_fall_v_per_us,elapsed_s
+ss,-40.0,1.62,0.486,1.134,19.869174161896964,12.037151702786417,37.34

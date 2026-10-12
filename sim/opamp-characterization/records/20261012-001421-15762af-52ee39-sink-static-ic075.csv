@@ -1,0 +1,16 @@
+corner,temp_c,vdd_v,sample,status,ok,pq_uw,i_xms_ua,vout_v,railed,boost_flag
+tt,-40.0,1.8,,pass,True,136.0906,0.0,0.8998,False,False
+tt,27.0,1.8,,pass,True,136.2226,0.0001,0.8998,False,False
+tt,125.0,1.8,,pass,True,136.5653,0.006,0.8999,False,False
+ff,-40.0,1.98,,pass,True,153.1572,0.0,0.9899,False,False
+ff,27.0,1.98,,pass,True,152.94,0.0001,0.9899,False,False
+ff,125.0,1.98,,pass,True,152.9586,0.0114,0.99,False,False
+ss,-40.0,1.62,,pass,True,118.9908,0.0,0.8097,False,False
+ss,27.0,1.62,,pass,True,119.8431,0.0,0.8098,False,False
+ss,125.0,1.62,,pass,True,120.6231,0.0035,0.8098,False,False
+sf,-40.0,1.8,,pass,True,136.2659,0.0,0.8998,False,False
+sf,27.0,1.8,,pass,True,136.3835,0.0001,0.8999,False,False
+sf,125.0,1.8,,pass,True,136.697,0.0079,0.8999,False,False
+fs,-40.0,1.8,,pass,True,136.0363,0.0,0.8998,False,False
+fs,27.0,1.8,,pass,True,136.3194,0.0001,0.8998,False,False
+fs,125.0,1.8,,pass,True,136.7069,0.0056,0.8999,False,False

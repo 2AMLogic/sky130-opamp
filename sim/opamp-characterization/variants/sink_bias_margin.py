@@ -201,7 +201,9 @@ def build_static_request(pvt, req_dir: Path, tag: str, backend: str, mc: dict | 
     5 corners x 3 T paired supplies (15 units) or, with `mc`, one `<corner>_mm` point."""
     pdk = pvt.resolve_pdk()
     req_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(pvt.ACTIVE_DUT[0], req_dir / pvt.dut_identity.SNAPSHOT_NAME)
+    dst = req_dir / pvt.dut_identity.SNAPSHOT_NAME
+    if not dst.exists():   # already the captured snapshot when the record dir is the request dir
+        shutil.copyfile(pvt.ACTIVE_DUT[0], dst)
     body = pvt.render(pvt.TESTBENCH_DIR / "opamp_ac.klt.spice.tmpl", {
         "OPAMP_NETLIST": pvt.dut_identity.SNAPSHOT_NAME, "VDD_NOM": pvt.VDD_BY_CORNER[corner if mc else "tt"],
         "IBIAS_A": pvt.IBIAS_A, "CL_F": pvt.CL_F, "RFB": pvt.AC_RFB, "CFB": pvt.AC_CFB})
@@ -269,8 +271,7 @@ def cmd_fleet(a, mc: bool):
     req = build_static_request(pvt, snap, f"{kind}-{tag}", a.backend,
                                {"n": a.n, "seed": MC_SEED + a.seed_offset} if mc else None, a.corner, a.temp)
     t0 = time.monotonic()
-    result = pvt.klt_sim(req, rec / f"{rid}-logs" / kind, a.backend)
-    report = result.payload
+    report = pvt.run_klt_sim(req, rec / f"{rid}-logs" / kind, a.backend)
     wall = time.monotonic() - t0
     env = report.get("environment", {})
     errors = []

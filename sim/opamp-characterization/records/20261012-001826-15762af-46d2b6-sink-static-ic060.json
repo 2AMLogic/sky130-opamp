@@ -1,0 +1,41 @@
+{
+  "record_id": "20261012-001826-15762af-46d2b6",
+  "kind": "sink-static",
+  "tag": "ic060",
+  "fraction": 0.6,
+  "dut": {
+    "source_path": "sim/opamp-characterization/variants/bias-margin/sink-ic060.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261012-001826-15762af-46d2b6/opamp_core.spice",
+    "sha256": "sha256:ad7fb658bb361f2d5be324811965cf53334f8223465f8c6071e32d664a1abdc1"
+  },
+  "backend": "batch",
+  "mc": null,
+  "klt_status": "pass",
+  "corner_count": 15,
+  "remote": {
+    "provider": "aws-batch-fleet",
+    "job_id": "klt-sim-3ebf4c03a308",
+    "bucket": "2am-batch-jobs-221082181346",
+    "region": "us-east-1",
+    "instance_id": "i-0a4cd8815c0fb46b7",
+    "instance_type": "m7i.4xlarge",
+    "availability_zone": "us-east-1b",
+    "ami_id": "ami-0e40e3245f1923ac8",
+    "lifecycle": "spot",
+    "spot": true,
+    "state": "done",
+    "exit_code": "0",
+    "concurrency": "1",
+    "physical_cores": "8",
+    "elapsed_seconds": 77,
+    "runner_klt_version": "0.5.0",
+    "client_klt_version": "0.7.0+gfc35718e4add",
+    "runner_compatibility": "mismatch",
+    "runner_compatibility_warning": "the fleet runner ran klt 0.5.0 but the submitting client is 0.7.0+gfc35718e4add; request options the runner does not know may have been ignored -- update the runner image or use a compatible client"
+  },
+  "wall_s": 112.6,
+  "errors": [],
+  "units": 15,
+  "units_ok": 15,
+  "request": "sim/opamp-characterization/netlist-snapshots/20261012-001826-15762af-46d2b6/sink-static-ic060-request.json"
+}
