@@ -329,5 +329,95 @@ class NegativeControlVerdict(unittest.TestCase):
             self.assertFalse(cc.is_genuine_mismatch(lvs), lvs)
 
 
+class ImportedCells(unittest.TestCase):
+    """Committed-cell import (issue #210); tool-free."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(dir=cc.REPO_ROOT / "layout")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name)
+        self.child = self.root / "child" / "child.gds"
+        self.child.parent.mkdir()
+        self.child.write_bytes(_gds(2026))
+        self.recipe = self.root / "top"
+        self.recipe.mkdir()
+
+    def spec(self, **cell):
+        entry = {"gds": "../child/child.gds", "cell_name": "TOP", "ports": [{"name": "a"}]}
+        entry.update(cell)
+        return {"blocks": [{"id": "kid", "cell": entry}]}
+
+    def test_valid_import_resolves_relative_to_recipe(self):
+        sources = cc.validate_blocks(self.spec(), self.recipe)
+        self.assertEqual(sources["kid"], self.child.resolve())
+
+    def test_invalid_metadata_rejected(self):
+        bad = [
+            {"gds": "../child/missing.gds"},
+            {"cell_name": "NOPE"},
+            {"cell_name": ""},
+            {"ports": "a"},
+            {"ports": [{"name": "a"}, {"name": "a"}]},
+            {"ports": [{"x": 1}]},
+            {"gds": str(self.child)},
+            {"gds": "../../../../../etc/passwd"},
+            {"bogus": 1},
+        ]
+        for override in bad:
+            with self.subTest(override=override), self.assertRaises(cc.BuildError):
+                cc.validate_blocks(self.spec(**override), self.recipe)
+
+    def test_duplicate_and_ambiguous_blocks_rejected(self):
+        spec = self.spec()
+        spec["blocks"].append(dict(spec["blocks"][0]))
+        with self.assertRaises(cc.BuildError):
+            cc.validate_blocks(spec, self.recipe)
+        both = self.spec()
+        both["blocks"][0]["generator"] = "res_array"
+        with self.assertRaises(cc.BuildError):
+            cc.validate_blocks(both, self.recipe)
+
+    def test_staging_normalises_copy_only_and_records_hashes(self):
+        spec = self.spec()
+        before = self.child.read_bytes()
+        gen = self.root / "scratch" / "gen"
+        gen.mkdir(parents=True)
+        record = cc.stage_import(spec["blocks"][0], self.child, gen_dir=gen)
+        self.assertEqual(self.child.read_bytes(), before)  # source untouched
+        self.assertEqual((gen / "kid.gds").read_bytes(), _gds(0))
+        self.assertEqual(record["source_sha256"], cc.sha256(self.child))
+        self.assertEqual(record["staged_sha256"], cc.sha256(gen / "kid.gds"))
+        self.assertTrue((gen / ("kid" + cc.IMPORT_RECORD)).exists())
+
+    def test_source_change_changes_identity_record(self):
+        spec = self.spec()
+        gen = self.root / "scratch" / "gen"
+        gen.mkdir(parents=True)
+        first = cc.stage_import(spec["blocks"][0], self.child, gen_dir=gen)
+        self.child.write_bytes(_gds(2026) + _record(0x0000))  # trailing change
+        second = cc.stage_import(spec["blocks"][0], self.child, gen_dir=gen)
+        self.assertNotEqual(first["source_sha256"], second["source_sha256"])
+
+    def test_metadata_change_changes_identity_record(self):
+        gen = self.root / "scratch" / "gen"
+        gen.mkdir(parents=True)
+        a = cc.stage_import(self.spec()["blocks"][0], self.child, gen_dir=gen)
+        b = cc.stage_import(
+            self.spec(ports=[{"name": "b"}])["blocks"][0], self.child, gen_dir=gen
+        )
+        self.assertNotEqual(a["ports"], b["ports"])
+
+    def test_staging_over_source_rejected(self):
+        same = self.root / "gen"
+        same.mkdir()
+        (same / "kid.gds").write_bytes(_gds(2026))
+        with self.assertRaises(cc.BuildError):
+            cc.stage_import(self.spec()["blocks"][0], same / "kid.gds", gen_dir=same)
+        self.assertEqual((same / "kid.gds").read_bytes(), _gds(2026))
+
+    def test_gds_cell_names(self):
+        self.assertEqual(cc.gds_cell_names(self.child), ["TOP"])
+
+
 if __name__ == "__main__":
     unittest.main()

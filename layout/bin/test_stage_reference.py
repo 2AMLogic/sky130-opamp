@@ -23,6 +23,7 @@ from stage_reference import (  # noqa: E402
     passive_geometry,
     select_cards,
     terminal_names,
+    write_reference,
 )
 
 REPO_ROOT = HERE.parents[1]
@@ -292,6 +293,62 @@ class MultiplicityExpansion(unittest.TestCase):
         units = sum(effective_multiplicity(c) for c in body[1:-1])
         self.assertEqual(units, 3)
         self.assertEqual(len(expand_body(body)) - 2, 3)
+
+
+INTERNAL = """\
+XA n1 g1 vss vss sky130_fd_pr__nfet_01v8 L=1 W=2 m=1
+XB out g2 n1 vss sky130_fd_pr__nfet_01v8 L=1 W=2 m=1
+"""
+
+
+class InternalNets(unittest.TestCase):
+    def build(self, **kw):
+        base = dict(
+            cell="c", pins=["out", "g1", "g2", "vss"], devices=["XA", "XB"]
+        )
+        base.update(kw)
+        return build_reference(INTERNAL, **base)
+
+    def test_internal_net_is_not_a_port(self):
+        body = self.build(internal_nets=["n1"])
+        self.assertEqual(body[0], ".subckt c out g1 g2 vss")
+        self.assertIn("n1", body[1])
+
+    def test_undeclared_internal_net_still_fails(self):
+        with self.assertRaisesRegex(ReferenceError, "n1"):
+            self.build()
+        with self.assertRaisesRegex(ReferenceError, "n1"):
+            self.build(internal_nets=[])
+        with self.assertRaisesRegex(ReferenceError, "not declared in internal_nets"):
+            self.build(internal_nets=["other"])
+
+    def test_invalid_declarations(self):
+        for bad in (["n1", "n1"], ["vss", "n1"], "n1", ["n 1"], [""], [3]):
+            with self.subTest(bad=bad), self.assertRaises(ReferenceError):
+                self.build(internal_nets=bad)
+
+    def test_unused_declaration_rejected(self):
+        with self.assertRaisesRegex(ReferenceError, "touch no selected"):
+            self.build(internal_nets=["n1", "spare"])
+
+    def test_promotion_to_boundary_pin_rejected(self):
+        with self.assertRaisesRegex(ReferenceError, "promoted to a port"):
+            self.build(pins=["out", "g1", "g2", "vss", "n1"], internal_nets=["n1"])
+
+    def test_write_reference_notes_internal_nets(self):
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            src, out = Path(tmp) / "s.spice", Path(tmp) / "o.spice"
+            src.write_text(INTERNAL)
+            write_reference(
+                src, out, source_label="s", cell="c",
+                pins=["out", "g1", "g2", "vss"], devices=["XA", "XB"],
+                internal_nets=["n1"],
+            )
+            text = out.read_text()
+            self.assertIn("Internal nets (not ports): n1", text)
+            self.assertIn(".subckt c out g1 g2 vss", text)
 
 
 if __name__ == "__main__":

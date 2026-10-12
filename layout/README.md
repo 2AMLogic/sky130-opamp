@@ -101,6 +101,47 @@ checkout, as in `.github/workflows/tests.yml`):
 python3 -m unittest discover -s layout/bin -p 'test_*.py' -v
 ```
 
+### Committed-cell import and internal LVS nets (issue #210)
+
+Prerequisite for the top-level assembly; it promotes no integrator GDS and
+makes no maturity claim. Both features are opt-in; recipes without them
+behave exactly as before.
+
+`blocks[]` may carry a committed sub-block instead of `draw`/`generator`
+(exactly one of the three per block; block ids must be unique):
+
+```json
+{"id": "comp", "cell": {"gds": "../opamp_comp/opamp_comp.gds",
+                         "cell_name": "opamp_comp",
+                         "ports": [{"name": "d2", "net": "d2", "layer": {"layer": 67, "datatype": 20},
+                                    "x_um": -6.0, "y_um": 22.705, "width_um": 0.42, "direction_deg": 180}]}}
+```
+
+- `gds` is relative to the recipe directory and must stay inside the repo;
+  `cell_name` must be defined in the stream; `ports` (the klt
+  `gen-compose` `blocks[].cell` port list; copy from the child's
+  `compose.response.json`) needs unique names. All of this is validated
+  before any tool runs.
+- The stream is copied to `gen/<id>.gds` and only the copy is timestamp
+  normalised; the source file is never written. `gen/<id>.import.json`
+  records source and staged SHA-256, cell name and ports; `--check` diffs it
+  (and the staged GDS bytes), so a changed child cannot hide behind stale
+  parent artifacts.
+- `lvs.internal_nets` (optional list) names reference-only nets. Boundary
+  `lvs.pins` remain the only subckt ports. Every device terminal must be a
+  pin or a declared internal net; duplicates, overlap with a pin and
+  unused declarations are errors. Without the field the strict pins-only
+  behaviour is unchanged.
+
+Importing `opamp_comp` carries its recorded resistor-head Magic DRC failure;
+composition cannot qualify it. Smoke experiment (pinned klt, single run,
+scratch recipe not committed): a one-block composite importing
+`opamp_comp.gds` with `lvs.devices = [XRz, XCc]`, `pins = [d2, out, vss]`,
+`internal_nets = [cz]` built with klt DRC clean, 2 devices, LVS match 2/2
+devices and 4/4 nets, `--check` reproduced it, the source SHA-256 was
+unchanged, and appending bytes to the child made `--check` report drift.
+Magic signoff was not run on the scratch composite.
+
 ### Toolchain
 
 `layout/pdk.json` pins:

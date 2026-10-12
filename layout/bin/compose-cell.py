@@ -22,12 +22,20 @@ relative-path invocation from the output directory, the unrouted-net hard
 failure, and ``--check``'s rebuild-into-a-temp-dir shape.
 
 Dropped (not needed by any cell here yet): multi-stage composition,
-``blocks[].cell`` sibling-cell placement, dependency/variant reference
-rewriting, and the bare-literal ``u`` unit rewrite (klayout-tools#1492 is
+dependency/variant reference rewriting, and the bare-literal ``u`` unit rewrite (klayout-tools#1492 is
 fixed in the pinned klt for ``reference.deck: "sky130"``).
 
 Added:
 
+* ``blocks[].cell`` -- placement of a committed cell (issue #210):
+  ``{"id", "cell": {"gds": "<path relative to the recipe dir>", "cell_name",
+  "ports": [{"name", ...}]}}``. The stream is validated (exists, inside the
+  repo, defines ``cell_name``) before any tool runs, copied to
+  ``gen/<id>.gds`` with timestamps normalised on the *copy only*, and
+  ``gen/<id>.import.json`` records source/staged SHA-256 and the metadata;
+  ``--check`` diffs it. The source is never written.
+* ``lvs.internal_nets`` -- optional list of reference-only nets (see
+  ``stage_reference.py``); never ports.
 * ``blocks[].draw`` -- a promotion stub drawn by ``klt draw`` from shapes in
   the cell.json (the sibling sky130-temp-por commits hand-drawn
   ``promo_stub.gds`` files; here the stub is regenerated every run so it is
@@ -146,6 +154,118 @@ def sha256(path: Path) -> str:
 
 
 # --------------------------------------------------------------------------
+# Imported (committed) cells
+# --------------------------------------------------------------------------
+
+#: Suffix of the per-import identity record written next to the staged copy.
+IMPORT_RECORD = ".import.json"
+
+
+def gds_cell_names(path: Path) -> list[str]:
+    """STRNAME records of a GDSII stream (the cells it defines), in order."""
+    data = path.read_bytes()
+    names: list[str] = []
+    offset = 0
+    while offset + 4 <= len(data):
+        length, rectype = struct.unpack_from(">HH", data, offset)
+        if length < 4:
+            raise BuildError(f"{path}: malformed GDS record at byte {offset}")
+        if rectype == 0x0606:
+            names.append(data[offset + 4 : offset + length].rstrip(b"\x00").decode())
+        if rectype == 0x0400:
+            break
+        offset += length
+    return names
+
+
+def validate_blocks(spec: dict, spec_dir: Path) -> dict[str, Path]:
+    """Validate block ids and imported-cell metadata before any tool runs.
+
+    Returns ``{block id: resolved source GDS}`` for every ``blocks[].cell``
+    (committed-cell import). Source paths are resolved relative to the recipe
+    directory. Hard errors: duplicate/missing block ids, a block with zero or
+    several of ``draw``/``generator``/``cell``, malformed ``cell`` metadata,
+    a missing source file, or a ``cell_name`` the stream does not define.
+    """
+    blocks = spec.get("blocks")
+    if not isinstance(blocks, list) or not blocks:
+        raise BuildError("cell.json: blocks must be a non-empty list")
+    seen: set[str] = set()
+    sources: dict[str, Path] = {}
+    for block in blocks:
+        bid = block.get("id") if isinstance(block, dict) else None
+        if not isinstance(bid, str) or not bid or "/" in bid or bid.startswith("."):
+            raise BuildError(f"cell.json: malformed block id {bid!r}")
+        if bid in seen:
+            raise BuildError(f"cell.json: duplicate block id {bid!r}")
+        seen.add(bid)
+        kinds = [k for k in ("draw", "generator", "cell") if k in block]
+        if len(kinds) != 1:
+            raise BuildError(
+                f"block {bid}: exactly one of draw/generator/cell required, got {kinds}"
+            )
+        if kinds[0] != "cell":
+            continue
+        cell = block["cell"]
+        if not isinstance(cell, dict):
+            raise BuildError(f"block {bid}: cell must be an object")
+        extra = sorted(set(cell) - {"gds", "cell_name", "ports"})
+        if extra:
+            raise BuildError(f"block {bid}: unknown cell key(s) {extra}")
+        for key in ("gds", "cell_name"):
+            if not isinstance(cell.get(key), str) or not cell[key]:
+                raise BuildError(f"block {bid}: cell.{key} must be a non-empty string")
+        ports = cell.get("ports", [])
+        if not isinstance(ports, list) or not all(
+            isinstance(p, dict) and isinstance(p.get("name"), str) and p["name"]
+            for p in ports
+        ):
+            raise BuildError(f"block {bid}: cell.ports must be a list of objects with a name")
+        names = [p["name"] for p in ports]
+        if len(set(names)) != len(names):
+            raise BuildError(f"block {bid}: duplicate port name in cell.ports")
+        if Path(cell["gds"]).is_absolute():
+            raise BuildError(f"block {bid}: cell.gds must be relative to the recipe directory")
+        source = (spec_dir / cell["gds"]).resolve()
+        try:
+            source.relative_to(REPO_ROOT)
+        except ValueError:
+            raise BuildError(f"block {bid}: cell.gds {cell['gds']!r} leaves the repository") from None
+        if not source.is_file():
+            raise BuildError(f"block {bid}: cell.gds source {cell['gds']!r} not found")
+        if cell["cell_name"] not in gds_cell_names(source):
+            raise BuildError(
+                f"block {bid}: {cell['cell_name']!r} is not defined in {cell['gds']}"
+            )
+        sources[bid] = source
+    return sources
+
+
+def stage_import(block: dict, source: Path, *, gen_dir: Path) -> dict:
+    """Copy a committed cell into the scratch ``gen/`` and record identity.
+
+    Only the scratch copy is timestamp-normalised; *source* is never written.
+    The record carries the source and staged SHA-256 and the metadata, so
+    ``--check`` notices a changed child.
+    """
+    bid, cell = block["id"], block["cell"]
+    staged = gen_dir / f"{bid}.gds"
+    if staged.resolve() == source.resolve():
+        raise BuildError(f"block {bid}: source cell is its own staging path")
+    shutil.copyfile(source, staged)
+    normalize_gds_timestamps(staged)
+    record = {
+        "source": cell["gds"],
+        "source_sha256": sha256(source),
+        "staged_sha256": sha256(staged),
+        "cell_name": cell["cell_name"],
+        "ports": cell.get("ports", []),
+    }
+    write_json(gen_dir / f"{bid}{IMPORT_RECORD}", record)
+    return record
+
+
+# --------------------------------------------------------------------------
 # Toolchain pin
 # --------------------------------------------------------------------------
 
@@ -181,12 +301,33 @@ def _orientation(block: dict) -> dict:
     return {"orientation": orient} if orient != "none" else {}
 
 
-def build_blocks(spec: dict, *, variant: str, env: dict, out_dir: Path) -> list[dict]:
+def build_blocks(
+    spec: dict,
+    *,
+    variant: str,
+    env: dict,
+    out_dir: Path,
+    sources: dict[str, Path] | None = None,
+) -> list[dict]:
     gen_dir = out_dir / "gen"
     gen_dir.mkdir(parents=True, exist_ok=True)
     blocks_request = []
     for block in spec["blocks"]:
         bid = block["id"]
+        if "cell" in block:
+            stage_import(block, (sources or {})[bid], gen_dir=gen_dir)
+            blocks_request.append(
+                {
+                    "id": bid,
+                    "cell": {
+                        "gds_path": f"gen/{bid}.gds",
+                        "cell_name": block["cell"]["cell_name"],
+                        "ports": block["cell"].get("ports", []),
+                    },
+                    **_orientation(block),
+                }
+            )
+            continue
         if "draw" in block:
             draw = block["draw"]
             write_json(gen_dir / f"{bid}.draw.request.json", {"shapes": draw["shapes"]})
@@ -466,9 +607,12 @@ def compose_cell(
     variant = spec["pdk"]["variant"]
     deck = spec["pdk"]["deck"]
     env = {**os.environ, "PDK": variant}
+    sources = validate_blocks(spec, spec_dir)  # before any tool runs
     toolchain = check_toolchain(env, variant, allow_unpinned)
 
-    blocks_request = build_blocks(spec, variant=variant, env=env, out_dir=out_dir)
+    blocks_request = build_blocks(
+        spec, variant=variant, env=env, out_dir=out_dir, sources=sources
+    )
     request = {
         "pdk": {"variant": variant},
         "blocks": blocks_request,
@@ -509,6 +653,7 @@ def compose_cell(
             cell=lvs_spec["subckt"],
             pins=lvs_spec["pins"],
             devices=lvs_spec["devices"],
+            internal_nets=lvs_spec.get("internal_nets"),
         )
     except ReferenceError as exc:
         raise BuildError(f"reference: {exc}") from exc
@@ -564,6 +709,7 @@ def compose_cell(
         "extract_json": extract,
         "env": env,
         "deck": deck,
+        "sources": sources,
     }
 
 
@@ -596,6 +742,19 @@ def check_cell(spec: dict, spec_dir: Path, *, allow_unpinned: bool) -> int:
                 drift.append(
                     f"{rel}: GDS bytes differ (committed sha256 {sha256(committed)[:16]}, "
                     f"rebuilt {sha256(rebuilt)[:16]})"
+                )
+        committed_records = {
+            p.name for p in (spec_dir / "gen").glob(f"*{IMPORT_RECORD}")
+        }
+        rebuilt_records = {p.name for p in (tmp_dir / "gen").glob(f"*{IMPORT_RECORD}")}
+        for name in sorted(committed_records | rebuilt_records):
+            c, r = spec_dir / "gen" / name, tmp_dir / "gen" / name
+            if not c.exists() or not r.exists():
+                drift.append(f"gen/{name}: present on one side only")
+            elif c.read_text() != r.read_text():
+                drift.append(
+                    f"gen/{name}: imported-cell identity differs (source hash or "
+                    "metadata changed; regenerate the parent)"
                 )
         ref = f"{cell}.ref.spice"
         if not (spec_dir / ref).exists():
