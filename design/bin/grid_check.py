@@ -32,6 +32,14 @@ CLASS_RE = {
     "mos": re.compile(r"sky130_fd_pr__[np]fet_\w+"),
 }
 DIMS = ("l", "w")
+# Required drawn dimensions per model (issue #205). First match wins. MOS and
+# MiM caps need L and W; the fixed-width high-poly resistor is canonically
+# L-only. Other passive models are not guessed: no requirement is imposed.
+REQUIRED_DIMS = (
+    (re.compile(r"sky130_fd_pr__[np]fet_\w+"), ("l", "w")),
+    (re.compile(r"sky130_fd_pr__cap_mim_\w+"), ("l", "w")),
+    (re.compile(r"sky130_fd_pr__res_high_po_1p41"), ("l",)),
+)
 
 
 def on_grid(value: float, grid: float = GRID_UM) -> bool:
@@ -91,6 +99,17 @@ def violations(text: str, classes=("passive",)) -> list[str]:
             nf, err = _nf(tokens)
             if err:
                 out.append(f"{name} ({model}): {err}")
+        required = next((r for rx, r in REQUIRED_DIMS if rx.fullmatch(model)), ())
+        supplied = {}
+        for tok in tokens[1:]:
+            key, eq, val = tok.partition("=")
+            if eq and key.lower() in DIMS:
+                supplied[key.lower()] = supplied.get(key.lower(), False) or bool(val)
+        for dim in required:
+            if dim not in supplied:
+                out.append(f"{name} ({model}): required dimension {dim.upper()} is missing")
+            elif not supplied[dim]:
+                out.append(f"{name} ({model}): required dimension {dim.upper()} is empty")
         for tok in tokens:
             key, _, val = tok.partition("=")
             if key.lower() in DIMS and val:

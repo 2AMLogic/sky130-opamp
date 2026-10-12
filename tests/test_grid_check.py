@@ -133,5 +133,75 @@ class MalformedGeometryTests(unittest.TestCase):
             self.assertEqual(gc.main([str(NETLIST)]), 0)
 
 
+class RequiredDimensionTests(unittest.TestCase):
+    NF = "sky130_fd_pr__nfet_01v8"
+    PF = "sky130_fd_pr__pfet_01v8"
+    CAP = "sky130_fd_pr__cap_mim_m3_1"
+    RES = "sky130_fd_pr__res_high_po_1p41"
+    ALL = ("passive", "mos")
+
+    def test_missing_or_empty_required_dims_rejected(self):
+        cases = []
+        for model in (self.NF, self.PF):
+            cases += [(model, "W=4.65 nf=1"), (model, "L=1.2 nf=1"), (model, "nf=1"),
+                      (model, "L=1.2 W= nf=1"), (model, "L= W=4.65"), (model, "L= W=")]
+        cases += [(self.CAP, "W=15.62"), (self.CAP, "L=15.62"), (self.CAP, "W= L=15.62"),
+                  (self.CAP, "W=15.62 L="), (self.CAP, "m=1")]
+        cases += [(self.RES, "mult=1"), (self.RES, "L=")]
+        for model, extra in cases:
+            found = gc.violations(f"XBAD a b c d {model} {extra}\n", self.ALL)
+            self.assertTrue(found, (model, extra))
+            self.assertTrue(all(f.startswith("XBAD") for f in found), found)
+            self.assertTrue(any("missing" in f or "empty" in f for f in found), found)
+
+    def test_both_dims_missing_reports_both(self):
+        found = gc.violations(f"XM d g s b {self.NF} nf=1\n", ("mos",))
+        self.assertEqual(len(found), 2, found)
+
+    def test_case_insensitive_and_continuation(self):
+        ok = f"XM d g s b {self.NF}\n+ l=1.2 w=4.65 nf=1\n"
+        self.assertEqual(gc.violations(ok, ("mos",)), [])
+        bad = f"XM d g s b {self.NF} l=1.2\n+ w= nf=1\n"
+        found = gc.violations(bad, ("mos",))
+        self.assertEqual(len(found), 1, found)
+        self.assertIn("W is empty", found[0])
+
+    def test_res_without_w_is_valid_and_other_passives_unguessed(self):
+        self.assertEqual(gc.violations(f"XR a b {self.RES} L=9.765\n", ("passive",)), [])
+        self.assertEqual(gc.violations("XR a b sky130_fd_pr__res_xhigh_po_1p41 mult=1\n", ("passive",)), [])
+
+    def test_class_opt_out_skips_required_check(self):
+        self.assertEqual(gc.violations(f"XM d g s b {self.NF} nf=1\n", ("passive",)), [])
+        self.assertEqual(gc.violations(f"XC a b {self.CAP} m=1\n", ("mos",)), [])
+
+    def test_positive_controls_for_all_canonical_classes(self):
+        text = (f"XN d g s b {self.NF} L=1.2 W=7.82 nf=1\n"
+                f"XP d g s b {self.PF} L=0.3 W=4.635 nf=1\n"
+                f"XC a b {self.CAP} W=15.62 L=15.62 MF=1 m=1\n"
+                f"XR a b {self.RES} L=9.765 mult=1 m=1\n")
+        self.assertEqual(gc.violations(text, self.ALL), [])
+
+    def test_canonical_netlist_models_all_covered(self):
+        models = {t for t in NETLIST.read_text().split() if t.startswith("sky130_fd_pr__")}
+        self.assertEqual(models, {self.NF, self.PF, self.CAP, self.RES})
+
+    def test_multiple_malformed_aggregate_and_cli_status(self):
+        import contextlib, io, pathlib, tempfile
+        text = (f"XA d g s b {self.NF} L=1.2\n" f"XB d g s b {self.PF} W=\n"
+                f"XC a b {self.CAP} W=15.62\n" f"XR a b {self.RES} mult=1\n"
+                f"XOK d g s b {self.NF} L=1.2 W=4.65\n")
+        found = gc.violations(text, self.ALL)
+        for n in ("XA", "XB", "XC", "XR"):
+            self.assertTrue(any(f.startswith(n) for f in found), (n, found))
+        self.assertFalse(any(f.startswith("XOK") for f in found), found)
+        with tempfile.TemporaryDirectory() as d:
+            f = pathlib.Path(d) / "n.spice"
+            f.write_text(text)
+            err = io.StringIO()
+            with contextlib.redirect_stderr(err):
+                self.assertEqual(gc.main([str(f)]), 1)
+            self.assertIn("XC", err.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()
