@@ -2,7 +2,13 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-12
+
+- **Issue #46** (closed): T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched
+
 ### 2026-10-11
+
+- **PR #200**: Measure paired offset drift before prototyping foreground trim (partial: 1 of 4 conditions)
 
 - **PR #198**: Reject malformed MOS geometry before manufacturing-grid arithmetic
 - **PR #195**: Offset technique study: trim, chopping, auto-zero, consumer-side (#147)

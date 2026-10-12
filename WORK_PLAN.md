@@ -19,13 +19,13 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#110**: sim: evaluate independent supply extremes across the PVT process grid
+- **#196**: Measure paired offset drift before prototyping foreground trim
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#185**: Measure input-range contribution to the falling slew gap
+- **#197**: Screen lower-overhead signal-dependent sink bias on the current DUT
 
 ## PRs Awaiting Review
 
@@ -44,15 +44,13 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 Issues carrying `loom:curated`.
 
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
-- **#46**: T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched *(curated)*
 - **#49**: Install ratification/ee-key and ratification/market-key reviewer trees (product#151) *(curated)*
-- **#121**: Extend opamp_stage1 with the grid-legal PMOS mirror and seven-pin LVS signoff *(curated)*
-- **#147**: Offset closure: scoped technique study (trim / chopping / auto-zero) after sizing was found insufficient *(curated)*
+- **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
+- **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
-- **#190**: Reject malformed MOS geometry before manufacturing-grid arithmetic *(architect)*
 
 ## Epics
 
@@ -68,7 +66,7 @@ _None._
 | In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
-| Curated | 5 |
-| Architect / Hermit proposals | 2 |
+| Curated | 4 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
