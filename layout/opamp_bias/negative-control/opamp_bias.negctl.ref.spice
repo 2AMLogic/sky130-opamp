@@ -1,0 +1,8 @@
+* NEGATIVE CONTROL -- scratch reference for opamp_bias: XM5.g rewired ibias -> tail
+* Must NOT match the layout. Not a design artifact.
+.subckt opamp_bias ibias tail vss
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM5_1 tail tail vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM5_2 tail tail vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+.ends opamp_bias
+.end

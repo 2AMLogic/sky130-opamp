@@ -1,0 +1,14 @@
+{
+  "layout": {
+    "netlist": "opamp_bias.spice"
+  },
+  "reference": {
+    "netlist": "opamp_bias.ref.spice",
+    "form": "subckt-call",
+    "deck": "sky130",
+    "top": "opamp_bias"
+  },
+  "options": {
+    "combine_devices": true
+  }
+}

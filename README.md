@@ -9,7 +9,7 @@ open-source xschem + ngspice flow.
 [gm/ID study](sim/gm-id-characterization/README.md) informs the
 [op-amp schematic](design/README.md), whose resized design has
 [PVT characterization records](sim/opamp-characterization/README.md).
-The [layout flow](layout/README.md) includes the NMOS input pair and routed
+The [layout flow](layout/README.md) includes the NMOS input pair, the bias/tail mirror and routed
 Rz/Cc compensation block with committed DRC and LVS evidence; the full-core
 layout remains pending.
 Performance gaps remain, including falling slew rate; the

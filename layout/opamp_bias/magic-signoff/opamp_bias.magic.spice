@@ -1,0 +1,8 @@
+* NGSPICE file created from opamp_bias.ext - technology: sky130A
+
+.subckt opamp_bias ibias vss tail
+X0 ibias ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X1 tail ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X2 tail ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+.ends
+

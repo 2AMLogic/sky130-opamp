@@ -1,0 +1,696 @@
+{
+  "cell": "opamp_bias",
+  "_comment": [
+    "Cell descriptor for layout/bin/compose-cell.py (issue #204). See layout/opamp_bias/README.md.",
+    "",
+    "SCOPE: the bias/tail mirror of design/netlist/opamp_core.spice:",
+    "  XMB1 nfet_01v8 W=7.820 L=1.2 m=1 (diode-connected reference, drain=gate=ibias)",
+    "  XM5  nfet_01v8 W=7.820 L=1.2 m=2 (tail source, drain=tail, gate=ibias)",
+    "Grid-legal width of DR-013. Not the full op-amp.",
+    "",
+    "MIRROR (block mb, klt gen mos_array 1x3, common_centroid, no dummies): three equal",
+    "7.82 x 1.2 um units in one row, all in the same orientation. Order west to east",
+    "is U1 | U0 | U2 with U0 = XMB1 (centre) and U1, U2 = XM5 (flanks): T B T.",
+    "Both devices have their centroid at the array centre in x and the same y, so a",
+    "linear gradient cancels to first order; the 1:2 ratio is unit count only.",
+    "fe_masks (klt draw overlay) adds nsdm over the diffusions, a psdm ring over the",
+    "p-tap ring, npc over the gate licons and the 0.15 um poly endcaps (both gate ends) the",
+    "generator does not draw (klayout-tools#2934, #2936).",
+    "",
+    "ROUTING: vss li1 (source pads and ring TAP_W); tail met1 (outer drains, bus at",
+    "y=-2.0 below the ring); ibias met1 (centre drain up x=4.27 to a gate bus at y=9.0",
+    "tying all three gates, west to the pin)."
+  ],
+  "pdk": {
+    "variant": "sky130A",
+    "deck": "sky130"
+  },
+  "blocks": [
+    {
+      "id": "mb",
+      "generator": "mos_array",
+      "cell_name": "bias_tail_units",
+      "params": {
+        "w_um": 7.82,
+        "l_um": 1.2,
+        "rows": 1,
+        "cols": 3,
+        "dummy": 0,
+        "gate_contact": true,
+        "add_guard_ring": true,
+        "flavor": "nfet"
+      }
+    },
+    {
+      "id": "fe_masks",
+      "draw": {
+        "cell_name": "bias_fe_masks",
+        "shapes": [
+          {
+            "layer": [
+              93,
+              44
+            ],
+            "rect_um": [
+              -0.125,
+              -0.125,
+              7.045,
+              7.945
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              -1.195,
+              -1.195,
+              8.115,
+              -0.525
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              -1.195,
+              9.165,
+              8.115,
+              9.835
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              -1.195,
+              -0.525,
+              -0.525,
+              9.165
+            ]
+          },
+          {
+            "layer": [
+              94,
+              20
+            ],
+            "rect_um": [
+              7.445,
+              -0.525,
+              8.115,
+              9.165
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              0.835,
+              8.245,
+              1.205,
+              8.615
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              3.275,
+              8.245,
+              3.645,
+              8.615
+            ]
+          },
+          {
+            "layer": [
+              95,
+              20
+            ],
+            "rect_um": [
+              5.715,
+              8.245,
+              6.085,
+              8.615
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.42,
+              -0.15,
+              1.62,
+              0.0
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              2.86,
+              -0.15,
+              4.06,
+              0.0
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              5.3,
+              -0.15,
+              6.5,
+              0.0
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              0.42,
+              7.82,
+              1.62,
+              7.97
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              2.86,
+              7.82,
+              4.06,
+              7.97
+            ]
+          },
+          {
+            "layer": [
+              66,
+              20
+            ],
+            "rect_um": [
+              5.3,
+              7.82,
+              6.5,
+              7.97
+            ]
+          }
+        ],
+        "ports": []
+      }
+    },
+    {
+      "id": "pin_ibias",
+      "draw": {
+        "cell_name": "stub_metal2",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vss",
+      "draw": {
+        "cell_name": "stub_metal2",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_tail",
+      "draw": {
+        "cell_name": "stub_metal3",
+        "shapes": [
+          {
+            "layer": [
+              69,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "CONN",
+            "x_um": 0.0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    }
+  ],
+  "placement": {
+    "strategy": "explicit",
+    "order": [
+      "mb",
+      "fe_masks",
+      "pin_ibias",
+      "pin_vss",
+      "pin_tail"
+    ],
+    "origins_um": {
+      "mb": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "fe_masks": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "pin_ibias": {
+        "x": -6.0,
+        "y": 8.79
+      },
+      "pin_vss": {
+        "x": -6.0,
+        "y": 4.11
+      },
+      "pin_tail": {
+        "x": 14.0,
+        "y": -2.41
+      }
+    }
+  },
+  "routing": {
+    "layer_role": "metal",
+    "width_um": 0.3
+  },
+  "connectivity": [
+    {
+      "net": "ibias",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "mb",
+          "port": "U1_G"
+        },
+        {
+          "block": "mb",
+          "port": "U0_G"
+        },
+        {
+          "block": "mb",
+          "port": "U2_G"
+        },
+        {
+          "block": "mb",
+          "port": "U0_D"
+        },
+        {
+          "block": "pin_ibias",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_ibias",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U1_G"
+          },
+          "waypoints_um": [
+            [
+              1.02,
+              9.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U1_G"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U0_G"
+          },
+          "waypoints_um": [
+            [
+              1.02,
+              9.0
+            ],
+            [
+              3.46,
+              9.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U0_G"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U2_G"
+          },
+          "waypoints_um": [
+            [
+              3.46,
+              9.0
+            ],
+            [
+              5.9,
+              9.0
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U0_D"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U0_G"
+          },
+          "waypoints_um": [
+            [
+              4.27,
+              9.0
+            ],
+            [
+              3.46,
+              9.0
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "net": "tail",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "mb",
+          "port": "U1_D"
+        },
+        {
+          "block": "mb",
+          "port": "U2_D"
+        },
+        {
+          "block": "pin_tail",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_tail",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U2_D"
+          },
+          "waypoints_um": [
+            [
+              6.71,
+              -2.2
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U2_D"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "U1_D"
+          },
+          "waypoints_um": [
+            [
+              6.71,
+              -2.2
+            ],
+            [
+              1.83,
+              -2.2
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "mb",
+          "port": "U1_S"
+        },
+        {
+          "block": "mb",
+          "port": "U0_S"
+        },
+        {
+          "block": "mb",
+          "port": "U2_S"
+        },
+        {
+          "block": "mb",
+          "port": "TAP_S"
+        },
+        {
+          "block": "mb",
+          "port": "TAP_W"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ],
+      "legs": [
+        {
+          "from_pin": {
+            "block": "pin_vss",
+            "port": "CONN"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "TAP_W"
+          }
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U1_S"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "TAP_S"
+          },
+          "waypoints_um": [
+            [
+              0.21,
+              -1.6
+            ],
+            [
+              3.46,
+              -1.6
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U0_S"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "TAP_S"
+          },
+          "waypoints_um": [
+            [
+              2.65,
+              -1.6
+            ],
+            [
+              3.46,
+              -1.6
+            ]
+          ]
+        },
+        {
+          "from_pin": {
+            "block": "mb",
+            "port": "U2_S"
+          },
+          "to_pin": {
+            "block": "mb",
+            "port": "TAP_S"
+          },
+          "waypoints_um": [
+            [
+              5.09,
+              -1.6
+            ],
+            [
+              3.46,
+              -1.6
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "ibias",
+      "block": "pin_ibias",
+      "port": "PAD"
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    },
+    {
+      "net": "tail",
+      "block": "pin_tail",
+      "port": "PAD"
+    }
+  ],
+  "lvs": {
+    "reference": "design/netlist/opamp_core.spice",
+    "subckt": "opamp_bias",
+    "devices": [
+      "XMB1",
+      "XM5"
+    ],
+    "pins": [
+      "ibias",
+      "tail",
+      "vss"
+    ],
+    "options": {
+      "combine_devices": true
+    }
+  },
+  "expect": {
+    "extracted_devices": 3,
+    "magic_types": [
+      "nmos",
+      "ndiff",
+      "psubdiff",
+      "poly"
+    ]
+  }
+}
