@@ -1,0 +1,29 @@
+* opamp_core ICMR-aware unity-gain-buffer step -- `klt sim` circuit BODY (issue #185)
+*
+* Opt-in diagnostic twin of opamp_tran_sr.klt.spice.tmpl: the same real unity-gain
+* connection (Rshort 1 mOhm out->inn), CL and pulse timing, but the input steps
+* between two LITERAL levels 0.788800 and 1.260000 that bin/pvt_sweep.py chose
+* inside the SAME DUT's measured ICMR window of this very (process, supply,
+* temperature) point (`select_icmr_step`: the standard 0.3..0.7*VDD stimulus
+* intersected with [ICMR_low + guard, ICMR_high - guard]). One request per point
+* because the levels differ per point. The standard slew definition and the
+* standard bench are untouched.
+*
+* The waveform artifact (options.waveforms) carries v(out), v(inp), i(vdd) and
+* the saved DUT node voltages; `icmr_sr_extract` applies the validity rules
+* (settled endpoints, crossings, slew-limited segment) -- see the README
+* "ICMR-aware slew diagnostic". The .meas cards are sanity only.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Xdut vdd vss inn inp out ibias opamp_dut
+Rshort inn out 1m
+Vinp inp 0 pulse(0.788800 1.260000 200n 1n 1n 1u 2u)
+Cload out 0 2p
