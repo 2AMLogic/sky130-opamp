@@ -6,7 +6,9 @@ sub-block lives in its own `layout/<cell>/` directory. That directory holds
 the recipe (`cell.json`), every intermediate request/response, the composed
 GDS, and the reports that back each claim in the cell's README.
 
-**Status: three sub-blocks. `opamp_stage1/` (the NMOS input pair
+**Status: four sub-blocks. `opamp_out/` (the canonical output stage
+`XM6`/`XM7`, ten units each; klt DRC/LVS, Magic `drc(full)` and netgen all
+pass, see `opamp_out/README.md`), `opamp_stage1/` (the NMOS input pair
 `XM1`/`XM2` and the PMOS mirror `XM3`/`XM4`), `opamp_bias/` (the bias/tail
 mirror `XMB1`/`XM5`; klt DRC/LVS, Magic `drc(full)` and netgen all pass, see
 `opamp_bias/README.md`) and `opamp_comp/` (the routed `XRz`/`XCc`
@@ -171,11 +173,13 @@ directory or an extension of one, with the same evidence set.
    output topology under evaluation in #47 changes the tail or sink is not
    decided here. klt and Magic DRC clean, klt LVS and netgen matched, negative
    control and `--check` pass. See `opamp_bias/README.md`.
-3. **Output stage `XM6` (10 PMOS units of the `XM3`/`XM4` device) and `XM7`
-   (10 NMOS units of the `XMB1` device).** These are interdigitated arrays
-   sharing the mirror groups' unit devices, each with its own guard ring.
-   Their topology still waits on #47 (slew-rate topology evaluation); their
-   widths are the grid-legal ones of DR-013.
+3. **Output stage `XM6` (10 PMOS units, W=4.635 L=0.3) and `XM7` (10 NMOS
+   units, W=7.820 L=1.2): done as a sub-block (#208).** Separate cell
+   `opamp_out/`, canonical netlist as is (DR-012 withholds adoption of the
+   experimental sink; #47 and #197 are closed and recommend no change).
+   klt and Magic DRC clean, klt LVS and netgen matched, negative control and
+   `--check` pass. Not joined to the other sub-blocks; a future approved
+   topology change needs its own layout. See `opamp_out/README.md`.
 4. **`Rz` (`res_high_po_1p41`, L=9.765) and `Cc` (`cap_mim_m3_1`, 15.62 x
    15.62).** These use `res_array` (`flavor: "high"`) and `cap_array` (MiM
    on met3/capm). Grid representability was checked first (issue #131,

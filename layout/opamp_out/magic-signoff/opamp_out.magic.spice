@@ -1,0 +1,25 @@
+* NGSPICE file created from opamp_out.ext - technology: sky130A
+
+.subckt opamp_out ibias d2 vss vdd out
+X0 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X1 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X2 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X3 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X4 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X5 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X7 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X8 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X9 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X10 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X11 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X12 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X13 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X14 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+X15 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X16 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X17 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X18 out ibias vss vss sky130_fd_pr__nfet_01v8 ad=3.2844 pd=16.48 as=3.2844 ps=16.48 w=7.82 l=1.2
+X19 out d2 vdd vdd sky130_fd_pr__pfet_01v8 ad=1.9467 pd=10.11 as=1.9467 ps=10.11 w=4.635 l=0.3
+.ends
+

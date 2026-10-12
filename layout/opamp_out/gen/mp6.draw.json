@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "generator": "draw",
+  "gds_path": "gen/mp6.gds",
+  "cell_name": "out_pmos_units",
+  "dbu_um": 0.001,
+  "shape_count": 414,
+  "label_count": 0,
+  "layers": [
+    {
+      "layer": 64,
+      "datatype": 20,
+      "name": null,
+      "shapes": 1
+    },
+    {
+      "layer": 65,
+      "datatype": 20,
+      "name": null,
+      "shapes": 10
+    },
+    {
+      "layer": 67,
+      "datatype": 20,
+      "name": null,
+      "shapes": 34
+    },
+    {
+      "layer": 66,
+      "datatype": 44,
+      "name": null,
+      "shapes": 330
+    },
+    {
+      "layer": 66,
+      "datatype": 20,
+      "name": null,
+      "shapes": 20
+    },
+    {
+      "layer": 95,
+      "datatype": 20,
+      "name": null,
+      "shapes": 10
+    },
+    {
+      "layer": 65,
+      "datatype": 44,
+      "name": null,
+      "shapes": 4
+    },
+    {
+      "layer": 94,
+      "datatype": 20,
+      "name": null,
+      "shapes": 1
+    },
+    {
+      "layer": 93,
+      "datatype": 44,
+      "name": null,
+      "shapes": 4
+    }
+  ],
+  "bbox_um": {
+    "x0": -1.12,
+    "y0": -1.12,
+    "x1": 16.12,
+    "y1": 6.575
+  },
+  "warnings": [
+    "written verbatim by `klt draw`: no PDK awareness and no rule checking were applied; this cell is not guaranteed to be design-legal"
+  ]
+}

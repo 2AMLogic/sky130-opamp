@@ -1,0 +1,26 @@
+Class opamp_out:  Merged 18 devices.
+Class opamp_out:  Merged 18 devices.
+
+Subcircuit summary:
+Circuit 1: opamp_out                       |Circuit 2: opamp_out                       
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__nfet_01v8 (1)                |sky130_fd_pr__nfet_01v8 (1)                
+sky130_fd_pr__pfet_01v8 (1)                |sky130_fd_pr__pfet_01v8 (1)                
+Number of devices: 2                       |Number of devices: 2                       
+Number of nets: 5                          |Number of nets: 5                          
+---------------------------------------------------------------------------------------
+Circuits match uniquely.
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: opamp_out                       |Circuit 2: opamp_out                       
+-------------------------------------------|-------------------------------------------
+d2                                         |d2                                         
+ibias                                      |ibias                                      
+out                                        |out                                        
+vdd                                        |vdd                                        
+vss                                        |vss                                        
+---------------------------------------------------------------------------------------
+Cell pin lists are equivalent.
+Device classes opamp_out and opamp_out are equivalent.
+Circuits match uniquely.

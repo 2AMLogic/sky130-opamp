@@ -1,0 +1,70 @@
+* extracted by klt extract --deck sky130
+
+* cell opamp_out
+* pin d2
+* pin ibias
+* pin out
+* pin vdd
+* pin vss
+.SUBCKT opamp_out d2 ibias out vdd vss
+* device instance $1 r0 *1 1.02,3.91 nfet
+M$1 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $2 r0 *1 3.46,3.91 nfet
+M$2 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $3 r0 *1 5.9,3.91 nfet
+M$3 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $4 r0 *1 8.34,3.91 nfet
+M$4 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $5 r0 *1 10.78,3.91 nfet
+M$5 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $6 r0 *1 13.22,3.91 nfet
+M$6 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $7 r0 *1 15.66,3.91 nfet
+M$7 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $8 r0 *1 18.1,3.91 nfet
+M$8 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $9 r0 *1 20.54,3.91 nfet
+M$9 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $10 r0 *1 22.98,3.91 nfet
+M$10 out ibias vss vss nfet L=1.2U W=7.82U AS=3.2844P AD=3.2844P PS=16.48U
++ PD=16.48U
+* device instance $11 r0 *1 33.57,2.317 pfet
+M$11 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $12 r0 *1 35.11,2.317 pfet
+M$12 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $13 r0 *1 36.65,2.317 pfet
+M$13 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $14 r0 *1 38.19,2.317 pfet
+M$14 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $15 r0 *1 39.73,2.317 pfet
+M$15 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $16 r0 *1 41.27,2.317 pfet
+M$16 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $17 r0 *1 42.81,2.317 pfet
+M$17 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $18 r0 *1 44.35,2.317 pfet
+M$18 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $19 r0 *1 45.89,2.317 pfet
+M$19 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+* device instance $20 r0 *1 47.43,2.317 pfet
+M$20 out d2 vdd vdd pfet L=0.3U W=4.635U AS=1.9467P AD=1.9467P PS=10.11U
++ PD=10.11U
+.ENDS opamp_out
