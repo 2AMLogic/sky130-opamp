@@ -1,0 +1,702 @@
+{
+  "schema_version": 3,
+  "file": "opamp_out.gds",
+  "deck": "sky130",
+  "top": "opamp_out",
+  "dbu_um": 0.001,
+  "netlist_path": "opamp_out.spice",
+  "netlist_sha256": "fe42f9afd05dd2c83364be8e85efd6bb8e03ef11ea73c2311e85843a2921726a",
+  "status": "extracted",
+  "device_count": 20,
+  "net_count": 5,
+  "pin_count": 5,
+  "device_counts": {
+    "nfet": 10,
+    "pfet": 10
+  },
+  "dummy_devices_dropped": 0,
+  "ignored_layers": [
+    {
+      "layer": 93,
+      "datatype": 44,
+      "shapes": 5
+    },
+    {
+      "layer": 95,
+      "datatype": 20,
+      "shapes": 20
+    }
+  ],
+  "device_recognition_only_layers": [
+    {
+      "layer": 94,
+      "datatype": 20,
+      "shapes": 5
+    }
+  ],
+  "device_classes": [
+    "nfet",
+    "pfet",
+    "pnp",
+    "sky130_fd_pr__model__cap_mim",
+    "sky130_fd_pr__model__cap_mim_m4",
+    "resistor"
+  ],
+  "devices": [
+    {
+      "name": "$1",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$10",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$11",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$12",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$13",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$14",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$15",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$16",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$17",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$18",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$19",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$2",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$20",
+      "class": "pfet",
+      "nets": {
+        "s": "vdd",
+        "g": "d2",
+        "d": "out",
+        "b": "vdd"
+      },
+      "params": {
+        "l_um": 0.3,
+        "w_um": 4.635,
+        "as_um2": 1.9467,
+        "ad_um2": 1.9467,
+        "ps_um": 10.11,
+        "pd_um": 10.11
+      },
+      "instance_path": [
+        {
+          "cell": "mp6__out_pmos_units",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$3",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$4",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$5",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$6",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$7",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$8",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    },
+    {
+      "name": "$9",
+      "class": "nfet",
+      "nets": {
+        "s": "vss",
+        "g": "ibias",
+        "d": "out",
+        "b": "vss"
+      },
+      "params": {
+        "l_um": 1.2,
+        "w_um": 7.82,
+        "as_um2": 3.2844,
+        "ad_um2": 3.2844,
+        "ps_um": 16.48,
+        "pd_um": 16.48
+      },
+      "instance_path": [
+        {
+          "cell": "mn__out_nmos_units",
+          "array_index": null
+        },
+        {
+          "cell": "mos_array",
+          "array_index": null
+        }
+      ]
+    }
+  ],
+  "nets": [
+    {
+      "name": "d2",
+      "pin": true,
+      "device_count": 10,
+      "net_id": 4,
+      "pin_index": 0,
+      "label_positions_um": [
+        {
+          "text": "d2",
+          "x_um": 49.215,
+          "y_um": 5.245
+        },
+        {
+          "text": "d2",
+          "x_um": 52.5,
+          "y_um": 5.245
+        }
+      ]
+    },
+    {
+      "name": "ibias",
+      "pin": true,
+      "device_count": 10,
+      "net_id": 5,
+      "pin_index": 1,
+      "label_positions_um": [
+        {
+          "text": "ibias",
+          "x_um": -6.0,
+          "y_um": 9.0
+        },
+        {
+          "text": "ibias",
+          "x_um": -1.455,
+          "y_um": 9.0
+        }
+      ]
+    },
+    {
+      "name": "out",
+      "pin": true,
+      "device_count": 20,
+      "net_id": 1,
+      "pin_index": 2,
+      "label_positions_um": [
+        {
+          "text": "out",
+          "x_um": 48.09,
+          "y_um": -1.245
+        },
+        {
+          "text": "out",
+          "x_um": 52.5,
+          "y_um": -2.2
+        }
+      ]
+    },
+    {
+      "name": "vdd",
+      "pin": true,
+      "device_count": 20,
+      "net_id": 3,
+      "pin_index": 3,
+      "label_positions_um": [
+        {
+          "text": "vdd",
+          "x_um": 49.855,
+          "y_um": 2.73
+        },
+        {
+          "text": "vdd",
+          "x_um": 52.5,
+          "y_um": 2.73
+        }
+      ]
+    },
+    {
+      "name": "vss",
+      "pin": true,
+      "device_count": 20,
+      "net_id": 6,
+      "pin_index": 4,
+      "label_positions_um": [
+        {
+          "text": "vss",
+          "x_um": -6.0,
+          "y_um": 4.32
+        },
+        {
+          "text": "vss",
+          "x_um": -2.68,
+          "y_um": 4.32
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "2 layers (93/44, 95/20) carrying 25 shapes are outside 'sky130' deck's connectivity graph -- this geometry is invisible to extraction, so a net routed only through it extracts as multiple disconnected nets instead of one, which will silently mismatch a downstream `klt lvs` reference netlist -- see ignored_layers[] for the full per-layer shape counts. See docs/cli/extract.md's 'ignored_layers' field documentation."
+  ],
+  "black_box_regions": [],
+  "abstracted_cells": [],
+  "unmodelled_poly": [],
+  "merged_net_labels": [],
+  "voltage_domain_warnings": [],
+  "missing_flavour_markers": [],
+  "unbiased_pmos_body_nets": [],
+  "single_terminal_nets": [],
+  "dead_metal": [],
+  "matched_device_groups": [],
+  "def_pin_promotion": null,
+  "label_layers": null,
+  "pdk": null,
+  "provenance": {
+    "klt_version": "0.7.0+g4cbdfa769875",
+    "klayout_version": "0.30.12",
+    "pdk": null,
+    "deck": {
+      "name": "sky130",
+      "content_hash": "sha256:f8f2c3f48eada473dc34a7a8926c0b04fef446fb351a70a636ce43a9ca9c70ba",
+      "released": true
+    },
+    "input": {
+      "content_hash": "sha256:cd4f621d3534b63d9eba5b30ba25701c0c0d74d8748a7b6e3ac9f5bcfb4d034a",
+      "role": "layout"
+    }
+  },
+  "parasitics": null,
+  "spef_path": null,
+  "subcircuit": null,
+  "metrics": {
+    "extract__device__count": 20,
+    "extract__net__count": 5,
+    "extract__pin__count": 5
+  }
+}
