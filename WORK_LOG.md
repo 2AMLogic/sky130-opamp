@@ -4,6 +4,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-12
 
+- **PR #212**: Enable committed sub-block composition and explicit internal LVS nets
+- **Issue #210** (closed): Enable committed sub-block composition and explicit internal LVS nets
 - **PR #209**: Lay out the canonical output stage XM6/XM7 as opamp_out sub-block
 - **PR #207**: Lay out the canonical bias/tail mirror XMB1/XM5 as a verified sub-block (#204)
 - **PR #206**: grid_check: reject missing/empty required dimensions (#205)
