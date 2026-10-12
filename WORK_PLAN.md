@@ -19,13 +19,13 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#196**: Measure paired offset drift before prototyping foreground trim
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
-- **#197**: Screen lower-overhead signal-dependent sink bias on the current DUT
+_None._
 
 ## PRs Awaiting Review
 
@@ -62,8 +62,8 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 1 |
 | Operator priority | 0 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 1 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 1 |
 | Curated | 4 |
