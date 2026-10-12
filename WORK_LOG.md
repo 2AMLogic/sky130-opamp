@@ -4,6 +4,16 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-12
 
+- **PR #209**: Lay out the canonical output stage XM6/XM7 as opamp_out sub-block
+- **PR #207**: Lay out the canonical bias/tail mirror XMB1/XM5 as a verified sub-block (#204)
+- **PR #206**: grid_check: reject missing/empty required dimensions (#205)
+- **PR #202**: Sink bias-margin study: ic075 screen, 15-point expansion, mismatch probe (#197)
+- **Issue #208** (closed): Lay out the canonical XM6/XM7 output stage as a verified sub-block
+- **Issue #203** (closed): Auditor guard review: preserve installed Loom file ownership
+- **Issue #27** (closed): layout: provide klt erc power-delivery evidence (T1 item 11) once layout exists
+- **Issue #204** (closed): Lay out the canonical bias and tail mirror as a verified sub-block
+- **Issue #205** (closed): Reject missing and empty required dimensions in the manufacturing-grid gate
+- **Issue #197** (closed): Screen lower-overhead signal-dependent sink bias on the current DUT
 - **Issue #46** (closed): T1 item 2, first increment: bring up the layout flow and lay out the first-stage matched groups (input pair and PMOS mirror), DRC clean and LVS matched
 
 ### 2026-10-11
