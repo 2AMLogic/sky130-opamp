@@ -1,28 +1,52 @@
 #!/usr/bin/env python3
 """Stage report for the sink bias-margin experiment (issue #197). Simulator-free.
 
-Reads only committed record CSVs. `bias-margin/records.json` lists, per variant tag, the
+Reads only committed records. `bias-margin/records.json` lists, per variant tag, the
 fleet record ids that carry its measurements (any number of pvt_sweep records, one static
-record, optional mc records) plus the canonical reference ids. Every record's DUT hash is
-checked against the variant file (or, for the canonical ids, the shared canonical hash).
-Points are keyed by the full (corner, temp_c, vdd_v) tuple. Failed/missing units are listed,
-never dropped.
+record, optional mc records) plus the canonical reference ids. Points are keyed by the full
+(corner, temp_c, vdd_v) tuple. Failed/missing units are listed, never dropped.
+
+Evidence validation (every record, before any of its rows is used):
+
+* DUT identity. The record JSON's DUT hash must equal the variant file (or, for the canonical
+  ids, the shared canonical hash). The captured netlist snapshot must still hash to that value
+  and saved decks must include only it (`dut_identity.verify_record_dut`). Static and mismatch
+  records must also declare the expected `kind` and `tag`, and their CSV must hold `units` rows.
+* Bench/model provenance. Every canonical and variant PVT record must share the PDK
+  (variant, commit, pin, RC corner), the bench matrix (CL, Ibias, supply mode, per-corner VDD,
+  solver settings), the `models` block of every klt request and the fleet runner klt version.
+  Every rendered variant bench body must be byte-identical to the canonical body of the same name.
+  The one exception is the two step levels of a per-point ICMR-aware slew body: the method derives
+  them from that DUT's own ICMR. They are masked for the comparison and must instead equal the
+  record's own `step_low_v`/`step_high_v`. Static and mismatch probes share one bench body across
+  variants, and their models and runner must match the canonical ones.
+* Duplicates and replay selection. A record listed twice, or a measurement key that repeats
+  inside one record's CSV, is rejected. The same key in two *distinct* records (for example a
+  Stage 2 full grid re-measuring a Stage 1 screen point, or a canonical re-run) is accepted only
+  as a replicate: every measured column must agree exactly (only the per-run `elapsed_s` may
+  differ). The row from the record listed last is selected. `row["_records"]` keeps every source
+  record id, and each overlap is logged with both ids. A conflicting replicate is an error, so
+  no silent choice is made. A failed unit (a row missing from a record) is never an overlap, and
+  every record's `errors` stay in the unit-error list whichever replicate is selected.
 
     python3 sim/opamp-characterization/variants/sink_bias_report.py screen   # Stage 1 table + verdicts
     python3 sim/opamp-characterization/variants/sink_bias_report.py full TAG # 15-point table for an expanded design
     python3 sim/opamp-characterization/variants/sink_bias_report.py mc TAG   # mismatch probe summary
+    python3 sim/opamp-characterization/variants/sink_bias_report.py provenance # validation + replicate log
 """
 from __future__ import annotations
 
 import csv
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent
 REC = REPO / "sim" / "opamp-characterization" / "records"
+SNAP = REPO / "sim" / "opamp-characterization" / "netlist-snapshots"
 MANIFEST = HERE / "bias-margin" / "records.json"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 import dut_identity  # noqa: E402
@@ -34,14 +58,21 @@ SLEW_POINTS = ("TT/27", "SS/-40")
 GAIN_MIN_DB, PM_MIN_DEG = 60.0, 60.0
 FALL_GAIN_TT_MIN, FALL_GAIN_SS_MIN = 1.5, 0.5   # V/us over canonical (PLAN.md screening condition 4)
 RAIL_V, BOOST_A = 0.10, 1e-6
+PVT_TABLES = ("ac", "tran-sr", "tran-sr-icmr", "icmr", "dc-swing")
+RUN_COLS = {"elapsed_s"}   # per-run timing, not a measurement: may differ between replicates
+PDK_FIELDS = ("variant", "installed_commit", "pinned_commit", "matches_pin", "rc_corner")
+BENCH_FIELDS = ("cl_f", "ibias_a", "supply_mode", "vdd_by_corner")
+ICMR_BODY_RE = re.compile(r"^tran-sr-icmr-([a-z]+)-(-?[0-9.]+)C-([0-9.]+)V-body\.spice$")
+PULSE_RE = re.compile(r"pulse\(([-+0-9.eE]+) ([-+0-9.eE]+) ")
+LEVELS_RE = re.compile(r"LITERAL levels ([-+0-9.eE]+) and ([-+0-9.eE]+)")
 
 
 def key(r):
     return (r["corner"], round(float(r["temp_c"]), 6), round(float(r["vdd_v"]), 6))
 
 
-def read(rid, suffix):
-    p = REC / f"{rid}-{suffix}.csv"
+def read(rid, suffix=None):
+    p = REC / (f"{rid}-{suffix}.csv" if suffix else f"{rid}.csv")
     if not p.exists():
         return []
     with open(p, newline="") as fh:
@@ -56,26 +87,184 @@ def fl(x):
     return v
 
 
-def load(ids, expect_sha):
-    """Merge rows over record ids; refuse a record whose DUT hash is not the expected one."""
-    out = {"ac": {}, "tran-sr": {}, "tran-sr-icmr": {}, "icmr": {}, "dc-swing": {}}
+def read_meta(rid):
+    return json.loads((REC / f"{rid}.json").read_text())
+
+
+def check_dut(rid, meta, expect_sha, kind=None, tag=None):
+    """Refuse a record that is not the expected DUT or whose captured snapshot is not intact."""
+    sha = (meta.get("dut") or {}).get("sha256")
+    if sha != expect_sha:
+        raise SystemExit(f"{rid}: DUT hash {sha} != expected {expect_sha}")
+    state, problems = dut_identity.verify_record_dut(meta, REPO)
+    if state != dut_identity.VERIFIED or problems:
+        raise SystemExit(f"{rid}: DUT snapshot not verified ({state}): {'; '.join(problems)}")
+    for field, want in (("kind", kind), ("tag", tag)):
+        if want is not None and meta.get(field) != want:
+            raise SystemExit(f"{rid}: {field} {meta.get(field)!r} != expected {want!r}")
+
+
+def unique_rows(rows, kfn, where):
+    """Key rows; a key that repeats inside one record is an error, never last-row-wins."""
+    out = {}
+    for r in rows:
+        k = kfn(r)
+        if k in out:
+            raise SystemExit(f"{where}: duplicate measurement key {k} within one record")
+        out[k] = r
+    return out
+
+
+def reconcile(tbl, k, row, rid, where, log):
+    """Replicate-agreement policy for one key seen in a further, distinct record (see module doc)."""
+    row = dict(row, _records=[rid])
+    prev = tbl.get(k)
+    if prev is not None:
+        cols = sorted(c for c in set(prev) | set(row)
+                      if not c.startswith("_") and c not in RUN_COLS and prev.get(c) != row.get(c))
+        if cols:
+            raise SystemExit(f"{where} {k}: conflicting duplicate between {prev['_records']} and {rid} "
+                             f"(columns {cols}); no replay selection is made for conflicting evidence")
+        row["_records"] = prev["_records"] + [rid]
+        log.append({"table": where, "key": k, "selected": rid, "replicates": list(prev["_records"])})
+    tbl[k] = row
+
+
+def no_repeats(ids, where):
+    seen = set()
+    for rid in ids:
+        if rid in seen:
+            raise SystemExit(f"{where}: record {rid} listed more than once")
+        seen.add(rid)
+
+
+def load(ids, expect_sha, log=None):
+    """Merge rows over record ids under the replicate policy; refuse a record that is not the DUT."""
+    log = [] if log is None else log
+    no_repeats(ids, "pvt ids")
+    out = {sfx: {} for sfx in PVT_TABLES}
     errs = []
     for rid in ids:
-        meta = json.loads((REC / f"{rid}.json").read_text())
-        sha = (meta.get("dut") or {}).get("sha256")
-        if sha != expect_sha:
-            raise SystemExit(f"{rid}: DUT hash {sha} != expected {expect_sha}")
+        meta = read_meta(rid)
+        check_dut(rid, meta, expect_sha)
         errs += [f"{rid}: {e}" for e in meta.get("errors", [])]
         for sfx in out:
-            for r in read(rid, sfx):
-                out[sfx][key(r)] = r
+            for k, r in unique_rows(read(rid, sfx), key, f"{rid}-{sfx}").items():
+                reconcile(out[sfx], k, r, rid, sfx, log)
     return out, errs
 
 
-def static_rows(rid):
-    p = REC / f"{rid}.csv"
-    with open(p, newline="") as fh:
-        return {(r["corner"], round(float(r["temp_c"]), 6), round(float(r["vdd_v"]), 6)): r for r in csv.DictReader(fh)}
+def static_rows(rid, tag, kind="sink-static"):
+    """Rows of one static (or mismatch) probe record, after DUT/snapshot/kind/tag validation."""
+    meta = read_meta(rid)
+    check_dut(rid, meta, variant_sha(tag), kind=kind, tag=tag)
+    rows = read(rid)
+    if len(rows) != meta.get("units"):
+        raise SystemExit(f"{rid}: {len(rows)} CSV rows != declared units {meta.get('units')}")
+    kfn = (lambda r: key(r) + (r["sample"],)) if kind == "sink-mc" else key
+    return unique_rows(rows, kfn, rid), meta
+
+
+def mc_rows(rid, tag):
+    by_key, meta = static_rows(rid, tag, kind="sink-mc")
+    return list(by_key.values()), meta
+
+
+def bench_template(text, name):
+    """(template text, step levels). The ICMR-aware slew method derives a body's two step levels from
+    the DUT's own ICMR at that point, so they are masked for the cross-DUT comparison and returned for
+    `check_stimulus`. Every other body is compared byte for byte."""
+    if not ICMR_BODY_RE.match(name):
+        return text, None
+    levels = {tuple(PULSE_RE.findall(text)), tuple(LEVELS_RE.findall(text))}
+    text = LEVELS_RE.sub("LITERAL levels <lo> and <hi>", PULSE_RE.sub("pulse(<lo> <hi> ", text))
+    return text, levels
+
+
+def snapshot_files(meta):
+    """{file name: sha256 of the bench template} for the rendered bodies saved next to the DUT snapshot."""
+    snap = REPO / Path(meta["dut"]["snapshot_path"]).parent
+    return {p.name: dut_identity.sha256_bytes(bench_template(p.read_text(), p.name)[0].encode())
+            for p in sorted(snap.glob("*-body.spice"))}
+
+
+def check_stimulus(rid, meta):
+    """The masked ICMR-aware step levels must be exactly the ones the record reports for that point."""
+    probs = []
+    rows = {key(r): r for r in read(rid, "tran-sr-icmr")}
+    snap = REPO / Path(meta["dut"]["snapshot_path"]).parent
+    for p in sorted(snap.glob("tran-sr-icmr-*-body.spice")):
+        mt = ICMR_BODY_RE.match(p.name)
+        _, levels = bench_template(p.read_text(), p.name)
+        pulse = levels and next(iter(levels))
+        if len(levels) != 1 or len(pulse) != 1:
+            probs.append(f"{rid}: {p.name} step levels not stated once and consistently ({sorted(levels)})")
+            continue
+        r = rows.get((mt[1], round(float(mt[2]), 6), round(float(mt[3]), 6)))
+        if r is None:
+            continue   # failed unit: no measurement uses this body; the record's errors carry it
+        lo, hi = (float(v) for v in pulse[0])
+        if abs(lo - fl(r["step_low_v"])) > 5e-7 or abs(hi - fl(r["step_high_v"])) > 5e-7:
+            probs.append(f"{rid}: {p.name} steps {lo}..{hi} != record step_low/high "
+                         f"{r['step_low_v']}..{r['step_high_v']}")
+    return probs
+
+
+def fingerprint(meta):
+    """Comparable bench/model provenance of one record (PVT records also carry pdk and matrix)."""
+    snap = REPO / Path(meta["dut"]["snapshot_path"]).parent
+    models = sorted({json.dumps(json.loads(p.read_text()).get("models"), sort_keys=True)
+                     for p in snap.glob("*-request.json")})
+    jobs = meta.get("klt_jobs") or [meta]
+    fp = {"models": models,
+          "runner_klt": sorted({str((j.get("remote") or {}).get("runner_klt_version")) for j in jobs})}
+    if "matrix" in meta:
+        mx = meta["matrix"]
+        fp["pdk"] = [(meta.get("pdk") or {}).get(f) for f in PDK_FIELDS]
+        fp["bench"] = dict({f: mx.get(f) for f in BENCH_FIELDS},
+                           solver=(mx.get("execution") or {}).get("solver_settings"))
+    return fp
+
+
+def check_provenance(m):
+    """Problems that make the canonical and variant comparisons not like-for-like (empty = ok)."""
+    probs = []
+    ref, ref_id, canon_bodies = None, None, {}
+    for rid in m["canonical"]["ids"]:
+        meta = read_meta(rid)
+        fp = fingerprint(meta)
+        if ref is None:
+            ref, ref_id = fp, rid
+        elif fp != ref:
+            probs.append(f"canonical {rid} provenance {fp} != canonical {ref_id} {ref}")
+        probs += check_stimulus(rid, meta)
+        for name, h in snapshot_files(meta).items():
+            if canon_bodies.setdefault(name, (h, rid))[0] != h:
+                probs.append(f"canonical bench {name} differs between {canon_bodies[name][1]} and {rid}")
+    probe_body = {}
+    for tag, e in m["variants"].items():
+        for rid in e["ids"] + e.get("stage2", []):
+            meta = read_meta(rid)
+            fp = fingerprint(meta)
+            for f in fp:
+                if fp[f] != ref[f]:
+                    probs.append(f"{tag} {rid}: {f} {fp[f]} != canonical {ref[f]}")
+            probs += check_stimulus(rid, meta)
+            for name, h in snapshot_files(meta).items():
+                if name not in canon_bodies:
+                    probs.append(f"{tag} {rid}: bench {name} has no canonical counterpart")
+                elif canon_bodies[name][0] != h:
+                    probs.append(f"{tag} {rid}: bench {name} differs from canonical {canon_bodies[name][1]}")
+        for rid in e.get("static", []) + e.get("mc", []):
+            meta = read_meta(rid)
+            fp = fingerprint(meta)
+            for f in ("models", "runner_klt"):
+                if fp[f] != ref[f]:
+                    probs.append(f"{tag} {rid}: {f} {fp[f]} != canonical {ref[f]}")
+            for name, h in snapshot_files(meta).items():
+                if probe_body.setdefault("h", (h, rid))[0] != h:
+                    probs.append(f"{tag} {rid}: probe bench {name} differs from {probe_body['h'][1]}")
+    return probs
 
 
 def manifest():
@@ -88,15 +277,22 @@ def variant_sha(tag):
 
 def get_all(stage2=False):
     m = manifest()
-    canon, _ = load(m["canonical"]["ids"], m["canonical"]["sha256"])
+    probs = check_provenance(m)
+    if probs:
+        raise SystemExit("bench/model provenance not comparable:\n  " + "\n  ".join(probs))
+    clog = []
+    canon, _ = load(m["canonical"]["ids"], m["canonical"]["sha256"], clog)
     data = {}
     for tag, e in m["variants"].items():
-        d, errs = load(e["ids"] + (e.get("stage2", []) if stage2 else []), variant_sha(tag))
+        log = []
+        d, errs = load(e["ids"] + (e.get("stage2", []) if stage2 else []), variant_sha(tag), log)
+        no_repeats(e.get("static", []), f"{tag} static ids")
         stat = {}
         for sid in e.get("static", []):
-            stat.update(static_rows(sid))
-        data[tag] = {"d": d, "errs": errs, "static": stat}
-    return m, canon, data
+            for k, r in static_rows(sid, tag)[0].items():
+                reconcile(stat, k, r, sid, "static", log)
+        data[tag] = {"d": d, "errs": errs, "static": stat, "replicates": log}
+    return dict(m, _canonical_replicates=clog), canon, data
 
 
 def val(tbl, k, col):
@@ -248,9 +444,10 @@ def cmd_full(tag):
 
 def cmd_mc(tag):
     m, *_ = get_all()
-    for rid in manifest()["variants"][tag].get("mc", []):
-        meta = json.loads((REC / f"{rid}.json").read_text())
-        rows = list(csv.DictReader(open(REC / f"{rid}.csv", newline="")))
+    ids = m["variants"][tag].get("mc", [])
+    no_repeats(ids, f"{tag} mc ids")
+    for rid in ids:
+        rows, meta = mc_rows(rid, tag)
         ok = [r for r in rows if r["ok"] == "True"]
         x = sorted(abs(fl(r["i_xms_ua"])) for r in ok)
         flagged = sum(1 for v in x if v * 1e-6 > BOOST_A)
@@ -261,6 +458,29 @@ def cmd_mc(tag):
               f"|I(XMS)| median {x[len(x) // 2]:.4f} p95 {x[int(0.95 * (len(x) - 1))]:.4f} max {x[-1]:.4f} uA")
 
 
+def cmd_provenance():
+    m, canon, data = get_all(stage2=True)
+    print("# Evidence validation and replicate selection (generated by sink_bias_report.py)\n")
+    print("All DUT hashes, captured snapshots, static/mismatch kind+tag, bench/model provenance and "
+          "duplicate-key checks passed (any failure aborts before this line).\n")
+    print("Bench comparison: variant bodies equal the canonical bodies of the same name byte for byte, "
+          "except the two DUT-derived step levels of each ICMR-aware slew body, which are masked and checked "
+          "against the record's own step_low_v/step_high_v.\n")
+    print("Replicate policy: a key measured in two distinct records must agree in every measured column "
+          "(only `elapsed_s` may differ); the record listed last is selected and all source ids are kept.\n")
+    for name, log in [("canonical", m["_canonical_replicates"])] + [(t, data[t]["replicates"]) for t in data]:
+        print(f"## {name}: {len(log)} replicated keys\n")
+        for o in log:
+            k = o["key"]
+            print(f"- {o['table']} {k[0].upper()}/{k[1]:g}C/{k[2]:g}V: selected {o['selected']}; "
+                  f"agreeing replicate(s) {', '.join(o['replicates'])}")
+        if log:
+            print()
+    for tag in data:
+        print(f"Unit errors retained for {tag}: {len(data[tag]['errs'])}")
+
+
 if __name__ == "__main__":
     c = sys.argv[1] if len(sys.argv) > 1 else "screen"
-    {"screen": cmd_screen, "full": lambda: cmd_full(sys.argv[2]), "mc": lambda: cmd_mc(sys.argv[2])}[c]()
+    {"screen": cmd_screen, "full": lambda: cmd_full(sys.argv[2]), "mc": lambda: cmd_mc(sys.argv[2]),
+     "provenance": cmd_provenance}[c]()

@@ -3,8 +3,35 @@
 Status: **partial, no candidate recommended.** Plan: `variants/bias-margin/PLAN.md` (committed before any
 fleet request). No topology is adopted, no target revised, no full compliance claimed. Every number below is
 regenerated from committed raw records by `variants/sink_bias_report.py`
-(outputs: `variants/bias-margin/stage1.out.md`, `stage2-full.out.md`, `stage2-mc.out.txt`); record ids
-are listed in `variants/bias-margin/records.json`. Failed attempts are retained, not removed.
+(outputs: `variants/bias-margin/stage1.out.md`, `stage2-full.out.md`, `stage2-mc.out.txt`,
+`provenance.out.md`); record ids are listed in `variants/bias-margin/records.json`. Failed attempts are
+retained, not removed.
+
+## Evidence validation and replicate selection
+
+Before a record's rows are used, the report checks it as follows (`provenance.out.md`, tests in
+`tests/test_sink_bias_margin.py`):
+
+- **DUT identity.** The record's DUT hash must equal its variant file (canonical records: the canonical
+  hash). This covers the static and mismatch records as well as the PVT records. The captured snapshot
+  must still hash to that value. Static and mismatch records must also declare the expected `kind` and
+  `tag` and hold their declared unit count.
+- **Bench and model provenance.** Canonical and variant PVT records share the same PDK commit and RC
+  corner, CL, Ibias, supply mode, per-corner VDD, solver settings, klt `models` block and fleet runner
+  version. Variant bench bodies are byte-identical to the canonical bodies of the same name. The one
+  exception is the two step levels of each ICMR-aware slew body: the method derives them from that DUT's
+  own ICMR, so they are masked and checked against the record's own `step_low_v`/`step_high_v`. One
+  point differs (SF/125: ic075 ICMR low 0.5841 V vs canonical 0.5842 V, so the step starts at 0.6341 V
+  vs 0.6342 V), as the method intends. The static and mismatch probes use one bench body for all three
+  variants.
+- **Duplicates.** A record listed twice and a measurement key repeated inside one record are rejected.
+  The same key in two distinct records is accepted only if every measured column agrees exactly (run
+  timing `elapsed_s` excepted). The last-listed record is selected and every source id is kept. A
+  conflicting replicate is an error, not a silent choice. On the committed evidence there are 26
+  replicated keys, all agreeing: 15 canonical standard-slew points (the canonical ICMR-aware re-run
+  re-measured them) and 11 ic075 Stage 1 screen points re-measured by Stage 2. No conflict and no
+  within-record duplicate was found. The regenerated tables are byte-identical. Failed-unit errors from
+  every record are listed whichever replicate is selected.
 
 ## Designs
 
