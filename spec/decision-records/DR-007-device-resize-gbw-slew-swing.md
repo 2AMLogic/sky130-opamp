@@ -1,6 +1,6 @@
 # DR-007: Device resize — closing the GBW / fall-slew-rate / output-swing gaps
 
-- **Status**: **proposed** — drafted by the Builder agent (issue #22), and,
+- **Status**: **ratified** (corrected 2026-10-09, issue #49: stated ratification act — approval of PR #42 by the Judge reviewer and merge — occurred, merged 2026-10-01; the original `proposed` text below is retained as history and its "merged copy still reads proposed" note no longer applies) — drafted by the Builder agent (issue #22), and,
   unlike DR-002 at its own drafting, **validated by circuit-level PVT
   simulation**: every number in "Decision" below is the sizing this record
   proposes *and* the sizing the full 5-corner × 3-temperature grid of

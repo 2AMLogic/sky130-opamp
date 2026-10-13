@@ -1,6 +1,6 @@
 # DR-005: 3.3 V I/O-device flavor not served — no 3.3 V-rail amplifier position
 
-- **Status**: **proposed** — a declining record, carried for ratification via
+- **Status**: **ratified** (corrected 2026-10-09, issue #49: stated ratification act — approval of PR #37 by the Judge reviewer and merge — occurred, merged 2026-09-23; the original `proposed` text below is retained as history and its "merged copy still reads proposed" note no longer applies) — a declining record, carried for ratification via
   this PR (Judge review + Champion/operator merge) per the 2026-08-19 canary
   spec/DR ratification-via-PR standing policy
   ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)); the same

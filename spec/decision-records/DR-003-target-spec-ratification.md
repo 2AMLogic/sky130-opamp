@@ -1,6 +1,6 @@
 # DR-003: Target-spec table ratification pass 1 — thirteen rows ratified, four left explicitly open
 
-- **Status**: **proposed** — a recommendation for two-key ratification via
+- **Status**: **ratified** (corrected 2026-10-09, issue #49: stated ratification act — approval of PR #29 by the Judge reviewer and merge — occurred, merged 2026-09-21; the original `proposed` text below is retained as history and its "merged copy still reads proposed" note no longer applies) — a recommendation for two-key ratification via
   this PR (Judge review + Champion/operator merge), per the 2026-08-19
   canary spec/DR ratification-via-PR standing policy
   ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)) — the
