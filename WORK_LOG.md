@@ -2,6 +2,17 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-14
+
+- **Issue #35** (closed): README: embed the fleet burndown chart (one line)
+
+### 2026-10-13
+
+- **PR #216**: tests: unit tests for psrr_noise_sweep.py
+- **Issue #68** (closed): tests: add simulator-free unit tests for psrr_noise_sweep.py
+- **PR #93**: ratification: install ee-key and market-key reviewer trees; fix stale DR Status lines (#49)
+- **Issue #49** (closed): Install ratification/ee-key and ratification/market-key reviewer trees (product#151)
+
 ### 2026-10-12
 
 - **PR #212**: Enable committed sub-block composition and explicit internal LVS nets
