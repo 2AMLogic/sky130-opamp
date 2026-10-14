@@ -7,7 +7,7 @@ This roadmap is generated from the repository's current Loom label state.
 
 Judge-approved PRs stuck under a `loom:operator` merge-risk hold — implementation work is done, only a human merge decision is missing.
 
-- **#93**: ratification: install ee-key and market-key reviewer trees; fix stale DR Status lines (#49)
+_None._
 
 ## Operator Priority
 
@@ -37,20 +37,19 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#93**: ratification: install ee-key and market-key reviewer trees; fix stale DR Status lines (#49)
+_None._
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
-- **#49**: Install ratification/ee-key and ratification/market-key reviewer trees (product#151) *(curated)*
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 
 ## Proposed (Architect / Hermit)
 
-- **#68**: tests: add simulator-free unit tests for psrr_noise_sweep.py *(architect)*
+_None._
 
 ## Epics
 
@@ -60,13 +59,13 @@ _None._
 
 | Tier | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 0 |
 | Operator priority | 0 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 1 |
-| Curated | 4 |
-| Architect / Hermit proposals | 1 |
+| Approved PRs awaiting merge | 0 |
+| Curated | 3 |
+| Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
