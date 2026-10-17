@@ -4,6 +4,8 @@
 Ported verbatim (contract unchanged, docstrings trimmed to this repo) from
 2AMLogic/sky130-trng ``layout/bin/_klt_common.py`` at commit
 ``5d443907c99bf4eb193092f0cf89f2a6e2a5c80e``.
+Local divergence: ``run_klt`` accepts the ``klt`` command as a string or a
+sequence of argv words (e.g. ``["uvx", "--from", ..., "klt"]``).
 
 Contract: shell out to ``klt ... --format json``; a missing/unparsable JSON
 response is fatal, an ``error`` object in an otherwise well-formed response
@@ -13,7 +15,9 @@ is fatal, and committed JSON is written with one fixed spelling.
 from __future__ import annotations
 
 import json
+import shlex
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 
 
@@ -26,7 +30,7 @@ def run_klt(
     *,
     env: dict[str, str],
     cwd: Path | None = None,
-    klt: str = "klt",
+    klt: str | Sequence[str] = "klt",
 ) -> dict:
     """Run ``klt`` with ``--format json`` from *cwd* and parse its response.
 
@@ -39,8 +43,10 @@ def run_klt(
     clean-run mismatch; callers report those from the response body. A
     response that is not JSON at all is fatal, as is one carrying ``error``.
     """
+    klt_argv = [klt] if isinstance(klt, str) else list(klt)
+    klt_name = shlex.join(klt_argv)
     proc = subprocess.run(
-        [klt, *args, "--format", "json"],
+        [*klt_argv, *args, "--format", "json"],
         capture_output=True,
         text=True,
         env=env,
@@ -51,12 +57,12 @@ def run_klt(
         response = json.loads(proc.stdout)
     except json.JSONDecodeError as exc:
         raise BuildError(
-            f"{klt} {' '.join(args)} produced no JSON response "
+            f"{klt_name} {' '.join(args)} produced no JSON response "
             f"(exit {proc.returncode}):\n{proc.stdout}\n{proc.stderr}"
         ) from exc
     if "error" in response:
         raise BuildError(
-            f"{klt} {' '.join(args)} failed: {response['error'].get('message')}"
+            f"{klt_name} {' '.join(args)} failed: {response['error'].get('message')}"
         )
     return response
 
