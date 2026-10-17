@@ -2,6 +2,17 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-17
+
+- **PR #229**: refactor: reuse attribution.logical_lines in sizing_feasibility
+- **PR #228**: refactor(layout): probe-passives uses shared run_klt
+- **PR #225**: feat(layout): assemble opamp_core from the four verified sub-blocks
+- **PR #224**: spec: add T1 item 9/10 attestation inventories and DR-014 wait-for-release record
+- **Issue #227** (closed): Consolidate probe-passives.py's duplicate run_klt/check_toolchain into layout/bin/_klt_common.py
+- **Issue #226** (closed): Consolidate duplicated SPICE logical_lines helpers (6 copies, 2 identical)
+- **Issue #221** (closed): Cite T1 items 9 and 10 with artifact-anchored inventories (klt signoff --attest)
+- **Issue #220** (closed): Assemble the full opamp_core layout from the four verified sub-blocks (T1 item 2)
+
 ### 2026-10-14
 
 - **Issue #35** (closed): README: embed the fleet burndown chart (one line)
