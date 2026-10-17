@@ -20,7 +20,6 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#54**: Add PSRR and input-referred noise benches to the PVT characterization
-- **#222**: Cite the assembled core for T1 items 2, 3, 4 and 11 (DRC/LVS/ERC)
 
 ## Ready
 
@@ -53,7 +52,6 @@ Issues carrying `loom:curated`.
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
-- **#222**: Cite the assembled core for T1 items 2, 3, 4 and 11 (DRC/LVS/ERC) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -69,12 +67,12 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
-| Important | 2 |
+| Important | 1 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 4 |
+| Curated | 3 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
