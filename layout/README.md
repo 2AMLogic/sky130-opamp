@@ -14,8 +14,14 @@ mirror `XMB1`/`XM5`; klt DRC/LVS, Magic `drc(full)` and netgen all pass, see
 `opamp_bias/README.md`) and `opamp_comp/` (the routed `XRz`/`XCc`
 compensation network; klt DRC/LVS and netgen pass, Magic `drc(full)` fails on
 the resistor heads, see `opamp_comp/README.md`).**
-That is not the op-amp's layout. T1 item 2 is `unmet`, and nothing in
-`manifests/` cites this directory.
+`opamp_core/` (issue #220) assembles the four sub-blocks into the full core:
+klt DRC clean, klt LVS match against the whole `opamp_core` netlist, negative
+control mismatches, `--check` reproduces it. The PDK's Magic `drc(full)` of
+the assembled core **fails**: it inherits the unfixed `opamp_comp` resistor-head
+finding (2 errors, `licon.1c`), and netgen's pin lists differ because Magic
+exports the internal labelled nets as ports (devices and nets match uniquely);
+see `opamp_core/README.md`. It is not foundry-DRC-clean. Nothing in
+`manifests/` cites this directory yet (follow-up).
 
 ## The flow
 
@@ -238,9 +244,10 @@ directory or an extension of one, with the same evidence set.
    clean. Its placement is reusable; final integration may reposition it.
    The probes' Magic "clean" result did not see the resistor
    (`opamp_comp/README.md`, "Magic DRC blocker").
-5. **Top-level assembly `opamp_core`.** The sub-blocks are placed as
-   committed cells (`blocks[].cell`, a sibling feature this port has not
-   needed yet), with supply rails, the six `opamp_core` pins and full-cell
-   DRC/LVS against the whole `opamp_core` netlist. After that come item 11
+5. **Top-level assembly `opamp_core`: done (#220).** The sub-blocks are
+   placed as committed cells (`blocks[].cell`), with supply rails, the six
+   `opamp_core` pins and full-cell DRC/LVS against the whole `opamp_core`
+   netlist; see `opamp_core/README.md` (Magic signoff still fails on the
+   inherited `opamp_comp` finding). Next come item 11
    (#27: ERC/full-layout checks) and parasitic extraction feeding back into
    `sim/`.

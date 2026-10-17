@@ -1,0 +1,92 @@
+{
+  "source": "../opamp_stage1/opamp_stage1.gds",
+  "source_sha256": "530a21f8fee6c2da54427f576375426a5bb66f4490d055aab76dc85e3bb29033",
+  "staged_sha256": "530a21f8fee6c2da54427f576375426a5bb66f4490d055aab76dc85e3bb29033",
+  "cell_name": "opamp_stage1",
+  "ports": [
+    {
+      "name": "inn",
+      "net": "inn",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 3.625,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "inp",
+      "net": "inp",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 7.86,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "tail",
+      "net": "tail",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": -2.0,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 4.035,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "d1",
+      "net": "d1",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": 27.5,
+      "y_um": 4.92,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "d2",
+      "net": "d2",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": 27.5,
+      "y_um": 11.0,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "vdd",
+      "net": "vdd",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": 27.5,
+      "y_um": -2.0,
+      "width_um": 0.42,
+      "direction_deg": 0
+    }
+  ]
+}

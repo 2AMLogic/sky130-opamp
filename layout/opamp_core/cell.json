@@ -1,0 +1,897 @@
+{
+  "cell": "opamp_core",
+  "_comment": [
+    "Cell descriptor for layout/bin/compose-cell.py (issue #220). See layout/opamp_core/README.md.",
+    "SCOPE: opamp_core assembled from the four committed sub-block GDS files (blocks[].cell, #210):",
+    "opamp_bias, opamp_stage1, opamp_out, opamp_comp. Inter-block nets d2, tail are routed here; d1 and cz",
+    "stay inside their sub-blocks (lvs.internal_nets, not core pins). Boundary pins: vdd vss inn inp out ibias.",
+    "rel_vss: 8 um li1 relay overlapping the stage1 vss stub so the vss route drops 8 um clear of the inn pin stack.",
+    "inn/inp waypoints steer the routes north out of the crowded west side of stage1.",
+    "Inherits the opamp_comp Magic drc(full) resistor-head failure (layout/opamp_comp/README.md)."
+  ],
+  "pdk": {
+    "variant": "sky130A",
+    "deck": "sky130"
+  },
+  "blocks": [
+    {
+      "id": "bias",
+      "cell": {
+        "gds": "../opamp_bias/opamp_bias.gds",
+        "cell_name": "opamp_bias",
+        "ports": [
+          {
+            "name": "ibias",
+            "net": "ibias",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 9.0,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "vss",
+            "net": "vss",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 4.32,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "tail",
+            "net": "tail",
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "x_um": 15.5,
+            "y_um": -2.2,
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "stage1",
+      "cell": {
+        "gds": "../opamp_stage1/opamp_stage1.gds",
+        "cell_name": "opamp_stage1",
+        "ports": [
+          {
+            "name": "inn",
+            "net": "inn",
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 3.625,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "inp",
+            "net": "inp",
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 7.86,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "tail",
+            "net": "tail",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": -2.0,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "vss",
+            "net": "vss",
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 4.035,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "d1",
+            "net": "d1",
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "x_um": 27.5,
+            "y_um": 4.92,
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "d2",
+            "net": "d2",
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "x_um": 27.5,
+            "y_um": 11.0,
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "vdd",
+            "net": "vdd",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": 27.5,
+            "y_um": -2.0,
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "out",
+      "cell": {
+        "gds": "../opamp_out/opamp_out.gds",
+        "cell_name": "opamp_out",
+        "ports": [
+          {
+            "name": "ibias",
+            "net": "ibias",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 9.0,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "vss",
+            "net": "vss",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 4.32,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "out",
+            "net": "out",
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "x_um": 52.5,
+            "y_um": -2.2,
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "d2",
+            "net": "d2",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": 52.5,
+            "y_um": 5.245,
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "vdd",
+            "net": "vdd",
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "x_um": 52.5,
+            "y_um": 2.73,
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "comp",
+      "cell": {
+        "gds": "../opamp_comp/opamp_comp.gds",
+        "cell_name": "opamp_comp",
+        "ports": [
+          {
+            "name": "d2",
+            "net": "d2",
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 22.705000000000002,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "out",
+            "net": "out",
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "x_um": -6.0,
+            "y_um": 8.31,
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "cz",
+            "net": "cz",
+            "layer": {
+              "layer": 71,
+              "datatype": 20
+            },
+            "x_um": 21.5,
+            "y_um": 18.21,
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "vss",
+            "net": "vss",
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "x_um": 39.5,
+            "y_um": 23.92,
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "rel_vss",
+      "draw": {
+        "cell_name": "relay_rel_vss",
+        "shapes": [
+          {
+            "layer": [
+              67,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              8,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 8,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 67,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_ibias",
+      "draw": {
+        "cell_name": "top_ibias",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          },
+          {
+            "name": "CONN",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vss",
+      "draw": {
+        "cell_name": "top_vss",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "CONN",
+            "x_um": 0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_inn",
+      "draw": {
+        "cell_name": "top_inn",
+        "shapes": [
+          {
+            "layer": [
+              69,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              0.42,
+              1.5
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.21,
+            "y_um": 1.5,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "CONN",
+            "x_um": 0.21,
+            "y_um": 0,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 270
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_inp",
+      "draw": {
+        "cell_name": "top_inp",
+        "shapes": [
+          {
+            "layer": [
+              70,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              0.42,
+              1.5
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 0.21,
+            "y_um": 1.5,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 90
+          },
+          {
+            "name": "CONN",
+            "x_um": 0.21,
+            "y_um": 0,
+            "layer": {
+              "layer": 70,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 270
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_out",
+      "draw": {
+        "cell_name": "top_out",
+        "shapes": [
+          {
+            "layer": [
+              69,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "CONN",
+            "x_um": 0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 69,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          }
+        ]
+      }
+    },
+    {
+      "id": "pin_vdd",
+      "draw": {
+        "cell_name": "top_vdd",
+        "shapes": [
+          {
+            "layer": [
+              68,
+              20
+            ],
+            "rect_um": [
+              0,
+              0,
+              1.5,
+              0.42
+            ]
+          }
+        ],
+        "ports": [
+          {
+            "name": "PAD",
+            "x_um": 1.5,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 0
+          },
+          {
+            "name": "CONN",
+            "x_um": 0,
+            "y_um": 0.21,
+            "layer": {
+              "layer": 68,
+              "datatype": 20
+            },
+            "width_um": 0.42,
+            "direction_deg": 180
+          }
+        ]
+      }
+    }
+  ],
+  "placement": {
+    "strategy": "explicit",
+    "order": [
+      "bias",
+      "stage1",
+      "out",
+      "comp",
+      "rel_vss",
+      "pin_ibias",
+      "pin_vss",
+      "pin_inn",
+      "pin_inp",
+      "pin_out",
+      "pin_vdd"
+    ],
+    "origins_um": {
+      "bias": {
+        "x": 0,
+        "y": 0
+      },
+      "stage1": {
+        "x": 40,
+        "y": 0
+      },
+      "out": {
+        "x": 30,
+        "y": -30
+      },
+      "comp": {
+        "x": 95,
+        "y": -30
+      },
+      "rel_vss": {
+        "x": 26,
+        "y": 3.825
+      },
+      "pin_ibias": {
+        "x": -20,
+        "y": 9
+      },
+      "pin_vss": {
+        "x": 140,
+        "y": -6
+      },
+      "pin_inn": {
+        "x": 30,
+        "y": 24
+      },
+      "pin_inp": {
+        "x": 38,
+        "y": 24
+      },
+      "pin_out": {
+        "x": 140,
+        "y": -32
+      },
+      "pin_vdd": {
+        "x": 140,
+        "y": 10
+      }
+    }
+  },
+  "routing": {
+    "layer_role": "metal",
+    "width_um": 0.3
+  },
+  "connectivity": [
+    {
+      "net": "tail",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "bias",
+          "port": "tail"
+        },
+        {
+          "block": "stage1",
+          "port": "tail"
+        }
+      ]
+    },
+    {
+      "net": "d2",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "stage1",
+          "port": "d2"
+        },
+        {
+          "block": "out",
+          "port": "d2"
+        },
+        {
+          "block": "comp",
+          "port": "d2"
+        }
+      ]
+    },
+    {
+      "net": "ibias",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "bias",
+          "port": "ibias"
+        },
+        {
+          "block": "out",
+          "port": "ibias"
+        },
+        {
+          "block": "pin_ibias",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "out",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "out",
+          "port": "out"
+        },
+        {
+          "block": "comp",
+          "port": "out"
+        },
+        {
+          "block": "pin_out",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "vss",
+      "layer_role": "metal5",
+      "pins": [
+        {
+          "block": "rel_vss",
+          "port": "PAD"
+        },
+        {
+          "block": "bias",
+          "port": "vss"
+        },
+        {
+          "block": "out",
+          "port": "vss"
+        },
+        {
+          "block": "comp",
+          "port": "vss"
+        },
+        {
+          "block": "pin_vss",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "vdd",
+      "layer_role": "metal2",
+      "pins": [
+        {
+          "block": "stage1",
+          "port": "vdd"
+        },
+        {
+          "block": "out",
+          "port": "vdd"
+        },
+        {
+          "block": "pin_vdd",
+          "port": "CONN"
+        }
+      ]
+    },
+    {
+      "net": "inn",
+      "layer_role": "metal4",
+      "pins": [
+        {
+          "block": "stage1",
+          "port": "inn"
+        },
+        {
+          "block": "pin_inn",
+          "port": "CONN"
+        }
+      ],
+      "waypoints_um": [
+        [
+          30,
+          3.625
+        ],
+        [
+          30,
+          24
+        ]
+      ]
+    },
+    {
+      "net": "inp",
+      "layer_role": "metal3",
+      "pins": [
+        {
+          "block": "stage1",
+          "port": "inp"
+        },
+        {
+          "block": "pin_inp",
+          "port": "CONN"
+        }
+      ],
+      "waypoints_um": [
+        [
+          31.5,
+          7.86
+        ],
+        [
+          31.5,
+          28
+        ],
+        [
+          38,
+          28
+        ]
+      ]
+    }
+  ],
+  "pins": [
+    {
+      "net": "ibias",
+      "block": "pin_ibias",
+      "port": "PAD"
+    },
+    {
+      "net": "vss",
+      "block": "pin_vss",
+      "port": "PAD"
+    },
+    {
+      "net": "inn",
+      "block": "pin_inn",
+      "port": "PAD"
+    },
+    {
+      "net": "inp",
+      "block": "pin_inp",
+      "port": "PAD"
+    },
+    {
+      "net": "out",
+      "block": "pin_out",
+      "port": "PAD"
+    },
+    {
+      "net": "vdd",
+      "block": "pin_vdd",
+      "port": "PAD"
+    }
+  ],
+  "lvs": {
+    "reference": "design/netlist/opamp_core.spice",
+    "subckt": "opamp_core",
+    "devices": [
+      "XM3",
+      "XM4",
+      "XM1",
+      "XM2",
+      "XM5",
+      "XMB1",
+      "XM6",
+      "XM7",
+      "XRz",
+      "XCc"
+    ],
+    "pins": [
+      "vdd",
+      "vss",
+      "inn",
+      "inp",
+      "out",
+      "ibias"
+    ],
+    "internal_nets": [
+      "d1",
+      "d2",
+      "tail",
+      "cz"
+    ],
+    "options": {
+      "combine_devices": true
+    },
+    "layout_input": "gds"
+  },
+  "expect": {
+    "extracted_devices": 35,
+    "magic_types": [
+      "nmos",
+      "pmos",
+      "ppolyres",
+      "mimcap"
+    ]
+  }
+}

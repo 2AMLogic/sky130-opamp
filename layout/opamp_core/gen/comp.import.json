@@ -1,0 +1,56 @@
+{
+  "source": "../opamp_comp/opamp_comp.gds",
+  "source_sha256": "0b882615ffe00b5f14e208cfeb43a17f0f7be97f63a5ad40b3b3facb2f6e7b9e",
+  "staged_sha256": "0b882615ffe00b5f14e208cfeb43a17f0f7be97f63a5ad40b3b3facb2f6e7b9e",
+  "cell_name": "opamp_comp",
+  "ports": [
+    {
+      "name": "d2",
+      "net": "d2",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 22.705000000000002,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "out",
+      "net": "out",
+      "layer": {
+        "layer": 70,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 8.31,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "cz",
+      "net": "cz",
+      "layer": {
+        "layer": 71,
+        "datatype": 20
+      },
+      "x_um": 21.5,
+      "y_um": 18.21,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 67,
+        "datatype": 20
+      },
+      "x_um": 39.5,
+      "y_um": 23.92,
+      "width_um": 0.42,
+      "direction_deg": 0
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "source": "../opamp_out/opamp_out.gds",
+  "source_sha256": "cd4f621d3534b63d9eba5b30ba25701c0c0d74d8748a7b6e3ac9f5bcfb4d034a",
+  "staged_sha256": "cd4f621d3534b63d9eba5b30ba25701c0c0d74d8748a7b6e3ac9f5bcfb4d034a",
+  "cell_name": "opamp_out",
+  "ports": [
+    {
+      "name": "ibias",
+      "net": "ibias",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 9.0,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 4.32,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "out",
+      "net": "out",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": 52.5,
+      "y_um": -2.2,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "d2",
+      "net": "d2",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": 52.5,
+      "y_um": 5.245,
+      "width_um": 0.42,
+      "direction_deg": 0
+    },
+    {
+      "name": "vdd",
+      "net": "vdd",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": 52.5,
+      "y_um": 2.73,
+      "width_um": 0.42,
+      "direction_deg": 0
+    }
+  ]
+}
