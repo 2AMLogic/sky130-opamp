@@ -36,7 +36,8 @@ class Candidates(unittest.TestCase):
             self.assertEqual(geo["XM3"], geo["XM4"])
 
     def test_candidate_netlist_only_changes_mos_geometry(self):
-        canon = sf.hc_logical_lines(sf.CANON.read_text())
+        from attribution import logical_lines
+        canon = logical_lines(sf.CANON.read_text())
         for name in sf.CANDIDATES:
             body = [ln for ln in sf.candidate_netlist(name).splitlines() if not ln.startswith("** CANDIDATE")
                     and not ln.startswith("** Generated") and not ln.startswith("** pmos_scale")

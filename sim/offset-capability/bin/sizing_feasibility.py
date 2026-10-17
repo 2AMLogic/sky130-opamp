@@ -262,7 +262,8 @@ def candidate_netlist(name: str) -> str:
            f"** {cd['why']}.",
            f"** pmos_scale={cd['pmos_scale']} (XM3/XM4/XM6 W and L), pair_scale={cd['pair_scale']} (XM1/XM2 W and L);",
            "** every W/L snapped to the 0.005 um grid; bias group W 7.819 -> 7.820 placeholder (owned by #120)."]
-    for ln in hc_logical_lines(CANON.read_text()):
+    from attribution import logical_lines
+    for ln in logical_lines(CANON.read_text()):
         toks = ln.split()
         if toks and toks[0] in geo:
             g = geo[toks[0]]
@@ -274,16 +275,6 @@ def candidate_netlist(name: str) -> str:
             ln = " ".join(toks)
         out.append(ln)
     return "\n".join(out) + "\n"
-
-
-def hc_logical_lines(text: str) -> list[str]:
-    lines: list[str] = []
-    for ln in text.splitlines():
-        if ln.startswith("+") and lines:
-            lines[-1] += " " + ln[1:].strip()
-        else:
-            lines.append(ln.rstrip())
-    return lines
 
 
 def cand_path(name: str) -> Path:
