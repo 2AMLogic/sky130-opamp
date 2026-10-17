@@ -64,6 +64,16 @@ class RunKltTests(unittest.TestCase):
         self.assertIs(m.call_args.kwargs["env"], env)
         self.assertEqual(m.call_args.kwargs["cwd"], cwd)
 
+    def test_klt_sequence_is_expanded_into_argv(self):
+        _, m = self._run(_proc("{}"), "version", klt=["uvx", "--from", "pkg", "klt"])
+        argv = m.call_args.args[0]
+        self.assertEqual(argv, ["uvx", "--from", "pkg", "klt", "version", "--format", "json"])
+
+    def test_klt_sequence_appears_in_error_message(self):
+        with self.assertRaises(BuildError) as ctx:
+            self._run(_proc('{"error": {"message": "boom"}}'), "version", klt=["uvx", "klt"])
+        self.assertIn("uvx klt version failed: boom", str(ctx.exception))
+
 
 class WriteJsonTests(unittest.TestCase):
     def test_format_order_and_parent_dirs(self):

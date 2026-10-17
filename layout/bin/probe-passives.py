@@ -37,7 +37,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-from _klt_common import BuildError, write_json  # noqa: E402
+from _klt_common import BuildError, run_klt, write_json  # noqa: E402
 
 PDK_PIN = REPO_ROOT / "layout" / "pdk.json"
 OUT_ROOT = REPO_ROOT / "layout" / "passive_probes"
@@ -109,24 +109,10 @@ def klt_cmd() -> list[str]:
     return ["uvx", "--from", f"klayout-tools @ git+https://github.com/2AMLogic/klayout-tools@{pin['klt_commit']}", "klt"]
 
 
-def run_klt(klt: list[str], args: list[str], cwd: Path, env: dict, ok: tuple = (0,)) -> dict:
-    proc = subprocess.run([*klt, *args, "--format", "json"], cwd=cwd, env=env,
-                          capture_output=True, text=True, check=False)
-    try:
-        resp = json.loads(proc.stdout)
-    except json.JSONDecodeError as exc:
-        raise BuildError(f"klt {' '.join(args)}: no JSON (exit {proc.returncode}):\n{proc.stdout}\n{proc.stderr}") from exc
-    if "error" in resp:
-        raise BuildError(f"klt {' '.join(args)} failed: {resp['error'].get('message')}")
-    if proc.returncode not in ok and proc.returncode not in (0, 2, 3):
-        raise BuildError(f"klt {' '.join(args)} exit {proc.returncode}")
-    return resp
-
-
 def check_toolchain(klt: list[str], env: dict) -> dict:
     pin = json.loads(PDK_PIN.read_text())
-    ver = run_klt(klt, ["version"], REPO_ROOT, env)
-    pdk = run_klt(klt, ["pdk", "find", "--pdk", pin["variant"]], REPO_ROOT, env)
+    ver = run_klt(["version"], env=env, cwd=REPO_ROOT, klt=klt)
+    pdk = run_klt(["pdk", "find", "--pdk", pin["variant"]], env=env, cwd=REPO_ROOT, klt=klt)
     problems = []
     if ver.get("git_commit") != pin["klt_commit"]:
         problems.append(f"klt {ver.get('git_commit')} != pinned {pin['klt_commit']}")
@@ -171,10 +157,10 @@ def off_grid(value_um: float) -> bool:
 def build_probe(probe: dict, out: Path, klt: list[str], env: dict, tech: Path) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     cell = probe["id"]
-    gen = run_klt(klt, ["gen", probe["generator"], "--pdk", "sky130A", "--params", json.dumps(probe["params"]),
-                        "--cell-name", cell, "-o", f"{cell}.gds"], out, env)
-    drc = run_klt(klt, ["drc", f"{cell}.gds", "--deck", "sky130"], out, env)
-    ext = run_klt(klt, ["extract", f"{cell}.gds", "--deck", "sky130"], out, env)
+    gen = run_klt(["gen", probe["generator"], "--pdk", "sky130A", "--params", json.dumps(probe["params"]),
+                        "--cell-name", cell, "-o", f"{cell}.gds"], env=env, cwd=out, klt=klt)
+    drc = run_klt(["drc", f"{cell}.gds", "--deck", "sky130"], env=env, cwd=out, klt=klt)
+    ext = run_klt(["extract", f"{cell}.gds", "--deck", "sky130"], env=env, cwd=out, klt=klt)
     # klt extract writes <cell>.spice next to the GDS; keep it, drop nothing.
     for name, payload in (("gen", gen), ("drc", drc), ("extract", ext)):
         for volatile in ("provenance",):
