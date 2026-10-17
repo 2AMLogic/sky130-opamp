@@ -13,7 +13,7 @@ NOT pass.** The Magic failure is the `opamp_comp` resistor-head finding
 (`opamp_comp/README.md`, "Magic DRC blocker"), inherited unchanged. It was not
 fixed here and is not waived: this layout must not be described as
 foundry-DRC-clean. No schematic, spec or sizing changed, so no new PVT
-campaign was run. Nothing in `manifests/` cites this directory (follow-up).
+campaign was run. `manifests/sky130-opamp.json` cites `extract.json`, `drc.json`, `lvs.json` and `erc.json` for T1 items 2, 3, 4 and 11 (#222).
 
 ## Result
 
@@ -24,6 +24,7 @@ campaign was run. Nothing in `manifests/` cites this directory (follow-up).
 | Geometry checks (`compose-cell.py`) | every reference card's `L`, summed `W` (MOS), resistor and capacitor geometry match the extraction | run it |
 | `klt lvs` vs the full `opamp_core` reference | `status: "match"`: devices 10/10, nets 10/10; boundary pins `vdd vss inn inp out ibias` | `lvs.json` |
 | LVS negative control (`XM6` gate `d2` -> `vss`) | `status: "mismatch"`, `mismatch_count: 10`; nets 6/10, devices 9/10 matched | `negative-control/` |
+| `klt erc` (`erc-spec.json`, `--deck sky130 --findings-only`) | `erc_status: "clean"`, no findings; `vdd`/`vss` one island each, n-well tap tie checked. The p-substrate tie is disclosed, not graded (no pwell drawn) | `erc.json` |
 | `compose-cell.py --check` | rebuild is byte-identical (SHA-256 of `opamp_core.gds`, every `gen/*.gds`, import records, reference, verdicts) | run it |
 | Magic 8.3.683 `drc(full)`, `sky130A.tech` | **FAIL: 2 errors**, rule `poly contact extends poly resistor by < 2.16um (licon.1c + li.5)`, the inherited `opamp_comp` finding. The `opamp_comp` run also reported the contact-length rule (1 box); it is absent here. Not investigated. Non-vacuous: types seen include `nmos pmos ppolyres mimcap metal1-4` | `magic-signoff/magic.json` |
 | netgen 1.5.133 + `sky130A_setup.tcl` (Magic extraction vs the same reference) | `Circuits match uniquely.`, `Netlists match uniquely.` **but the pin lists differ**: Magic exports the labelled internal nets `d1 d2 tail cz` as ports, the reference has only the six boundary pins. netgen altered the pin lists to match; `pins_matched` is `false`, so `magic-signoff.py` exits 3 on this as well as on DRC | `magic-signoff/netgen.out` |
@@ -45,6 +46,8 @@ python3 layout/bin/compose-cell.py layout/opamp_core/cell.json                  
 python3 layout/bin/compose-cell.py layout/opamp_core/cell.json --check               # reproduce
 python3 layout/bin/compose-cell.py layout/opamp_core/cell.json --negative-control XM6:g=vss
 python3 layout/bin/magic-signoff.py layout/opamp_core/cell.json                      # exits 3 today
+klt erc layout/opamp_core/opamp_core.gds layout/opamp_core/erc-spec.json \
+  --deck sky130 --findings-only --format json > layout/opamp_core/erc.json   # klt 0.7.0 (rc 4: no antenna limits checked)
 ```
 
 ## Floorplan and conventions

@@ -206,6 +206,20 @@ class MalformedManifestTests(Fixture):
                        "3": {"file": "ev/k.json", "content_hash": "sha256:x"}})
         self.assertEqual(self.run_check()[::2], (1, []))
 
+    def test_compound_list_entry_checks_every_part(self):
+        self.write("ev/rec.md", "r")
+        self.envelope("ev/env.json", "rec.md", h(b"r"))
+        self.envelope("ev/k.json", None, None, kind="klt")
+        self.manifest({"11": [{"file": "ev/k.json", "content_hash": "sha256:x"},
+                              "ev/env.json"]})
+        self.assertEqual(self.run_check()[::2], (1, []))
+        self.write("ev/rec.md", "changed")
+        n, _, fails = self.run_check()
+        self.assertEqual(n, 1)
+        self.assertTrue(fails[0].startswith("item 11:"))
+        self.manifest({"11": [{"file": "ev/k.json"}, 7]})
+        self.assertTrue(self.run_check()[2][0].startswith("item 11:"))
+
 
 class ContainmentTests(Fixture):
     """Evidence must resolve inside the checkout (canonical realpath)."""

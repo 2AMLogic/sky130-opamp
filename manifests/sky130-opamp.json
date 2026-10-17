@@ -6,9 +6,31 @@
       "file": "design/netlist/opamp_core.sources.evidence.json",
       "content_hash": "sha256:fe8735fdcc5055e99a182eff7de7caacf53047394a998a8492c419764bd22093"
     },
+    "2": {
+      "file": "layout/opamp_core/extract.json",
+      "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+    },
+    "3": {
+      "file": "layout/opamp_core/drc.json",
+      "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+    },
+    "4": {
+      "file": "layout/opamp_core/lvs.json",
+      "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+    },
     "8": {
       "file": "sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json",
       "content_hash": "sha256:7fa0dc2c984212c03867ce673a0b96f87d2b7b361f89d73611c170312d9394f4"
-    }
+    },
+    "11": [
+      {
+        "file": "layout/opamp_core/erc.json",
+        "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+      },
+      {
+        "file": "layout/opamp_core/lvs.json",
+        "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+      }
+    ]
   }
 }

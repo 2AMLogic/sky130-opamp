@@ -17,9 +17,10 @@ identified there.
     filing issue: a two-stage Miller-compensated operational amplifier,
     no digital or mixed-signal partition (see the tracker's "Block kind"
     section and `design/`).
-  - `evidence` holds **two citations — item 8** (issue
-    [#43](https://github.com/2AMLogic/sky130-opamp/issues/43)) **and item 1**
-    (issue [#55](https://github.com/2AMLogic/sky130-opamp/issues/55)). Every
+  - `evidence` holds citations for items 8 (issue
+    [#43](https://github.com/2AMLogic/sky130-opamp/issues/43)), 1 (issue
+    [#55](https://github.com/2AMLogic/sky130-opamp/issues/55)) and 2, 3, 4, 11
+    (issue [#222](https://github.com/2AMLogic/sky130-opamp/issues/222)). Every
     other item stays deliberately uncited, for a reason per item:
     - **Item 1 (design sources)** cites
       [`design/netlist/opamp_core.sources.evidence.json`](../design/netlist/opamp_core.sources.evidence.json)
@@ -69,17 +70,50 @@ identified there.
       is quoted in `sky130-opamp.signoff.json`'s citation block under
       klt 0.7.0 (`artifact_binding.summary`); the envelope file remains
       the source.
-    - **Items 2, 3, 4, 7 and 11 (layout / DRC / LVS / post-layout / ERC
-      supply)**: a **partial** layout is committed —
-      [`layout/opamp_stage1/`](../layout/opamp_stage1/README.md), the NMOS
-      input pair `XM1`/`XM2` only (DRC clean on klt's curated sky130 deck and
-      Magic `drc(full)`; LVS match against a reference generated from the
-      netlist's own device cards, in `klt lvs` and netgen). The PMOS mirror
-      `XM3`/`XM4` is not drawn (tracked in #50), and there is no full-core
-      layout, so no qualified full-core `klt drc`/`lvs`/`pex`/`erc`
-      envelope exists. The manifest cites **no** layout evidence: that
-      sub-block's README states item 2 stays `unmet` and that no manifest
-      cites it, and this guide does not promote it to a full-core claim.
+    - **Items 2, 3, 4 and 11 (assembled core layout)** cite the tool-produced
+      envelopes of [`layout/opamp_core/`](../layout/opamp_core/README.md)
+      (issue [#222](https://github.com/2AMLogic/sky130-opamp/issues/222)), all
+      pinned to the stream's `provenance.input.content_hash`
+      (`opamp_core.gds`): item 2 cites `extract.json` (`klt extract`), item 3
+      `drc.json` (`klt drc`), item 4 `lvs.json` (`klt lvs` against
+      `opamp_core.ref.spice`, the whole 10-device netlist), and item 11 the
+      compound set `erc.json` + `lvs.json` (`klt erc` on
+      [`erc-spec.json`](../layout/opamp_core/erc-spec.json)). Verdicts come
+      from `klt signoff`; nothing is hand-marked. What each `met` does and
+      does not say:
+      - **Item 3 coverage, quoted from `drc.json`'s `coverage`**:
+        `layers_in_stream_without_rules` = `66/13, 67/5, 68/5, 69/5, 70/5,
+        71/5` (label/pin layers); `rules_skipped` = 52 rules, all
+        `no_applicable_geometry` for layers the stream does not draw
+        (`areaid_re`, `capm2`, `dnwell`, `hvi`, `hvntm`, `hvtp`, `hvtr`,
+        `lvtn`, `met5`, `mf`, `ncm`, `nsm`, `pad`, `pwbm`, `pwde`,
+        `pwell_rs`, `tunm`, `uhvi`, `vhvi`, `via4`, `vpp`); `deck_scope` =
+        `cap2m, capm, ct, difftap, li, licon, m1, m2, m3, m4, m5, nwell, poly,
+        via, via2, via3, via4, x`. The deck holes `layout/README.md` already
+        names stand: it has no implant, `npc` or poly-end-cap rules. The
+        Magic `drc(full)` run alongside **fails** (2 errors, rule `poly
+        contact extends poly resistor by < 2.16um`, inherited from
+        `opamp_comp`; `layout/opamp_core/magic-signoff/magic.json`). So item
+        3 `met` means klt's curated deck is clean, **not** that the layout is
+        foundry-DRC-clean.
+      - **Item 4**: `power_connectivity.status` is `unchecked` (the
+        `subckt-call` reference carries its own supply pins, so they take
+        part in the ordinary compare) and `body_verification.status` is
+        `verified` (0 devices needing a check), both as reported in
+        `lvs.json`. netgen on the Magic extraction matches circuits but with
+        differing pin lists (`magic-signoff/netgen.out`).
+      - **Item 11**: `vdd` and `vss` each resolve to one island with zero
+        unlabelled conductor on their owned roles (`met1`, `met4`); the
+        n-well tap tie (`nwell_tap_vdd`, the dedicated `tap` layer under
+        `nsdm`, both wells) is checked with zero `erc.missing_tie`;
+        `erc_coverage.skipped` is empty. **The p-substrate tie is not
+        graded**: the stream draws no pwell, so it is disclosed
+        (`ties_disclosure.undeclared_classes`, `p-substrate`) rather than
+        declared; the signoff citation carries it as
+        `disclosed_undeclared_tie_classes`. The declaration was
+        negative-controlled: pointing the tie at `vss` reports
+        `erc.missing_tie`.
+      Item 7 (post-layout) stays uncited: no `klt pex` run exists.
     - **Item 5 (corner verification vs a ratified spec)**: `spec/target-spec.md`
       is now **RATIFIED (partial)** (DR-003,
       [#26](https://github.com/2AMLogic/sky130-opamp/issues/26)), so that
@@ -107,11 +141,12 @@ identified there.
       evidence-kind one: no `klt yield` report (and no item-6 citation)
       exists. Matching and any other statistical rows are not covered by
       that campaign.
-    - **Items 2, 9 and 10** have *no* kind restriction at all, so any
+    - **Items 9 and 10** have *no* kind restriction at all, so any
       passing envelope would mechanically green them. The grader contract
       is explicit that this is the dishonest-citation failure mode the
       machinery exists to prevent: "The safest default is to leave [items
-      2, 9 and 10] uncited (item 1 is cited only because a CI gate re-derives it)." They stay uncited.
+      9 and 10] uncited (item 1 is cited only because a CI gate re-derives it)." They stay uncited (item 2 is cited here on a tool-produced `klt extract`
+      envelope, not a generic one).
 - **`design-evidence-tiers.md`** — the T1-T4 checklist the grader
   parses. Vendored **byte-identical** from
   [`2AMLogic/klayout-tools@31a3e3c`](https://github.com/2AMLogic/klayout-tools/blob/31a3e3c41c08bbd58719e0b99a3b6d19beb9be63/docs/design-evidence-tiers.md)
@@ -220,7 +255,7 @@ then rerun the `klt signoff` regeneration command above.
 
 ## Current verdict
 
-**Not-T1 — T1 items 1 and 8 met** as of this record. Every item's `reason`
+**Not-T1 — T1 items 1, 2, 3, 4, 8 and 11 met (6 of 11)** as of this record. Every item's `reason`
 is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 
 - **Item 8 (characterization report) — `met`**, on the generic evidence
@@ -233,7 +268,10 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
   envelope's `summary` names the other 4).
 - **Item 1 (design sources) — `met`**, on the generic envelope described
   above; backed by the netlist-drift CI job, not by `klt`.
-- **The other 9 T1 items — `unmet` / `no_evidence`**, each for the
+- **Items 2, 3, 4, 11** — `met` on the `layout/opamp_core/` envelopes
+  described above, with the caveats there (Magic `drc(full)` fails; the
+  p-substrate tie is disclosed, not graded).
+- **The other 5 T1 items — `unmet` / `no_evidence`**, each for the
   reason recorded per item above.
 
 Known item-level gates on the path forward (partial layout and measured
@@ -249,14 +287,10 @@ full-core signoff or ratification):
 - Item 6 (Monte Carlo): measured offset data exists against a proposed
   (DR-009), OPEN target, and does not meet it; the remaining gate is a
   `klt yield` report and citation — see the per-item rationale above.
-- Item 11 (power delivery, structural): the
-  [companion item-11 issue](https://github.com/2AMLogic/sky130-opamp/issues/27)
-  — ERC supply evidence plus an LVS report whose reference carries the
-  supplies; gated on a qualified full-core layout.
-- Items 3/4/7 (DRC/LVS/post-layout) and 2 (layout): only the input-pair
-  sub-block is laid out (`layout/opamp_stage1/`); the PMOS mirror
-  (#50) and the assembled full-core layout (#46, #120, #121) remain
-  pending, so these stay uncited.
+- Item 7 (post-layout): no `klt pex` run exists, so it stays uncited.
+- Items 2, 3, 4 and 11 are cited on the assembled core; the open caveats
+  there are the failing Magic `drc(full)` (inherited `opamp_comp` resistor
+  head) and the ungraded p-substrate tie.
 
 As evidence lands, the manifest's `evidence` map grows one item at a
 time — every citation must pin the `content_hash` of the artifact it

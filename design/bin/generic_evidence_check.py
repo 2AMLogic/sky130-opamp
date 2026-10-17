@@ -163,7 +163,15 @@ def check_manifest(manifest, root=REPO):
                        f"got {_type_name(evidence)}"]
 
     checked, oks, failures = 0, [], []
+    flat = []
     for item, entry in sorted(evidence.items(), key=_sort_key):
+        # Item 11's evidence is compound: klt signoff accepts a non-empty
+        # array of entries (ERC report + LVS report). Check each part.
+        if isinstance(entry, list) and entry:
+            flat.extend((item, part) for part in entry)
+        else:
+            flat.append((item, entry))
+    for item, entry in flat:
         kind, value = _classify_entry(entry)
         if kind == "skip":
             continue
