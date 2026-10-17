@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "kind": "t1-attestation-inventory",
+  "t1_item": 10,
+  "description": "T1 item 10 (Repo hygiene) for sky130-opamp: README, LICENSE, agent instructions, the three CI workflows, and the simulator-free CI gates those workflows run. Only commands that pass without the PDK or xschem are listed, because a --check re-run happens on a runner that has neither (see spec/decision-records/DR-014-t1-attestation-inventories.md).",
+  "hygiene": [
+    "README.md",
+    "LICENSE",
+    "CLAUDE.md",
+    ".gitignore",
+    ".github/workflows/design-sources.yml",
+    ".github/workflows/signoff.yml",
+    ".github/workflows/tests.yml"
+  ],
+  "checks": [
+    {"name": "sizing_check validate", "argv": ["python3", "design/bin/sizing_check.py", "validate"]},
+    {"name": "integrator_check validate", "argv": ["python3", "design/bin/integrator_check.py", "validate"]},
+    {"name": "spec_figures_check validate", "argv": ["python3", "design/bin/spec_figures_check.py", "validate"]},
+    {"name": "dut_identity validate", "argv": ["python3", "sim/lib/dut_identity.py", "validate"]},
+    {"name": "dut_identity current", "argv": ["python3", "sim/lib/dut_identity.py", "current"]},
+    {"name": "grid_check", "argv": ["python3", "design/bin/grid_check.py"]},
+    {"name": "unittest tests", "argv": ["python3", "-m", "unittest", "discover", "-s", "tests"]},
+    {"name": "unittest layout/bin", "argv": ["python3", "-m", "unittest", "discover", "-s", "layout/bin", "-p", "test_*.py"]}
+  ]
+}
