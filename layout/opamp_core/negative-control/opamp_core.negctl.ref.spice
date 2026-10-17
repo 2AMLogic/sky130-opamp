@@ -1,0 +1,34 @@
+* NEGATIVE CONTROL -- scratch reference for opamp_core: XM6.g rewired d2 -> vss
+* Must NOT match the layout. Not a design artifact.
+.subckt opamp_core vdd vss inn inp out ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.030 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.0480928689883914 nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=6.030 nf=1 ad=1.7487 as=1.7487 pd=12.64 ps=12.64 nrd=0.0480928689883914 nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM5_1 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM5_2 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_1 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_2 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_3 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_4 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_5 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_6 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_7 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_8 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_9 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM6_10 out vss vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=4.635 nf=1 ad=1.34415 as=1.34415 pd=9.85 ps=9.85 nrd=0.0625674217907228 nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_1 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_2 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_3 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_4 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_5 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_6 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_8 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_9 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM7_10 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821 nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+.ends opamp_core
+.end

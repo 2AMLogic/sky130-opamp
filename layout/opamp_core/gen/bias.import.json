@@ -1,0 +1,44 @@
+{
+  "source": "../opamp_bias/opamp_bias.gds",
+  "source_sha256": "468a3daab5f2a7ae720bb751553323e58a15f4f7c7acee253aeebd910eb26d71",
+  "staged_sha256": "468a3daab5f2a7ae720bb751553323e58a15f4f7c7acee253aeebd910eb26d71",
+  "cell_name": "opamp_bias",
+  "ports": [
+    {
+      "name": "ibias",
+      "net": "ibias",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 9.0,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "vss",
+      "net": "vss",
+      "layer": {
+        "layer": 68,
+        "datatype": 20
+      },
+      "x_um": -6.0,
+      "y_um": 4.32,
+      "width_um": 0.42,
+      "direction_deg": 180
+    },
+    {
+      "name": "tail",
+      "net": "tail",
+      "layer": {
+        "layer": 69,
+        "datatype": 20
+      },
+      "x_um": 15.5,
+      "y_um": -2.2,
+      "width_um": 0.42,
+      "direction_deg": 0
+    }
+  ]
+}

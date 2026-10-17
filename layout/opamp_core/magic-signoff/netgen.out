@@ -1,0 +1,32 @@
+Class opamp_core:  Merged 25 devices.
+Class opamp_core:  Merged 19 devices.
+
+Subcircuit summary:
+Circuit 1: opamp_core                      |Circuit 2: opamp_core                      
+-------------------------------------------|-------------------------------------------
+sky130_fd_pr__res_high_po_1p41 (1)         |sky130_fd_pr__res_high_po_1p41 (1)         
+sky130_fd_pr__nfet_01v8 (5)                |sky130_fd_pr__nfet_01v8 (5)                
+sky130_fd_pr__pfet_01v8 (3)                |sky130_fd_pr__pfet_01v8 (3)                
+sky130_fd_pr__cap_mim_m3_1 (1)             |sky130_fd_pr__cap_mim_m3_1 (1)             
+Number of devices: 10                      |Number of devices: 10                      
+Number of nets: 10                         |Number of nets: 10                         
+---------------------------------------------------------------------------------------
+Circuits match uniquely.
+Netlists match uniquely.
+
+Subcircuit pins:
+Circuit 1: opamp_core                      |Circuit 2: opamp_core                      
+-------------------------------------------|-------------------------------------------
+vdd                                        |vdd                                        
+tail                                       |(no matching pin)                          
+out                                        |out                                        
+inp                                        |inp                                        
+inn                                        |inn                                        
+vss                                        |vss                                        
+cz                                         |(no matching pin)                          
+d1                                         |(no matching pin)                          
+d2                                         |(no matching pin)                          
+ibias                                      |ibias                                      
+---------------------------------------------------------------------------------------
+Cell pin lists for opamp_core and opamp_core altered to match.
+Circuits match uniquely.
