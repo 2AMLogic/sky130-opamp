@@ -2,6 +2,11 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-20
+
+- **PR #234**: chore: remove unreferenced constants and dead alias in sim scripts
+- **Issue #233** (closed): Remove unreferenced constants and dead alias in sim scripts (two look like enforced tolerances)
+
 ### 2026-10-17
 
 - **PR #231**: feat(manifests): cite opamp_core extract/DRC/LVS/ERC evidence for T1 items 2, 3, 4, 11
