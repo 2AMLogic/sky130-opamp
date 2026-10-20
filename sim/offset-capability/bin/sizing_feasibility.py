@@ -68,9 +68,7 @@ PLAN = RECORDS / "sizing-feasibility-plan-20261010.json"
 
 GRID_UM = 0.005
 TARGET_SIGMA_V = 0.275e-3          # DR-009 proposed (not ratified) allocation, kept as is
-ALL_ON_TT_SIGMA_V = 8.583e-3       # #85 tt all-devices sigma (campaign-20261009-offset-mc300.md)
 N_ATTR = 300                       # #107 samples per MOS group
-HANDCALC_TOTAL_V = None            # filled from hc.calc() at run time
 
 # Candidate set (bounded: 3 sizing candidates + 1 grid-only reference). Each
 # scales W and L of a matched group by the same factor s (W/L, mult, and the

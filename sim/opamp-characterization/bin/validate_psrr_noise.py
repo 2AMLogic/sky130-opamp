@@ -33,7 +33,6 @@ sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import dut_identity  # noqa: E402
 from spice_harness import allocate_record_id, git_sha, run_klt_sim, write_new  # noqa: E402
 
-TB = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 MODELS = {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice"}

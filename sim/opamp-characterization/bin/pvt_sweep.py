@@ -480,7 +480,6 @@ CONSUMER_SENSE_V = 0.73
 # CMRR bench: spot frequencies at which Adm and Acm are read (.meas ... at=)
 CMRR_SPOTS = (("1hz", "1"), ("10hz", "10"), ("100hz", "100"), ("1khz", "1k"),
               ("10khz", "10k"), ("100khz", "100k"), ("1mhz", "1meg"))
-CMRR_SPOT_HEADLINE = "1khz"  # the single "stated spot frequency" quoted in the README
 # DC common-mode bias points the CMRR bench is run at: mid-supply (the same
 # point opamp_ac uses, so Adm is directly comparable) and the centre of the
 # ratified ICMR target window (which sits above mid-rail).
@@ -1554,12 +1553,6 @@ def swing_fixcm_comparison(fixcm_rows: list[dict], swing_rows: list[dict] | None
                      "conclusive": "fixed Vcm inside the same point's 40 dB ICMR window and not inconsistent"},
             "points": len(table), "unmatched": unmatched, "summary": counts,
             "icmr_available": bool(icmr_rows), "table": table}
-
-
-def latest_ac_rows(before_id: str, dut_sha256: str, repo_root: Path | None = None,
-                   records_dir: Path | None = None) -> dict:
-    """Verified-identity historical AC reference (see select_ac_reference)."""
-    return select_ac_reference(before_id, dut_sha256, repo_root, records_dir)
 
 
 # --------------------------------------------------------------------------
