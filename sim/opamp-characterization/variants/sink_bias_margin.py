@@ -42,7 +42,6 @@ OUT_DIR = HERE / "bias-margin"
 FRACTIONS = {"ic090": 0.90, "ic075": 0.75, "ic060": 0.60}
 ORIGINAL = "ic090"
 I_UNIT_UA = 5.0
-I_M6_Q_UA = 50.0       # quiescent M6 current
 I_M6_FALL_UA = 14.0    # M6 current during the falling edge (variants/README.md, #79)
 VDD_TT = 1.8
 

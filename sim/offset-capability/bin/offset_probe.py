@@ -77,8 +77,6 @@ SWEEP_LO, SWEEP_HI, SWEEP_STEP = -0.03, 0.03, 20e-6   # vd bracket / resolution 
 # Predeclared tolerances (see README "Predeclared tolerances").
 EXTRACTION_RES_V = SWEEP_STEP          # linear interp between 20 uV points
 CONTROL_TOL_V = 2 * EXTRACTION_RES_V   # mismatch-off spread / replay mismatch
-PAIR_CONTROL_TOL_A = 1e-9              # |id1-id2| floor with mismatch off
-PAIR_MIN_SPREAD_A = 10e-9              # randomized pair diff must exceed this
 
 
 class ProbeError(RuntimeError):
