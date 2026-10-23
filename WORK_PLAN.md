@@ -32,7 +32,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-- **#240**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact)
+_None._
 
 ## PRs Awaiting Review
 
@@ -44,7 +44,7 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#241**: feat(sim): store new evidence bytes in the artifact store, commit manifests
+_None._
 
 ## Proposed
 
@@ -53,7 +53,6 @@ Issues carrying `loom:curated`.
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
-- **#240**: Adopt the common artifact store for sim evidence (manifests in git, bytes via klt artifact) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -71,10 +70,10 @@ _None._
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 1 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 1 |
-| Curated | 4 |
+| Approved PRs awaiting merge | 0 |
+| Curated | 3 |
 | Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
