@@ -26,3 +26,10 @@ ngspice testbenches and append-only results.
   committed `pdk.json`, `.spice.tmpl` rendering, tool-version and git-SHA
   stamping). Stdlib only. One copy, imported by every `*/bin/*.py` runner
   rather than pasted into each (issue #23).
+- [`lib/artifact_store.py`](lib/artifact_store.py) — new evidence bytes go to
+  the fleet artifact store (`klt artifact put`), not git: runners stage into
+  the git-ignored `sim/.work/.stage/`, fail closed if the broker or
+  `artifact put` is unavailable, and commit only
+  `manifests/artifacts/<bench>-<run-id>.manifest.json` and a summary. CI runs
+  [`lib/check_artifact_manifests.py`](lib/check_artifact_manifests.py). See
+  [`manifests/artifacts/README.md`](../manifests/artifacts/README.md) (issue #240).

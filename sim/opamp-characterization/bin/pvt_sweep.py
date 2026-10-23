@@ -110,6 +110,7 @@ EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     KLT_CMD,
@@ -134,6 +135,8 @@ GMID_MODEL_FILES = GMID_DIR / "corners" / "model-files.json"
 OWN_PDK_FILE = EXP_DIR / "pdk.json"
 TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
+ARTIFACT_BENCH = "opamp-characterization"
+STAGE_REL = "sim/.work/.stage"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / "design" / "netlist" / "opamp_core.spice"
 # The DUT netlist the campaign actually includes (issue #104). Defaults to the
@@ -1875,7 +1878,7 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
             "corner_count": report.get("corner_count"), "wall_s": round(wall, 1), "remote": env.get("remote"),
             "diagnostic_counts": report.get("diagnostic_counts"),
             "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
-            "response": f"sim/opamp-characterization/records/{log_dir.name}/klt-{tag}-response.json",
+            "response": f"{STAGE_REL}/{log_dir.name}/klt-{tag}-response.json",
         })
         if "error" in report:
             errors.append(f"{label}: klt error: {report['error'].get('message')}")
@@ -2007,7 +2010,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             "remote": env.get("remote"),
             "diagnostic_counts": report.get("diagnostic_counts"),
             "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
-            "response": f"sim/opamp-characterization/records/{log_dir.name}/klt-{tag}-response.json",
+            "response": f"{STAGE_REL}/{log_dir.name}/klt-{tag}-response.json",
         })
         if "error" in report:
             errors.append(f"{tag}: klt error: {report['error'].get('message')}")
@@ -2198,10 +2201,18 @@ def main(argv=None) -> int:
             print(f"ERROR: corner '{corner}' not in {GMID_MODEL_FILES}", file=sys.stderr)
             return 1
 
+    # Issue #240: raw per-run outputs go to the artifact store, so fail closed
+    # before reserving a record or simulating if they cannot be stored.
+    try:
+        klt_store_cmd = artifact_store.preflight()
+    except artifact_store.ArtifactError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 1
+
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
     # Atomically reserve a unique record namespace (issue #75) before any write.
     record_id = allocate_record_id(RECORDS_DIR, git_sha(REPO_ROOT), extra_dirs=[SNAPSHOT_DIR])
-    log_dir = RECORDS_DIR / f"{record_id}-logs"
+    log_dir = artifact_store.stage_dir(ARTIFACT_BENCH, record_id)
     snapshot_run_dir = SNAPSHOT_DIR / record_id
     make_new_dir(snapshot_run_dir)
     # Capture the DUT bytes ONCE, before any analysis is scheduled; every local
@@ -2304,6 +2315,14 @@ def main(argv=None) -> int:
     elapsed_total = time.monotonic() - t_start
     print(f"Completed {n_runs} runs ({len(errors)} failed) in {elapsed_total:.1f}s", file=sys.stderr)
 
+    # Store the raw outputs BEFORE writing any record: a failed put leaves
+    # nothing under manifests/ or records/ and the stage is kept (issue #240).
+    try:
+        manifest_path, _summary_path = artifact_store.store(ARTIFACT_BENCH, record_id, log_dir, klt_store_cmd)
+    except artifact_store.ArtifactError as exc:
+        print(f"ERROR: raw outputs not stored; no record written: {exc}", file=sys.stderr)
+        return 1
+
     written = []
     for analysis, rows in results.items():
         if not rows:
@@ -2372,6 +2391,7 @@ def main(argv=None) -> int:
             f"{a}_csv": f"sim/opamp-characterization/records/{record_id}-{a.replace('_', '-')}.csv"
             for a in results if results[a]
         },
+        "artifacts": {"manifest": manifest_path.relative_to(REPO_ROOT).as_posix()},
         "errors": errors,
         "elapsed_s": round(elapsed_total, 1),
     }
@@ -2382,7 +2402,7 @@ def main(argv=None) -> int:
     for p in written:
         print(f"  {p.relative_to(REPO_ROOT)}")
     print(f"  {json_path.relative_to(REPO_ROOT)}")
-    print(f"  {log_dir.relative_to(REPO_ROOT)}/ (raw ngspice logs / klt responses and per-corner artifacts)")
+    print(f"  {manifest_path.relative_to(REPO_ROOT)} (raw ngspice logs / klt responses and per-corner artifacts, stored)")
     print(f"  {snapshot_run_dir.relative_to(REPO_ROOT)}/ (rendered deck snapshots)")
 
     if errors:

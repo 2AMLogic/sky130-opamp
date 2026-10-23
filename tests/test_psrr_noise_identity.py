@@ -53,6 +53,21 @@ class Repo:
             p = mock.patch.object(m, name, val)
             p.start()
             test.addCleanup(p.stop)
+        # Issue #240: never reach the real broker or write under the real manifests/ tree.
+        stage_root = self.tmp / ".stage"
+
+        def stage_dir(bench, run_id):
+            d = stage_root / f"{bench}-{run_id}"
+            d.mkdir(parents=True, exist_ok=True)
+            return d
+
+        for name, val in (("preflight", lambda: ["klt"]), ("klt_command", lambda: ["klt"]),
+                          ("stage_dir", stage_dir),
+                          ("store", lambda b, r, s, k: (self.tmp / "manifests" / f"{b}-{r}.manifest.json",
+                                                         self.tmp / "x.summary.md"))):
+            p = mock.patch.object(m.artifact_store, name, val)
+            p.start()
+            test.addCleanup(p.stop)
         p = mock.patch.object(m.shutil, "which", lambda t: f"/usr/bin/{t}")
         p.start()
         test.addCleanup(p.stop)

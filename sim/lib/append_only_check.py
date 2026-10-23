@@ -3,6 +3,7 @@
 
 CLAUDE.md: "`sim/` results are append-only evidence". Guarded paths:
   sim/*/records/   sim/*/corners/   sim/*/netlist-snapshots/
+  manifests/artifacts/*.manifest.json   manifests/artifacts/*.summary.md
 (README.md prose under sim/*/ is deliberately NOT guarded.)
 
 Only git status `A` (added) is permitted. M, D, T and R*/C* are violations;
@@ -31,7 +32,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-GUARDED = ("sim/*/records/", "sim/*/corners/", "sim/*/netlist-snapshots/")
+GUARDED = ("sim/*/records/", "sim/*/corners/", "sim/*/netlist-snapshots/", "manifests/artifacts/*.manifest.json",
+           "manifests/artifacts/*.summary.md")
 DEFAULT_ALLOWLIST = "sim/append-only-allowlist.txt"
 
 
@@ -111,7 +113,7 @@ def remediation(violations, allowlist_path=DEFAULT_ALLOWLIST) -> str:
 
 def git_name_status(*diff_args) -> str:
     return subprocess.run(
-        ["git", "diff", "--name-status", "-z", "-M", *diff_args, "--", "sim/"],
+        ["git", "diff", "--name-status", "-z", "-M", *diff_args, "--", "sim/", "manifests/artifacts/"],
         check=True, capture_output=True).stdout.decode("utf-8", "surrogateescape")
 
 

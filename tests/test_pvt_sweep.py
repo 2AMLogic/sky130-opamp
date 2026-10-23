@@ -10,6 +10,24 @@ import _paths
 from _paths import EXP, RECORDS, REPO, TESTBENCH
 import spice_harness as sh
 import dut_identity
+from unittest import mock
+
+
+def fake_artifact_patches(root):
+    """Stand-ins for the fleet artifact store (issue #240): no broker, nothing under the real repo."""
+    import artifact_store
+
+    def stage_dir(bench, run_id):
+        d = Path(root) / ".stage" / f"{bench}-{run_id}"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def store(bench, run_id, stage, klt):
+        return Path(root) / "manifests" / f"{bench}-{run_id}.manifest.json", Path(root) / "x.summary.md"
+
+    return [mock.patch.object(artifact_store, "preflight", lambda: ["klt"]),
+            mock.patch.object(artifact_store, "stage_dir", stage_dir),
+            mock.patch.object(artifact_store, "store", store)]
 
 pvt = _paths.load_module("pvt_sweep", EXP / "bin" / "pvt_sweep.py")
 
@@ -1178,7 +1196,7 @@ class FleetAnalysisTests(unittest.TestCase):
             cand.write_text("* candidate netlist, not the canonical design\n")
             records, snaps = root / "records", root / "snaps"
             patches = [
-                mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
+                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
                 mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), mock.patch.object(pvt, "resolve_pdk", lambda: Pdk()),
                 mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
                 mock.patch.object(pvt, "klt_version", lambda: "klt-test"), mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
@@ -1560,7 +1578,7 @@ class SwingFixcmTests(unittest.TestCase):
             root.mkdir()
             records, snaps = root / "records", root / "snaps"
             patches = [
-                mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
+                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
                 mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), mock.patch.object(pvt, "resolve_pdk", lambda: Pdk()),
                 mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
                 mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
@@ -1737,7 +1755,7 @@ class LocalExecutionAllowanceTests(unittest.TestCase):
             snaps.mkdir(parents=True)
             out = io.StringIO()
             patches = [
-                mock.patch.object(pvt, "REPO_ROOT", root),
+                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root),
                 mock.patch.object(pvt, "RECORDS_DIR", records),
                 mock.patch.object(pvt, "SNAPSHOT_DIR", snaps),
                 mock.patch.object(pvt, "resolve_pdk", lambda: self.LocalPdk()),

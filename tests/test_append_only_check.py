@@ -23,6 +23,12 @@ def check(text, allow=None):
 
 
 class AppendOnlyTests(unittest.TestCase):
+    def test_artifact_manifest_guarded(self):
+        m = "manifests/artifacts/b-r.manifest.json"
+        self.assertEqual(check(f"A\t{m}\n")[0], [])
+        self.assertEqual(check(f"M\t{m}\n")[0], [("M", m)])
+        self.assertEqual(check("M\tmanifests/artifacts/README.md\n")[0], [])
+
     def test_add_passes(self):
         v, a = check(f"A\t{R}\nA\t{C}\nA\t{N}\n")
         self.assertEqual((v, a), ([], []))
