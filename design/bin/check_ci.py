@@ -29,6 +29,7 @@ def default_checks(py=None):
         ("canonical MOS+passive grid legality", [py, "design/bin/grid_check.py"]),
         ("generic evidence artifact hashes (signoff.yml)",
          [py, "design/bin/generic_evidence_check.py"]),
+        ("artifact manifests (issue #240)", [py, "sim/lib/check_artifact_manifests.py"]),
         ("unit tests", [py, "-m", "unittest", "discover", "-s", "tests", "-v"]),
         ("layout flow unit tests",
          [py, "-m", "unittest", "discover", "-s", "layout/bin", "-p", "test_*.py", "-v"]),

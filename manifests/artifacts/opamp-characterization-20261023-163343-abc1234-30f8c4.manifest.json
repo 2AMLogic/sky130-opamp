@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "sha256": "204b1ef973d32b4e6ac8e09dba1fc66e8c350e47f484fa8b0b713c8bc91c9263",
+      "size": 5967,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.7.1.dev2517+g6bb7cf233677",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "f3988ff331d54a9199ab87f4b221a3f8db0d1359"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/20/204b1ef973d32b4e6ac8e09dba1fc66e8c350e47f484fa8b0b713c8bc91c9263",
+      "name": "sim/.work/.stage/opamp-characterization-20261023-163343-abc1234-30f8c4/klt-dc-swing-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "b6626c3e3332c05b10d811f5659e128c08b303bd731f54371b9fb29eb6ca76b7",
+      "size": 6015,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.7.1.dev2517+g6bb7cf233677",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "f3988ff331d54a9199ab87f4b221a3f8db0d1359"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b6/b6626c3e3332c05b10d811f5659e128c08b303bd731f54371b9fb29eb6ca76b7",
+      "name": "sim/.work/.stage/opamp-characterization-20261023-163343-abc1234-30f8c4/klt-swing-fixcm-response.json",
+      "media_type": "application/json"
+    }
+  ]
+}

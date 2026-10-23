@@ -27,7 +27,8 @@ Records (append-only; a new timestamped set per run, never overwritten):
     records/<id>-psrr-vdd.csv  records/<id>-psrr-vss.csv  records/<id>-noise.csv
     records/<id>-<bench>.klt.json      the unmodified `klt sim` response
     records/<id>-psrr-noise.json/.md   metadata (backend, remote job ids, pins)
-    records/<id>-psrr-noise-logs/      per-corner ngspice log (when returned)
+    manifests/artifacts/opamp-psrr-noise-<id>.manifest.json  per-corner ngspice logs, stored in the
+                                       fleet artifact store (issue #240); never committed as bytes
     netlist-snapshots/<id>-psrr-noise/ DUT copy (opamp_core.spice), rendered bench bodies and
                                        replayable requests (always), per-corner decks (when returned)
 
@@ -60,6 +61,7 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
 from spice_harness import (  # noqa: E402
     KLT_CMD,
@@ -73,6 +75,7 @@ from spice_harness import (  # noqa: E402
 
 TESTBENCH_DIR = EXP_DIR / "testbench"
 RECORDS_DIR = EXP_DIR / "records"
+ARTIFACT_BENCH = "opamp-psrr-noise"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / dut_identity.CURRENT_NETLIST_REL
 _DUT_INCLUDE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
@@ -343,6 +346,14 @@ def main(argv=None) -> int:
         return 1
 
     sha = git_sha(REPO_ROOT)
+    # Issue #240: raw outputs go to the artifact store; fail closed before
+    # reserving a record or submitting anything if they cannot be stored.
+    if not args.dry_run:
+        try:
+            artifact_store.preflight()
+        except artifact_store.ArtifactError as exc:
+            print(f"ERROR: {exc}", file=sys.stderr)
+            return 1
     RECORDS_DIR.mkdir(parents=True, exist_ok=True)
     # Atomically reserve a unique record namespace (issue #75) before any write.
     record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=[SNAPSHOT_DIR])
@@ -431,7 +442,25 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
             return 1, False
 
         RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-        log_dir = RECORDS_DIR / f"{record_id}-psrr-noise-logs"
+        log_dir = artifact_store.stage_dir(ARTIFACT_BENCH, record_id)
+        # Stage the per-corner logs and store them BEFORE any record is written: a failed
+        # put leaves nothing under manifests/ or records/ and the stage is kept (issue #240).
+        n_logs = {}
+        for bench, res in results.items():
+            tag = BENCHES[bench]["tag"]
+            n_logs[bench] = 0
+            for c in res["payload"]["corners"]:
+                src = (c.get("artifacts") or {}).get("log")
+                if src and Path(src).is_file():
+                    shutil.copy(src, log_dir / f"{tag}-{c['corner_id'].replace('/', '_')}.log")
+                    n_logs[bench] += 1
+        manifest_path = None
+        if any(n_logs.values()):
+            try:
+                manifest_path, _summary = artifact_store.store(ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
+            except artifact_store.ArtifactError as exc:
+                print(f"ERROR: raw outputs not stored; no record written: {exc}", file=sys.stderr)
+                return 1
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
@@ -443,16 +472,13 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
             req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
             write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
             write_new(RECORDS_DIR / f"{record_id}-{tag}.klt.json", json.dumps(payload, indent=2) + "\n")
-            n_art = 0
+            n_art = n_logs[bench]
             for c in payload["corners"]:
-                art = c.get("artifacts") or {}
-                cid = c["corner_id"].replace("/", "_")
-                for kind, dest_dir, suffix in (("log", log_dir, "log"), ("deck", snap_dir, "spice")):
-                    src = art.get(kind)
-                    if src and Path(src).is_file():
-                        dest_dir.mkdir(parents=True, exist_ok=True)
-                        shutil.copy(src, dest_dir / f"{tag}-{cid}.{suffix}")
-                        n_art += 1
+                src = (c.get("artifacts") or {}).get("deck")
+                if src and Path(src).is_file():
+                    snap_dir.mkdir(parents=True, exist_ok=True)
+                    shutil.copy(src, snap_dir / f"{tag}-{c['corner_id'].replace('/', '_')}.spice")
+                    n_art += 1
             remote = (payload.get("environment") or {}).get("remote")
             meta_benches[bench] = {
                 "status": payload["status"], "corner_count": payload["corner_count"],
@@ -487,6 +513,7 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
             "env_KLT_SIM_BACKEND": os.environ.get("KLT_SIM_BACKEND"),
             "dut": dut,
             "benches": meta_benches,
+            "artifacts": {"manifest": manifest_path.relative_to(REPO_ROOT).as_posix() if manifest_path else None},
             "tools": {
                 "klt": klt_version(),
                 "python": platform.python_version(),
