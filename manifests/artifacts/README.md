@@ -18,7 +18,7 @@ object). Both are append-only (`sim/lib/append_only_check.py`).
   fetch one object with `klt artifact get`.
 - CI: `sim/lib/check_artifact_manifests.py` validates the schema, accepts only
   `artifact:` URIs, fails if a stored object's bytes are also tracked, and
-  rejects `s3://` / `arn:aws:` anywhere under `manifests/`. Never write the
+  rejects bucket URLs and cloud account ARNs anywhere under `manifests/`. Never write the
   broker URL into the repo.
 - Zero-byte outputs cannot be stored; the summary lists them.
 - Manifest-forward only: evidence committed before this flow stays in

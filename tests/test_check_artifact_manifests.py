@@ -78,6 +78,16 @@ class CheckTests(unittest.TestCase):
     def test_repo_is_clean(self):
         self.assertEqual(c.check(Path(__file__).resolve().parent.parent), [])
 
+    def test_readme_does_not_trip_its_own_checker(self):
+        repo = Path(__file__).resolve().parent.parent
+        text = (repo / "manifests" / "artifacts" / "README.md").read_text(encoding="utf-8")
+        self.assertIsNone(c.FORBIDDEN.search(text))
+
+    def test_no_test_fixture_manifests_in_real_tree(self):
+        # Tests use placeholder commit abc1234; they must never write into the real manifests/ tree.
+        repo = Path(__file__).resolve().parent.parent
+        self.assertEqual(sorted((repo / "manifests" / "artifacts").glob("*-abc1234-*")), [])
+
 
 if __name__ == "__main__":
     unittest.main()
