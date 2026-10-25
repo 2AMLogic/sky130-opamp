@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "kind": "generic",
+  "status": "pass",
+  "t1_item": 9,
+  "summary": "T1 item 9 (Testbenches shipped): 19/19 attestation checks passed (klt signoff --attest)",
+  "source": "manifests/inventory/item9.json",
+  "attestation": {
+    "producer": "klt signoff --attest",
+    "inventory_schema_version": 1,
+    "hash_algorithm": "sha256-raw-bytes",
+    "check_count": 19,
+    "passed_count": 19,
+    "checks": [
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/gm-id-characterization/README.md",
+        "passed": true,
+        "content_hash": "sha256:8fafce6b7a0980a1e41c533dbd2d1118da5402440edd926f5689148a123d0786"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/gm-id-characterization/bin/sweep.py",
+        "passed": true,
+        "content_hash": "sha256:0a116337991402499d252cc8416c1a512435afab98041cc0c0f794802b5bc2cf"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/gm-id-characterization/pdk.json",
+        "passed": true,
+        "content_hash": "sha256:557f7ec2506d899f7af9d5cf0710bd8e8b0a4b04a87c8f13809f533e8fb95bb1"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/gm-id-characterization/testbench/nfet_gmid.spice.tmpl",
+        "passed": true,
+        "content_hash": "sha256:95a04956618338b2305255fa0d34d9d0974ce096bb4e6891013e0c450069a2a0"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/gm-id-characterization/testbench/pfet_gmid.spice.tmpl",
+        "passed": true,
+        "content_hash": "sha256:534b188dc974124841bf74ac95dc13907a546b67473e300df5c3471bd04df83c"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/offset-capability/README.md",
+        "passed": true,
+        "content_hash": "sha256:4c63c77df25557de95ebcf7148f85c20205e3c896fbcccdc84c97ee3214809a6"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/offset-capability/bench/offset_dc.cir",
+        "passed": true,
+        "content_hash": "sha256:2844e0dbcdbb3bd426858cda16e3e657dff84aabf6276b6e73f5516cda1174c5"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/offset-capability/bench/pair_diag.cir",
+        "passed": true,
+        "content_hash": "sha256:4678b2850a639f91781da0d3a13c8feeca4398cb8176d6d62c3ed4ba4e6d37f1"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/offset-capability/bin/offset_probe.py",
+        "passed": true,
+        "content_hash": "sha256:a166e160e3f8c3466b849b71fa86418c29d9c353ff5382ecf4f33d87e38adf1a"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/README.md",
+        "passed": true,
+        "content_hash": "sha256:11e886f3a845ad8982f72863806caaa848472d8a40e48fb229ff16da2e2588a8"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/bin/psrr_noise_sweep.py",
+        "passed": true,
+        "content_hash": "sha256:e18b43e8d1ba796ddd46b75c5fd52888115a0e41b7fa911cd1713b7103172de1"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/bin/pvt_sweep.py",
+        "passed": true,
+        "content_hash": "sha256:a8ca0c48c5e950776607c647ae86c1e694f3bf8c2dad3d30ff67a5791579d0cf"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/pdk.json",
+        "passed": true,
+        "content_hash": "sha256:72c851c36eb8f15104249ff7368ea590759744d1ec35a6ca798c3096429b96a0"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/testbench/opamp_ac.spice.tmpl",
+        "passed": true,
+        "content_hash": "sha256:b9dd29b187ae05ab2e92bb27f50418fb451eab7c7fb62176d51892a5bf5f2993"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/testbench/opamp_dc_swing.spice.tmpl",
+        "passed": true,
+        "content_hash": "sha256:c5584d41a77c44b8d38d88be21bc0b78ce24666b7b45fb57ac4215e49c3bf0b3"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/opamp-characterization/testbench/opamp_tran_sr.spice.tmpl",
+        "passed": true,
+        "content_hash": "sha256:50a654ec5d3470d7c1cd9c0d06555777da5980599f44bbb2db82e840f54becd6"
+      },
+      {
+        "check": "command",
+        "role": "cold_start",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_*sweep.py"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "pin",
+        "role": "pdk",
+        "passed": true,
+        "value": {
+          "name": "sky130A",
+          "revision": "c6d73a35f524070e85faff4a6a9eef49553ebc2b"
+        }
+      },
+      {
+        "check": "pin",
+        "role": "tools",
+        "passed": true,
+        "value": {
+          "klayout-tools": "0.8.0",
+          "ngspice": "42"
+        }
+      }
+    ]
+  },
+  "provenance": {
+    "klt_version": "0.8.0",
+    "klayout_version": null,
+    "pdk": null,
+    "deck": null,
+    "input": {
+      "path": {
+        "path": "manifests/inventory/item9.json",
+        "scope": "repo"
+      },
+      "content_hash": "sha256:b21d1408fe3d97a7bdedeb53ba494cdabe5970cbb9263ab26e3f97b02abd92d1"
+    }
+  }
+}

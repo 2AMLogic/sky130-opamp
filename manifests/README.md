@@ -17,7 +17,8 @@ identified there.
     filing issue: a two-stage Miller-compensated operational amplifier,
     no digital or mixed-signal partition (see the tracker's "Block kind"
     section and `design/`).
-  - `evidence` holds citations for items 8 (issue
+  - `evidence` holds citations for items 9 and 10 (issue
+    [#223](https://github.com/2AMLogic/sky130-opamp/issues/223)), 8 (issue
     [#43](https://github.com/2AMLogic/sky130-opamp/issues/43)), 1 (issue
     [#55](https://github.com/2AMLogic/sky130-opamp/issues/55)) and 2, 3, 4, 11
     (issue [#222](https://github.com/2AMLogic/sky130-opamp/issues/222)). Every
@@ -34,7 +35,7 @@ identified there.
       stale), with negative controls in `design/bin/test_netlist_check.py`.
       Under the pinned klt 0.7.0 this generic citation grades item 1 `met`.
       (Historical: klt 0.5.0 rendered a generic item-1 citation
-      `wrong_kind`, which is why the pin moved to 0.7.0.) Like item 8,
+      `wrong_kind`, which is why the pin was first raised to 0.7.0.) Like item 8,
       `klt signoff` never re-hashes the cited input
       ([klayout-tools#2196](https://github.com/2AMLogic/klayout-tools/issues/2196)),
       so `signoff.yml`'s re-hash step plus the design-sources workflow are the
@@ -52,7 +53,7 @@ identified there.
       [`20261009-103006-566b9a5.md`](../sim/opamp-characterization/records/20261009-103006-566b9a5.md)
       (issue #53; it carries the six earlier rows forward from record
       `20261001-074923-c317ff9`).
-      Generic evidence is currently cited on exactly two items, 1 and 8,
+      Generic evidence is currently cited on items 1, 8, 9 and 10,
       and nowhere else. Item 8's checklist text names no `klt` verb, so it
       is reachable with no layout and no `klt sim` port. (Historical, klt
       0.5.0: item 8 was the only item accepting generic evidence; that no
@@ -141,12 +142,24 @@ identified there.
       evidence-kind one: no `klt yield` report (and no item-6 citation)
       exists. Matching and any other statistical rows are not covered by
       that campaign.
-    - **Items 9 and 10** have *no* kind restriction at all, so any
-      passing envelope would mechanically green them. The grader contract
-      is explicit that this is the dishonest-citation failure mode the
-      machinery exists to prevent: "The safest default is to leave [items
-      9 and 10] uncited (item 1 is cited only because a CI gate re-derives it)." They stay uncited (item 2 is cited here on a tool-produced `klt extract`
-      envelope, not a generic one).
+    - **Items 9 and 10 (attested inventories)** cite generic envelopes
+      produced by `klt signoff --attest N --inventory
+      manifests/inventory/itemN.json` (issue
+      [#223](https://github.com/2AMLogic/sky130-opamp/issues/223), design
+      in [DR-014](../spec/decision-records/DR-014-t1-attestation-inventories.md)),
+      committed as
+      [`envelopes/item9.attest.json`](envelopes/item9.attest.json) and
+      [`envelopes/item10.attest.json`](envelopes/item10.attest.json).
+      Items 9 and 10 have *no* kind restriction at all, so any passing
+      envelope would mechanically green them; that is why they are cited
+      only on an envelope the tool derived from a versioned inventory (it
+      pins the inventory's bytes and every inventoried file's hash and runs
+      the declared PDK-free checks), never on a hand-written one. Item 9's
+      cold start is the PDK-free harness unit tests; the full ngspice
+      sweeps stay documented in each bench README. CI re-runs `klt signoff
+      --attest N --inventory ... --check <envelope>` per envelope (exit 3 =
+      drift): edit an inventoried file and regenerate the envelope in the
+      same PR. The klt pin moved to 0.8.0 because `--attest` first shipped there.
 - **`design-evidence-tiers.md`** — the T1-T4 checklist the grader
   parses. Vendored **byte-identical** from
   [`2AMLogic/klayout-tools@31a3e3c`](https://github.com/2AMLogic/klayout-tools/blob/31a3e3c41c08bbd58719e0b99a3b6d19beb9be63/docs/design-evidence-tiers.md)
@@ -168,7 +181,7 @@ identified there.
 ## Regenerate (cold start)
 
 ```console
-pip install klayout-tools==0.7.0        # provides the `klt` command
+pip install klayout-tools==0.8.0        # provides the `klt` command
 klt signoff --manifest manifests/sky130-opamp.json \
             --tiers-doc manifests/design-evidence-tiers.md \
             --format json > manifests/sky130-opamp.signoff.json
@@ -255,7 +268,7 @@ then rerun the `klt signoff` regeneration command above.
 
 ## Current verdict
 
-**Not-T1 — T1 items 1, 2, 3, 4, 8 and 11 met (6 of 11)** as of this record. Every item's `reason`
+**Not-T1 — T1 items 1, 2, 3, 4, 8, 9, 10 and 11 met (8 of 11)** as of this record. Every item's `reason`
 is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 
 - **Item 8 (characterization report) — `met`**, on the generic evidence
@@ -271,7 +284,9 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 - **Items 2, 3, 4, 11** — `met` on the `layout/opamp_core/` envelopes
   described above, with the caveats there (Magic `drc(full)` fails; the
   p-substrate tie is disclosed, not graded).
-- **The other 5 T1 items — `unmet` / `no_evidence`**, each for the
+- **Items 9 and 10** — `met` on the `--attest` envelopes described above
+  (inventory-derived, re-checked in CI).
+- **The other 3 T1 items (5, 6, 7) — `unmet` / `no_evidence`**, each for the
   reason recorded per item above.
 
 Known item-level gates on the path forward (partial layout and measured

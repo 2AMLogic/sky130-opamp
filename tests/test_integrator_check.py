@@ -40,7 +40,7 @@ class IntegratorCheckTests(unittest.TestCase):
     def test_changed_count(self):
         self.mutate(lambda m: m["maturity"].update(t1_met=0))
         errs = ic.check(self.tmp)
-        self.assertEqual(errs, ["maturity.t1_met: expected 6 (from source), actual 0"])
+        self.assertEqual(errs, ["maturity.t1_met: expected 8 (from source), actual 0"])
 
     def test_swapped_ports(self):
         def sw(m):
