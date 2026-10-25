@@ -199,6 +199,9 @@ def check_manifest(manifest, root=REPO):
         prov = prov.get("input") if isinstance(prov, dict) else None
         prov = prov if isinstance(prov, dict) else {}
         artifact = prov.get("path")
+        # klt --attest envelopes spell the path as {"path": ..., "scope": "repo"}.
+        if isinstance(artifact, dict) and artifact.get("scope") == "repo":
+            artifact = artifact.get("path")
         declared = prov.get("content_hash")
         if not artifact or not declared or not isinstance(artifact, str):
             failures.append(

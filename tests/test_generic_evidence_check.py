@@ -63,6 +63,17 @@ class CheckTests(Fixture):
         self.manifest({"8": "ev/env.json"})
         self.assertEqual(self.run_check()[0], 1)
 
+    def test_attest_scope_repo_path_form(self):
+        # klt --attest spells provenance.input.path as {"path": ..., "scope": "repo"}.
+        self.write("inv/item.json", "inventory\n")
+        self.envelope("ev/env.json", {"path": "inv/item.json", "scope": "repo"},
+                      h(b"inventory\n"))
+        self.manifest({"9": {"file": "ev/env.json", "content_hash": "sha256:x"}})
+        n, oks, fails = self.run_check()
+        self.assertEqual((n, fails), (1, []))
+        self.write("inv/item.json", "edited\n")
+        self.assertEqual(len(self.run_check()[2]), 1)
+
     def test_altered_artifact_fails_without_touching_hashes(self):
         self.valid()
         env_before = (self.root / "ev/env.json").read_bytes()

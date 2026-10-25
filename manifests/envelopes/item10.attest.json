@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "kind": "generic",
+  "status": "pass",
+  "t1_item": 10,
+  "summary": "T1 item 10 (Repo hygiene): 15/15 attestation checks passed (klt signoff --attest)",
+  "source": "manifests/inventory/item10.json",
+  "attestation": {
+    "producer": "klt signoff --attest",
+    "inventory_schema_version": 1,
+    "hash_algorithm": "sha256-raw-bytes",
+    "check_count": 15,
+    "passed_count": 15,
+    "checks": [
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": ".github/workflows/design-sources.yml",
+        "passed": true,
+        "content_hash": "sha256:2feec454569e1a1642b623f12da53f5a8ad858aa58a7537dcf48338dfd6baad3"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": ".github/workflows/signoff.yml",
+        "passed": true,
+        "content_hash": "sha256:ab9f13df3ff869f03af0cdda05c231f7cb8ff96adff461c28fb0e3ae0d119c55"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": ".github/workflows/tests.yml",
+        "passed": true,
+        "content_hash": "sha256:e9379c058a4d0d44f1beaacda950a92a6dee239f62014e70d47832192ef750d5"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": ".gitignore",
+        "passed": true,
+        "content_hash": "sha256:078aea49a1e0ff4d724c403f651769b3cbccb4135fcdd53b4f9fab36ab9538b3"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": "CLAUDE.md",
+        "passed": true,
+        "content_hash": "sha256:48f21f89de607b9df39a3021a95ae4b506e2ce9139223bb9fab3cae4c2647285"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": "LICENSE",
+        "passed": true,
+        "content_hash": "sha256:cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+      },
+      {
+        "check": "present",
+        "role": "hygiene",
+        "path": "README.md",
+        "passed": true,
+        "content_hash": "sha256:ad36cebb0eaa15a9bdcf4925b3c64f767451fb5f10d7370732d89f06a9cc7f03"
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "sizing_check validate",
+        "argv": [
+          "python3",
+          "design/bin/sizing_check.py",
+          "validate"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "integrator_check validate",
+        "argv": [
+          "python3",
+          "design/bin/integrator_check.py",
+          "validate"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "spec_figures_check validate",
+        "argv": [
+          "python3",
+          "design/bin/spec_figures_check.py",
+          "validate"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "dut_identity validate",
+        "argv": [
+          "python3",
+          "sim/lib/dut_identity.py",
+          "validate"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "dut_identity current",
+        "argv": [
+          "python3",
+          "sim/lib/dut_identity.py",
+          "current"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "grid_check",
+        "argv": [
+          "python3",
+          "design/bin/grid_check.py"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "unittest tests",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      },
+      {
+        "check": "command",
+        "role": "audit",
+        "name": "unittest layout/bin",
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "layout/bin",
+          "-p",
+          "test_*.py"
+        ],
+        "cwd": ".",
+        "exit_status": 0,
+        "passed": true
+      }
+    ]
+  },
+  "provenance": {
+    "klt_version": "0.8.0",
+    "klayout_version": null,
+    "pdk": null,
+    "deck": null,
+    "input": {
+      "path": {
+        "path": "manifests/inventory/item10.json",
+        "scope": "repo"
+      },
+      "content_hash": "sha256:cfc5fb8cacde888ba148e5e5558edb248d5856c24ae559c35dc71c7459aff6a3"
+    }
+  }
+}

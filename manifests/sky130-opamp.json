@@ -22,6 +22,14 @@
       "file": "sim/opamp-characterization/records/20261009-103006-566b9a5.characterization.json",
       "content_hash": "sha256:7fa0dc2c984212c03867ce673a0b96f87d2b7b361f89d73611c170312d9394f4"
     },
+    "9": {
+      "file": "manifests/envelopes/item9.attest.json",
+      "content_hash": "sha256:b21d1408fe3d97a7bdedeb53ba494cdabe5970cbb9263ab26e3f97b02abd92d1"
+    },
+    "10": {
+      "file": "manifests/envelopes/item10.attest.json",
+      "content_hash": "sha256:cfc5fb8cacde888ba148e5e5558edb248d5856c24ae559c35dc71c7459aff6a3"
+    },
     "11": [
       {
         "file": "layout/opamp_core/erc.json",

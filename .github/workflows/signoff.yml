@@ -35,7 +35,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install pinned klt
-        run: pip install klayout-tools==0.7.0
+        run: pip install klayout-tools==0.8.0
 
       # Generic ("kind": "generic") evidence envelopes are hand-written, and
       # `klt signoff` grades their freshness against the hash the envelope
@@ -53,6 +53,15 @@ jobs:
       # (unit-tested; also run by `python3 design/bin/check_ci.py`).
       - name: Re-hash every generic envelope's cited artifact
         run: python3 design/bin/generic_evidence_check.py
+
+      # Items 9 and 10 are cited on `klt signoff --attest` envelopes. --check
+      # re-attests from the versioned inventory and exits 0 only if the
+      # committed envelope still reproduces and passes (3 = drift/fail).
+      - name: Re-attest T1 item 9 (testbenches shipped)
+        run: klt signoff --attest 9 --inventory manifests/inventory/item9.json --check manifests/envelopes/item9.attest.json
+
+      - name: Re-attest T1 item 10 (repo hygiene)
+        run: klt signoff --attest 10 --inventory manifests/inventory/item10.json --check manifests/envelopes/item10.attest.json
 
       - name: Re-run klt signoff and compare against the committed record
         run: |
