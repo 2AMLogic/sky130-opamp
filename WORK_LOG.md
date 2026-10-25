@@ -2,6 +2,11 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-25
+
+- **PR #244**: feat: attest T1 items 9 and 10 with klt 0.8.0 envelopes
+- **Issue #223** (closed): T1 items 9/10: produce attestation envelopes once a klt release has --attest (phase B of #221)
+
 ### 2026-10-23
 
 - **PR #241**: feat(sim): store new evidence bytes in the artifact store, commit manifests
