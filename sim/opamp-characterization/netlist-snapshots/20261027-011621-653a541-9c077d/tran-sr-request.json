@@ -1,0 +1,125 @@
+{
+  "netlist": "tran-sr-body.spice",
+  "engine": "ngspice",
+  "backend": "batch",
+  "models": {
+    "pdk": "sky130A",
+    "lib": "libs.tech/ngspice/sky130.lib.spice"
+  },
+  "corners": {
+    "process": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "supply_v": {
+      "vdd": [
+        1.62,
+        1.8,
+        1.98
+      ]
+    },
+    "temperature_c": [
+      -40.0,
+      27.0,
+      125.0
+    ]
+  },
+  "exclude": [
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.8
+      }
+    },
+    {
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.62
+      }
+    },
+    {
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.98
+      }
+    }
+  ],
+  "analysis": {
+    "kind": "tran",
+    "args": "2n 2.2u"
+  },
+  "measurements": [
+    {
+      "name": "t20_rise",
+      "unit": "s",
+      "spice": ".meas tran t20_rise when v(out)=v(l20) rise=1"
+    },
+    {
+      "name": "t80_rise",
+      "unit": "s",
+      "spice": ".meas tran t80_rise when v(out)=v(l80) rise=1"
+    },
+    {
+      "name": "t80_fall",
+      "unit": "s",
+      "spice": ".meas tran t80_fall when v(out)=v(l80) fall=1"
+    },
+    {
+      "name": "t20_fall",
+      "unit": "s",
+      "spice": ".meas tran t20_fall when v(out)=v(l20) fall=1"
+    }
+  ],
+  "options": {
+    "timeout_s": 1200,
+    "keep_artifacts": true
+  },
+  "batch": {
+    "runner_version_check": "warn"
+  }
+}

@@ -114,7 +114,43 @@ identified there.
         `disclosed_undeclared_tie_classes`. The declaration was
         negative-controlled: pointing the tie at `vss` reports
         `erc.missing_tie`.
-      Item 7 (post-layout) stays uncited: no `klt pex` run exists.
+    - **Item 7 (post-layout)** cites the `klt pex` report
+      [`20261027-pex-opamp_core.pex.json`](../sim/opamp-characterization/records/20261027-pex-opamp_core.pex.json)
+      (issue [#247](https://github.com/2AMLogic/sky130-opamp/issues/247)): 150
+      `delta[]` rows (10 measurements x 15 PVT points), all `pass`, run with
+      `--measure-command` over `sim/opamp-characterization/bin/pex_measure.py`
+      (it drives `pvt_sweep.py --fleet --backend batch`; records
+      `20261027-011621-653a541-9c077d` schematic leg, `20261027-012720-653a541-83f9a1`
+      extracted leg). Rows: DC gain, GBW, phase margin, quiescent power, rise/fall
+      slew, output swing (`vpp_v`), ICMR low/high/width. What the `met` does and
+      does not say:
+      - **`body_bias.status` is `biased`** (0 unbiased devices, 0 unbiased nets), so
+        the extracted numbers are comparable to the schematic leg.
+      - **`extraction.model` limits** (quoted from the report): quasi-static, one
+        frequency-independent R and C per net, lumped star resistance (no
+        `--distributed-rc`), vertical-overlap coupling only (no lateral
+        coupling: no `--critical-net` was named), no fringe shielding, substrate
+        tied through 1e12 ohm. The citation is no evidence about frequency-dependent
+        or lateral-coupling effects.
+      - **Largest delta per row** (schematic -> extracted): gain +2.24 % (FS/-40 C),
+        GBW -3.11 % (SS/-40 C), phase margin +4.11 % (SF/-40 C), Pq +3.68 %
+        (SF/-40 C), rise slew +1.05 %, fall slew -9.57 % (SS/-40 C), output swing
+        -5.92 % (SS/-40 C), ICMR low -1.21 %, ICMR high -9.05 % and ICMR width
+        -17.10 % (SF/-40 C). `met` is the tool's grading that the run completed with
+        a biased netlist; it is **not** a claim that every row stays within its spec
+        target after extraction. Spec rows are not re-graded or loosened here; the
+        extracted ICMR window (0.586 V narrowest) must be read against the target
+        window in `spec/target-spec.md`.
+      - **Attribution is partial.** The extracted lumped nets add ground
+        capacitance (e.g. `out` 40 fF, `d2` 19 fF, `d1` 8.4 fF, `tail` 9.1 fF,
+        `cz` 3.2 fF) and star resistance, which accounts for the GBW/phase-margin
+        movement. The report also carries `model_mismatch`: the extractor emits
+        `sky130_fd_pr__res_high_po` where the schematic uses `..._res_high_po_1p41`,
+        and the layout is 35 fingered devices (per-finger AS/AD/PS/PD) against 10
+        schematic instances; the `--device-only-leg` split that separates those from
+        parasitics was not run, so the larger ICMR/slew deltas are not attributed
+        to R/C alone.
+      - Not done: the negative control (extracted == reference gives zero delta).
     - **Item 5 (corner verification vs a ratified spec)**: `spec/target-spec.md`
       is now **RATIFIED (partial)** (DR-003,
       [#26](https://github.com/2AMLogic/sky130-opamp/issues/26)), so that
@@ -302,7 +338,8 @@ full-core signoff or ratification):
 - Item 6 (Monte Carlo): measured offset data exists against a proposed
   (DR-009), OPEN target, and does not meet it; the remaining gate is a
   `klt yield` report and citation — see the per-item rationale above.
-- Item 7 (post-layout): no `klt pex` run exists, so it stays uncited.
+- Item 7 (post-layout): cited on the `klt pex` report above (`met`, `body_bias` biased); the
+  attribution caveats there stand.
 - Items 2, 3, 4 and 11 are cited on the assembled core; the open caveats
   there are the failing Magic `drc(full)` (inherited `opamp_comp` resistor
   head) and the ungraded p-substrate tie.
