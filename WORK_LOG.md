@@ -2,6 +2,11 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-27
+
+- **PR #248**: feat(sim): cite klt pex run on the opamp_core layout for T1 item 7
+- **Issue #247** (closed): T1 item 7 (post-layout verification): klt pex of opamp_core against the ratified rows
+
 ### 2026-10-25
 
 - **PR #244**: feat: attest T1 items 9 and 10 with klt 0.8.0 envelopes
