@@ -29,7 +29,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -37,45 +36,13 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from _klt_common import BuildError, run_klt, write_json  # noqa: E402
+from _magic_common import flatten_gds, parse_magic_log, run_checked as run, run_magic  # noqa: E402
 
-FLATTEN_RB = """\
-ly = RBA::Layout.new
-ly.read($input)
-top = ly.top_cell
-top.flatten(true)
-ly.cleanup
-ly.write($output)
-"""
-
-DRC_TCL = """\
-gds read flat.gds
-load {cell}
-select top cell
-box values -100000 -100000 100000 100000
-select area
-puts "MAGIC_TYPES: [lindex [what -list] 0]"
-select clear
-port makeall
-drc euclidean on
-drc style drc(full)
-drc check
-drc catchup
-puts "MAGIC_DRC_TOTAL: [drc listall count total]"
-foreach {{msg boxes}} [drc listall why] {{ puts "MAGIC_DRC_WHY: [llength $boxes] :: $msg" }}
+EXTRACT_TAIL = """\
 extract all
 ext2spice lvs
 ext2spice -o {cell}.magic.spice
-quit -noprompt
 """
-
-
-def run(cmd: list[str], cwd: Path) -> str:
-    proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)
-    if proc.returncode != 0:
-        raise BuildError(
-            f"{cmd[0]} exited {proc.returncode}:\n{proc.stdout}\n{proc.stderr}"
-        )
-    return proc.stdout + proc.stderr
 
 
 def signoff_clean(summary: dict, netgen_match: bool) -> bool:
@@ -115,48 +82,17 @@ def main(argv: list[str] | None = None) -> int:
     out.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="magic-signoff-") as tmp:
         tmp_dir = Path(tmp)
-        (tmp_dir / "flatten.rb").write_text(FLATTEN_RB)
-        run(
-            [
-                "klayout",
-                "-b",
-                "-rd",
-                f"input={cell_dir / f'{cell}.gds'}",
-                "-rd",
-                "output=flat.gds",
-                "-r",
-                "flatten.rb",
-            ],
-            tmp_dir,
-        )
-        (tmp_dir / "drc.tcl").write_text(DRC_TCL.format(cell=cell))
-        with open(tmp_dir / "drc.tcl") as script:
-            proc = subprocess.run(
-                [
-                    "magic",
-                    "-dnull",
-                    "-noconsole",
-                    "-rcfile",
-                    "/dev/null",
-                    "-T",
-                    str(magic_tech),
-                ],
-                cwd=tmp_dir,
-                stdin=script,
-                capture_output=True,
-                text=True,
-                check=False,
+        flatten_gds(cell_dir / f"{cell}.gds", tmp_dir)
+        parsed = parse_magic_log(
+            run_magic(
+                cell,
+                magic_tech,
+                tmp_dir,
+                pre="port makeall\n",
+                post=EXTRACT_TAIL.format(cell=cell),
             )
-        log = proc.stdout + proc.stderr
-        types_line = re.search(r"^MAGIC_TYPES: (.*)$", log, re.MULTILINE)
-        total = re.search(r"^MAGIC_DRC_TOTAL: (\d+)", log, re.MULTILINE)
-        if not types_line or not total:
-            raise BuildError(f"magic produced no DRC summary:\n{log[-2000:]}")
-        types = types_line.group(1).strip("{} ").split()
-        why = [
-            {"count": int(m.group(1)), "rule": m.group(2)}
-            for m in re.finditer(r"^MAGIC_DRC_WHY: (\d+) :: (.*)$", log, re.MULTILINE)
-        ]
+        )
+        types = parsed["magic_types_seen"]
         missing = [t for t in expect_types.split(",") if t and t not in types]
 
         (tmp_dir / "ref.spice").write_text((cell_dir / f"{cell}.ref.spice").read_text())
@@ -196,8 +132,8 @@ def main(argv: list[str] | None = None) -> int:
         },
         "magic_types_seen": types,
         "missing_expected_types": missing,
-        "drc_total": int(total.group(1)),
-        "drc_by_rule": why,
+        "drc_total": parsed["drc_total"],
+        "drc_by_rule": parsed["drc_by_rule"],
         "netgen": {
             "netlists_match_uniquely": "Netlists match uniquely." in report,
             "pins_matched": "Cell pin lists are equivalent." in report,
