@@ -27,9 +27,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shlex
-import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -38,36 +36,12 @@ HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
 from _klt_common import BuildError, run_klt, write_json  # noqa: E402
+import _magic_common  # noqa: E402
+from _magic_common import flatten_gds, run_magic  # noqa: E402
 
 PDK_PIN = REPO_ROOT / "layout" / "pdk.json"
 OUT_ROOT = REPO_ROOT / "layout" / "passive_probes"
 GRID_UM = 0.005  # sky130 manufacturing grid used by this repo (README, DR-010)
-
-FLATTEN_RB = """\
-ly = RBA::Layout.new
-ly.read($input)
-top = ly.top_cell
-top.flatten(true)
-ly.cleanup
-ly.write($output)
-"""
-
-DRC_TCL = """\
-gds read flat.gds
-load {cell}
-select top cell
-box values -100000 -100000 100000 100000
-select area
-puts "MAGIC_TYPES: [lindex [what -list] 0]"
-select clear
-drc euclidean on
-drc style drc(full)
-drc check
-drc catchup
-puts "MAGIC_DRC_TOTAL: [drc listall count total]"
-foreach {{msg boxes}} [drc listall why] {{ puts "MAGIC_DRC_WHY: [llength $boxes] :: $msg" }}
-quit -noprompt
-"""
 
 # id, generator, params, schematic statement it probes
 PROBES = [
@@ -126,26 +100,16 @@ def check_toolchain(klt: list[str], env: dict) -> dict:
 def magic_drc(gds: Path, cell: str, tech: Path) -> dict:
     with tempfile.TemporaryDirectory(prefix="probe-magic-") as tmp:
         t = Path(tmp)
-        (t / "flatten.rb").write_text(FLATTEN_RB)
-        subprocess.run(["klayout", "-b", "-rd", f"input={gds}", "-rd", "output=flat.gds", "-r", "flatten.rb"],
-                       cwd=t, check=True, capture_output=True, text=True)
-        (t / "drc.tcl").write_text(DRC_TCL.format(cell=cell))
-        with open(t / "drc.tcl") as script:
-            proc = subprocess.run(["magic", "-dnull", "-noconsole", "-rcfile", "/dev/null", "-T", str(tech)],
-                                  cwd=t, stdin=script, capture_output=True, text=True, check=False)
-    return parse_magic_log(proc.stdout + proc.stderr)
+        flatten_gds(gds, t)
+        log = run_magic(cell, tech, t)
+    return parse_magic_log(log)
 
 
 def parse_magic_log(log: str) -> dict:
-    types = re.search(r"^MAGIC_TYPES: (.*)$", log, re.MULTILINE)
-    total = re.search(r"^MAGIC_DRC_TOTAL: (\d+)", log, re.MULTILINE)
-    if not total or not types:
-        raise BuildError(f"magic produced no DRC summary:\n{log[-1500:]}")
-    why = [{"count": int(m.group(1)), "rule": m.group(2)}
-           for m in re.finditer(r"^MAGIC_DRC_WHY: (\d+) :: (.*)$", log, re.MULTILINE)]
-    seen = types.group(1).strip("{} ").split()
-    return {"drc_style": "drc(full)", "drc_total": int(total.group(1)), "drc_by_rule": why,
-            "magic_types_seen": seen,
+    parsed = _magic_common.parse_magic_log(log)
+    seen = parsed["magic_types_seen"]
+    return {"drc_style": "drc(full)", "drc_total": parsed["drc_total"],
+            "drc_by_rule": parsed["drc_by_rule"], "magic_types_seen": seen,
             "vacuous": not seen}
 
 
