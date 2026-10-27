@@ -32,8 +32,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-- **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row
-- **#247**: T1 item 7 (post-layout verification): klt pex of opamp_core against the ratified rows
+_None._
 
 ## PRs Awaiting Review
 
@@ -54,10 +53,12 @@ Issues carrying `loom:curated`.
 - **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
+- **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#237**: Consolidate duplicated logical_lines and sha256 helpers across flow scripts *(hermit)*
+- **#251**: Consolidate duplicated Magic DRC pipeline across layout scripts *(hermit)*
 
 ## Epics
 
@@ -71,10 +72,10 @@ _None._
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 2 |
+| In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 3 |
-| Architect / Hermit proposals | 1 |
+| Curated | 4 |
+| Architect / Hermit proposals | 2 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
