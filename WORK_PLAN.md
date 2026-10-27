@@ -32,7 +32,8 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row
+- **#247**: T1 item 7 (post-layout verification): klt pex of opamp_core against the ratified rows
 
 ## PRs Awaiting Review
 
@@ -70,7 +71,7 @@ _None._
 | Very important | 0 |
 | Important | 2 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
 | Curated | 3 |
