@@ -4,6 +4,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-10-27
 
+- **PR #254**: refactor: share Magic DRC pipeline between layout scripts
+- **Issue #251** (closed): Consolidate duplicated Magic DRC pipeline across layout scripts
 - **PR #248**: feat(sim): cite klt pex run on the opamp_core layout for T1 item 7
 - **Issue #247** (closed): T1 item 7 (post-layout verification): klt pex of opamp_core against the ratified rows
 
