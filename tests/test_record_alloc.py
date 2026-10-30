@@ -90,23 +90,5 @@ class AllocTests(unittest.TestCase):
             sh.make_new_dir(d)
 
 
-class ReaderCompatTests(unittest.TestCase):
-    def test_latest_ac_csv_orders_new_ids_after_historical(self):
-        pvt = _paths.load_module("pvt_sweep_alloc", _paths.EXP / "bin" / "pvt_sweep.py")
-        with tempfile.TemporaryDirectory() as d:
-            rec = Path(d)
-            for n in ("20260916-032327-edc9f22-ac.csv", "20261009-120000-abc1234-a1b2c3-ac.csv"):
-                (rec / n).write_text("x")
-            old = pvt.RECORDS_DIR
-            pvt.RECORDS_DIR = rec
-            try:
-                got = pvt.latest_ac_csv("20261009-120001-abc1234-ffffff")
-                self.assertEqual(got.name, "20261009-120000-abc1234-a1b2c3-ac.csv")
-                got = pvt.latest_ac_csv("20261009-120000-abc1234-000000")
-                self.assertEqual(got.name, "20260916-032327-edc9f22-ac.csv")
-            finally:
-                pvt.RECORDS_DIR = old
-
-
 if __name__ == "__main__":
     unittest.main()

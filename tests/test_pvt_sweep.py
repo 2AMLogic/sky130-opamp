@@ -466,6 +466,13 @@ class ReferenceBindingTests(unittest.TestCase):
         self.assertFalse(got["available"])
         self.assertIn("failed verification", got["skipped_candidates"][0]["reason"])
 
+    def test_new_format_ids_rank_after_historical(self):
+        old, new = "20260916-032327-edc9f22", "20261009-120000-abc1234-a1b2c3"
+        self.add(old)
+        self.add(new)
+        self.assertEqual(self.select(before="20261009-120001-abc1234-ffffff")["identity"]["record_id"], new)
+        self.assertEqual(self.select(before="20261009-120000-abc1234-000000")["identity"]["record_id"], old)
+
     def test_no_candidates(self):
         self.assertIn("no earlier AC record exists", self.select()["unavailable_reasons"][0])
 
