@@ -1,0 +1,159 @@
+{
+  "record_id": "20261030-050623-0fa5c15-950b9f",
+  "timestamp": "2026-10-30T05:08:47.327489+00:00",
+  "git": {
+    "sha": "0fa5c15"
+  },
+  "label": "",
+  "experiment": {
+    "slug": "opamp-characterization/psrr-noise",
+    "claim": "Pre-layout (schematic netlist) PSRR+/PSRR- and input-referred noise of design/netlist/opamp_core.spice over the 5-corner x 3-temperature grid (corner-paired VDD), via klt sim corner requests.",
+    "netlist_source": "schematic (pre-layout)"
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "benches": [
+      "noise"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "grid": {
+      "ppd": 20,
+      "f0_hz": 0.1,
+      "f1_hz": 1000000000.0,
+      "curve_step": 5
+    },
+    "psrr_window_hz": [
+      0.1,
+      1000.0
+    ],
+    "noise_band_hz": [
+      100.0,
+      1000000.0
+    ]
+  },
+  "backend_arg": "batch",
+  "env_KLT_SIM_BACKEND": "batch",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261030-050623-0fa5c15-950b9f-psrr-noise/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "benches": {
+    "noise": {
+      "status": "pass",
+      "corner_count": 15,
+      "passed": 15,
+      "failed": 0,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "46",
+      "backend_remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-08a110bc4ee6",
+        "region": "us-east-1",
+        "instance_id": "i-0a1e588c2d787910f",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0fa5ef830209100bd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 94,
+        "client_submitted_at": "2026-10-30T05:06:23.664006Z",
+        "client_launched_at": "2026-10-30T05:06:40.678070Z",
+        "client_status_terminal_at": "2026-10-30T05:08:44.379194Z",
+        "client_collected_at": "2026-10-30T05:08:45.203864Z",
+        "runner_klt_version": "0.8.0",
+        "client_klt_version": "0.8.1.dev758+g8ca3f4951d15",
+        "runner_compatibility": "match",
+        "runner_request_features": {
+          "required": [
+            "measurements[].expr",
+            "options.ngspice_init"
+          ],
+          "missing": [],
+          "status": "supported"
+        },
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-46 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2025, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Oct  1 23:51:59 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "d5ac52956829da3fee35d0b307d4e6cb83ae0e6535b56dba2eefed61cdffaf9b",
+            "stamp_text": "open_pdks c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "mismatch",
+            "warning": "the worker's ngspice --version banner differs from the local binary's; build options (e.g. FFT linkage) may differ, so results derived from them can differ from a local run"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        }
+      },
+      "artifacts_copied": 30,
+      "rendered_body": "sim/opamp-characterization/netlist-snapshots/20261030-050623-0fa5c15-950b9f-psrr-noise/noise.spice",
+      "request_snapshot": "sim/opamp-characterization/netlist-snapshots/20261030-050623-0fa5c15-950b9f-psrr-noise/noise.request.json",
+      "csv": "sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.csv"
+    }
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-psrr-noise-20261030-050623-0fa5c15-950b9f.manifest.json"
+  },
+  "tools": {
+    "klt": "klt 0.8.1.dev758+g8ca3f4951d15",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64"
+  }
+}
