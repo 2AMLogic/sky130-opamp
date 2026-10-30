@@ -884,12 +884,6 @@ def klt_fieldnames_cmrr() -> list[str]:
     return cols + ["gbw_hz", "elapsed_s"]
 
 
-def latest_ac_csv(before_id: str) -> Path | None:
-    """The newest committed -ac.csv older than this record: the cross-check reference."""
-    cands = sorted(p for p in RECORDS_DIR.glob("*-ac.csv") if p.name.split("-ac.csv")[0] < before_id)
-    return cands[-1] if cands else None
-
-
 REPO_REL_RECORDS = "sim/opamp-characterization/records"
 
 
