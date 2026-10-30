@@ -80,7 +80,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:11e886f3a845ad8982f72863806caaa848472d8a40e48fb229ff16da2e2588a8"
+        "content_hash": "sha256:2545adcb4aa0943ead4649a1e039f2537a445f2eae65ffa20b3a56c76f248261"
       },
       {
         "check": "present",

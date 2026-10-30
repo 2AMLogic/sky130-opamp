@@ -239,6 +239,7 @@ record ids are kept.
 ```bash
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --check-env
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py          # all three benches, 15 corners each
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch   # the 15-corner noise record (2026-10-30)
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches psrr_vdd,psrr_vss --runner-version-check warn
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --backend local --corners tt --temps 27 --benches noise   # single-corner debug probe only
 python3 sim/opamp-characterization/bin/validate_psrr_noise.py       # four single-corner cross-checks (local)
@@ -252,7 +253,8 @@ grids run on the Spot batch fleet; the job ids are in the record's
 submit fails: it exits non-zero and writes nothing. `KLT_CMD` overrides the
 `klt` launcher (e.g. `uvx --from klayout-tools==X.Y.Z klt`) without touching
 the host install. See "PSRR and input-referred noise" below for the results
-and for why the noise grid is **not** yet recorded.
+(the noise grid was blocked on the fleet runner until 2026-10-30; see
+"Result: noise PVT grid").
 
 ### ICMR and CMRR benches (issue #53)
 
@@ -1133,6 +1135,79 @@ does state a band (100 Hz – 1 MHz), so no missing-band finding applies; what
 it lacks is any flicker or integrated-noise number to compare against. The
 same single-corner data is a preview, not a grid-worst-case claim: other
 corners (ss/−40…) are expected to differ and are not measured.
+
+### Result: noise PVT grid (appended 2026-10-30; earlier text unchanged)
+
+The fleet runner image now carries klt 0.8.0, so the grid blocked above ran.
+`psrr_noise_sweep.py --benches noise --backend batch` (client
+0.8.1.dev758+g8ca3f4951d15) ran as batch job `klt-sim-08a110bc4ee6`
+(Spot m7i.4xlarge, 94 s): **15/15 corners pass, 0 failed**, record
+`20261030-050623-0fa5c15-950b9f`
+([`noise.csv`](records/20261030-050623-0fa5c15-950b9f-noise.csv),
+[`noise.klt.json`](records/20261030-050623-0fa5c15-950b9f-noise.klt.json) raw
+response, [`noise.request.json`](records/20261030-050623-0fa5c15-950b9f-noise.request.json),
+[`psrr-noise.json`](records/20261030-050623-0fa5c15-950b9f-psrr-noise.json) metadata,
+decks in `netlist-snapshots/20261030-050623-0fa5c15-950b9f-psrr-noise/`).
+The response reports `runner_compatibility=match` (runner 0.8.0) with
+`measurements[].expr` and `options.ngspice_init` in `supported` request
+features. No local grid was run. All values are **pre-layout** (schematic
+netlist, no parasitics, no package or board noise) and finite in all 15 rows.
+
+Band 100 Hz – 1 MHz (the spec row's proposed `[P]` band); VDD paired with the
+corner as in the other grids. Spot density in nV/√Hz, integrated noise in µV rms:
+
+| Corner | T (°C) | VDD | 100 Hz | 1 kHz | 100 kHz | white floor | 1/f crossing (kHz) | Integrated 100 Hz–1 MHz |
+|---|---|---|---|---|---|---|---|---|
+| tt | −40 | 1.80 | 1439 | 520 | 74.8 | 29.2 | 639 | 65.26 |
+| tt | 27 | 1.80 | 1500 | 541 | 79.7 | 35.8 | 442 | 70.11 |
+| tt | 125 | 1.80 | 1625 | 585 | 88.8 | 45.4 | 304 | 78.97 |
+| ff | −40 | 1.98 | 1399 | 505 | 72.7 | 28.2 | 651 | 63.42 |
+| ff | 27 | 1.98 | 1453 | 524 | 77.2 | 34.6 | 444 | 67.94 |
+| ff | 125 | 1.98 | 1567 | 565 | 85.8 | 43.9 | 304 | 76.27 |
+| ss | −40 | 1.62 | 1485 | 535 | 76.9 | 30.5 | 605 | 67.20 |
+| ss | 27 | 1.62 | 1561 | 561 | 82.3 | 37.1 | 434 | 72.54 |
+| ss | 125 | 1.62 | 1704 | 611 | 92.2 | 47.3 | 302 | **82.19** |
+| sf | −40 | 1.80 | 1386 | 498 | 71.4 | 28.4 | 597 | **62.49** |
+| sf | 27 | 1.80 | 1449 | 520 | 76.3 | 34.9 | 418 | 67.37 |
+| sf | 125 | 1.80 | 1575 | 564 | 85.6 | 44.8 | 285 | 76.45 |
+| fs | −40 | 1.80 | 1502 | 543 | 78.1 | 29.8 | 681 | 68.06 |
+| fs | 27 | 1.80 | 1567 | 566 | 83.1 | 36.5 | 467 | 73.00 |
+| fs | 125 | 1.80 | 1696 | 611 | 92.3 | 46.1 | 324 | 81.87 |
+
+(spot columns are the grid points nearest each frequency; the full 4 points/decade
+curves are in the CSV.)
+
+- **Integrated input-referred noise, 100 Hz – 1 MHz: 62.5 – 82.2 µV rms**
+  across the 15 corners. Binding (worst) corner: **ss / 125 °C / 1.62 V,
+  82.19 µV rms**, with fs/125 °C (81.87) next; best: sf/−40 °C (62.49).
+  Noise rises monotonically with temperature at every process corner.
+- **White floor: 28.2 – 47.3 nV/√Hz** (min over the high-frequency span, as in
+  the single-corner probe); worst again ss/125 °C. The floor is a minimum of
+  the sampled curve, not a fitted thermal term.
+- **Spot density**: worst at 100 Hz is 1704 nV/√Hz (ss/125 °C); at 1 kHz,
+  611 nV/√Hz (fs/125 °C and ss/125 °C).
+- **1/f crossing is present at every corner** (psd = 2× floor²): 285 kHz
+  (sf/125 °C) to 681 kHz (fs/−40 °C), i.e. inside the 100 Hz – 1 MHz band
+  everywhere. The band is therefore flicker-dominated at all 15 corners, which
+  confirms the single-corner preview above and sharpens the spec finding that
+  `spec/target-spec.md` §2a models a thermal floor only. The crossing falls
+  with temperature at every process corner.
+- **Cross-check**: the TT/27 °C row reproduces the earlier local single-corner
+  probe (`20261009-073753-e06f2fc`: 70.1 µV rms, floor 35.8 nV/√Hz, crossing
+  ≈ 442 kHz) to the printed digits (70.1065 µV, 35.754 nV/√Hz, 441.8 kHz), even
+  though the worker runs ngspice-46 and the client has ngspice-42 (the response
+  flags the build-banner difference). The band-limited-vs-full-sweep check
+  above still stands (1.7×10⁻⁴).
+- **No target is passed or failed**: the spec row is ratified as a target
+  without an integrated-noise or flicker limit, so these are measurements, not
+  verdicts. Failed or missing values would be recorded as such; none occurred.
+- `manifests/integrator.json` is **unchanged**: no consumer row moved from
+  unknown to a measured verdict, because no consumer row states a noise limit
+  to compare against. Consumer loop PSRR requirements are not amplifier
+  allocations.
+- Limitation: pre-layout schematic only; the response's PDK stamp comparison is
+  `not_comparable` (client stamp unavailable), and the fleet job-ceiling check
+  warned (job bound above 3600 s) but the job completed in 94 s.
 
 ### Validation of the benches (`bin/validate_psrr_noise.py`)
 
