@@ -2,6 +2,13 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-30
+
+- **PR #258**: feat(sim): record 15-corner batch noise grid (62.5-82.2 uVrms, 100 Hz-1 MHz)
+- **PR #257**: refactor: remove unused identity-unchecked latest_ac_csv
+- **Issue #256** (closed): Remove dead pvt_sweep.latest_ac_csv (superseded by select_ac_reference)
+- **Issue #54** (closed): Add PSRR and input-referred noise benches to the PVT characterization
+
 ### 2026-10-27
 
 - **PR #254**: refactor: share Magic DRC pipeline between layout scripts
