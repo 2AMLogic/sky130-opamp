@@ -1171,7 +1171,7 @@ corner as in the other grids. Spot density in nV/√Hz, integrated noise in µV 
 | sf | 27 | 1.80 | 1449 | 520 | 76.3 | 34.9 | 418 | 67.37 |
 | sf | 125 | 1.80 | 1575 | 564 | 85.6 | 44.8 | 285 | 76.45 |
 | fs | −40 | 1.80 | 1502 | 543 | 78.1 | 29.8 | 681 | 68.06 |
-| fs | 27 | 1.80 | 1567 | 566 | 83.1 | 36.5 | 434 | 73.00 |
+| fs | 27 | 1.80 | 1567 | 566 | 83.1 | 36.5 | 467 | 73.00 |
 | fs | 125 | 1.80 | 1696 | 611 | 92.3 | 46.1 | 324 | 81.87 |
 
 (spot columns are the grid points nearest each frequency; the full 4 points/decade
