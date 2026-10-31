@@ -2,6 +2,11 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-10-31
+
+- **PR #260**: feat(sim): split item-7 pex deltas into representation vs parasitic terms
+- **Issue #250** (closed): pex: attribute item-7 deltas (run --device-only-leg) and add negative control
+
 ### 2026-10-30
 
 - **PR #258**: feat(sim): record 15-corner batch noise grid (62.5-82.2 uVrms, 100 Hz-1 MHz)
