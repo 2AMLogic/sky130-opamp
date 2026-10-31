@@ -53,7 +53,6 @@ Issues carrying `loom:curated`.
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 - **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row *(curated)*
-- **#250**: pex: attribute item-7 deltas (run --device-only-leg) and add negative control *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -74,7 +73,7 @@ _None._
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 5 |
+| Curated | 4 |
 | Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
