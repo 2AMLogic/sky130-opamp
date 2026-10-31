@@ -1,0 +1,1748 @@
+{
+  "schema_version": 1,
+  "entries": [
+    {
+      "sha256": "6c6b71fb4dc03e4a8cab92fad3b214119a69489ad4f58238f2ad120dcc869383",
+      "size": 1313,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/6c/6c6b71fb4dc03e4a8cab92fad3b214119a69489ad4f58238f2ad120dcc869383",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ac-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "2828ab3e401ec65e9396b4baed414f2ea4f85661afd7d2adb9f4bfeef7cef442",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/28/2828ab3e401ec65e9396b4baed414f2ea4f85661afd7d2adb9f4bfeef7cef442",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "ab0c639d62166c168f7f2697a134fa108ee1b64988c6726f893b3235fc11e80b",
+      "size": 392,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ab/ab0c639d62166c168f7f2697a134fa108ee1b64988c6726f893b3235fc11e80b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ff_1p980V_125C/corner.cir"
+    },
+    {
+      "sha256": "1b3b81d6fe41dcb4e00719f0389341a73bb53d7e3abfdaede210040d5c772470",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/1b/1b3b81d6fe41dcb4e00719f0389341a73bb53d7e3abfdaede210040d5c772470",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ff_1p980V_27C/corner.cir"
+    },
+    {
+      "sha256": "ccf096aa09f419cf778862dd53666adccfaf8ac5ad895da3b3a988057e4eb5fd",
+      "size": 392,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/cc/ccf096aa09f419cf778862dd53666adccfaf8ac5ad895da3b3a988057e4eb5fd",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ff_1p980V_n40C/corner.cir"
+    },
+    {
+      "sha256": "6f26df89afaabd9ddaf19c6a77ff24d73fb8eb2a83aa1d8ef4d915ae23593bd6",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/6f/6f26df89afaabd9ddaf19c6a77ff24d73fb8eb2a83aa1d8ef4d915ae23593bd6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/fs_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "88815d0cee0a5d4cd3ec8b0d08efb2175109eb2d9f12302ad7469ed7f5604d08",
+      "size": 390,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/88/88815d0cee0a5d4cd3ec8b0d08efb2175109eb2d9f12302ad7469ed7f5604d08",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/fs_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "350dd965e0d7276fef756097270a999a142ea00c86e5900b6e3009d4b33a5c8c",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/35/350dd965e0d7276fef756097270a999a142ea00c86e5900b6e3009d4b33a5c8c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/fs_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "75c5508560ce633ee2f403b24a478face7ffb386f81f3098f677ef325e73a70f",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/75/75c5508560ce633ee2f403b24a478face7ffb386f81f3098f677ef325e73a70f",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/sf_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "4cd47dac3d03f1c1f3d6e67072dc9509fdfb442ee12d2eeb30e0d52818f245d8",
+      "size": 390,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4c/4cd47dac3d03f1c1f3d6e67072dc9509fdfb442ee12d2eeb30e0d52818f245d8",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/sf_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "3f0453b02b3316306c2ecb8cfadb1ccd1c497c8c24221406db0a0848054fabc6",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/3f/3f0453b02b3316306c2ecb8cfadb1ccd1c497c8c24221406db0a0848054fabc6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/sf_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "ecc5f3db3ac284904d4e9b1db9eff6f796caaab3d107b977b0ee6d52a8bf4d73",
+      "size": 392,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ec/ecc5f3db3ac284904d4e9b1db9eff6f796caaab3d107b977b0ee6d52a8bf4d73",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ss_1p620V_125C/corner.cir"
+    },
+    {
+      "sha256": "86dc2118713a2c709c3b192b29d32440abc3f2efb5d02fa08700f37534593cdb",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/86/86dc2118713a2c709c3b192b29d32440abc3f2efb5d02fa08700f37534593cdb",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ss_1p620V_27C/corner.cir"
+    },
+    {
+      "sha256": "281906e2e128033bea568327435964dc3f83f273639adb4b2fa48afdc4092181",
+      "size": 392,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/28/281906e2e128033bea568327435964dc3f83f273639adb4b2fa48afdc4092181",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/ss_1p620V_n40C/corner.cir"
+    },
+    {
+      "sha256": "e060bcf2764d9cd92a32ab3d333fd4e4be227bec0a99c973f05afc9f06b06acd",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e0/e060bcf2764d9cd92a32ab3d333fd4e4be227bec0a99c973f05afc9f06b06acd",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/tt_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "b36b97f4eb0f9ce7459fb2a2f5504669024755b0fff05b49755d7d54639d4f03",
+      "size": 390,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b3/b36b97f4eb0f9ce7459fb2a2f5504669024755b0fff05b49755d7d54639d4f03",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/tt_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "99e7fb5592b87bf9da9d9d64790b07043beb596da9eadd10ffac4ff20fa95f80",
+      "size": 391,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/99/99e7fb5592b87bf9da9d9d64790b07043beb596da9eadd10ffac4ff20fa95f80",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac/tt_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "39f5b4584c1589f6234b1e15a1cacec74753feea9ec9ade2ad67209c80093939",
+      "size": 1313,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/39/39f5b4584c1589f6234b1e15a1cacec74753feea9ec9ade2ad67209c80093939",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ac-iq-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "2dcc4509a1436f84b7a2a8f38145dac2ce7281246a2e4a5750ab82a602d52673",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2d/2dcc4509a1436f84b7a2a8f38145dac2ce7281246a2e4a5750ab82a602d52673",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "4e1a6151f13fe68bccafc912af444b6c529094cf73f6e03ab32a81b21673803d",
+      "size": 285,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4e/4e1a6151f13fe68bccafc912af444b6c529094cf73f6e03ab32a81b21673803d",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ff_1p980V_125C/corner.cir"
+    },
+    {
+      "sha256": "0081857f311324619e430e0dd9f37292c6ecbb60ad2828a79ac68fd120e065db",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/00/0081857f311324619e430e0dd9f37292c6ecbb60ad2828a79ac68fd120e065db",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ff_1p980V_27C/corner.cir"
+    },
+    {
+      "sha256": "b5954f306f2279bef27a70180a09635f26a34f5a88f6e1cc89608d9233f17c74",
+      "size": 285,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b5/b5954f306f2279bef27a70180a09635f26a34f5a88f6e1cc89608d9233f17c74",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ff_1p980V_n40C/corner.cir"
+    },
+    {
+      "sha256": "10773ec9fcb5fb684ff98ccc4b9c34c693618df577e7eb8fdd5183255fafe9b6",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/10/10773ec9fcb5fb684ff98ccc4b9c34c693618df577e7eb8fdd5183255fafe9b6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/fs_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "947feb6bd54c218bbf50b6bddcd5641cd36f3c615eb3a10c2964c6229fb857e8",
+      "size": 283,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/94/947feb6bd54c218bbf50b6bddcd5641cd36f3c615eb3a10c2964c6229fb857e8",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/fs_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "c261b6f2b98f7776f9c67dd8aacc092f4d30a607a3d74a62845323360af6c3b6",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/c2/c261b6f2b98f7776f9c67dd8aacc092f4d30a607a3d74a62845323360af6c3b6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/fs_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "21f85a5a4a80a9ea90c1894e2e409ae4eb1bcb4b512e8e65ff23ab7bffd1f4a4",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/21/21f85a5a4a80a9ea90c1894e2e409ae4eb1bcb4b512e8e65ff23ab7bffd1f4a4",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/sf_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "c3ae30f051aea74acfd4f9e32d2a9209351d9fae4d3cf18ca55d4e6f322ce74c",
+      "size": 283,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/c3/c3ae30f051aea74acfd4f9e32d2a9209351d9fae4d3cf18ca55d4e6f322ce74c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/sf_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "5f2e04a5697f2c4c10a879a8d0c1e8ce158774978b848801827a572c0491c73d",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/5f/5f2e04a5697f2c4c10a879a8d0c1e8ce158774978b848801827a572c0491c73d",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/sf_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "6392f4c20f18063c95431e3a8dfeccca508482b40fd7ea678cd6b66b4081e389",
+      "size": 285,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/63/6392f4c20f18063c95431e3a8dfeccca508482b40fd7ea678cd6b66b4081e389",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ss_1p620V_125C/corner.cir"
+    },
+    {
+      "sha256": "a5ba27416ea50ffdc62942824fbdbf1dcc7b8be7b8acdf214742edc46ccd9bc8",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/a5/a5ba27416ea50ffdc62942824fbdbf1dcc7b8be7b8acdf214742edc46ccd9bc8",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ss_1p620V_27C/corner.cir"
+    },
+    {
+      "sha256": "8300ad23f48c810855a12ce934efb9ec52e9fa9a4ad624e9a5cbf3d53b4b1f7b",
+      "size": 285,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/83/8300ad23f48c810855a12ce934efb9ec52e9fa9a4ad624e9a5cbf3d53b4b1f7b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/ss_1p620V_n40C/corner.cir"
+    },
+    {
+      "sha256": "636da66ac32976a5ccb6c30dc2690790189bba17e7512bfc548d7b7dbb08a701",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/63/636da66ac32976a5ccb6c30dc2690790189bba17e7512bfc548d7b7dbb08a701",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/tt_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "494705ba4aab7a262ed7ef6f4e93d957cd2633ee48098221303e20874281c407",
+      "size": 283,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/49/494705ba4aab7a262ed7ef6f4e93d957cd2633ee48098221303e20874281c407",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/tt_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "aa1da9849a72799087e1cc1cff53db956f884e5cf7da6d8b82810bbc64b378d5",
+      "size": 284,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/aa/aa1da9849a72799087e1cc1cff53db956f884e5cf7da6d8b82810bbc64b378d5",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq/tt_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "43767f4310f08a1b90ba7e9b941a495a932f15716b0ee7e4a86de51d67fd14ce",
+      "size": 26509,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/43/43767f4310f08a1b90ba7e9b941a495a932f15716b0ee7e4a86de51d67fd14ce",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-iq-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "f5c0377477c105df0bbace0e2284a6de49ab982b293538ef1894465e5c9aeec7",
+      "size": 38276,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f5/f5c0377477c105df0bbace0e2284a6de49ab982b293538ef1894465e5c9aeec7",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-ac-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "18a6d4f70d533aa930f3c8e84417526b55f3d7b7f9456b2fb2e1d32330d09da6",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/18/18a6d4f70d533aa930f3c8e84417526b55f3d7b7f9456b2fb2e1d32330d09da6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "d9fdcb9b913218d3dbaeac6385f71ffb8affca27e9aa7f40ebc8747a4427260c",
+      "size": 1313,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/d9/d9fdcb9b913218d3dbaeac6385f71ffb8affca27e9aa7f40ebc8747a4427260c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/dc-swing-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "0f62b500c18257195dff20ec65dffd4eacfc31c3c02c81a216c860bf58a0ee20",
+      "size": 418,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/0f/0f62b500c18257195dff20ec65dffd4eacfc31c3c02c81a216c860bf58a0ee20",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_125C/corner.cir"
+    },
+    {
+      "sha256": "bc1f9dc50229e4b2b10cd41bfcef0373387dafc6f7259a3a44d9f99d6373f8a1",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/bc/bc1f9dc50229e4b2b10cd41bfcef0373387dafc6f7259a3a44d9f99d6373f8a1",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_125C/ngspice.log"
+    },
+    {
+      "sha256": "a01b8107b4ebc928e3d6eaa391a8f5be1632534873e0e0915eef4081c4fa47f7",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/a0/a01b8107b4ebc928e3d6eaa391a8f5be1632534873e0e0915eef4081c4fa47f7",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_125C/waveform.raw"
+    },
+    {
+      "sha256": "641ed33b9034eb9ea45ff7b0c9bcf11c2a8797b01d793bb31c5ffbc18a7b26fe",
+      "size": 416,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/64/641ed33b9034eb9ea45ff7b0c9bcf11c2a8797b01d793bb31c5ffbc18a7b26fe",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_27C/corner.cir"
+    },
+    {
+      "sha256": "7cb31dbc26858d3248eb6c87b3b1b78134e6621a6f1bb0fc1ad40f8d87040fba",
+      "size": 406,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/7c/7cb31dbc26858d3248eb6c87b3b1b78134e6621a6f1bb0fc1ad40f8d87040fba",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_27C/ngspice.log"
+    },
+    {
+      "sha256": "31f2de8c885b4618e7eb58f9ac674d433545ab15b19296591d0feb1729d19daf",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/31/31f2de8c885b4618e7eb58f9ac674d433545ab15b19296591d0feb1729d19daf",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_27C/waveform.raw"
+    },
+    {
+      "sha256": "4d0aacaa14053899f9bac38b11fdbfad6e537793024ef97f8f3ac2ab008c8238",
+      "size": 418,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4d/4d0aacaa14053899f9bac38b11fdbfad6e537793024ef97f8f3ac2ab008c8238",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_n40C/corner.cir"
+    },
+    {
+      "sha256": "90ffb2534adce01d14fd90e06c8ed1f8f76bcc8472b304ba6e636a4f33af6b57",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/90/90ffb2534adce01d14fd90e06c8ed1f8f76bcc8472b304ba6e636a4f33af6b57",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_n40C/ngspice.log"
+    },
+    {
+      "sha256": "2d491f16a5e8e60671efdaf5b6c85ed2f20cfa4fd4ef82cf4b681467df47a714",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2d/2d491f16a5e8e60671efdaf5b6c85ed2f20cfa4fd4ef82cf4b681467df47a714",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ff_1p980V_n40C/waveform.raw"
+    },
+    {
+      "sha256": "14a3af524f778fc6f45044cb864b4174123f70073cda04e88dba329971fe8c2b",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/14/14a3af524f778fc6f45044cb864b4174123f70073cda04e88dba329971fe8c2b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "b9e03dfd85ce09262eb3c06396283311809df7054fb04b7a1045ca68031c12ee",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b9/b9e03dfd85ce09262eb3c06396283311809df7054fb04b7a1045ca68031c12ee",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_125C/ngspice.log"
+    },
+    {
+      "sha256": "d98ba8eb434ff0ffaddae4977efce146a87de2f1293bd72060cdfc638a6d6470",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/d9/d98ba8eb434ff0ffaddae4977efce146a87de2f1293bd72060cdfc638a6d6470",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_125C/waveform.raw"
+    },
+    {
+      "sha256": "d95699c8ebc812dfe5fe222fa9c607b3ea09e8497ed2fa7d99daeb4f157ca8d1",
+      "size": 415,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/d9/d95699c8ebc812dfe5fe222fa9c607b3ea09e8497ed2fa7d99daeb4f157ca8d1",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "c0747e8ab080796460f46c5d294453512815e5a91fe81364df78a9c6e6098930",
+      "size": 681,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/c0/c0747e8ab080796460f46c5d294453512815e5a91fe81364df78a9c6e6098930",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_27C/ngspice.log"
+    },
+    {
+      "sha256": "4b4f39782ffd7918cfe52cc9cb52c90498f517fb263e8cec694986d947b3915b",
+      "size": 361093,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4b/4b4f39782ffd7918cfe52cc9cb52c90498f517fb263e8cec694986d947b3915b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_27C/waveform.raw"
+    },
+    {
+      "sha256": "b679137fc022a47b8376bb5cf2ee43edcdc543c60a5b06203d7e0f3f80490906",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b6/b679137fc022a47b8376bb5cf2ee43edcdc543c60a5b06203d7e0f3f80490906",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "cd861505adf7af4414b927bc6fc14a2f80e1a83de333dd12721958a92ea3b431",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/cd/cd861505adf7af4414b927bc6fc14a2f80e1a83de333dd12721958a92ea3b431",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_n40C/ngspice.log"
+    },
+    {
+      "sha256": "fbc20f0a699b865d1ca65f66bc0d13cd501cc5dc53b24acd85d6137b00b2921c",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/fb/fbc20f0a699b865d1ca65f66bc0d13cd501cc5dc53b24acd85d6137b00b2921c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/fs_1p800V_n40C/waveform.raw"
+    },
+    {
+      "sha256": "c0537d3c72eb175a8fce87686e50704e26853d9cae15721eb84812067adc0390",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/c0/c0537d3c72eb175a8fce87686e50704e26853d9cae15721eb84812067adc0390",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "7d37bd6c2c0ab84b745cf4ccbbb085c8a47d812ea94282bd2bfbdebe9ee13141",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/7d/7d37bd6c2c0ab84b745cf4ccbbb085c8a47d812ea94282bd2bfbdebe9ee13141",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_125C/ngspice.log"
+    },
+    {
+      "sha256": "4c0e242feee43fc1fd8b5d50e7c812d8cf80427e3eeacc88be244d9c8934904f",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4c/4c0e242feee43fc1fd8b5d50e7c812d8cf80427e3eeacc88be244d9c8934904f",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_125C/waveform.raw"
+    },
+    {
+      "sha256": "efe208cdd3d6f0a2843a2a083933b242730d62919df8a50bd451a74ee2df3d29",
+      "size": 415,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ef/efe208cdd3d6f0a2843a2a083933b242730d62919df8a50bd451a74ee2df3d29",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "22459254fd0bd65fda321cec0492134e5045121edf3d1a8f99fcf03246b48ecd",
+      "size": 681,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/22/22459254fd0bd65fda321cec0492134e5045121edf3d1a8f99fcf03246b48ecd",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_27C/ngspice.log"
+    },
+    {
+      "sha256": "5eedc19c5137a3a1ac6cee26f3873e9d7e3c9a5ff7a50ddeb4dc36fdb7fd7ac6",
+      "size": 361097,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/5e/5eedc19c5137a3a1ac6cee26f3873e9d7e3c9a5ff7a50ddeb4dc36fdb7fd7ac6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_27C/waveform.raw"
+    },
+    {
+      "sha256": "bc621d6d2bc13f74b7936b93e58fcb118836c81810cd0b9f5d4b5f818cca37fb",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/bc/bc621d6d2bc13f74b7936b93e58fcb118836c81810cd0b9f5d4b5f818cca37fb",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "e1b1fb08b930690e088ff7a53f0b07645b00b72a018ba20782ec23e8373fcaed",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e1/e1b1fb08b930690e088ff7a53f0b07645b00b72a018ba20782ec23e8373fcaed",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_n40C/ngspice.log"
+    },
+    {
+      "sha256": "ee19c6991ebcb4a632f2b593daba17073a02d8beca4a5ad58e44f96606d50e2b",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ee/ee19c6991ebcb4a632f2b593daba17073a02d8beca4a5ad58e44f96606d50e2b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/sf_1p800V_n40C/waveform.raw"
+    },
+    {
+      "sha256": "d605d300dcc8dbd21f7cb4c0efc9bba2c77306e9e6dfba51f0d2f2f6e3b72678",
+      "size": 418,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/d6/d605d300dcc8dbd21f7cb4c0efc9bba2c77306e9e6dfba51f0d2f2f6e3b72678",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_125C/corner.cir"
+    },
+    {
+      "sha256": "47710744d9408f31d2c6e404f17d5e92ee51b05593cd2eb5412fe5a7dd5368b9",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/47/47710744d9408f31d2c6e404f17d5e92ee51b05593cd2eb5412fe5a7dd5368b9",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_125C/ngspice.log"
+    },
+    {
+      "sha256": "5f4dc81b8002d75012bb6a129c81ce9f0c5ebb0dfe341eebb0078a841d0b2039",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/5f/5f4dc81b8002d75012bb6a129c81ce9f0c5ebb0dfe341eebb0078a841d0b2039",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_125C/waveform.raw"
+    },
+    {
+      "sha256": "97ddb592c830b9b10b273b1795f22d7c937b701cca6ac954af9e7e0efef3411c",
+      "size": 416,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/97/97ddb592c830b9b10b273b1795f22d7c937b701cca6ac954af9e7e0efef3411c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_27C/corner.cir"
+    },
+    {
+      "sha256": "99172ada5e1e7434a6f808c4b44bd77cb2bd2d83876d279bb644edb89a003f71",
+      "size": 681,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/99/99172ada5e1e7434a6f808c4b44bd77cb2bd2d83876d279bb644edb89a003f71",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_27C/ngspice.log"
+    },
+    {
+      "sha256": "0610cdfcea374bc9de154a9f981c134c568667aca58fac4bca3f9cecc37764a9",
+      "size": 361093,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/06/0610cdfcea374bc9de154a9f981c134c568667aca58fac4bca3f9cecc37764a9",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_27C/waveform.raw"
+    },
+    {
+      "sha256": "e71da0fda6b030eaae492b7800f19321e1cf8a0627f522910b83c6402e508858",
+      "size": 418,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e7/e71da0fda6b030eaae492b7800f19321e1cf8a0627f522910b83c6402e508858",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_n40C/corner.cir"
+    },
+    {
+      "sha256": "672562c0d92403c1f09a935737f1b0a6efdb8aeda300cd33eb1bfe3ad24d25f4",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/67/672562c0d92403c1f09a935737f1b0a6efdb8aeda300cd33eb1bfe3ad24d25f4",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_n40C/ngspice.log"
+    },
+    {
+      "sha256": "68935a06a11e427f146376194669d9fb56ec2015745e3827540a78dd2a9c23be",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/68/68935a06a11e427f146376194669d9fb56ec2015745e3827540a78dd2a9c23be",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/ss_1p620V_n40C/waveform.raw"
+    },
+    {
+      "sha256": "d78c0d52f65f818f52bb00e5deb6d7580c39dcaf255a5653eaf8fc6616038f98",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/d7/d78c0d52f65f818f52bb00e5deb6d7580c39dcaf255a5653eaf8fc6616038f98",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "4ed9be31850087ed59e5f46e44018d24660f0d94b512e55dddd2fdfca9a60305",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4e/4ed9be31850087ed59e5f46e44018d24660f0d94b512e55dddd2fdfca9a60305",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_125C/ngspice.log"
+    },
+    {
+      "sha256": "2f85fa5404bca0e4bf62c24a40b5310b75331bb5f591cdf3806f34edd16234b1",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2f/2f85fa5404bca0e4bf62c24a40b5310b75331bb5f591cdf3806f34edd16234b1",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_125C/waveform.raw"
+    },
+    {
+      "sha256": "2eb427ce685570eceea425e871a8aae598cfea69e447d13b71a3c1c1b5a0251e",
+      "size": 415,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2e/2eb427ce685570eceea425e871a8aae598cfea69e447d13b71a3c1c1b5a0251e",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "efb245c5581fd9d484e66cf858d75860b4ee88bb8641ae2aac4d36ef1e6e515b",
+      "size": 406,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ef/efb245c5581fd9d484e66cf858d75860b4ee88bb8641ae2aac4d36ef1e6e515b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_27C/ngspice.log"
+    },
+    {
+      "sha256": "742da886b13fbbb249ae9a2d28a0eba43719228e370ee1d268d2d3f0f85448de",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/74/742da886b13fbbb249ae9a2d28a0eba43719228e370ee1d268d2d3f0f85448de",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_27C/waveform.raw"
+    },
+    {
+      "sha256": "92237efcca365e2ba7898dbb348f4f28bfb0e5c39176c998682388680298b8ff",
+      "size": 417,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/92/92237efcca365e2ba7898dbb348f4f28bfb0e5c39176c998682388680298b8ff",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "ed4cce31025d0aa432d2ab6b4245a79aa75deb4cd8a0454e1b29f60cf85ae357",
+      "size": 408,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ed/ed4cce31025d0aa432d2ab6b4245a79aa75deb4cd8a0454e1b29f60cf85ae357",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_n40C/ngspice.log"
+    },
+    {
+      "sha256": "7d04560c93450539f9c93c9e5c54bd379c2b7df2bbc011e6373b1942b746c68e",
+      "size": 361090,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/7d/7d04560c93450539f9c93c9e5c54bd379c2b7df2bbc011e6373b1942b746c68e",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing/tt_1p800V_n40C/waveform.raw"
+    },
+    {
+      "sha256": "2a66f0747c672836cf861b485468331bf31250c369eb3fe70270b28eb03694d0",
+      "size": 30355,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2a/2a66f0747c672836cf861b485468331bf31250c369eb3fe70270b28eb03694d0",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-dc-swing-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "7099d4be697288754a882f671de18402dd239b6db760027fb710fe821049a375",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/70/7099d4be697288754a882f671de18402dd239b6db760027fb710fe821049a375",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "dd469a3c14eb88b3b481ce210f8c4a9a4cd1d12b30361661b872fd4728f1501a",
+      "size": 734,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/dd/dd469a3c14eb88b3b481ce210f8c4a9a4cd1d12b30361661b872fd4728f1501a",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff/ff_1p980V_125C/corner.cir"
+    },
+    {
+      "sha256": "f42d605930759df0b459b78ed0d37765a86c5b7bf3ded2e862eb29f50cf68bf5",
+      "size": 733,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f4/f42d605930759df0b459b78ed0d37765a86c5b7bf3ded2e862eb29f50cf68bf5",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff/ff_1p980V_27C/corner.cir"
+    },
+    {
+      "sha256": "4cc70809dc5292bf4906b6d47e26c840a012ed720975cb62cdfdb8b35dbaa16a",
+      "size": 734,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4c/4cc70809dc5292bf4906b6d47e26c840a012ed720975cb62cdfdb8b35dbaa16a",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff/ff_1p980V_n40C/corner.cir"
+    },
+    {
+      "sha256": "ff0f62318b9cc71508807e92cde4822e6f63ef0e7ff1de27524e26b3e81ba686",
+      "size": 1311,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ff/ff0f62318b9cc71508807e92cde4822e6f63ef0e7ff1de27524e26b3e81ba686",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff/icmr-ff-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "5b8c1a6617b3249e1ebca114ea17772a6354e76e17b924a6a5e0cfd3e0c46e3c",
+      "size": 22954,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/5b/5b8c1a6617b3249e1ebca114ea17772a6354e76e17b924a6a5e0cfd3e0c46e3c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ff-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "e0c8ae7e12157163184a205cf434281c57c4ba0fb6c4af93b0e460aed6dfeb49",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e0/e0c8ae7e12157163184a205cf434281c57c4ba0fb6c4af93b0e460aed6dfeb49",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "678991ed24a229607e7ab2d72f3599a3a1c741b8133a36f5ea33e633b1db76f7",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/67/678991ed24a229607e7ab2d72f3599a3a1c741b8133a36f5ea33e633b1db76f7",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs/fs_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "49ee68758e5908aae85f1f850507b4fccbd672459bd06c568ddfa0da0201db5e",
+      "size": 725,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/49/49ee68758e5908aae85f1f850507b4fccbd672459bd06c568ddfa0da0201db5e",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs/fs_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "97240774d5e4c69c8b19996bfb116d8918ff9154a6b0f17876639e242100e31f",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/97/97240774d5e4c69c8b19996bfb116d8918ff9154a6b0f17876639e242100e31f",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs/fs_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "f033bb78d73f41ecf8538556a92144aaeb0f82b9bf5569e69af236602e8e306b",
+      "size": 1378,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f0/f033bb78d73f41ecf8538556a92144aaeb0f82b9bf5569e69af236602e8e306b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs/icmr-fs-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "1ec913e73e0b1cdcbb838d904027549f0be172046e443c8d81c79adad8815cbd",
+      "size": 22948,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/1e/1ec913e73e0b1cdcbb838d904027549f0be172046e443c8d81c79adad8815cbd",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-fs-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "5541c4b3a565353aade73a20dcefb8c7a8ebb2788af359fcddc2d66db488918b",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/55/5541c4b3a565353aade73a20dcefb8c7a8ebb2788af359fcddc2d66db488918b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "060a0c9f52187c982604e976b28a31d3978bb59a1e5e3e7a0130e78964335dab",
+      "size": 1311,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/06/060a0c9f52187c982604e976b28a31d3978bb59a1e5e3e7a0130e78964335dab",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf/icmr-sf-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "c96751f8f043ec573f27397e68746080e01e12ee032c2959cdd8856aebf177a6",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/c9/c96751f8f043ec573f27397e68746080e01e12ee032c2959cdd8856aebf177a6",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf/sf_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "2e7c49abc0f3fbc39e2bd04e872031afbaa8a39261e077fe44aa1f1e4ac55058",
+      "size": 725,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2e/2e7c49abc0f3fbc39e2bd04e872031afbaa8a39261e077fe44aa1f1e4ac55058",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf/sf_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "0e974470bd155dc0e4efb71b4cbd209010958b1d9302c67fb915dc06a7cb5557",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/0e/0e974470bd155dc0e4efb71b4cbd209010958b1d9302c67fb915dc06a7cb5557",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf/sf_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "e7bb9d54018631efee5f00e990c5d470e9a6ab1802e18a2a59a964a71fb91b30",
+      "size": 22945,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e7/e7bb9d54018631efee5f00e990c5d470e9a6ab1802e18a2a59a964a71fb91b30",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-sf-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "ea65e6fec89b99513025c015807392661f1cf0df0cfa6234d50ce8da470f745b",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/ea/ea65e6fec89b99513025c015807392661f1cf0df0cfa6234d50ce8da470f745b",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "4ce00fd8c02eef5760606d1af657df9575395647c6c315902027d34291b4904d",
+      "size": 1311,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/4c/4ce00fd8c02eef5760606d1af657df9575395647c6c315902027d34291b4904d",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss/icmr-ss-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "180ba3d896f02f9cbb4acf611e4cd96fa9eaa4d0fd65c1846bf8154c950c9bef",
+      "size": 737,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/18/180ba3d896f02f9cbb4acf611e4cd96fa9eaa4d0fd65c1846bf8154c950c9bef",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss/ss_1p620V_125C/corner.cir"
+    },
+    {
+      "sha256": "f91b8872d6e001b4968e98f97820e319a21b96415c114c550a42db45e514ba4c",
+      "size": 736,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f9/f91b8872d6e001b4968e98f97820e319a21b96415c114c550a42db45e514ba4c",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss/ss_1p620V_27C/corner.cir"
+    },
+    {
+      "sha256": "b4b99ffee54d126ed66fe0a82a3a7d21753bbbabfba4e695430283803d688d2e",
+      "size": 737,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b4/b4b99ffee54d126ed66fe0a82a3a7d21753bbbabfba4e695430283803d688d2e",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss/ss_1p620V_n40C/corner.cir"
+    },
+    {
+      "sha256": "30dff92cb8fc0b270ab3642aea0b34ddb3757415fefd0ba6e04c4eb6ee379b02",
+      "size": 22951,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/30/30dff92cb8fc0b270ab3642aea0b34ddb3757415fefd0ba6e04c4eb6ee379b02",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-ss-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "f3abcdb551627e23b1c37fd091de924ef0d60e17e114396ce00b4bc69b7c815d",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f3/f3abcdb551627e23b1c37fd091de924ef0d60e17e114396ce00b4bc69b7c815d",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "e40f6966ae69bb04e6ca531f08017d852e94fb63e110ebe3f316820cdc4b9b45",
+      "size": 1311,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/e4/e40f6966ae69bb04e6ca531f08017d852e94fb63e110ebe3f316820cdc4b9b45",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt/icmr-tt-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "9955eab7cc9c990f2fb6914ed9bd1dbde1cf6475227a70f1a4b611b0fd807075",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/99/9955eab7cc9c990f2fb6914ed9bd1dbde1cf6475227a70f1a4b611b0fd807075",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt/tt_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "0261b437d680633a3f83b59143745404d7edd41c9824983d456ff338002631b3",
+      "size": 725,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/02/0261b437d680633a3f83b59143745404d7edd41c9824983d456ff338002631b3",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt/tt_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "4722e1ce0291eab821b22825040aba16fd0a772a4880b88c98c741b384245513",
+      "size": 726,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/47/4722e1ce0291eab821b22825040aba16fd0a772a4880b88c98c741b384245513",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt/tt_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "66c928780d0dbbda9ae06d3ecc9f4303c9d99b3ae6a6952ef6fe437c6b2d1f25",
+      "size": 22951,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/66/66c928780d0dbbda9ae06d3ecc9f4303c9d99b3ae6a6952ef6fe437c6b2d1f25",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-icmr-tt-response.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "2b96e27773630d07e8d3546c50ee344f42c7eb3c3832fae5eb66d719f76a42da",
+      "size": 339,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2b/2b96e27773630d07e8d3546c50ee344f42c7eb3c3832fae5eb66d719f76a42da",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/batch-receipt.json",
+      "media_type": "application/json"
+    },
+    {
+      "sha256": "2de3deb31045c9fdbd16c07c1d9634749eb85ed20ae6302a54dd78c17602e1fe",
+      "size": 432,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/2d/2de3deb31045c9fdbd16c07c1d9634749eb85ed20ae6302a54dd78c17602e1fe",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ff_1p980V_125C/corner.cir"
+    },
+    {
+      "sha256": "a56b1cf830e0b1bbaa12cc16b6df4ef0aba151aaf0864878d7ca02a3186dfa71",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/a5/a56b1cf830e0b1bbaa12cc16b6df4ef0aba151aaf0864878d7ca02a3186dfa71",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ff_1p980V_27C/corner.cir"
+    },
+    {
+      "sha256": "f276ac3918b9de2e46829328831eebec4de410c38c5f5e488eea228d150fdb37",
+      "size": 432,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f2/f276ac3918b9de2e46829328831eebec4de410c38c5f5e488eea228d150fdb37",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ff_1p980V_n40C/corner.cir"
+    },
+    {
+      "sha256": "1a2deffeaf80c75db54c35e058db6397f3acbe51e8d6b54dcb786a06cbd680b3",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/1a/1a2deffeaf80c75db54c35e058db6397f3acbe51e8d6b54dcb786a06cbd680b3",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/fs_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "1573cf41cda7d0d18232f55b37a390a1e8f6f4ce41531992ffb31edcc2de2d33",
+      "size": 430,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/15/1573cf41cda7d0d18232f55b37a390a1e8f6f4ce41531992ffb31edcc2de2d33",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/fs_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "0e8d2c9b27e06cef6f750c95956486d5e582c81dadb0681039458e8d87c87165",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/0e/0e8d2c9b27e06cef6f750c95956486d5e582c81dadb0681039458e8d87c87165",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/fs_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "352b6e6141b32778694d53b2e4cd459cedcf25856f64e81d6b265990c5ff4812",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/35/352b6e6141b32778694d53b2e4cd459cedcf25856f64e81d6b265990c5ff4812",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/sf_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "b92b0e3fc96ab1995704956bade996e8bd2ff9eb00f935bd5ffd5d7f33732177",
+      "size": 430,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b9/b92b0e3fc96ab1995704956bade996e8bd2ff9eb00f935bd5ffd5d7f33732177",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/sf_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "bbae61d7f0b556914a6507f68385d3b6e531a09788ae9731266e6a90444a8b02",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/bb/bbae61d7f0b556914a6507f68385d3b6e531a09788ae9731266e6a90444a8b02",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/sf_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "b131e236de346761bd68da071f535bf02f1af895ab4a1717473249bd8008e3ab",
+      "size": 432,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/b1/b131e236de346761bd68da071f535bf02f1af895ab4a1717473249bd8008e3ab",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ss_1p620V_125C/corner.cir"
+    },
+    {
+      "sha256": "1cfc37ba60dcae2e5fc10d402b37980267f1fe071eb411e5bc2bb831b6baf7aa",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/1c/1cfc37ba60dcae2e5fc10d402b37980267f1fe071eb411e5bc2bb831b6baf7aa",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ss_1p620V_27C/corner.cir"
+    },
+    {
+      "sha256": "f6488cdea3a365b50165f8275230d790817e1e49ef946b85ab6a2a1024cd6436",
+      "size": 432,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/f6/f6488cdea3a365b50165f8275230d790817e1e49ef946b85ab6a2a1024cd6436",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/ss_1p620V_n40C/corner.cir"
+    },
+    {
+      "sha256": "17dfc478da424d1280cedefd4fdebcccaff8476c4180c704deb9827ac0275d09",
+      "size": 1313,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/17/17dfc478da424d1280cedefd4fdebcccaff8476c4180c704deb9827ac0275d09",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/tran-sr-request.stderr.txt",
+      "media_type": "text/plain"
+    },
+    {
+      "sha256": "5fa4cf5077fff019b6e67f71df811a2815969101b4c4658fd32bd09a1c136288",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/5f/5fa4cf5077fff019b6e67f71df811a2815969101b4c4658fd32bd09a1c136288",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/tt_1p800V_125C/corner.cir"
+    },
+    {
+      "sha256": "874db8fbf4e91f1983a43236ba0e9d31d6c6018973da554f67acb50cadf23384",
+      "size": 430,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/87/874db8fbf4e91f1983a43236ba0e9d31d6c6018973da554f67acb50cadf23384",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/tt_1p800V_27C/corner.cir"
+    },
+    {
+      "sha256": "8fdbab22ac14d5d423264300553a7994c750a4d4b3446f99f6d79032428e4aa7",
+      "size": 431,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/8f/8fdbab22ac14d5d423264300553a7994c750a4d4b3446f99f6d79032428e4aa7",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr/tt_1p800V_n40C/corner.cir"
+    },
+    {
+      "sha256": "a4e4370e7634dbaa8c70a7e706687cce8ffab49f27dbf445c08f487062c78ef0",
+      "size": 41939,
+      "kind": "evidence",
+      "producer": {
+        "tool": "klt",
+        "version": "0.8.1.dev849+gf05774458ae2",
+        "loom.repo": "2AMLogic/sky130-opamp",
+        "commit": "26b1547f94448a7e454b0ab375539f3283c33f33"
+      },
+      "uri": "artifact:evidence/2AMLogic__sky130-opamp/a4/a4e4370e7634dbaa8c70a7e706687cce8ffab49f27dbf445c08f487062c78ef0",
+      "name": "sim/.work/.stage/opamp-characterization-20261030-231341-26b1547-72e42c/klt-tran-sr-response.json",
+      "media_type": "application/json"
+    }
+  ]
+}

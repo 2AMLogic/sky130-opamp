@@ -141,16 +141,34 @@ identified there.
         target after extraction. Spec rows are not re-graded or loosened here; the
         extracted ICMR window (0.586 V narrowest) must be read against the target
         window in `spec/target-spec.md`.
-      - **Attribution is partial.** The extracted lumped nets add ground
-        capacitance (e.g. `out` 40 fF, `d2` 19 fF, `d1` 8.4 fF, `tail` 9.1 fF,
-        `cz` 3.2 fF) and star resistance, which accounts for the GBW/phase-margin
-        movement. The report also carries `model_mismatch`: the extractor emits
-        `sky130_fd_pr__res_high_po` where the schematic uses `..._res_high_po_1p41`,
-        and the layout is 35 fingered devices (per-finger AS/AD/PS/PD) against 10
-        schematic instances; the `--device-only-leg` split that separates those from
-        parasitics was not run, so the larger ICMR/slew deltas are not attributed
-        to R/C alone.
-      - Not done: the negative control (extracted == reference gives zero delta).
+      - **Attribution (device-only split).** The rerun
+        [`20261030-pex-opamp_core-device-only.pex.json`](../sim/opamp-characterization/records/20261030-pex-opamp_core-device-only.pex.json)
+        (`klt pex --device-only-leg`, same layout, same `--measure-command`; 150
+        rows, all with `representation_delta_pct` and `parasitic_delta_pct`; records
+        `20261030-231341-26b1547-72e42c` schematic, `20261030-233051-26b1547-d56adc`
+        extracted, `20261030-234100-26b1547-66bd4e` device-only, all on the batch
+        fleet) re-measures the same layout on a third, parasitic-free netlist (same
+        fingered devices and AS/AD/PS/PD, no R/C). Its schematic and extracted
+        totals reproduce the figures above. `model_mismatch` still stands (35 vs 10
+        instances, `res_high_po` vs `res_high_po_1p41`), so the split is: at each
+        row's worst-total corner, representation / parasitic (percent, of the total):
+        ICMR width -17.10 (SF/-40 C) = -15.80 / -1.55; ICMR high -9.05 (SF/-40 C) =
+        -8.47 / -0.64; fall slew -9.57 (SS/-40 C) = -2.41 / -7.34; output swing
+        -5.92 (SS/-40 C) = -5.05 / -0.92; GBW -3.11 (SS/-40 C) = -2.31 / -0.82; phase
+        margin +4.11 (SF/-40 C) = -0.12 / +4.23; Pq +3.68 (SF/-40 C) = -0.01 / +3.69;
+        ICMR low -1.21 (FF/27 C) is representation-dominated
+        (-1.43 / +0.22). **Finding:** the ICMR window and output-swing
+        deltas are device representation, not R/C; the phase-margin and Pq deltas
+        are parasitic; fall slew is mostly parasitic (-7.34 of -9.57) with a
+        representation share; gain is representation (+2.22 of +2.24 at FS/-40 C).
+        At SF/125 C the ICMR width terms are opposite-signed (+18.35 / -11.17), so the
+        attribution is a worst-corner statement. This split does not separate
+        fingering from the resistor model, and `--flatten-schematic` was not run.
+      - Negative control: `tests/test_pex_measure.py` feeds the wrapper the same
+        campaign record on both sides and asserts zero delta on every row, then
+        perturbs one side and asserts the delta appears (and that a missing point
+        stays an error row, never zero). That covers the measurement path; the
+        delta arithmetic is `klt pex`'s own.
     - **Item 5 (corner verification vs a ratified spec)**: `spec/target-spec.md`
       is now **RATIFIED (partial)** (DR-003,
       [#26](https://github.com/2AMLogic/sky130-opamp/issues/26)), so that
@@ -339,7 +357,7 @@ full-core signoff or ratification):
   (DR-009), OPEN target, and does not meet it; the remaining gate is a
   `klt yield` report and citation — see the per-item rationale above.
 - Item 7 (post-layout): cited on the `klt pex` report above (`met`, `body_bias` biased); the
-  attribution caveats there stand.
+  attribution split above (device-only leg) stands.
 - Items 2, 3, 4 and 11 are cited on the assembled core; the open caveats
   there are the failing Magic `drc(full)` (inherited `opamp_comp` resistor
   head) and the ungraded p-substrate tie.
