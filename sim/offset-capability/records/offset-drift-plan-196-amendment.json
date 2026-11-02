@@ -1,0 +1,109 @@
+{
+  "issue": 196,
+  "date": "2026-11-02",
+  "status": "PROPOSED. Planning only. Nothing in this file authorizes a simulation submission, a capacity probe that executes a job, a retry reset, spending, ratification of the 0.275 mV allocation, a circuit change or closure of #196. A later explicit campaign decision is required before any step below runs. Immutable once merged; later revisions are new dated files.",
+  "amends": "offset-drift-plan-196.json (unchanged; sha256 below). The original plan, its attempt ledger, the B0-B4 and P0 records and the study are append-only history and are not edited. The original retry allowances (3 attempts per batch, 18 requests) remain EXHAUSTED for B2, B3 and B4; this proposal does not reset them.",
+  "base_commit": "dcbe083",
+  "scope": "Costed continuation for the three conditions that are NOT_MEASURED: B2 (-40 C / 1.98 V), B3 (125 C / 1.62 V), B4 (125 C / 1.98 V), 100 samples each, 300 environmental samples. B1 (-40 C / 1.62 V) keeps its conditional FAIL_SCREEN (sigma 1.006 mV, CI [0.883, 1.169], against the 0.19 mV screen); it is not re-run. The result is exploratory (TT only, N = 100 per condition) and, even if all three conditions were measured, would not be an offset-compliance claim, would not adopt any trim architecture, and would not turn the conditional B1 result into an unconditional physical-drift conclusion.",
+  "pinned_identities": {
+    "original_plan": {"path": "sim/offset-capability/records/offset-drift-plan-196.json", "sha256": "sha256:bfd000e4d3b4976804bed0db7b63dc9da553da83fd779672f4b2958cb703de8f"},
+    "original_study": {"path": "sim/offset-capability/records/offset-drift-study-196.md", "sha256": "sha256:bd4b5f22eb046f34d7936c892fc6d00fb1fcebf9e2602bc45735745afa08eae6"},
+    "drift_record": {"path": "sim/offset-capability/records/20261011-233532-drift-drift196-1e74b9.drift.json", "sha256": "sha256:56d4612ddc8b98286a1821fa950cded6c0bdb82104c0ad2220935c9087d585af", "outcome": "VERDICTS_PARTIAL"},
+    "dut": {
+      "snapshot_dir": "sim/offset-capability/records/dut-drift196/",
+      "opamp_core_sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+      "opamp_core_matches_design_netlist_at_base_commit": true,
+      "bench_netlist": "dut-drift196/offset_dc.spice",
+      "bench_netlist_sha256": "sha256:0bafe511031853990cbaefa9cb8267ad474be76315b07e7e8dc4f7817ec0d41d",
+      "rule": "Every continuation request is built from the existing snapshot directory (the driver's `resume` path). A new snapshot, a changed canonical netlist or a different bench file makes the reference incompatible: stop, do not pool."
+    },
+    "models": {"pdk": "sky130A", "lib": "libs.tech/ngspice/sky130.lib.spice", "models_lib_sha256": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64"},
+    "engine": {"name": "ngspice", "version": "46"},
+    "runner": {"runner_klt_version": "0.5.0", "runner_compatibility": "mismatch", "instance_types_seen": ["c7i.4xlarge", "m7i.4xlarge"], "note": "Equality with the accepted B0/P0/B1 jobs is a REQUIRED pairing condition. If the fleet image has since been updated, runner_klt_version or models_lib_sha256 will differ and the continuation is a stop (see stop_rules), not a re-baselining."},
+    "client": {"used_for_accepted_jobs": "klt 0.7.0+gfc35718e4add", "installed_on_this_host_at_proposal_time": "klt 0.8.1.dev1073+gbe5754378ff3", "rule": "Execution must use the client that produced the accepted jobs, via a throwaway environment: `uvx --from \"klayout-tools==0.7.0\" klt sim ...` (not the host tool, which must not be changed). Using 0.8.1 changes the submitted request/echo surface and is an unverified difference that would have to be re-established by the pairing probe before use."},
+    "reference_records": {
+      "B0_ref_accepted": {"record_id": "20261011-223043-offset-drift196-B0_ref-r3-92ab00", "job_id": "klt-sim-59f75072ec89", "attempt": 3, "request_sha256": "sha256:0eb0f9aef27577c88c00b8789258c3fcf7fe92759128ff7e6198696cb6c23434", "summary_sha256": "sha256:3cb69a02e08a5b50c9cc0ceaea9cb1b2689e1c26828a00c73a49060b28bbd7da", "elapsed_seconds": 822, "samples": "20261085/0..99, 100 of 100 ok"},
+      "P0_replay_accepted": {"record_id": "20261011-224524-offset-drift196-P0_replay-4f4c2e", "job_id": "klt-sim-d39676a0725a", "request_sha256": "sha256:5d72d18cb0168cccc23de0f0199a49b94b81eb8f9c07f259a337db90fb9d233e", "summary_sha256": "sha256:4d3098dc799960fc21143a8405cc5152e5a5b6c388df714d641e811ce934f397", "elapsed_seconds": 43, "replay_difference_uv": 0.0},
+      "B1_accepted": {"record_id": "20261011-224645-offset-drift196-B1-7527c3", "job_id": "klt-sim-9128edec529b", "attempt": 1, "request_sha256": "sha256:86e56fe5ff3042dc7347a7266aae359dde9802049bacfdaa08d3e59d5070afae", "summary_sha256": "sha256:51c6270dd1922ab51acdd51be62d3427668ccb609c33f6adec6ea969d0bf79d7", "elapsed_seconds": 610, "samples": "20261085/0..99, 100 of 100 ok"}
+    },
+    "reference_compatibility": "The existing REF (TT, 27 C, 1.8 V) 100-sample set is the reference for B2-B4. It was measured on the same DUT snapshot, bench, models library and seed, so no new reference batch is proposed. Compatibility is re-checked at execution time from the echoed provenance of each new accepted job against the REF job above; any mismatch means the reference is incompatible and no residual is computed."
+  },
+  "conditions": {
+    "REF": {"process": "tt_mm", "temperature_c": 27.0, "vdd_v": 1.8},
+    "C2": {"step": "B2", "process": "tt_mm", "temperature_c": -40.0, "vdd_v": 1.98},
+    "C3": {"step": "B3", "process": "tt_mm", "temperature_c": 125.0, "vdd_v": 1.62},
+    "C4": {"step": "B4", "process": "tt_mm", "temperature_c": 125.0, "vdd_v": 1.98}
+  },
+  "bench_held_constant": {"output_crossing_v": 0.9, "input_common_mode_v": 0.9, "sweep_v": [-0.03, 0.03, 2e-05], "iref_a": 5e-06, "request_shape": "identical to the accepted B1 request except corners.supply_v.vdd and corners.temperature_c; monte_carlo {n: 100, seed: 20261085, vary: mismatch}; batch.runner_version_check warn"},
+  "sample_ids": {
+    "format": "<seed>/<sample_index>",
+    "seed": 20261085,
+    "ids_per_batch": "20261085/0 .. 20261085/99 (100 IDs), identical in REF, B1, B2, B3 and B4",
+    "n_per_batch": 100,
+    "total_environmental_samples": 300
+  },
+  "proposed_steps": [
+    {"step": "G0_capacity_gate", "kind": "gate", "executes_job": false, "description": "Operator-side confirmation that the fleet can accept the next step before it is submitted (see capacity_prerequisites). Not a probe job."},
+    {"step": "PE1_env_replay", "kind": "probe", "condition": "C1 (-40 C / 1.62 V)", "n": 1, "sample_id": "20261085/0", "purpose": "Reproduce the already-accepted B1 sample 0 with the run client and current fleet image. Must reproduce Vos within the 40 uV tolerance and equal echoed seeds. This establishes that the continuation environment (client, runner, models, DUT) still pairs with the accepted B1/REF jobs before any B2-B4 compute is spent. Counted separately from the 300 samples."},
+    {"step": "B2", "kind": "batch", "condition": "C2", "n": 100},
+    {"step": "B3", "kind": "batch", "condition": "C3", "n": 100},
+    {"step": "B4", "kind": "batch", "condition": "C4", "n": 100}
+  ],
+  "pairing_evidence": {
+    "design": "Equal input seeds and same-condition replay alone do not establish environmental pairing, so they are necessary but not sufficient. The evidence required for each of B2, B3 and B4 is the same set the original plan required for B1, evaluated per new condition: (1) per-sample rndseed, process_seed and mismatch_seed echoed by the condition equal those of the REF sample with the same ID, all 100; (2) PE1 reproduces B1 sample 20261085/0 (equal seeds, |dVos| <= 40 uV), showing the continuation environment is reproducible against accepted environmental evidence; (3) runner_klt_version, ngspice engine_version, models_lib_sha256 and bench netlist hash equal those of the REF/B1 accepted jobs; (4) statistical sanity gate per condition: paired residual sigma < 0.5 x the REF sigma (7.560 mV, i.e. < 3.78 mV); independent realizations would give about sqrt(2) x 7.56 = 10.7 mV.",
+    "limit": "Items (1)-(3) show the seed inputs and environment are held constant; they do not prove in-simulator device draws are invariant to temperature and supply. Item (4) is the independent check and is loose: a 0.5 x gate admits a partially decorrelated realization (the observed B1 residual was 13% of REF sigma). A gate pass therefore bounds, but does not eliminate, the possibility that part of a measured residual is decorrelation rather than drift, and any reported sigma is an upper-leaning estimate of true drift.",
+    "tighter_option_not_proposed_for_approval": "A stronger check would be a device-level realization comparison (for example a few samples at which the per-device mismatch parameters are echoed or extracted at two conditions). The runner does not expose per-device draws in the records seen so far, and no tool for it is established; this is an unresolved capability, not a proposed step.",
+    "capability_gap_stop": "If any of (1)-(4) fails or cannot be evaluated, the outcome is CAPABILITY GAP: write the report, issue NO drift verdict for the affected condition(s), and do not draw a physical-drift conclusion. The conditional B1 FAIL_SCREEN stays conditional on pairing in every case.",
+    "mixed_baselines": "Forbidden. No DR-007-width, sizing144 or any other historical result is subtracted from or pooled with these results. A reference failure at an ID invalidates that ID at every condition."
+  },
+  "budget_ceilings": {
+    "status": "PROPOSED. Not approved. The old allowances stay exhausted until a later explicit approval establishes new ones.",
+    "logical_condition_batches": 3,
+    "unique_environmental_samples": 300,
+    "reference_batches": 0,
+    "pairing_probes": {"logical_probes": 1, "unique_sample_runs": 1, "accounting": "PE1 is not a fourth logical batch and not part of the 300 samples; it is declared separately, 1 unique sample run."},
+    "max_attempts_per_condition_batch": 2,
+    "max_attempts_probe": 2,
+    "attempt_definition": "initial submission plus at most one retry, of the SAME request (same seed, n, sample IDs, DUT snapshot). A retry replaces a failed attempt, never adds samples and never redraws individual samples. Every attempt is retained as its own record.",
+    "max_requests": 8,
+    "max_requests_derivation": "3 batches x 2 attempts + 1 probe x 2 attempts",
+    "max_unique_sample_runs": 301,
+    "max_sample_runs_including_retries": 602,
+    "max_sample_runs_derivation": "3 x 2 x 100 + 1 x 2 x 1",
+    "capacity_refusals": "A request refused by the fleet before launch consumes an attempt under this ceiling unless a later approval says otherwise. The submit-side capacity wait options (`--wait-for-capacity`, `--capacity-retries`, present in the 0.8.1 client; not verified in 0.7.0) are NOT assumed available in the pinned client; if used they must be shown to count refusals as attempts, and no bounded wait may exceed the stated per-attempt wait ceiling in the cost section of the companion document.",
+    "backend": "batch only (KLT_SIM_BACKEND=batch). No local ngspice grids, loops, xargs, background jobs or launchd. If a submit fails, report the error; do not fall back to local.",
+    "unplanned_additions": "None. No sixth logical batch, no extra reference, no extra seeds or corners. A condition that fails after its attempts stays NOT_MEASURED and is not re-drawn."
+  },
+  "failure_accounting": {
+    "attempt_acceptance": "Identical to the original plan: corners[] present; monte_carlo n/seed/vary echoed exactly; exactly n samples with sample_index 0..n-1, no duplicate, no absent; process tt_mm and the requested temperature_c and supply_v.vdd echoed on every sample. The first accepted attempt per step is used.",
+    "per_sample_failures": "status not pass; vos_inp/out_lo/out_hi missing or non-finite; output not bracketing 0.9 V. Listed with ID and reason; never zero-filled, never replaced, never redrawn.",
+    "orphan_requests": "A request file with no summary counts as an attempt (conservative), as in the original ledger.",
+    "reported_separately": ["requested", "returned", "valid_pairs", "failed_condition_samples", "failed_reference_samples_invalidating_pairs", "attempts_used", "requests_consumed_against_ceiling"],
+    "minimum_valid_pairs": 80,
+    "statistics": "Unchanged from the original plan: residual r_i = Vos(condition, i) - Vos(REF, i) in mV joined by sample ID; 95% Student-t interval on the mean; 95% chi-square interval on sigma; complete-case over valid pairs with dropped IDs listed; mean, sample sigma (ddof=1) and max |residual| reported separately."
+  },
+  "screen": {
+    "sigma_screen_mv": 0.19,
+    "verdicts": {"PASS_SCREEN": "95% upper bound of sigma < 0.19 mV", "FAIL_SCREEN": "95% lower bound of sigma > 0.19 mV", "INCONCLUSIVE": "interval contains 0.19 mV, or fewer than 80 valid pairs"},
+    "not_bounded_by_screen": "mean drift and maximum residual",
+    "b1_unchanged": "B1 keeps FAIL_SCREEN (conditional on pairing) with its recorded interval; B2-B4 stay NOT_MEASURED until measured. The 0.275 mV allocation remains proposed."
+  },
+  "stop_rules": [
+    "No step starts without a later explicit campaign decision that names this file's sha256, the ceilings used and the capacity gate result.",
+    "PE1 fails (seeds differ, |dVos| > 40 uV, or provenance differs from the accepted jobs): stop; B2-B4 are not submitted; report CAPABILITY GAP / incompatible environment.",
+    "Runner version, ngspice version, models_lib_sha256, bench hash or DUT hash differs from the pinned values: stop and report; do not re-baseline or pool.",
+    "Any attempt ceiling reached for a batch: record FAILED_BATCH, condition stays NOT_MEASURED, no further retries.",
+    "Request ceiling (8) or sample-run ceiling (602) reached: stop all submission.",
+    "Pairing evidence (1)-(4) fails for a condition: no drift verdict for it.",
+    "Any condition FAIL_SCREEN does not authorize extra samples, seeds or corners; the remaining declared conditions still run only inside this budget (same rule as the original plan).",
+    "A failed submit is reported; the grid is never run locally."
+  ],
+  "claims_not_made": [
+    "campaign execution or any fresh retry budget (planning only)",
+    "offset compliance (0.275 mV remains proposed)",
+    "adoption of any trim architecture, or rejection of every trim architecture",
+    "an unconditional physical-drift conclusion from B1 or from any B2-B4 result",
+    "behaviour at process corners other than TT, or at N >= 300 per corner",
+    "closure of issue #196 (plan acceptance does not satisfy the original four-condition acceptance criteria)"
+  ]
+}

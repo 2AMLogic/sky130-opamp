@@ -216,3 +216,13 @@ Machine-readable result: [`records/20261011-233532-drift-drift196-1e74b9.drift.j
 (`VERDICTS_ISSUED`, which overstated a 1-of-4 run); same raw records, identical statistics.
 The B1 FAIL_SCREEN holds only if pairing is exact; imperfect pairing would inflate the
 measured residual. Issue #196 stays open for the three unmeasured conditions.
+
+### Costed continuation plan for the three unmeasured conditions (#196, proposed)
+
+[`records/offset-drift-amendment-196.md`](records/offset-drift-amendment-196.md) and
+[`records/offset-drift-plan-196-amendment.json`](records/offset-drift-plan-196-amendment.json)
+(2026-11-02): **planning only, not approved, nothing executed.** Pins the DUT/model/runner/bench identities and the
+`20261085/0..99` sample IDs for B2, B3, B4 (300 samples), proposes finite ceilings (≤ 8 requests, ≤ 2 attempts per
+batch), a pairing-evidence design with its limits, runtime/cost estimates from the accepted B0/B1 jobs and the open
+capacity prerequisite. B1's conditional FAIL_SCREEN and B2–B4 NOT_MEASURED are unchanged; the 0.275 mV allocation stays
+proposed. Issue #196 stays open.
