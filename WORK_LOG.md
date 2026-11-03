@@ -2,6 +2,14 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-11-03
+
+- **Issue #263** (closed): main red: klt signoff drifted on T1 item 10 (.gitignore hash) after Loom resync
+
+### 2026-11-02
+
+- **Issue #265** (closed): signoff red on main: T1 item 10 attest envelope drifted (.gitignore hash)
+
 ### 2026-10-31
 
 - **PR #260**: feat(sim): split item-7 pex deltas into representation vs parasitic terms
