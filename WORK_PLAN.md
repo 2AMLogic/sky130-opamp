@@ -56,7 +56,7 @@ Issues carrying `loom:curated`.
 
 ## Proposed (Architect / Hermit)
 
-- **#237**: Consolidate duplicated logical_lines and sha256 helpers across flow scripts *(hermit)*
+_None._
 
 ## Epics
 
