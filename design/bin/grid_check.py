@@ -25,6 +25,8 @@ import re
 import sys
 from pathlib import Path
 
+from _common import join_continuations
+
 GRID_UM = 0.005
 DEFAULT_NETLIST = Path(__file__).resolve().parent.parent / "netlist" / "opamp_core.spice"
 CLASS_RE = {
@@ -45,19 +47,6 @@ REQUIRED_DIMS = (
 def on_grid(value: float, grid: float = GRID_UM) -> bool:
     n = value / grid
     return abs(n - round(n)) <= 1e-6
-
-
-def logical_lines(text: str):
-    cur = ""
-    for raw in text.splitlines():
-        if raw.startswith("+"):
-            cur += " " + raw[1:].strip()
-            continue
-        if cur:
-            yield cur
-        cur = raw.strip()
-    if cur:
-        yield cur
 
 
 def _nf(tokens):
@@ -83,7 +72,7 @@ def _nf(tokens):
 
 def violations(text: str, classes=("passive",)) -> list[str]:
     out = []
-    for line in logical_lines(text):
+    for line in join_continuations(text):
         if not line or line[0] in "*.":
             continue
         tokens = line.split()

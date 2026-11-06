@@ -14,6 +14,7 @@ RECORDS = EXP / "records"
 TESTBENCH = EXP / "testbench"
 
 sys.path.insert(0, str(REPO / "sim" / "lib"))
+sys.path.insert(0, str(REPO / "design" / "bin"))  # scripts import sibling _common
 
 
 def load_module(name: str, path: Path):

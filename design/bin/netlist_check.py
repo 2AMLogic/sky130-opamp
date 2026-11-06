@@ -41,7 +41,6 @@ design/xschemrc and sim/gm-id-characterization/pdk.json).
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -50,6 +49,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from _common import join_continuations, sha256_prefixed
 
 DESIGN = Path(__file__).resolve().parent.parent
 DERIVED = {"ad", "as", "pd", "ps", "nrd", "nrs"}
@@ -61,21 +62,9 @@ EXPR_RE = re.compile(r"""^expr\('(?P<body>.*)'\)$""")
 SAFE_BODY_RE = re.compile(r"^[0-9@A-Za-z_ .+\-*/()]*$")
 
 
-def sha256(path: Path) -> str:
-    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
-
-
 def logical_lines(text: str) -> list[str]:
-    """Drop line 1's sch_path comment; join '+' continuations."""
-    out: list[str] = []
-    for i, line in enumerate(text.splitlines()):
-        if i == 0 and line.startswith("** sch_path:"):
-            continue
-        if line.startswith("+") and out:
-            out[-1] += " " + line[1:].strip()
-        else:
-            out.append(line.rstrip())
-    return out
+    """Comment-aware join; the line-1 ``** sch_path:`` comment is dropped with the rest."""
+    return join_continuations(text)
 
 
 def split_tokens(line: str) -> list[str]:
@@ -197,8 +186,8 @@ def record_for(schematic: Path, netlist: Path, record: Path) -> dict:
             "for T1 item 1. Refreshed by design/bin/netlist_check.py --write-record; "
             "verified by the same script in CI."
         ),
-        "schematic": {"path": rel(schematic), "content_hash": sha256(schematic)},
-        "netlist": {"path": rel(netlist), "content_hash": sha256(netlist)},
+        "schematic": {"path": rel(schematic), "content_hash": sha256_prefixed(schematic)},
+        "netlist": {"path": rel(netlist), "content_hash": sha256_prefixed(netlist)},
     }
 
 
