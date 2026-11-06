@@ -29,11 +29,12 @@ failure (all item-specific failures are aggregated and reported).
 """
 
 import argparse
-import hashlib
 import json
 import os
 import sys
 from pathlib import Path
+
+from _common import sha256_prefixed
 
 REPO = Path(__file__).resolve().parent.parent.parent
 DEFAULT_MANIFEST = "manifests/sky130-opamp.json"
@@ -49,11 +50,6 @@ REMEDIATION = (
 def _sort_key(kv):
     k = str(kv[0])
     return (0, int(k), k) if k.isdigit() else (1, 0, k)
-
-
-def sha256_of(path):
-    with open(path, "rb") as handle:
-        return "sha256:" + hashlib.sha256(handle.read()).hexdigest()
 
 
 class EvidencePathError(Exception):
@@ -222,7 +218,7 @@ def check_manifest(manifest, root=REPO):
             continue
         shown = os.path.relpath(resolved, os.path.realpath(root))
         try:
-            actual = sha256_of(resolved)
+            actual = sha256_prefixed(resolved)
         except OSError as exc:
             failures.append(f"item {item}: cannot read cited artifact {shown}: {exc}")
             continue
