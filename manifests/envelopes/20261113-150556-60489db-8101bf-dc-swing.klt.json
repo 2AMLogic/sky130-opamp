@@ -1,0 +1,729 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 15,
+  "passed": 15,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 3
+    },
+    "by_severity": {
+      "warning": 3
+    },
+    "corners_with_diagnostics": 3
+  },
+  "metrics": {
+    "sim__corner__count": 15,
+    "sim__corner__passed_count": 15,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "47",
+    "ngspice_binary": "/usr/local/bin/ngspice",
+    "engine_build": {
+      "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******",
+      "binary_sha256": "20b24e16d6550f40d31c0690adbac8c64f3078205bd9aaa60b50274d3eebcf62",
+      "probe": "ok",
+      "reason": null
+    },
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "models_lib_sha256_scope": "client",
+    "netlist_sha256": "6704b8bc5c3213dd74c02dd99349ebce41dfa0499bebd2e19069d353c6dd9cea",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "6704b8bc5c3213dd74c02dd99349ebce41dfa0499bebd2e19069d353c6dd9cea"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "netlist_identity": "sha256:ae4ed81247cb7a9f922196626046c0d8af1c130950ba87082a7974c99a74d5aa",
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-23f10132b955",
+      "region": "us-east-1",
+      "instance_id": "i-0cb13beb1fb75edaf",
+      "instance_type": "m7i.4xlarge",
+      "availability_zone": "us-east-1c",
+      "ami_id": "ami-0f6bb304291339ed0",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "1",
+      "physical_cores": "8",
+      "elapsed_seconds": 30,
+      "client_submitted_at": "2026-11-13T15:07:36.845064Z",
+      "client_launched_at": "2026-11-13T15:08:14.687570Z",
+      "client_status_terminal_at": "2026-11-13T15:09:17.480538Z",
+      "client_collected_at": "2026-11-13T15:09:18.734418Z",
+      "runner_klt_version": "0.9.0",
+      "client_klt_version": "0.9.0",
+      "runner_compatibility": "match",
+      "worker_environment": {
+        "capture": "ok",
+        "simulator": {
+          "requested_binary": "ngspice",
+          "binary_source": "PATH",
+          "selected_path": "/usr/local/bin/ngspice",
+          "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+          "version_probe": "ok"
+        },
+        "pdk": {
+          "variant": "sky130A",
+          "root": "/opt/pdk",
+          "stamp_scheme": "sources-sha256",
+          "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+          "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+          "models_staged": false,
+          "stamp_scope": "executed"
+        },
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+        "omp_num_threads": null,
+        "image_manifest": null,
+        "model_inputs": null,
+        "diagnostics": [],
+        "pdk_stamp_comparison": {
+          "status": "not_comparable",
+          "reason": "client_stamp_unavailable"
+        },
+        "engine_build_comparison": {
+          "status": "match"
+        }
+      },
+      "runner_model_inputs": null,
+      "job_ceiling": {
+        "basis": "conservative_serial_bound",
+        "unit_count": 15,
+        "per_unit_timeout_s": 1200,
+        "overhead_s": 120.0,
+        "job_bound_s": 18120.0,
+        "max_job_seconds": 3600.0,
+        "max_job_seconds_source": "fleet_config",
+        "exceeds_ceiling": true,
+        "check": "warn",
+        "max_units_per_job": 2,
+        "recommended_hosts": 8,
+        "warning": "batch job bound 18120s (options.timeout_s 1200s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 8 to run one job per shard of at most 2 units, each within the ceiling"
+      }
+    },
+    "engine_host": "worker",
+    "client_ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "backend": {
+      "resolved": "batch",
+      "source": "flag",
+      "requested": "batch"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 15,
+    "measurements_declared": 1,
+    "measurements_with_limits": 0,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "measurement:[0,\"tt/1.800V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[1,\"tt/1.800V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[10,\"sf/1.800V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[11,\"sf/1.800V/125C\",\"vout_mid_v\"]/observation",
+      "measurement:[12,\"fs/1.800V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[13,\"fs/1.800V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[14,\"fs/1.800V/125C\",\"vout_mid_v\"]/observation",
+      "measurement:[2,\"tt/1.800V/125C\",\"vout_mid_v\"]/observation",
+      "measurement:[3,\"ff/1.980V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[4,\"ff/1.980V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[5,\"ff/1.980V/125C\",\"vout_mid_v\"]/observation",
+      "measurement:[6,\"ss/1.620V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[7,\"ss/1.620V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[8,\"ss/1.620V/125C\",\"vout_mid_v\"]/observation",
+      "measurement:[9,\"sf/1.800V/-40C\",\"vout_mid_v\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"tt/1.800V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"tt/1.800V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[10,\"sf/1.800V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[11,\"sf/1.800V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[12,\"fs/1.800V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[13,\"fs/1.800V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[14,\"fs/1.800V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"tt/1.800V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[3,\"ff/1.980V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[4,\"ff/1.980V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[5,\"ff/1.980V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[6,\"ss/1.620V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[7,\"ss/1.620V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[8,\"ss/1.620V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[9,\"sf/1.800V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.9.0",
+    "klt_git_commit": "5dbbad05ff42265c92a6f3d2f20d1bbcd2957d49",
+    "klt_reinstall_spec": "klayout-tools==0.9.0",
+    "klayout_version": "0.30.13",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.ciel",
+      "version": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+      "ambiguous_sources": [
+        "search root: ~/.volare"
+      ]
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:6704b8bc5c3213dd74c02dd99349ebce41dfa0499bebd2e19069d353c6dd9cea",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "vout_mid_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "tt/1.800V/-40C",
+        "value": 0.899808,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "tt/1.800V/-40C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 11.859,
+      "peak_rss_bytes": 380293120,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899808,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/27C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 11.973,
+      "peak_rss_bytes": 381005824,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899849,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_27C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_27C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_27C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "tt/1.800V/125C",
+      "process": "tt",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 11.908,
+      "peak_rss_bytes": 380919808,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.89992,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_125C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_125C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_125C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/tt_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 11.916,
+      "peak_rss_bytes": 381005824,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.989853,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 11.853,
+      "peak_rss_bytes": 380919808,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.989909,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_27C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_27C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_27C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 11.869,
+      "peak_rss_bytes": 380919808,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.990009,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_125C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_125C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_125C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/-40C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 12.039,
+      "peak_rss_bytes": 381005824,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.809706,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/27C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 11.893,
+      "peak_rss_bytes": 380919808,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.809757,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_27C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_27C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_27C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ss/1.620V/125C",
+      "process": "ss",
+      "supply_v": {
+        "vdd": 1.62
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 9.674,
+      "peak_rss_bytes": 381005824,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.809819,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_125C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_125C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_125C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/ss_1p620V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/-40C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 9.595,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899829,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/27C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 9.657,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.89986,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_27C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_27C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_27C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "sf/1.800V/125C",
+      "process": "sf",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 9.639,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.89991,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_125C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_125C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_125C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/sf_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/-40C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 9.658,
+      "peak_rss_bytes": 381108224,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.89977,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_n40C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_n40C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_n40C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/27C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 9.744,
+      "peak_rss_bytes": 381108224,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899833,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_27C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_27C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_27C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "fs/1.800V/125C",
+      "process": "fs",
+      "supply_v": {
+        "vdd": 1.8
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 9.582,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.899944,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_125C/ngspice.log",
+        "raw": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_125C/waveform.raw",
+        "waveform": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_125C/waveform.raw.json",
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-dc-swing/fs_1p800V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

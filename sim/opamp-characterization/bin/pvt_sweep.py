@@ -67,7 +67,19 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --netlist PATH      characterize this flat DUT netlist (ports vdd vss inn inp
                         out ibias) instead of design/netlist/opamp_core.spice; the
                         record snapshots it, the canonical design is not touched
+    --export-envelopes DIR
+                        write each `klt sim` response envelope into DIR (committed,
+                        append-only) instead of the git-ignored stage, for the
+                        campaign whose envelopes are cited as T1 item 5 evidence
+                        (issue #246)
     --keep-work         do not delete the scratch ngspice decks/outputs
+
+Every `klt sim` request grades the ratified spec rows it can express: the
+measurements carry `limits` (the unchanged DR-003 bound) and a `spec_row` tag,
+so the envelope itself records per-corner pass/fail and the binding corner, and
+`klt signoff --manifest` derives item 5's row coverage from it. See the "T1 item 5
+spec-row grading" block below for the per-row provenance of each bound and for
+the rows no `klt sim` request of this harness can grade (declared gaps).
 
 `ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
 decks and drives `ngspice -b` itself, one subprocess per (corner, temperature)
@@ -167,6 +179,115 @@ VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
 SUPPLY_MODES = ("paired", "cartesian")
 DEFAULT_SUPPLY_MODE = "paired"
 CARTESIAN_SUPPLIES_V = (1.62, 1.80, 1.98)
+
+# --------------------------------------------------------------------------
+# T1 item 5 spec-row grading (issue #246).
+#
+# Every bound below is the RATIFIED target, read off `spec/target-spec.md` Sec 2
+# and `DR-003`'s per-row ratification, and is NEVER loosened or tightened here
+# (CLAUDE.md: "agents do not relax the ratified spec to make results pass").
+# Attaching them as klt `limits` is what makes the `klt sim` envelope record
+# per-corner pass/fail and the binding corner (`measurements[].worst_case`), and
+# `spec_row` is what lets `klt signoff --manifest` derive item 5's row coverage
+# from the envelope instead of trusting the manifest's word (klt >= 0.8.0,
+# docs/cli/signoff.md "Derived coverage").
+#
+# Per-row provenance of the bound:
+#   open_loop_dc_gain  DR-003 "RATIFY >= 60 dB (stretch >= 65 dB) unchanged"
+#                      (the stretch bound is not graded: it is not the target).
+#   gbw_cl2pf          DR-003 "RATIFY ~ 16 MHz unchanged, as a target the current
+#                      design does *not* meet" -- i.e. a hard lower bound, graded
+#                      at CL = 2 pF (DR-001).
+#   phase_margin       DR-003 "RATIFY >= 60 deg unchanged".
+#   slew_rate          DR-003 "RATIFY ~ 20 V/us unchanged, with the hand
+#                      estimate's implicit rise/fall symmetry made an explicit
+#                      part of the ratified row: both the 20%-80% rise and the
+#                      80%-20% fall transit ... must meet it" -- so BOTH edges
+#                      are graded against the same lower bound. DR-003 itself
+#                      grades a 19.69 V/us rise as "marginally under", which is
+#                      why the bound is the literal 20.0 and not a tolerance band.
+#   quiescent_power    DR-003 "RATIFY ~ 128.7 uW at the 1.98 V binding corner /
+#                      ~ 117.0 uW at nominal 1.8 V unchanged ... this record does
+#                      not convert [the measured deltas] into a ratification
+#                      tolerance". Those two power figures are the SAME current:
+#                      128.7 uW / 1.98 V = 117.0 uW / 1.80 V = 65.0 uA, and the
+#                      row's own text says `I_Q = 65 uA` "is exactly what the
+#                      row's '~' estimate encodes". A klt `limits` bound is one
+#                      number across every corner of a request, and the supply
+#                      axis moves with the process corner, so the row is graded
+#                      in its supply-independent form (Iq) -- the only bound that
+#                      reproduces BOTH ratified power figures exactly. `pq_w` is
+#                      reported alongside, ungraded, so the record still carries
+#                      the power number.
+#                      CAVEAT -- this bound is the ONE place in this block where
+#                      a SPEC_* constant is not simply a ratified number copied
+#                      across: 65.0 uA as a zero-tolerance `max` is a READING of
+#                      an "~" row, and the spec does not state it. DR-003 ratified
+#                      "~" figures and declined to set a tolerance (quoted above),
+#                      while spec/target-spec.md's row calls the measured result
+#                      "confirmed on both PVT grids" at +2.5% vs. the DR-002
+#                      estimate and its status column reads "measured". So the
+#                      spec's own disposition of these numbers is "confirmed" and
+#                      this grading's is "fail" -- a conservative reading chosen
+#                      here, not a relaxation and not a spec statement. Under it
+#                      13 of the 15 points fail, nominal TT/27 C included
+#                      (65.745 uA, 118.34 uW vs the ~ 117.0 uW figure); only
+#                      SS/-40 C (64.243 uA) and SS/27 C (64.736 uA) pass; and
+#                      SS/125 C/1.62 V fails at 65.148 uA while drawing 105.54 uW,
+#                      BELOW both ratified power figures -- the row ratifies no
+#                      figure at 1.62 V and a current bound supplies one. A `fail`
+#                      on this row therefore means "fails under the stated
+#                      reading", not a design verdict. The reconciliation is a
+#                      spec/ decision record, tracked in issue #277; changing
+#                      SPEC_IQ_MAX_A is that ruling's job, not a tuning knob.
+#   input_common_mode_range
+#                      DR-003 "RATIFY AS TARGET: ~ 0.888-1.024 V ... The value
+#                      binds as the input range the design commits to covering",
+#                      so the measured 40 dB window must CONTAIN it: low edge
+#                      <= 0.888 V and high edge >= 1.024 V.
+#
+# Rows this harness's `klt sim` requests cannot grade are declared gaps in
+# `manifests/sky130-opamp.json` (`spec_rows."5"`), never silently dropped --
+# see manifests/README.md item 5 and ITEM5_UNGRADED_ROWS below.
+SPEC_GAIN_MIN_DB = 60.0
+SPEC_GBW_MIN_HZ = 16e6
+SPEC_PM_MIN_DEG = 60.0
+SPEC_SR_MIN_V_PER_US = 20.0
+SPEC_IQ_MAX_A = 65e-6
+# Radians -> degrees as an ngspice `.meas ... param=` literal (no `pi` in a
+# param expression); 180/pi to 16 significant digits.
+RAD_TO_DEG = "57.29577951308232"
+# Spec-row ids used in `measurements[].spec_row` and in the block manifest's
+# `spec_rows."5"`. One id per `spec/target-spec.md` Sec 2 row.
+ITEM5_GRADED_ROWS = ("open_loop_dc_gain", "gbw_cl2pf", "phase_margin", "slew_rate",
+                     "input_common_mode_range", "quiescent_power")
+# Sec 2 rows no `klt sim` request of this harness grades, and the short reason,
+# echoed into every record's `spec_row_grading` so a campaign states its own
+# coverage. These are item 5's declared gaps; the AUTHORITATIVE text -- with the
+# issue each gap is tracked by -- is the manifest's `spec_rows."5"`, which
+# `klt signoff` quotes into the committed record's `detail.declared_gaps`.
+# Keep the two consistent in the same PR.
+ITEM5_UNGRADED_ROWS = {
+    "output_swing": "the ratified grading rule is a contiguous-run reduction over a swept waveform "
+                    "(largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` "
+                    "measurement form expresses it (klayout-tools#5518), so the row is measured "
+                    "(dc_swing waveform, -dc-swing.csv) but graded by no envelope",
+    "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, "
+                            "but carry no limits/spec_row and DR-003 left the graded quantity undecided "
+                            "(issue #274)",
+    "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
+    "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); "
+                             "target proposed by DR-009, not ratified",
+    "cmrr": "target proposed by DR-008, not ratified: no ratified bound to grade",
+    "area": "not a PVT-simulated row (post-layout quantity, [TBD])",
+}
+# Relative tolerance of the klt-card-vs-Python-column cross-check in the record.
+# ngspice prints a `.meas` result to 6 significant figures and both paths consume
+# those same rounded numbers; the slew cards additionally divide a difference of
+# two such times (t80 - t20 is ~2e-8 s out of ~2e-7 s values), which costs about
+# another decade. 1e-3 relative is therefore the print-precision floor, not a
+# physics tolerance -- a real disagreement is orders of magnitude larger.
+KLT_VS_PYTHON_REL_TOL = 1e-3
 
 
 def supply_values(corners: list[str], mode: str = DEFAULT_SUPPLY_MODE,
@@ -508,10 +629,16 @@ def icmr_measurements(vdd: float) -> list[dict]:
     ]
     for label, db in ICMR_CMRR_FLOORS_DB.items():
         level = 10 ** (-db / 20.0)
+        # The ratified ICMR row binds as the window the design commits to COVERING, so
+        # the primary (40 dB) edges carry the containment bound: low edge <= 0.888 V and
+        # high edge >= 1.024 V (issue #246). The 30/50 dB sensitivity band stays ungraded.
+        graded = label == "40db"
+        lo_extra = {"limits": {"max": TARGET_ICMR_V[0]}, "spec_row": "input_common_mode_range"} if graded else {}
+        hi_extra = {"limits": {"min": TARGET_ICMR_V[1]}, "spec_row": "input_common_mode_range"} if graded else {}
         ms.append({"name": f"lo_{label}", "unit": "V",
-                   "spice": f".meas dc lo_{label} when v(k)={level:g} cross=last to={mid:g}"})
+                   "spice": f".meas dc lo_{label} when v(k)={level:g} cross=last to={mid:g}", **lo_extra})
         ms.append({"name": f"hi_{label}", "unit": "V",
-                   "spice": f".meas dc hi_{label} when v(k)={level:g} cross=1 from={mid:g}"})
+                   "spice": f".meas dc hi_{label} when v(k)={level:g} cross=1 from={mid:g}", **hi_extra})
     return ms
 
 
@@ -555,30 +682,66 @@ def body_template(analysis: str) -> Path:
 
 def ac_measurements() -> list[dict]:
     """`.meas ac` cards of the fleet AC request: the unchanged DC-servo open-loop sweep
-    (gain at FSTART=1 Hz, unity-gain frequency, phase there)."""
+    (gain at FSTART=1 Hz, unity-gain frequency, phase there), plus the phase margin in
+    degrees as an ngspice `param=` card so the ratified gain / GBW / PM rows carry
+    klt-graded `limits` and a `spec_row` tag (issue #246). The raw values and their
+    definitions are unchanged -- only the grading metadata is new."""
     return [
-        {"name": "gain_dc_db", "unit": "dB", "spice": ".meas ac gain_dc_db find vdb(out) at=1"},
-        {"name": "gbw_hz", "unit": "Hz", "spice": ".meas ac gbw_hz when vdb(out)=0 cross=1"},
+        {"name": "gain_dc_db", "unit": "dB", "spice": ".meas ac gain_dc_db find vdb(out) at=1",
+         "limits": {"min": SPEC_GAIN_MIN_DB}, "spec_row": "open_loop_dc_gain"},
+        {"name": "gbw_hz", "unit": "Hz", "spice": ".meas ac gbw_hz when vdb(out)=0 cross=1",
+         "limits": {"min": SPEC_GBW_MIN_HZ}, "spec_row": "gbw_cl2pf"},
         {"name": "phase_at_gbw_rad", "unit": "rad",
          "spice": ".meas ac phase_at_gbw_rad find vp(out) when vdb(out)=0 cross=1"},
+        # PM = 180 deg + phase(GBW); the same arithmetic ac_row() does in Python, moved
+        # into the deck so klt grades it. The ngspice `param=` form reads the results of
+        # the `.meas` cards above (declared before it, as ngspice requires).
+        {"name": "phase_margin_deg", "unit": "deg",
+         "spice": f".meas ac phase_margin_deg param='180+phase_at_gbw_rad*{RAD_TO_DEG}'",
+         "limits": {"min": SPEC_PM_MIN_DEG}, "spec_row": "phase_margin"},
     ]
 
 
 def ac_iq_measurements() -> list[dict]:
-    """Quiescent supply current of the AC bench at its operating point. The runner image's
-    klt (0.5.0) takes only `.meas` cards (no `expr`, no `analysis_steps`), and a `.meas`
-    has no `op` type, so Iq comes from a companion zero-offset `dc` request of the SAME
-    body (the sweep point at Vinp = 0 is exactly the AC bias point). Pq = Iq * VDD."""
-    return [{"name": "i_vdd_a", "unit": "A", "spice": ".meas dc i_vdd_a find i(vdd) at=0"}]
+    """Quiescent supply current of the AC bench at its operating point. A `.meas` has no
+    `op` type, so Iq comes from a companion zero-offset `dc` request of the SAME body
+    (the sweep point at Vinp = 0 is exactly the AC bias point). Pq = Iq * VDD.
+
+    `iq_a` carries the quiescent-power row's ratified bound (SPEC_IQ_MAX_A -- see the
+    ITEM5 block above for why the row is graded in its supply-independent current form);
+    `pq_w` is reported ungraded so the record still carries the power figure."""
+    return [
+        {"name": "i_vdd_a", "unit": "A", "spice": ".meas dc i_vdd_a find i(vdd) at=0"},
+        {"name": "vdd_v", "unit": "V", "spice": ".meas dc vdd_v find v(vdd) at=0"},
+        {"name": "iq_a", "unit": "A", "spice": ".meas dc iq_a param='-i_vdd_a'",
+         "limits": {"max": SPEC_IQ_MAX_A}, "spec_row": "quiescent_power"},
+        {"name": "pq_w", "unit": "W", "spice": ".meas dc pq_w param='-i_vdd_a*vdd_v'"},
+    ]
 
 
 def tran_sr_measurements() -> list[dict]:
     """Crossing times of the 20 %/80 % levels (behavioural nodes l20/l80 in the body,
-    which follow each corner's VDD); SR = 0.6*span/(t80-t20) is derived in tran_sr_row."""
+    which follow each corner's VDD), plus both slew rates as `param=` cards so the
+    ratified slew row carries klt-graded `limits` (issue #246).
+
+    SR = 0.6*span/(t80-t20) with span = V_HIGH - V_LOW = 0.4*VDD, so the numerator
+    0.6*span = 0.24*VDD is EXACTLY v(l80) - v(l20) (the body sets l20/l80 to
+    VDD*(0.3+0.4*0.2) and VDD*(0.3+0.4*0.8)). Reading the two level nodes instead of
+    writing a VDD literal keeps one request valid for the whole supply axis -- a
+    `param=` expression cannot reference a vector, and `limits` is one number per
+    measurement across every corner of the request. tran_sr_row()'s Python arithmetic
+    is unchanged and is cross-checked against these cards in the record."""
     cards = [("t20_rise", "l20", "rise"), ("t80_rise", "l80", "rise"),
              ("t80_fall", "l80", "fall"), ("t20_fall", "l20", "fall")]
-    return [{"name": n, "unit": "s", "spice": f".meas tran {n} when v(out)=v({lvl}) {edge}=1"}
-            for n, lvl, edge in cards]
+    ms = [{"name": n, "unit": "s", "spice": f".meas tran {n} when v(out)=v({lvl}) {edge}=1"}
+          for n, lvl, edge in cards]
+    ms += [{"name": "v20_level_v", "unit": "V", "spice": ".meas tran v20_level_v find v(l20) at=0"},
+           {"name": "v80_level_v", "unit": "V", "spice": ".meas tran v80_level_v find v(l80) at=0"}]
+    for name, num in (("sr_rise_v_per_us", "t80_rise-t20_rise"), ("sr_fall_v_per_us", "t20_fall-t80_fall")):
+        ms.append({"name": name, "unit": "V/us",
+                   "spice": f".meas tran {name} param='(v80_level_v-v20_level_v)/({num})/1e6'",
+                   "limits": {"min": SPEC_SR_MIN_V_PER_US}, "spec_row": "slew_rate"})
+    return ms
 
 
 def swing_measurements() -> list[dict]:
@@ -589,8 +752,114 @@ def swing_measurements() -> list[dict]:
 KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 instances at once
 CAPACITY_RETRIES = 30
 CAPACITY_WAIT_S = 60
+# Per-submit wall-clock budget klt itself spends waiting out a Spot capacity or
+# fleet concurrency refusal (`batch.capacity_wait_s`); the host rule for this
+# worker requires it on every batch `klt sim` (2am#6872).
+BATCH_CAPACITY_WAIT_S = 600
+# Directory (repo-relative) a campaign writes its `klt sim` response envelopes to
+# instead of the git-ignored stage, set by --export-envelopes. An exported
+# envelope is committed evidence (it is what the block manifest cites), so it is
+# deliberately NOT also handed to the artifact store -- committing bytes the
+# store already holds is what sim/lib/check_artifact_manifests.py refuses.
+EXPORT_ENVELOPE_DIR: list[Path | None] = [None]
 RUNNER_VERSION_CHECK = ["warn"]  # set from --batch-runner-check
 KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set from --timeout-s
+
+
+# (tag, report) of every `klt sim` response this campaign collected, so the
+# record can summarise the spec-row grading the envelopes carry (issue #246).
+KLT_REPORTS: list[tuple[str, dict]] = []
+
+
+def spec_row_grading(reports: list[tuple[str, dict]], results: dict) -> dict:
+    """Per-spec-row rollup of what the campaign's `klt sim` envelopes graded.
+
+    Reads the envelopes' own `measurements[]` rollup (so it reports what klt
+    decided, never a re-derivation): the bound, the worst value and ITS corner,
+    and -- per row -- which measurement/envelope/corner BINDS (smallest margin).
+    Also cross-checks each klt `param=` card against the Python column the row
+    builders computed from the same response: the two must agree, or one of them
+    is wrong. Agreement is asserted RELATIVELY (KLT_VS_PYTHON_REL_TOL), because
+    both paths consume the same 6-significant-figure `.meas` outputs and the
+    slew cards divide a difference of two such times -- an absolute bound would
+    be reporting print precision, not disagreement."""
+    rows: dict[str, dict] = {}
+    for tag, report in reports:
+        for m in report.get("measurements") or []:
+            row = m.get("spec_row")
+            if not row:
+                continue
+            e = rows.setdefault(row, {"status": "pass", "graded_measurement_points": 0, "measurements": []})
+            e["measurements"].append({
+                "envelope": tag, "name": m.get("name"), "unit": m.get("unit"),
+                "limits": m.get("limits"), "status": m.get("status"),
+                "worst_case": m.get("worst_case"),
+            })
+            e["graded_measurement_points"] += int(report.get("corner_count") or 0)
+            if m.get("status") != "pass":
+                e["status"] = "fail"
+    for e in rows.values():
+        binding = min(e["measurements"],
+                      key=lambda m: (m["worst_case"] or {}).get("margin")
+                      if (m["worst_case"] or {}).get("margin") is not None else math.inf)
+        e["binding"] = {"envelope": binding["envelope"], "measurement": binding["name"],
+                        "corner_id": (binding["worst_case"] or {}).get("corner_id"),
+                        "value": (binding["worst_case"] or {}).get("value"),
+                        "margin": (binding["worst_case"] or {}).get("margin"),
+                        "unit": binding["unit"]}
+    # klt `param=` card vs the row builder's Python arithmetic, same response.
+    checks = [("phase_margin_deg", "ac", "phase_margin_deg"), ("pq_w", "ac", "pq_w"),
+              ("sr_rise_v_per_us", "tran_sr", "sr_rise_v_per_us"),
+              ("sr_fall_v_per_us", "tran_sr", "sr_fall_v_per_us")]
+    agree: list[dict] = []
+    for meas_name, analysis, col in checks:
+        by_point: dict[tuple, float] = {}
+        for _tag, report in reports:
+            for c in report.get("corners") or []:
+                for m in c.get("measurements") or []:
+                    if m.get("name") == meas_name and m.get("value") is not None:
+                        by_point[(c["process"], float(c["temperature_c"]))] = float(m["value"])
+        if not by_point:
+            continue
+        worst, worst_at, n = 0.0, None, 0
+        for r in results.get(analysis) or []:
+            v = by_point.get((r["corner"], float(r["temp_c"])))
+            if v is None or r.get(col) is None:
+                continue
+            n += 1
+            ref = max(abs(v), abs(float(r[col])))
+            d = abs(v - float(r[col])) / ref if ref else 0.0
+            if d > worst:
+                worst, worst_at = d, f"{r['corner']}/{r['temp_c']:g}C"
+        agree.append({"measurement": meas_name, "python_column": f"{analysis}.{col}", "points": n,
+                      "max_rel_delta": worst, "at": worst_at, "rel_tol": KLT_VS_PYTHON_REL_TOL,
+                      "agrees": worst <= KLT_VS_PYTHON_REL_TOL})
+    return {"rows": rows, "klt_vs_python": agree,
+            "klt_vs_python_agrees": all(c["agrees"] for c in agree) if agree else None,
+            "ungraded_rows": ITEM5_UNGRADED_ROWS,
+            "all_graded_rows_present": sorted(rows) == sorted(ITEM5_GRADED_ROWS)}
+
+
+def write_klt_response(log_dir: Path, tag: str, report: dict) -> str:
+    """Persist one `klt sim` response envelope; return its repo-relative path.
+
+    Default (issue #240): into the git-ignored stage, from where artifact_store
+    hands it to the fleet artifact store and git keeps only the manifest.
+    With --export-envelopes (issue #246): into that committed directory instead,
+    because the block manifest cites the envelope itself as item 5 evidence --
+    and never into both, so no committed byte is also a stored object (the rule
+    sim/lib/check_artifact_manifests.py enforces)."""
+    text = json.dumps(report, indent=2) + "\n"
+    out_dir = EXPORT_ENVELOPE_DIR[0]
+    if out_dir is None:
+        (log_dir / f"klt-{tag}-response.json").write_text(text)
+        return f"{STAGE_REL}/{log_dir.name}/klt-{tag}-response.json"
+    record_id = log_dir.name[len(ARTIFACT_BENCH) + 1:] if log_dir.name.startswith(f"{ARTIFACT_BENCH}-") \
+        else log_dir.name
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{record_id}-{tag}.klt.json"
+    write_new(path, text)  # append-only: never overwrite committed evidence
+    return path.relative_to(REPO_ROOT).as_posix()
 
 
 def klt_available() -> str | None:
@@ -713,15 +982,23 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
                     **({"waveforms": True} if analysis in ("dc_swing", "swing_fixcm", "tran_sr_icmr") else {})},
     }
     if backend == "batch":
-        # The fleet image's klt (0.5.0 when this was written) is older than any
-        # client that can submit to it, so the default "enforce" gate refuses
-        # every job (batch_runner_version_mismatch, exit 87). "warn" runs the
-        # job anyway and records the skew in environment.remote; the requests
-        # built here deliberately use only fields klt 0.5.0 understands
-        # (measurements[].spice, no `expr`), and the record carries
-        # runner_compatibility + a same-grid cross-check against the committed
-        # ac record so a silently-ignored option would show up.
-        request["batch"] = {"runner_version_check": RUNNER_VERSION_CHECK[0]}
+        # The fleet image's klt has been both older and newer than the submitting
+        # client (0.5.0 when this was written; 0.9.0 as of issue #246), so the
+        # "enforce" gate refuses a skewed job (batch_runner_version_mismatch,
+        # exit 87). "warn" runs it anyway and records the skew in
+        # environment.remote; the requests built here deliberately use only
+        # `measurements[].spice` cards (no `expr`, no `analysis_steps`), and the
+        # record carries runner_compatibility + a same-grid cross-check against
+        # the committed ac record so a silently-ignored option would show up.
+        # Pin the client to the runner's version (--klt-cmd) and pass
+        # --batch-runner-check enforce for a `match` campaign.
+        #
+        # capacity_wait_s: the fleet is vCPU-budgeted, so a burst of submits gets
+        # a capacity/concurrency refusal. Waiting it out inside the submit is the
+        # host-rule contract (2am#6872); CAPACITY_RETRIES below is the outer net
+        # for a refusal that outlives this budget.
+        request["batch"] = {"runner_version_check": RUNNER_VERSION_CHECK[0],
+                            "capacity_wait_s": BATCH_CAPACITY_WAIT_S}
     req_path = req_dir / f"{tag}-request.json"
     req_path.write_text(json.dumps(request, indent=2) + "\n")
     return req_path, tag
@@ -1865,14 +2142,15 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
             errors.append(f"{label}: {exc}")
             print(f"{label}: FAIL {exc}", file=sys.stderr)
             continue
-        (log_dir / f"klt-{tag}-response.json").write_text(json.dumps(report, indent=2) + "\n")
+        response_rel = write_klt_response(log_dir, tag, report)
+        KLT_REPORTS.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
             "corner_count": report.get("corner_count"), "wall_s": round(wall, 1), "remote": env.get("remote"),
             "diagnostic_counts": report.get("diagnostic_counts"),
             "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
-            "response": f"{STAGE_REL}/{log_dir.name}/klt-{tag}-response.json",
+            "response": response_rel,
         })
         if "error" in report:
             errors.append(f"{label}: klt error: {report['error'].get('message')}")
@@ -1996,7 +2274,8 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             errors.append(f"{tag}: {exc}")
             print(f"{tag}: FAIL {exc}", file=sys.stderr)
             continue
-        (log_dir / f"klt-{tag}-response.json").write_text(json.dumps(report, indent=2) + "\n")
+        response_rel = write_klt_response(log_dir, tag, report)
+        KLT_REPORTS.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
@@ -2004,7 +2283,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             "remote": env.get("remote"),
             "diagnostic_counts": report.get("diagnostic_counts"),
             "request": f"sim/opamp-characterization/netlist-snapshots/{snapshot_run_dir.name}/{req_path.name}",
-            "response": f"{STAGE_REL}/{log_dir.name}/klt-{tag}-response.json",
+            "response": response_rel,
         })
         if "error" in report:
             errors.append(f"{tag}: klt error: {report['error'].get('message')}")
@@ -2110,6 +2389,11 @@ def parse_args(argv):
                    help="DUT netlist to characterize (default: design/netlist/opamp_core.spice). A flat netlist "
                         "with ports vdd vss inn inp out ibias; snapshotted into the record, the canonical design "
                         "is never edited")
+    p.add_argument("--export-envelopes", default=None, metavar="DIR",
+                   help="write each `klt sim` response envelope to DIR (repo-relative, append-only) "
+                        "instead of into the git-ignored stage, for a campaign whose envelopes are "
+                        "cited as T1 item 5 evidence in manifests/sky130-opamp.json (issue #246). "
+                        "An exported envelope is never also handed to the artifact store")
     p.add_argument("--keep-work", action="store_true")
     args = p.parse_args(argv)
     args.backend = resolve_backend(args.backend)
@@ -2121,6 +2405,9 @@ def main(argv=None) -> int:
     RUNNER_VERSION_CHECK[0] = args.batch_runner_check
     LOCAL_SIM_FORBIDDEN[0] = bool(args.fleet and args.backend == "batch")
     KLT_TIMEOUT_S[0] = args.timeout_s
+    EXPORT_ENVELOPE_DIR[0] = (REPO_ROOT / args.export_envelopes).resolve() if args.export_envelopes else None
+    if EXPORT_ENVELOPE_DIR[0] is not None and not EXPORT_ENVELOPE_DIR[0].is_relative_to(REPO_ROOT):
+        raise HarnessError(f"--export-envelopes must stay inside the checkout: {args.export_envelopes}")
     if args.klt_cmd:
         KLT_CMD[:] = shlex.split(args.klt_cmd)
 
@@ -2378,6 +2665,7 @@ def main(argv=None) -> int:
             **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
         },
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
+        **({"spec_row_grading": spec_row_grading(KLT_REPORTS, results)} if KLT_REPORTS else {}),
         **({"tran_step_pm_crosscheck": pm_crosscheck} if pm_crosscheck else {}),
         **({"swing_fixcm_comparison": fixcm_comparison} if fixcm_comparison is not None else {}),
         **({"tran_sr_icmr_summary": sr_icmr_summary} if sr_icmr_summary is not None else {}),
