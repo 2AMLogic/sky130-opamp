@@ -20,6 +20,7 @@ _None._
 `loom:important`; taken before unlabelled work.
 
 - **#196**: Measure paired offset drift before prototyping foreground trim
+- **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row
 
 ## Ready
 
@@ -31,7 +32,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row
 
 ## PRs Awaiting Review
 
@@ -53,6 +54,7 @@ Issues carrying `loom:curated`.
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 - **#246**: T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row *(curated)*
+- **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits) *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -68,12 +70,12 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
-| Important | 1 |
+| Important | 2 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 4 |
+| Curated | 5 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
