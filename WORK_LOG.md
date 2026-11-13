@@ -2,6 +2,10 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-11-13
+
+- **Issue #273** (closed): Follow-on: Work identified in PR #272
+
 ### 2026-11-06
 
 - **PR #269**: refactor: share sha256 and SPICE continuation helpers in design/bin/_common.py
