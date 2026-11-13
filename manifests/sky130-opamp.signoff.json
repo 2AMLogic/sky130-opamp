@@ -200,9 +200,128 @@
         "Both require the spec table itself to be ratified \u2014 verdicts against a draft spec are provisional by construction."
       ],
       "status": "unmet",
-      "reason": "no_evidence",
+      "reason": "check_failed",
       "graded_by_build": true,
-      "citation": null
+      "citation": null,
+      "citations_graded": [
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-ac.klt.json",
+          "rows": [
+            "open_loop_dc_gain",
+            "gbw_cl2pf",
+            "phase_margin"
+          ],
+          "status": "met",
+          "reason": null
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-ac-iq.klt.json",
+          "rows": [
+            "quiescent_power"
+          ],
+          "status": "unmet",
+          "reason": "check_failed"
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json",
+          "rows": [
+            "slew_rate"
+          ],
+          "status": "unmet",
+          "reason": "check_failed"
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-tt.klt.json",
+          "rows": [
+            "input_common_mode_range"
+          ],
+          "status": "met",
+          "reason": null
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ff.klt.json",
+          "rows": [
+            "input_common_mode_range"
+          ],
+          "status": "met",
+          "reason": null
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ss.klt.json",
+          "rows": [
+            "input_common_mode_range"
+          ],
+          "status": "met",
+          "reason": null
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-sf.klt.json",
+          "rows": [
+            "input_common_mode_range"
+          ],
+          "status": "met",
+          "reason": null
+        },
+        {
+          "citation": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-fs.klt.json",
+          "rows": [
+            "input_common_mode_range"
+          ],
+          "status": "met",
+          "reason": null
+        }
+      ],
+      "detail": {
+        "critical_metric_blockers": [
+          {
+            "metric": "sim__corner__failed_count",
+            "value": 13,
+            "higher_is_better": false
+          }
+        ],
+        "failed_citations": [
+          "manifests/envelopes/20261113-150556-60489db-8101bf-ac-iq.klt.json",
+          "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json"
+        ],
+        "failed_rows": [
+          "quiescent_power",
+          "slew_rate"
+        ],
+        "uncovered_rows": [],
+        "declared_gaps": [
+          {
+            "id": "output_swing",
+            "gap": "the ratified grading rule is a contiguous-run slope-band reduction over a swept waveform (largest run around mid-supply where d(vout)/d(vin) stays in [0.8, 1.2]); no klt sim measurement form expresses it, so the row is measured on the full 15-point grid by this campaign's dc-swing envelope and CSV but graded by neither. Tool gap filed as 2AMLogic/klayout-tools#5518; tracker #3"
+          },
+          {
+            "id": "input_referred_noise",
+            "gap": "#54's noise bench landed and its 15-corner klt sim envelope is committed (sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.klt.json), but its measurements carry no limits or spec_row, and DR-003 ratified the row as a target without settling which number is graded (spot thermal floor vs band-integrated). Both are tracked in #274"
+          },
+          {
+            "id": "psrr",
+            "gap": "[TBD] in spec/target-spec.md and not ratified, so there is no bound to grade; #54's PSRR bench exists but the target itself needs a spec decision record. Tracker #3"
+          },
+          {
+            "id": "input_referred_offset",
+            "gap": "target proposed by DR-009, not ratified. A statistical row: its evidence is the N = 300 mismatch Monte Carlo campaign (T1 item 6), not a klt sim corner envelope. Tracker #3"
+          },
+          {
+            "id": "cmrr",
+            "gap": "target proposed by DR-008, not ratified, so there is no ratified bound to grade; the cmrr bench measures the row on the full grid. Tracker #3"
+          },
+          {
+            "id": "area",
+            "gap": "not a PVT-simulated row: a post-layout quantity, [TBD] in spec/target-spec.md. Tracker #3"
+          }
+        ],
+        "unratified_rows": [],
+        "row_sources": {
+          "gbw_cl2pf": "derived",
+          "input_common_mode_range": "derived",
+          "open_loop_dc_gain": "derived",
+          "phase_margin": "derived"
+        }
+      }
     },
     {
       "tier": "T1",

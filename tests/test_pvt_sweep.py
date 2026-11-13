@@ -348,6 +348,96 @@ class KltBenchTests(unittest.TestCase):
         self.assertEqual(pvt.TARGET_ICMR_V, (0.888, 1.024))
         self.assertEqual(pvt.CONSUMER_SENSE_V, 0.73)
 
+    # -- T1 item 5 spec-row grading (issue #246) -----------------------------
+
+    def test_graded_bounds_are_the_ratified_spec_values(self):
+        """Every klt `limits` bound equals the RATIFIED target in
+        spec/target-spec.md Sec 2 / DR-003. This test is the no-relaxation guard
+        (CLAUDE.md): changing a bound here must fail until the spec changes."""
+        self.assertEqual(pvt.SPEC_GAIN_MIN_DB, 60.0)        # ">= 60 dB"
+        self.assertEqual(pvt.SPEC_GBW_MIN_HZ, 16e6)         # "~ 16 MHz", graded as a lower bound
+        self.assertEqual(pvt.SPEC_PM_MIN_DEG, 60.0)         # ">= 60 deg"
+        self.assertEqual(pvt.SPEC_SR_MIN_V_PER_US, 20.0)    # "~ 20 V/us", rise AND fall
+        self.assertEqual(pvt.SPEC_IQ_MAX_A, 65e-6)
+        # the two ratified quiescent-power figures ARE that current at their supplies
+        self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.98, 128.7e-6, places=9)
+        self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.80, 117.0e-6, places=9)
+
+    def test_every_graded_row_is_tagged_exactly_once_per_request_set(self):
+        tagged = {}
+        for ms in (pvt.ac_measurements(), pvt.ac_iq_measurements(),
+                   pvt.tran_sr_measurements(), pvt.icmr_measurements(1.8)):
+            for m in ms:
+                if "spec_row" in m:
+                    tagged.setdefault(m["spec_row"], []).append(m["name"])
+                    self.assertIn("limits", m, m["name"])  # a tag without limits covers nothing
+        self.assertEqual(sorted(tagged), sorted(pvt.ITEM5_GRADED_ROWS))
+        self.assertEqual(tagged["slew_rate"], ["sr_rise_v_per_us", "sr_fall_v_per_us"])
+        self.assertEqual(tagged["input_common_mode_range"], ["lo_40db", "hi_40db"])
+        # the 30/50 dB ICMR sensitivity band is reported, never graded
+        for m in pvt.icmr_measurements(1.8):
+            if m["name"].endswith(("_30db", "_50db")):
+                self.assertNotIn("limits", m)
+                self.assertNotIn("spec_row", m)
+
+    def test_graded_and_ungraded_rows_partition_the_spec_section2_rows(self):
+        self.assertEqual(set(pvt.ITEM5_GRADED_ROWS) & set(pvt.ITEM5_UNGRADED_ROWS), set())
+        self.assertEqual(len(pvt.ITEM5_GRADED_ROWS) + len(pvt.ITEM5_UNGRADED_ROWS), 12)
+        self.assertTrue(all(v and isinstance(v, str) for v in pvt.ITEM5_UNGRADED_ROWS.values()))
+
+    def test_icmr_bound_is_containment_of_the_target_window(self):
+        by = {m["name"]: m for m in pvt.icmr_measurements(1.8)}
+        self.assertEqual(by["lo_40db"]["limits"], {"max": pvt.TARGET_ICMR_V[0]})
+        self.assertEqual(by["hi_40db"]["limits"], {"min": pvt.TARGET_ICMR_V[1]})
+
+    def test_slew_numerator_is_the_level_difference_not_a_vdd_literal(self):
+        """0.6*span == v(l80) - v(l20) at EVERY supply, so one request spans the
+        whole supply axis; a VDD literal would only be right for one group."""
+        for vdd in (1.62, 1.80, 1.98):
+            v20, v80 = vdd * (0.3 + 0.4 * 0.2), vdd * (0.3 + 0.4 * 0.8)
+            span = pvt.SR_FRAC_HIGH * vdd - pvt.SR_FRAC_LOW * vdd
+            self.assertAlmostEqual(v80 - v20, 0.6 * span, places=12)
+        cards = {m["name"]: m.get("spice", "") for m in pvt.tran_sr_measurements()}
+        for n in ("sr_rise_v_per_us", "sr_fall_v_per_us"):
+            self.assertIn("(v80_level_v-v20_level_v)", cards[n])
+            self.assertNotRegex(cards[n], r"1\.(62|8|98)")
+
+    def test_spec_row_grading_summary_reports_what_the_envelope_decided(self):
+        report = {"corner_count": 2, "measurements": [
+            {"name": "sr_rise_v_per_us", "unit": "V/us", "limits": {"min": 20.0}, "status": "pass",
+             "spec_row": "slew_rate",
+             "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 20.4, "margin": 0.4}},
+            {"name": "sr_fall_v_per_us", "unit": "V/us", "limits": {"min": 20.0}, "status": "fail",
+             "spec_row": "slew_rate",
+             "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 11.0, "margin": -9.0}},
+            {"name": "t20_rise", "unit": "s", "limits": None, "status": "pass",
+             "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 1e-7, "margin": None}},
+        ], "corners": [
+            {"process": "ss", "temperature_c": -40.0, "measurements": [
+                {"name": "sr_rise_v_per_us", "value": 20.4}, {"name": "sr_fall_v_per_us", "value": 11.0}]},
+        ]}
+        rows = [{"corner": "ss", "temp_c": -40.0, "sr_rise_v_per_us": 20.4, "sr_fall_v_per_us": 11.0}]
+        out = pvt.spec_row_grading([("tran-sr", report)], {"tran_sr": rows})
+        self.assertEqual(out["rows"]["slew_rate"]["status"], "fail")       # one failing edge fails the row
+        self.assertEqual(len(out["rows"]["slew_rate"]["measurements"]), 2)  # the untagged card is not a row
+        self.assertFalse(out["all_graded_rows_present"])                   # only one row in this fixture
+        # the binding measurement is the smallest-margin one, with ITS corner
+        self.assertEqual(out["rows"]["slew_rate"]["binding"],
+                         {"envelope": "tran-sr", "measurement": "sr_fall_v_per_us",
+                          "corner_id": "ss/1.620V/-40C", "value": 11.0, "margin": -9.0, "unit": "V/us"})
+        checks = {c["measurement"]: c for c in out["klt_vs_python"]}
+        self.assertTrue(checks["sr_rise_v_per_us"]["agrees"] and checks["sr_fall_v_per_us"]["agrees"])
+        self.assertTrue(out["klt_vs_python_agrees"])
+        self.assertEqual(checks["sr_fall_v_per_us"]["points"], 1)
+        # print-precision deltas agree; a real disagreement does not (negative control)
+        near = pvt.spec_row_grading([("tran-sr", report)],
+                                    {"tran_sr": [dict(rows[0], sr_fall_v_per_us=11.0 * (1 + 5e-4))]})
+        self.assertTrue({c["measurement"]: c for c in near["klt_vs_python"]}["sr_fall_v_per_us"]["agrees"])
+        bad = pvt.spec_row_grading([("tran-sr", report)],
+                                   {"tran_sr": [dict(rows[0], sr_fall_v_per_us=14.0)]})
+        self.assertFalse({c["measurement"]: c for c in bad["klt_vs_python"]}["sr_fall_v_per_us"]["agrees"])
+        self.assertFalse(bad["klt_vs_python_agrees"])
+
     def test_cmrr_row_is_adm_minus_acm_from_the_same_response(self):
         vals = {"gbw_hz": 1e7}
         for label, _f in pvt.CMRR_SPOTS:
@@ -859,14 +949,16 @@ class FleetAnalysisTests(unittest.TestCase):
         self.assertEqual((tag, ac["analysis"]), ("ac", {"kind": "ac", "args": "dec 20 1 1g"}))
         iq, _b, tag = klt_request("ac_iq")
         self.assertEqual((tag, iq["analysis"]["kind"]), ("ac-iq", "dc"))
-        self.assertEqual([m["name"] for m in iq["measurements"]], ["i_vdd_a"])
-        # klt 0.5.0 runner compatibility: `.meas` cards only, no expr / analysis_steps
+        self.assertEqual([m["name"] for m in iq["measurements"]], ["i_vdd_a", "vdd_v", "iq_a", "pq_w"])
+        # `.meas` cards only, no expr / analysis_steps (runner-version independent)
         for r in (ac, iq, klt_request("tran_sr")[0], klt_request("dc_swing")[0]):
             self.assertNotIn("analysis_steps", r)
             self.assertTrue(all("spice" in m and "expr" not in m for m in r["measurements"]))
         sr, _b, tag = klt_request("tran_sr")
         self.assertEqual((tag, sr["analysis"]), ("tran-sr", {"kind": "tran", "args": "2n 2.2u"}))
-        self.assertEqual({m["name"] for m in sr["measurements"]}, {"t20_rise", "t80_rise", "t80_fall", "t20_fall"})
+        self.assertEqual({m["name"] for m in sr["measurements"]},
+                         {"t20_rise", "t80_rise", "t80_fall", "t20_fall", "v20_level_v", "v80_level_v",
+                          "sr_rise_v_per_us", "sr_fall_v_per_us"})
         dc, body, tag = klt_request("dc_swing")
         self.assertEqual((tag, dc["analysis"]["kind"]), ("dc-swing", "dc"))
         self.assertTrue(dc["options"]["waveforms"])

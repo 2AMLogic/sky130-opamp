@@ -234,6 +234,77 @@ records included), records whose bench or model provenance differs from the cano
 conflicting measurement keys. Agreeing cross-stage replicates are selected last-listed, and all source
 record ids are kept.
 
+### Spec-row grading in the `klt sim` requests (issue #246)
+
+Every `klt sim` request this runner writes grades the ratified spec rows it can
+express: the measurement that corresponds to a row carries that row's
+**unchanged** bound as a klt `limits` pair plus a `spec_row` tag. Three
+consequences, all of them the point of T1 item 5:
+
+- the envelope itself records **per-corner pass/fail and the binding corner**
+  (`measurements[].worst_case.corner_id`), so a unit's `status` is `fail` when
+  the design misses the spec there — not only when the simulation breaks;
+- `klt signoff --manifest` **derives** item 5's row coverage from the envelope
+  rather than taking the manifest's word (`detail.row_sources: derived`);
+- a bound can only change when the spec changes: every value is traced to
+  `DR-003`'s per-row ratification in `bin/pvt_sweep.py`'s `ITEM5` block, and
+  `tests/test_pvt_sweep.py` asserts each one equals the ratified number.
+
+Which card grades which row, and the one case where the bound is restated:
+
+| Row | Graded measurement | Bound |
+|---|---|---|
+| `open_loop_dc_gain` | `gain_dc_db` (`ac`) | `min` 60 dB |
+| `gbw_cl2pf` | `gbw_hz` (`ac`) | `min` 16 MHz |
+| `phase_margin` | `phase_margin_deg` (`ac`) | `min` 60° |
+| `slew_rate` | `sr_rise_v_per_us`, `sr_fall_v_per_us` (`tran_sr`) | `min` 20 V/µs, **both** edges |
+| `input_common_mode_range` | `lo_40db` / `hi_40db` (`icmr`) | `max` 0.888 V / `min` 1.024 V — the window must *contain* the target |
+| `quiescent_power` | `iq_a` (`ac-iq`) | `max` 65.0 µA |
+
+`phase_margin_deg`, `iq_a`, `pq_w` and both slew rates are ngspice
+`.meas … param='…'` cards: arithmetic over the `.meas` results declared above
+them, which is how a derived figure of merit gets into the envelope without an
+`expr` (the request deliberately stays `.meas`-only, so it does not depend on
+the fleet runner's klt version understanding newer measurement forms). Two
+details worth knowing before editing them:
+
+- **The slew numerator is read from the circuit, not written as a literal.**
+  `SR = 0.6·span/Δt` with `span = 0.4·VDD`, so `0.6·span = 0.24·VDD` is exactly
+  `v(l80) − v(l20)`, the two behavioural trigger levels the body already
+  derives from `v(vdd)`. A `param=` expression cannot reference a vector and
+  `limits` is one number per measurement across every corner of a request, so a
+  VDD literal would only be correct for one supply group; reading the level
+  difference keeps a single request valid across the whole supply axis.
+- **Quiescent power is graded as a current.** The ratified row names ≈ 128.7 µW
+  at 1.98 V and ≈ 117.0 µW at 1.80 V, which are the same 65.0 µA; grading Iq is
+  the only single bound that reproduces both figures exactly when the supply
+  moves with the process corner. `pq_w` is reported ungraded alongside it.
+
+**Output swing is deliberately ungraded.** Its ratified rule is the largest
+contiguous run around mid-supply over which `d(vout)/d(vin)` stays in
+`[0.8, 1.2]` — a waveform reduction no `klt sim` measurement form expresses
+(filed generically as
+[klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)).
+The row is still measured on the full grid: `swing_row()` applies the rule to
+the envelope's waveform artifact and writes `-dc-swing.csv`. Same reason the
+`swing_fixcm` and `tran_sr_icmr` diagnostics reduce waveforms in Python.
+
+Each record carries a `spec_row_grading` block: per row, the bound, the worst
+value with **its** corner, the binding measurement, and a cross-check of every
+`param=` card against the Python column the row builders compute from the same
+response (`klt_vs_python_agrees`). Agreement is relative
+(`KLT_VS_PYTHON_REL_TOL = 1e-3`) because both paths consume the same
+6-significant-figure `.meas` output and the slew cards divide a difference of
+two such times; a real disagreement is orders of magnitude larger.
+
+`--export-envelopes DIR` writes each response envelope into `DIR`
+(append-only, committed) instead of the git-ignored stage, for the campaign
+whose envelopes a manifest cites. An exported envelope is never also handed to
+the artifact store — committing bytes the store already holds is what
+`sim/lib/check_artifact_manifests.py` refuses. The item-5 campaign of record is
+`records/20261113-150556-60489db-8101bf.json`, with its eight cited
+envelopes under `manifests/envelopes/`; see `manifests/README.md` item 5.
+
 ### PSRR and noise benches (issue #54)
 
 ```bash
@@ -433,6 +504,7 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
 | `testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl` | `klt sim` circuit-body twins of the three benches above for `--fleet` (issue #77) |
 | `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (and the `icmr,cmrr` `klt sim` path) |
+| `manifests/envelopes/<record_id>-<tag>.klt.json` | Unmodified `klt sim` response envelopes of an `--export-envelopes` campaign: committed evidence, cited per spec row by `manifests/sky130-opamp.json` (issue #246) |
 | `testbench/opamp_icmr.spice.tmpl`, `opamp_cmrr.spice.tmpl` | `klt sim` circuit-body benches: input common-mode range (output held at mid-rail) and CMRR (Adm and Acm in one deck) (issue #53) |
 | `records/<id>-{icmr,cmrr}.csv` | Per-point ICMR edges / CMRR(f) for the issue #53 benches; `<id>-logs/` holds the klt requests, responses and per-corner decks |
 | `testbench/opamp_tran_sr_icmr.spice.tmpl`, `records/<id>-tran-sr-icmr.csv` | `klt sim` circuit body and per-point result of the opt-in ICMR-aware slew diagnostic (issue #185); the record JSON's `tran_sr_icmr_summary` counts the verdicts |

@@ -1,0 +1,1336 @@
+{
+  "record_id": "20261113-150556-60489db-8101bf",
+  "timestamp": "2026-11-13T15:18:16.111458+00:00",
+  "git": {
+    "sha": "60489db"
+  },
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "ac",
+      "tran_sr",
+      "dc_swing",
+      "icmr"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 60,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "ac",
+        "tran_sr",
+        "dc_swing",
+        "icmr"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64",
+    "klt": "klt 0.9.0",
+    "klt_cmd": "uvx --from klayout-tools==0.9.0 klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "ac-iq",
+      "backend": "batch",
+      "status": "fail",
+      "corner_count": 15,
+      "wall_s": 98.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c3f3daabe24e",
+        "region": "us-east-1",
+        "instance_id": "i-0853dbbb0d0584d78",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 31,
+        "client_submitted_at": "2026-11-13T15:05:56.532779Z",
+        "client_launched_at": "2026-11-13T15:06:29.584546Z",
+        "client_status_terminal_at": "2026-11-13T15:07:32.758586Z",
+        "client_collected_at": "2026-11-13T15:07:34.158857Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 18120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 8,
+          "warning": "batch job bound 18120s (options.timeout_s 1200s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 8 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 12
+        },
+        "by_severity": {
+          "warning": 12
+        },
+        "corners_with_diagnostics": 12
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/ac-iq-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-ac-iq.klt.json"
+    },
+    {
+      "tag": "ac",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 100.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a979ae113f1a",
+        "region": "us-east-1",
+        "instance_id": "i-0ddbe51584dea3675",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 31,
+        "client_submitted_at": "2026-11-13T15:05:56.532697Z",
+        "client_launched_at": "2026-11-13T15:06:31.448247Z",
+        "client_status_terminal_at": "2026-11-13T15:07:34.690559Z",
+        "client_collected_at": "2026-11-13T15:07:36.162961Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 18120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 8,
+          "warning": "batch job bound 18120s (options.timeout_s 1200s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 8 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 12
+        },
+        "by_severity": {
+          "warning": 12
+        },
+        "corners_with_diagnostics": 12
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/ac-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-ac.klt.json"
+    },
+    {
+      "tag": "tran-sr",
+      "backend": "batch",
+      "status": "fail",
+      "corner_count": 15,
+      "wall_s": 101.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-27d70cfdc64c",
+        "region": "us-east-1",
+        "instance_id": "i-0f16a34dbbd0a0e65",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 49,
+        "client_submitted_at": "2026-11-13T15:07:34.861008Z",
+        "client_launched_at": "2026-11-13T15:08:11.701323Z",
+        "client_status_terminal_at": "2026-11-13T15:09:14.554134Z",
+        "client_collected_at": "2026-11-13T15:09:15.659092Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 18120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 8,
+          "warning": "batch job bound 18120s (options.timeout_s 1200s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 8 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/tran-sr-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json"
+    },
+    {
+      "tag": "dc-swing",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 102.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-23f10132b955",
+        "region": "us-east-1",
+        "instance_id": "i-0cb13beb1fb75edaf",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1c",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 30,
+        "client_submitted_at": "2026-11-13T15:07:36.845064Z",
+        "client_launched_at": "2026-11-13T15:08:14.687570Z",
+        "client_status_terminal_at": "2026-11-13T15:09:17.480538Z",
+        "client_collected_at": "2026-11-13T15:09:18.734418Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 18120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 8,
+          "warning": "batch job bound 18120s (options.timeout_s 1200s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 8 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/dc-swing-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-dc-swing.klt.json"
+    },
+    {
+      "tag": "icmr-tt",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 126.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-8809d94f88bd",
+        "region": "us-east-1",
+        "instance_id": "i-0663b085d1ea6a3a9",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1a",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 52,
+        "client_submitted_at": "2026-11-13T15:09:16.226079Z",
+        "client_launched_at": "2026-11-13T15:09:48.012696Z",
+        "client_status_terminal_at": "2026-11-13T15:11:21.563472Z",
+        "client_collected_at": "2026-11-13T15:11:22.502112Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 3720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 2,
+          "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/icmr-tt-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-tt.klt.json"
+    },
+    {
+      "tag": "icmr-ff",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 120.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-2501c15c00cf",
+        "region": "us-east-1",
+        "instance_id": "i-08797c6ea133b8beb",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 63,
+        "client_submitted_at": "2026-11-13T15:09:19.338157Z",
+        "client_launched_at": "2026-11-13T15:09:44.816854Z",
+        "client_status_terminal_at": "2026-11-13T15:11:18.144744Z",
+        "client_collected_at": "2026-11-13T15:11:19.086301Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 3720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 2,
+          "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/icmr-ff-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ff.klt.json"
+    },
+    {
+      "tag": "icmr-ss",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 152.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-9076912610e2",
+        "region": "us-east-1",
+        "instance_id": "i-0e01565355da31b8d",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 85,
+        "client_submitted_at": "2026-11-13T15:11:19.742457Z",
+        "client_launched_at": "2026-11-13T15:11:45.593952Z",
+        "client_status_terminal_at": "2026-11-13T15:13:50.104553Z",
+        "client_collected_at": "2026-11-13T15:13:51.125520Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8375C CPU @ 2.90GHz",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 3720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 2,
+          "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/icmr-ss-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ss.klt.json"
+    },
+    {
+      "tag": "icmr-sf",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 216.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-5b180509f7d6",
+        "region": "us-east-1",
+        "instance_id": "i-0789285c332f1ee7d",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 96,
+        "client_submitted_at": "2026-11-13T15:11:23.024389Z",
+        "client_launched_at": "2026-11-13T15:12:54.000227Z",
+        "client_status_terminal_at": "2026-11-13T15:14:58.483423Z",
+        "client_collected_at": "2026-11-13T15:14:59.356395Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 3720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 2,
+          "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/icmr-sf-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-sf.klt.json"
+    },
+    {
+      "tag": "icmr-fs",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 186.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-774bc4f82585",
+        "region": "us-east-1",
+        "instance_id": "i-0a714be91fad6c1b1",
+        "instance_type": "c7i.8xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-0f6bb304291339ed0",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "2",
+        "physical_cores": "16",
+        "elapsed_seconds": 86,
+        "client_submitted_at": "2026-11-13T15:13:51.685110Z",
+        "client_launched_at": "2026-11-13T15:14:52.730568Z",
+        "client_status_terminal_at": "2026-11-13T15:16:56.991873Z",
+        "client_collected_at": "2026-11-13T15:16:57.841543Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.0",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "not_comparable",
+            "reason": "client_stamp_unavailable"
+          },
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 1200,
+          "overhead_s": 120.0,
+          "job_bound_s": 3720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 2,
+          "recommended_hosts": 2,
+          "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261113-150556-60489db-8101bf/icmr-fs-request.json",
+      "response": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-fs.klt.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "spec_row_grading": {
+    "rows": {
+      "quiescent_power": {
+        "status": "fail",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac-iq",
+            "name": "iq_a",
+            "unit": "A",
+            "limits": {
+              "max": 6.5e-05
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ff/1.980V/125C",
+              "value": 6.66284e-05,
+              "margin": -1.6284000000000063e-06
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac-iq",
+          "measurement": "iq_a",
+          "corner_id": "ff/1.980V/125C",
+          "value": 6.66284e-05,
+          "margin": -1.6284000000000063e-06,
+          "unit": "A"
+        }
+      },
+      "open_loop_dc_gain": {
+        "status": "pass",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "gain_dc_db",
+            "unit": "dB",
+            "limits": {
+              "min": 60.0
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/125C",
+              "value": 61.6377,
+              "margin": 1.6377000000000024
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "gain_dc_db",
+          "corner_id": "fs/1.800V/125C",
+          "value": 61.6377,
+          "margin": 1.6377000000000024,
+          "unit": "dB"
+        }
+      },
+      "gbw_cl2pf": {
+        "status": "pass",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "gbw_hz",
+            "unit": "Hz",
+            "limits": {
+              "min": 16000000.0
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ss/1.620V/125C",
+              "value": 17922900.0,
+              "margin": 1922900.0
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "gbw_hz",
+          "corner_id": "ss/1.620V/125C",
+          "value": 17922900.0,
+          "margin": 1922900.0,
+          "unit": "Hz"
+        }
+      },
+      "phase_margin": {
+        "status": "pass",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "phase_margin_deg",
+            "unit": "deg",
+            "limits": {
+              "min": 60.0
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/27C",
+              "value": 63.9052,
+              "margin": 3.9052000000000007
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "phase_margin_deg",
+          "corner_id": "sf/1.800V/27C",
+          "value": 63.9052,
+          "margin": 3.9052000000000007,
+          "unit": "deg"
+        }
+      },
+      "slew_rate": {
+        "status": "fail",
+        "graded_measurement_points": 30,
+        "measurements": [
+          {
+            "envelope": "tran-sr",
+            "name": "sr_rise_v_per_us",
+            "unit": "V/us",
+            "limits": {
+              "min": 20.0
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 19.8773,
+              "margin": -0.12269999999999825
+            }
+          },
+          {
+            "envelope": "tran-sr",
+            "name": "sr_fall_v_per_us",
+            "unit": "V/us",
+            "limits": {
+              "min": 20.0
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 11.038,
+              "margin": -8.962
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "tran-sr",
+          "measurement": "sr_fall_v_per_us",
+          "corner_id": "ss/1.620V/-40C",
+          "value": 11.038,
+          "margin": -8.962,
+          "unit": "V/us"
+        }
+      },
+      "input_common_mode_range": {
+        "status": "pass",
+        "graded_measurement_points": 30,
+        "measurements": [
+          {
+            "envelope": "icmr-tt",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "tt/1.800V/-40C",
+              "value": 0.696871,
+              "margin": 0.191129
+            }
+          },
+          {
+            "envelope": "icmr-tt",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "tt/1.800V/-40C",
+              "value": 1.42602,
+              "margin": 0.40202000000000004
+            }
+          },
+          {
+            "envelope": "icmr-ff",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ff/1.980V/-40C",
+              "value": 0.680131,
+              "margin": 0.20786899999999997
+            }
+          },
+          {
+            "envelope": "icmr-ff",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ff/1.980V/-40C",
+              "value": 1.62086,
+              "margin": 0.59686
+            }
+          },
+          {
+            "envelope": "icmr-ss",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 0.716772,
+              "margin": 0.17122800000000005
+            }
+          },
+          {
+            "envelope": "icmr-ss",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 1.16864,
+              "margin": 0.14463999999999988
+            }
+          },
+          {
+            "envelope": "icmr-sf",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/-40C",
+              "value": 0.659673,
+              "margin": 0.22832700000000006
+            }
+          },
+          {
+            "envelope": "icmr-sf",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/-40C",
+              "value": 1.36617,
+              "margin": 0.3421700000000001
+            }
+          },
+          {
+            "envelope": "icmr-fs",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/-40C",
+              "value": 0.738783,
+              "margin": 0.14921700000000004
+            }
+          },
+          {
+            "envelope": "icmr-fs",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/-40C",
+              "value": 1.5052,
+              "margin": 0.48120000000000007
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "icmr-ss",
+          "measurement": "hi_40db",
+          "corner_id": "ss/1.620V/-40C",
+          "value": 1.16864,
+          "margin": 0.14463999999999988,
+          "unit": "V"
+        }
+      }
+    },
+    "klt_vs_python": [
+      {
+        "measurement": "phase_margin_deg",
+        "python_column": "ac.phase_margin_deg",
+        "points": 15,
+        "max_rel_delta": 3.972483760401661e-06,
+        "at": "ss/-40C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "pq_w",
+        "python_column": "ac.pq_w",
+        "points": 15,
+        "max_rel_delta": 4.375685594163569e-06,
+        "at": "sf/27C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "sr_rise_v_per_us",
+        "python_column": "tran_sr.sr_rise_v_per_us",
+        "points": 15,
+        "max_rel_delta": 3.5833333333996196e-05,
+        "at": "ff/27C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "sr_fall_v_per_us",
+        "python_column": "tran_sr.sr_fall_v_per_us",
+        "points": 15,
+        "max_rel_delta": 0.00027290698293095696,
+        "at": "fs/-40C",
+        "rel_tol": 0.001,
+        "agrees": true
+      }
+    ],
+    "klt_vs_python_agrees": true,
+    "ungraded_rows": {
+      "output_swing": "the ratified grading rule is a contiguous-run reduction over a swept waveform (largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` measurement form expresses it (klayout-tools#5518), so the row is measured (dc_swing waveform, -dc-swing.csv) but graded by no envelope",
+      "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, but carry no limits/spec_row and DR-003 left the graded quantity undecided (issue #274)",
+      "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
+      "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); target proposed by DR-009, not ratified",
+      "cmrr": "target proposed by DR-008, not ratified: no ratified bound to grade",
+      "area": "not a PVT-simulated row (post-layout quantity, [TBD])"
+    },
+    "all_graded_rows_present": true
+  },
+  "links": {
+    "ac_csv": "sim/opamp-characterization/records/20261113-150556-60489db-8101bf-ac.csv",
+    "tran_sr_csv": "sim/opamp-characterization/records/20261113-150556-60489db-8101bf-tran-sr.csv",
+    "dc_swing_csv": "sim/opamp-characterization/records/20261113-150556-60489db-8101bf-dc-swing.csv",
+    "icmr_csv": "sim/opamp-characterization/records/20261113-150556-60489db-8101bf-icmr.csv"
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-characterization-20261113-150556-60489db-8101bf.manifest.json"
+  },
+  "errors": [],
+  "elapsed_s": 662.0
+}

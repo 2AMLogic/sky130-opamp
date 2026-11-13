@@ -1,0 +1,718 @@
+{
+  "schema_version": 3,
+  "netlist": {
+    "path": null,
+    "scope": "external"
+  },
+  "status": "pass",
+  "corner_count": 3,
+  "passed": 3,
+  "failed": 0,
+  "errored": 0,
+  "inconclusive": 0,
+  "diagnostic_counts": {
+    "by_code": {
+      "nonconvergence": 3
+    },
+    "by_severity": {
+      "warning": 3
+    },
+    "corners_with_diagnostics": 3
+  },
+  "metrics": {
+    "sim__corner__count": 3,
+    "sim__corner__passed_count": 3,
+    "sim__corner__failed_count": 0,
+    "sim__corner__errored_count": 0,
+    "sim__corner__inconclusive_count": 0
+  },
+  "environment": {
+    "engine": "ngspice",
+    "engine_version": "47",
+    "ngspice_binary": "/usr/local/bin/ngspice",
+    "engine_build": {
+      "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******",
+      "binary_sha256": "20b24e16d6550f40d31c0690adbac8c64f3078205bd9aaa60b50274d3eebcf62",
+      "probe": "ok",
+      "reason": null
+    },
+    "models_lib": {
+      "path": null,
+      "scope": "external"
+    },
+    "models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+    "models_lib_sha256_scope": "client",
+    "netlist_sha256": "1cae257dd0a478c70f073c3ff30b7d327e057cc57a5a936b9d9a3424d2048210",
+    "netlist_closure": [
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "1cae257dd0a478c70f073c3ff30b7d327e057cc57a5a936b9d9a3424d2048210"
+      },
+      {
+        "path": null,
+        "scope": "external",
+        "sha256": "e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+      }
+    ],
+    "netlist_identity": "sha256:117c127085e208016c5dcdef6c6a9596648c9bc3f767c1013c52949f379982df",
+    "remote": {
+      "provider": "aws-batch-fleet",
+      "job_id": "klt-sim-2501c15c00cf",
+      "region": "us-east-1",
+      "instance_id": "i-08797c6ea133b8beb",
+      "instance_type": "c7i.8xlarge",
+      "availability_zone": "us-east-1f",
+      "ami_id": "ami-0f6bb304291339ed0",
+      "lifecycle": "spot",
+      "spot": true,
+      "state": "done",
+      "exit_code": "0",
+      "concurrency": "2",
+      "physical_cores": "16",
+      "elapsed_seconds": 63,
+      "client_submitted_at": "2026-11-13T15:09:19.338157Z",
+      "client_launched_at": "2026-11-13T15:09:44.816854Z",
+      "client_status_terminal_at": "2026-11-13T15:11:18.144744Z",
+      "client_collected_at": "2026-11-13T15:11:19.086301Z",
+      "runner_klt_version": "0.9.0",
+      "client_klt_version": "0.9.0",
+      "runner_compatibility": "match",
+      "worker_environment": {
+        "capture": "ok",
+        "simulator": {
+          "requested_binary": "ngspice",
+          "binary_source": "PATH",
+          "selected_path": "/usr/local/bin/ngspice",
+          "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Thu Nov 12 22:47:40 UTC 2026\n******\n",
+          "version_probe": "ok"
+        },
+        "pdk": {
+          "variant": "sky130A",
+          "root": "/opt/pdk",
+          "stamp_scheme": "sources-sha256",
+          "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+          "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+          "models_staged": false,
+          "stamp_scope": "executed"
+        },
+        "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+        "omp_num_threads": null,
+        "image_manifest": null,
+        "model_inputs": null,
+        "diagnostics": [],
+        "pdk_stamp_comparison": {
+          "status": "not_comparable",
+          "reason": "client_stamp_unavailable"
+        },
+        "engine_build_comparison": {
+          "status": "match"
+        }
+      },
+      "runner_model_inputs": null,
+      "job_ceiling": {
+        "basis": "conservative_serial_bound",
+        "unit_count": 3,
+        "per_unit_timeout_s": 1200,
+        "overhead_s": 120.0,
+        "job_bound_s": 3720.0,
+        "max_job_seconds": 3600.0,
+        "max_job_seconds_source": "fleet_config",
+        "exceeds_ceiling": true,
+        "check": "warn",
+        "max_units_per_job": 2,
+        "recommended_hosts": 2,
+        "warning": "batch job bound 3720s (options.timeout_s 1200s x 3 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 2 to run one job per shard of at most 2 units, each within the ceiling"
+      }
+    },
+    "engine_host": "worker",
+    "client_ngspice_binary": "/home/ubuntu/.local/bin/ngspice",
+    "backend": {
+      "resolved": "batch",
+      "source": "flag",
+      "requested": "batch"
+    }
+  },
+  "coverage": {
+    "corners_simulated": 3,
+    "measurements_declared": 10,
+    "measurements_with_limits": 2,
+    "unrecognized_limit_keys": [],
+    "schema_version": 1,
+    "known": true,
+    "checked": [
+      "limit:[0,\"ff/1.980V/-40C\",\"hi_40db\",\"min\"]",
+      "limit:[0,\"ff/1.980V/-40C\",\"lo_40db\",\"max\"]",
+      "limit:[1,\"ff/1.980V/27C\",\"hi_40db\",\"min\"]",
+      "limit:[1,\"ff/1.980V/27C\",\"lo_40db\",\"max\"]",
+      "limit:[2,\"ff/1.980V/125C\",\"hi_40db\",\"min\"]",
+      "limit:[2,\"ff/1.980V/125C\",\"lo_40db\",\"max\"]",
+      "measurement:[0,\"ff/1.980V/-40C\",\"hi_30db\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"hi_50db\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"iq_mid_a\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"k_mid\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"lo_30db\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"lo_50db\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"vid_mid_v\"]/observation",
+      "measurement:[0,\"ff/1.980V/-40C\",\"vout_mid_v\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"hi_30db\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"hi_50db\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"iq_mid_a\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"k_mid\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"lo_30db\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"lo_50db\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"vid_mid_v\"]/observation",
+      "measurement:[1,\"ff/1.980V/27C\",\"vout_mid_v\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"hi_30db\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"hi_50db\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"iq_mid_a\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"k_mid\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"lo_30db\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"lo_50db\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"vid_mid_v\"]/observation",
+      "measurement:[2,\"ff/1.980V/125C\",\"vout_mid_v\"]/observation"
+    ],
+    "skipped": [],
+    "inapplicable": [
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[0,\"ff/1.980V/-40C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[1,\"ff/1.980V/27C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"hi_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"hi_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"iq_mid_a\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"k_mid\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"lo_30db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"lo_50db\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"vid_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      },
+      {
+        "id": "measurement:[2,\"ff/1.980V/125C\",\"vout_mid_v\"]/limits",
+        "reason": "characterization_without_limits"
+      }
+    ],
+    "unknown": [],
+    "nothing_checked": false,
+    "nothing_checked_reasons": []
+  },
+  "provenance": {
+    "klt_version": "0.9.0",
+    "klt_git_commit": "5dbbad05ff42265c92a6f3d2f20d1bbcd2957d49",
+    "klt_reinstall_spec": "klayout-tools==0.9.0",
+    "klayout_version": "0.30.13",
+    "pdk": {
+      "name": "sky130A",
+      "source": "search root: ~/.ciel",
+      "version": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+      "ambiguous_sources": [
+        "search root: ~/.volare"
+      ]
+    },
+    "deck": {
+      "name": "sky130.lib.spice",
+      "content_hash": "sha256:17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+      "released": false
+    },
+    "input": {
+      "content_hash": "sha256:1cae257dd0a478c70f073c3ff30b7d327e057cc57a5a936b9d9a3424d2048210",
+      "role": "netlist"
+    }
+  },
+  "measurements": [
+    {
+      "name": "vout_mid_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 0.989707,
+        "margin": null
+      }
+    },
+    {
+      "name": "vid_mid_v",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": -0.000146747,
+        "margin": null
+      }
+    },
+    {
+      "name": "iq_mid_a",
+      "unit": "A",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 6.64176e-05,
+        "margin": null
+      }
+    },
+    {
+      "name": "k_mid",
+      "unit": null,
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 0.000427022,
+        "margin": null
+      }
+    },
+    {
+      "name": "lo_40db",
+      "unit": "V",
+      "limits": {
+        "max": 0.888
+      },
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 0.680131,
+        "margin": 0.20786899999999997
+      },
+      "spec_row": "input_common_mode_range"
+    },
+    {
+      "name": "hi_40db",
+      "unit": "V",
+      "limits": {
+        "min": 1.024
+      },
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 1.62086,
+        "margin": 0.59686
+      },
+      "spec_row": "input_common_mode_range"
+    },
+    {
+      "name": "lo_30db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 0.454998,
+        "margin": null
+      }
+    },
+    {
+      "name": "hi_30db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 1.65261,
+        "margin": null
+      }
+    },
+    {
+      "name": "lo_50db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 0.740823,
+        "margin": null
+      }
+    },
+    {
+      "name": "hi_50db",
+      "unit": "V",
+      "limits": null,
+      "status": "pass",
+      "worst_case": {
+        "corner_id": "ff/1.980V/-40C",
+        "value": 1.58528,
+        "margin": null
+      }
+    }
+  ],
+  "corners": [
+    {
+      "corner_id": "ff/1.980V/-40C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": -40.0,
+      "status": "pass",
+      "runtime_s": 55.126,
+      "peak_rss_bytes": 380825600,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.989707,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": -0.000146747,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.64176e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000427022,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.680131,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.20786899999999997
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.62086,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.59686
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.454998,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.65261,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.740823,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.58528,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_n40C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_n40C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/27C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 27.0,
+      "status": "pass",
+      "runtime_s": 22.545,
+      "peak_rss_bytes": 380825600,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.989818,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": -9.09014e-05,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.65056e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000496196,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.650479,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.23752099999999998
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.68452,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.66052
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.483997,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.72116,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.719938,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.63871,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_27C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_27C/corner.cir"
+      },
+      "monte_carlo": null
+    },
+    {
+      "corner_id": "ff/1.980V/125C",
+      "process": "ff",
+      "supply_v": {
+        "vdd": 1.98
+      },
+      "temperature_c": 125.0,
+      "status": "pass",
+      "runtime_s": 15.889,
+      "peak_rss_bytes": 380379136,
+      "engine_exit_code": 0,
+      "engine_killed_by_signal": null,
+      "measurements": [
+        {
+          "name": "vout_mid_v",
+          "value": 0.990018,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "vid_mid_v",
+          "value": 8.90956e-06,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "iq_mid_a",
+          "value": 6.66286e-05,
+          "unit": "A",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "k_mid",
+          "value": 0.000631493,
+          "unit": null,
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_40db",
+          "value": 0.619107,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.26889300000000005
+        },
+        {
+          "name": "hi_40db",
+          "value": 1.79668,
+          "unit": "V",
+          "status": "pass",
+          "margin": 0.77268
+        },
+        {
+          "name": "lo_30db",
+          "value": 0.450005,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_30db",
+          "value": 1.84132,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "lo_50db",
+          "value": 0.69916,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        },
+        {
+          "name": "hi_50db",
+          "value": 1.73511,
+          "unit": "V",
+          "status": "pass",
+          "margin": null
+        }
+      ],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "code": "nonconvergence",
+          "message": "Warning: Dynamic gmin stepping failed"
+        }
+      ],
+      "artifacts": {
+        "log": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_125C/ngspice.log",
+        "raw": null,
+        "waveform": null,
+        "deck": "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-246/sim/.work/.stage/opamp-characterization-20261113-150556-60489db-8101bf/klt-icmr-ff/ff_1p980V_125C/corner.cir"
+      },
+      "monte_carlo": null
+    }
+  ]
+}

@@ -18,6 +18,66 @@
       "file": "layout/opamp_core/lvs.json",
       "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
     },
+    "5": [
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-ac.klt.json",
+        "content_hash": "sha256:9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+        "rows": [
+          "open_loop_dc_gain",
+          "gbw_cl2pf",
+          "phase_margin"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-ac-iq.klt.json",
+        "content_hash": "sha256:9588d8f4527192ea4ec7c5b1d7646b14b7b5de34d08467e3d26037f6721fd575",
+        "rows": [
+          "quiescent_power"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json",
+        "content_hash": "sha256:0eef48c21208510ae1a2753a4cccbbb4b7c7615a7136ba0fc0fbafe4be0e8b37",
+        "rows": [
+          "slew_rate"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-tt.klt.json",
+        "content_hash": "sha256:04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522",
+        "rows": [
+          "input_common_mode_range"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ff.klt.json",
+        "content_hash": "sha256:1cae257dd0a478c70f073c3ff30b7d327e057cc57a5a936b9d9a3424d2048210",
+        "rows": [
+          "input_common_mode_range"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-ss.klt.json",
+        "content_hash": "sha256:7b78b484d71c58aed1f5907192f36d93815027a1e0d0d7d94e3222a4534c4c46",
+        "rows": [
+          "input_common_mode_range"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-sf.klt.json",
+        "content_hash": "sha256:04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522",
+        "rows": [
+          "input_common_mode_range"
+        ]
+      },
+      {
+        "file": "manifests/envelopes/20261113-150556-60489db-8101bf-icmr-fs.klt.json",
+        "content_hash": "sha256:04f77b9bf9b3f34d11d99c6635d454e137db3be7a1fc163e871ecc723e3c7522",
+        "rows": [
+          "input_common_mode_range"
+        ]
+      }
+    ],
     "7": {
       "file": "sim/opamp-characterization/records/20261027-pex-opamp_core.pex.json",
       "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
@@ -42,6 +102,54 @@
       {
         "file": "layout/opamp_core/lvs.json",
         "content_hash": "sha256:59f900e1dcbb088a7b9da9aad761685def2208f7139a671db2f0fbe5d46bf25a"
+      }
+    ]
+  },
+  "spec_rows": {
+    "5": [
+      {
+        "id": "open_loop_dc_gain"
+      },
+      {
+        "id": "gbw_cl2pf"
+      },
+      {
+        "id": "phase_margin"
+      },
+      {
+        "id": "slew_rate"
+      },
+      {
+        "id": "input_common_mode_range"
+      },
+      {
+        "id": "quiescent_power"
+      },
+      {
+        "id": "output_swing",
+        "gap": "the ratified grading rule is a contiguous-run slope-band reduction over a swept waveform (largest run around mid-supply where d(vout)/d(vin) stays in [0.8, 1.2]); no klt sim measurement form expresses it, so the row is measured on the full 15-point grid by this campaign's dc-swing envelope and CSV but graded by neither. Tool gap filed as 2AMLogic/klayout-tools#5518; tracker #3"
+      },
+      {
+        "id": "input_referred_noise",
+        "gap": "#54's noise bench landed and its 15-corner klt sim envelope is committed (sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.klt.json), but its measurements carry no limits or spec_row, and DR-003 ratified the row as a target without settling which number is graded (spot thermal floor vs band-integrated). Both are tracked in #274"
+      },
+      {
+        "id": "psrr",
+        "gap": "[TBD] in spec/target-spec.md and not ratified, so there is no bound to grade; #54's PSRR bench exists but the target itself needs a spec decision record. Tracker #3"
+      },
+      {
+        "id": "input_referred_offset",
+        "ratified": false,
+        "gap": "target proposed by DR-009, not ratified. A statistical row: its evidence is the N = 300 mismatch Monte Carlo campaign (T1 item 6), not a klt sim corner envelope. Tracker #3"
+      },
+      {
+        "id": "cmrr",
+        "ratified": false,
+        "gap": "target proposed by DR-008, not ratified, so there is no ratified bound to grade; the cmrr bench measures the row on the full grid. Tracker #3"
+      },
+      {
+        "id": "area",
+        "gap": "not a PVT-simulated row: a post-layout quantity, [TBD] in spec/target-spec.md. Tracker #3"
       }
     ]
   }
