@@ -219,6 +219,27 @@ CARTESIAN_SUPPLIES_V = (1.62, 1.80, 1.98)
 #                      reproduces BOTH ratified power figures exactly. `pq_w` is
 #                      reported alongside, ungraded, so the record still carries
 #                      the power number.
+#                      CAVEAT -- this bound is the ONE place in this block where
+#                      a SPEC_* constant is not simply a ratified number copied
+#                      across: 65.0 uA as a zero-tolerance `max` is a READING of
+#                      an "~" row, and the spec does not state it. DR-003 ratified
+#                      "~" figures and declined to set a tolerance (quoted above),
+#                      while spec/target-spec.md's row calls the measured result
+#                      "confirmed on both PVT grids" at +2.5% vs. the DR-002
+#                      estimate and its status column reads "measured". So the
+#                      spec's own disposition of these numbers is "confirmed" and
+#                      this grading's is "fail" -- a conservative reading chosen
+#                      here, not a relaxation and not a spec statement. Under it
+#                      13 of the 15 points fail, nominal TT/27 C included
+#                      (65.745 uA, 118.34 uW vs the ~ 117.0 uW figure); only
+#                      SS/-40 C (64.243 uA) and SS/27 C (64.736 uA) pass; and
+#                      SS/125 C/1.62 V fails at 65.148 uA while drawing 105.54 uW,
+#                      BELOW both ratified power figures -- the row ratifies no
+#                      figure at 1.62 V and a current bound supplies one. A `fail`
+#                      on this row therefore means "fails under the stated
+#                      reading", not a design verdict. The reconciliation is a
+#                      spec/ decision record, tracked in issue #277; changing
+#                      SPEC_IQ_MAX_A is that ruling's job, not a tuning knob.
 #   input_common_mode_range
 #                      DR-003 "RATIFY AS TARGET: ~ 0.888-1.024 V ... The value
 #                      binds as the input range the design commits to covering",

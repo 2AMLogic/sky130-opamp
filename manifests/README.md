@@ -205,14 +205,40 @@ identified there.
         value — the no-relaxation guard `CLAUDE.md` requires.
       - **Item 5 is `unmet` / `check_failed`, and that is the finding, not a
         tooling failure.** `detail.failed_rows` is `["quiescent_power",
-        "slew_rate"]`: the design misses two ratified rows at their binding
-        corners. Slew rate binds at **SS / −40 °C**, where the 80 %–20 % fall
-        transit measures **11.04 V/µs** against the ratified 20 V/µs (the rise
-        edge is also under, at 19.88 V/µs — `DR-003` ratified *both* edges
-        against that bound and itself called a 19.69 V/µs rise "marginally
-        under"). Quiescent power binds at **FF / 125 °C / 1.98 V**, where Iq
-        measures **66.63 µA** against the row's 65.0 µA budget (131.92 µW vs the
-        ratified ≈ 128.7 µW). No threshold was loosened to make either pass.
+        "slew_rate"]` — but the two rows are not the same kind of result.
+        **Slew rate is a design miss** and binds at **SS / −40 °C**, where the
+        80 %–20 % fall transit measures **11.04 V/µs** against the ratified
+        20 V/µs (the rise edge is also under, at 19.88 V/µs — `DR-003` ratified
+        *both* edges against that bound and itself called a 19.69 V/µs rise
+        "marginally under"). **Quiescent power fails only under this pass's own
+        zero-tolerance reading of an `≈` row** — see the next bullet. No
+        threshold was loosened to make either pass.
+      - **The quiescent-power `max` of 65.0 µA is a zero-tolerance reading of an
+        `≈` row, and the ratified spec currently disposes of the same numbers
+        the other way.** The bound's binding corner is
+        **FF / 125 °C / 1.98 V**, where Iq measures **66.63 µA** against 65.0 µA
+        (131.92 µW vs the ratified ≈ 128.7 µW). But `spec/target-spec.md`'s row
+        calls that very measurement "**confirmed on both PVT grids** at
+        unchanged bias currents" at **+2.5%** vs. the `DR-002` estimate, and its
+        status column reads "measured"; `DR-003` recorded the measured deltas as
+        facts and then said explicitly that "this record does **not** convert
+        them into a ratification tolerance". Grading the row at exactly 65.0 µA
+        is therefore a conservative reading *this pass chose*, not a number the
+        spec states — the same kind of undecided graded quantity that keeps
+        input-referred noise a declared gap
+        ([#274](https://github.com/2AMLogic/sky130-opamp/issues/274)). Under
+        that reading the row fails at **13 of the 15 points**, not only at the
+        binding corner: **nominal TT / 27 °C included (65.745 µA, 118.34 µW
+        against the ≈ 117.0 µW figure)**, with only SS / −40 °C (64.243 µA) and
+        SS / 27 °C (64.736 µA) passing. One point shows the reading's edge
+        plainly — **SS / 125 °C / 1.62 V fails at 65.148 µA while drawing
+        105.54 µW**, below *both* ratified power figures: the row ratifies no
+        figure at 1.62 V, and grading it as a current supplies one. So this
+        record reports the row as failing **under the stated reading** and
+        claims no design verdict for it; reconciling the spec row with the
+        grading is a `spec/` decision, not an agent's call
+        ([#277](https://github.com/2AMLogic/sky130-opamp/issues/277) carries the
+        options).
       - **Four ratified rows pass at every corner of the 15-point grid**:
         open-loop DC gain (worst **61.64 dB @ FS / 125 °C**, bound ≥ 60 dB), GBW
         (worst **17.92 MHz @ SS / 125 °C**, bound ≈ 16 MHz), phase margin (worst
@@ -430,10 +456,15 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
 - **Item 7 (post-layout) — `met`** on the `klt pex` report described above,
   with the extraction-model limits and the device-only attribution split there.
 - **Item 5 (corner verification) — `unmet` / `check_failed`**, cited on eight
-  `klt sim` envelopes that grade the ratified rows themselves. The reason is a
-  **design** gap, not an evidence one: `detail.failed_rows` names
-  `quiescent_power` and `slew_rate`, and six further rows are declared gaps.
-  See the per-item rationale above.
+  `klt sim` envelopes that grade the ratified rows themselves.
+  `detail.failed_rows` names `quiescent_power` and `slew_rate`, and six further
+  rows are declared gaps. For **slew rate** the reason is a **design** gap, not
+  an evidence one. For **quiescent power** it is neither: the row fails only
+  under this pass's zero-tolerance reading of an `≈` row that
+  `spec/target-spec.md` itself records as "confirmed" at +2.5% — an unsettled
+  spec question routed to
+  [#277](https://github.com/2AMLogic/sky130-opamp/issues/277), not a design
+  verdict. See the per-item rationale above.
 - **Item 6 (Monte Carlo) — `unmet` / `no_evidence`**, for the reason recorded
   per item above (no `klt yield` report exists).
 
@@ -449,8 +480,13 @@ full-core signoff or ratification):
   eight ratified §2 rows are now graded by the tool at every corner. Two gates
   remain, and they are different in kind: **(a)** two graded rows *fail* at
   their binding corners (fall slew 11.04 V/µs vs 20 V/µs at SS / −40 °C, and
-  Iq 66.63 µA vs 65.0 µA at FF / 125 °C / 1.98 V) — closing those is a design
-  pass, never a threshold edit; **(b)** six rows are declared gaps — output
+  Iq 66.63 µA vs 65.0 µA at FF / 125 °C / 1.98 V). For **slew rate** closing
+  that is a design pass, never a threshold edit; for **quiescent power** the
+  row fails only against this pass's zero-tolerance reading of an `≈` row that
+  `spec/target-spec.md` itself records as "confirmed" at +2.5%, so what has to
+  be settled first is that spec question
+  ([#277](https://github.com/2AMLogic/sky130-opamp/issues/277)), not the
+  design; **(b)** six rows are declared gaps — output
   swing is an expressibility gap in `klt sim`
   ([klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)),
   noise needs a graded quantity and `limits`

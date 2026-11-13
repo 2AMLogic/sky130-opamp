@@ -279,6 +279,25 @@ details worth knowing before editing them:
   at 1.98 V and ≈ 117.0 µW at 1.80 V, which are the same 65.0 µA; grading Iq is
   the only single bound that reproduces both figures exactly when the supply
   moves with the process corner. `pq_w` is reported ungraded alongside it.
+- **…and that 65.0 µA `max` is a zero-tolerance reading of an `≈` row, which
+  the spec itself does not state.** `spec/target-spec.md`'s quiescent-power row
+  calls the measured result "**confirmed on both PVT grids** at unchanged bias
+  currents" at **+2.5%** vs. the `DR-002` estimate, and its status column reads
+  "measured"; `DR-003` recorded the measured deltas as facts and said
+  explicitly that "this record does **not** convert them into a ratification
+  tolerance". Reading the row at exactly 65.0 µA is a conservative *choice this
+  harness makes*, not a bound the spec writes down, and it is the one place
+  where a `SPEC_*` constant here is not simply a ratified number copied across.
+  Under it the row fails at **13 of the 15 points** — nominal TT / 27 °C
+  included (65.745 µA, 118.34 µW against the ≈ 117.0 µW figure), only
+  SS / −40 °C (64.243 µA) and SS / 27 °C (64.736 µA) passing — and
+  **SS / 125 °C / 1.62 V fails at 65.148 µA while drawing 105.54 µW**, below
+  *both* ratified power figures, because the row ratifies no figure at 1.62 V
+  and a current bound supplies one. Treat a `fail` on this row as "fails under
+  the stated reading", not as a design verdict, until the spec question is
+  ruled on:
+  [#277](https://github.com/2AMLogic/sky130-opamp/issues/277). Changing
+  `SPEC_IQ_MAX_A` is that ruling's job, not a tuning knob.
 
 **Output swing is deliberately ungraded.** Its ratified rule is the largest
 contiguous run around mid-supply over which `d(vout)/d(vin)` stays in
