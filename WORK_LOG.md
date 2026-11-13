@@ -4,6 +4,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-13
 
+- **PR #275**: feat(item5): grade the ratified spec rows inside the klt sim envelopes and cite them
+- **Issue #246** (closed): T1 item 5 (corner verification): re-run the PVT characterization through klt sim envelopes and cite them per ratified row
 - **Issue #273** (closed): Follow-on: Work identified in PR #272
 
 ### 2026-11-06
