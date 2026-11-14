@@ -120,6 +120,14 @@ BENCHES = {
     "noise": {"netlist": "noise.cir", "kind": "noise", "tag": "noise"},
 }
 
+# Per-submit wall-clock budget klt itself spends waiting out a Spot capacity or
+# fleet concurrency refusal (`batch.capacity_wait_s`); the host rule for this
+# worker requires it on every batch `klt sim` (2am#6872). Same name and value as
+# pvt_sweep.py so the two campaigns read alike. This script records nothing on a
+# failed submit, so without the wait a burst of bench submits onto the
+# vCPU-budgeted fleet loses the whole run to `batch_no_capacity`.
+BATCH_CAPACITY_WAIT_S = 600
+
 
 def measurements(bench: str) -> list[dict]:
     m: list[dict] = []
@@ -191,8 +199,13 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
         "measurements": measurements(bench),
         "options": options,
     }
+    # Always carry `batch`: `capacity_wait_s` is unconditional (the host rule),
+    # while `runner_version_check` stays opt-in via --runner-version-check.
+    # A `local` run ignores the block, so emitting it always keeps the request
+    # files replayable on either backend.
+    req["batch"] = {"capacity_wait_s": BATCH_CAPACITY_WAIT_S}
     if runner_version_check:
-        req["batch"] = {"runner_version_check": runner_version_check}
+        req["batch"]["runner_version_check"] = runner_version_check
     return req
 
 
