@@ -1,20 +1,24 @@
 """The sky130 PDK pin must be identical in CI, sim and layout configs (issue #81).
 
-Simulator-free: only reads JSON / YAML text. To add a copy of the pin, add one
-line to PIN_LOCATIONS.
+Simulator-free: only reads JSON / YAML text. To add a copy of the pin: one
+line in PIN_LOCATIONS, its file in FILES, its anchor in anchors(). Shared
+harness: tests/_pin_sync.py.
 """
 
 import json
 import re
-import shutil
-import tempfile
 import unittest
-from pathlib import Path
 
-import _paths
+import _pin_sync
 
-REPO = _paths.REPO
 SHA_RE = r"[0-9a-f]{40}"
+WORKFLOW = ".github/workflows/design-sources.yml"
+GMID_PDK = "sim/gm-id-characterization/pdk.json"
+GMID_MODELS = "sim/gm-id-characterization/corners/model-files.json"
+OPAMP_PDK = "sim/opamp-characterization/pdk.json"
+LAYOUT_PDK = "layout/pdk.json"
+# the configs that repeat the pin in an install_command (one extra copy each)
+INSTALL_CMD_FILES = (GMID_PDK, OPAMP_PDK, LAYOUT_PDK)
 
 
 def _json_key(rel, key="open_pdks_commit"):
@@ -33,74 +37,35 @@ def _json_install_cmd(rel):
 
 
 def _workflow_pin(root):
-    text = (root / ".github/workflows/design-sources.yml").read_text()
+    text = (root / WORKFLOW).read_text()
     m = re.search(r"^\s*PDK_VERSION:\s*(" + SHA_RE + r")\s*$", text, re.M)
     assert m, "PDK_VERSION not found in design-sources.yml"
     return m.group(1)
 
 
-PIN_LOCATIONS = {
-    "ci PDK_VERSION": _workflow_pin,
-    "gm-id pdk.json": _json_key("sim/gm-id-characterization/pdk.json"),
-    "gm-id pdk.json install_command": _json_install_cmd("sim/gm-id-characterization/pdk.json"),
-    "opamp pdk.json": _json_key("sim/opamp-characterization/pdk.json"),
-    "opamp pdk.json install_command": _json_install_cmd("sim/opamp-characterization/pdk.json"),
-    "gm-id model-files.json": _json_key("sim/gm-id-characterization/corners/model-files.json"),
-    "layout pdk.json": _json_key("layout/pdk.json"),
-    "layout pdk.json install_command": _json_install_cmd("layout/pdk.json"),
-}
+class PdkPinSyncTests(_pin_sync.PinSyncMixin, unittest.TestCase):
+    PIN_RE = SHA_RE
+    BAD_PIN = "0" * 40
+    FILES = (WORKFLOW, GMID_PDK, OPAMP_PDK, GMID_MODELS, LAYOUT_PDK)
+    PIN_LOCATIONS = {
+        "ci PDK_VERSION": _workflow_pin,
+        "gm-id pdk.json": _json_key(GMID_PDK),
+        "gm-id pdk.json install_command": _json_install_cmd(GMID_PDK),
+        "opamp pdk.json": _json_key(OPAMP_PDK),
+        "opamp pdk.json install_command": _json_install_cmd(OPAMP_PDK),
+        "gm-id model-files.json": _json_key(GMID_MODELS),
+        "layout pdk.json": _json_key(LAYOUT_PDK),
+        "layout pdk.json install_command": _json_install_cmd(LAYOUT_PDK),
+    }
 
-
-def collect(root):
-    return {name: read(root) for name, read in PIN_LOCATIONS.items()}
-
-
-class PdkPinSyncTests(unittest.TestCase):
-    def test_all_copies_equal(self):
-        pins = collect(REPO)
-        self.assertEqual(
-            len(set(pins.values())), 1, f"PDK pin differs across configs: {pins}")
-        for name, pin in pins.items():
-            self.assertRegex(pin, "^" + SHA_RE + "$", name)
-
-    def _tmp_copy(self):
-        tmp = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, tmp, True)
-        for rel in (".github/workflows/design-sources.yml",
-                    "sim/gm-id-characterization/pdk.json",
-                    "sim/opamp-characterization/pdk.json",
-                    "sim/gm-id-characterization/corners/model-files.json",
-                    "layout/pdk.json"):
-            dst = tmp / rel
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(REPO / rel, dst)
-        return tmp
-
-    def test_negative_control_each_copy_detected(self):
-        """Changing any single copy in a temp tree must break equality."""
-        good = collect(REPO)
-        pin = next(iter(good.values()))
-        bad = "0" * 40
-        files = {
-            ".github/workflows/design-sources.yml",
-            "sim/gm-id-characterization/pdk.json",
-            "sim/opamp-characterization/pdk.json",
-            "sim/gm-id-characterization/corners/model-files.json",
-            "layout/pdk.json",
-        }
-        for rel in files:
-            with self.subTest(rel=rel):
-                tmp = self._tmp_copy()
-                p = tmp / rel
-                text = p.read_text()
-                # change only the live key, not prose mentions of the pin
-                if rel.endswith(".yml"):
-                    anchor = "PDK_VERSION: " + pin
-                else:
-                    anchor = '"open_pdks_commit": "' + pin
-                self.assertIn(anchor, text)
-                p.write_text(text.replace(anchor, anchor.replace(pin, bad), 1))
-                self.assertGreater(len(set(collect(tmp).values())), 1)
+    def anchors(self, rel, pin):
+        # each anchor carries its key: edit the live value, not a _comment
+        if rel == WORKFLOW:
+            return ("PDK_VERSION: " + pin,)
+        found = ['"open_pdks_commit": "' + pin]
+        if rel in INSTALL_CMD_FILES:
+            found.append('"install_command": "volare enable --pdk sky130 ' + pin)
+        return found
 
 
 if __name__ == "__main__":
