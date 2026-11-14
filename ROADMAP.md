@@ -48,7 +48,8 @@ ratified (DR-003); DR-008 through DR-014 are `proposed`.
 
 ## Now
 
-Startable today, one PR each. None has an issue yet.
+Startable today, one PR each. Each was filed as an issue just after this
+file's snapshot: #281, #282, #283 and #284, in the order below.
 
 1. **Clear the Magic resistor-head DRC failure in `opamp_comp`.** The
    generator gap it was parked on, klayout-tools#3077, is closed upstream.
@@ -110,8 +111,9 @@ Startable today, one PR each. None has an issue yet.
 
 ## Blocked and waiting
 
-Every open issue is held on an operator decision or is a resting tracker:
-**no issue is dispatchable today**. The Now items need issues first.
+At the snapshot, every open issue was held on an operator decision or was a
+resting tracker: **nothing was dispatchable**. The Now items have since been
+filed as #281-#284 and are not listed below.
 
 | Issue | Waiting on |
 |---|---|
