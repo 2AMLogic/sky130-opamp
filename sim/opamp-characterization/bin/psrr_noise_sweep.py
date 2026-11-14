@@ -64,6 +64,7 @@ sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
 from spice_harness import (  # noqa: E402
+    BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
     KltSimError,
     allocate_record_id,
@@ -192,7 +193,8 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
         "options": options,
     }
     if runner_version_check:
-        req["batch"] = {"runner_version_check": runner_version_check}
+        req["batch"] = {"runner_version_check": runner_version_check,
+                        "capacity_wait_s": BATCH_CAPACITY_WAIT_S}
     return req
 
 

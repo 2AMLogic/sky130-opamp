@@ -173,7 +173,8 @@ class BuildRequestTests(unittest.TestCase):
         self.assertTrue(r["options"]["keep_artifacts"])
         self.assertNotIn("batch", r)
         r = self.req("noise", runner_version_check="enforce")
-        self.assertEqual(r["batch"], {"runner_version_check": "enforce"})
+        self.assertEqual(r["batch"], {"runner_version_check": "enforce",
+                                      "capacity_wait_s": m.BATCH_CAPACITY_WAIT_S})
 
     def test_unknown_bench_and_corner_raise(self):
         with self.assertRaises(KeyError):
