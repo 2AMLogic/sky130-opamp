@@ -45,6 +45,13 @@ compared, after the figure's `where` filter, with the unique
 (corner, temp_c, supply) tuples of the CSV: missing, duplicate and unexpected
 points and nonfinite values of the figure's key are all errors, with dataset
 and point diagnostics. Figures that cite the same matrix share one validation.
+The point identity itself (strip + reject a blank corner, reject a nonfinite
+temp/supply, round to 6) and the per-row validation come from
+sim/lib/point_identity.py, shared with
+sim/opamp-characterization/variants/{compare,sink_bias_report}.py so this gate
+and the report generators cannot disagree about a committed row (issue #291).
+A row with a blank/whitespace-padded corner or a nonfinite identity field is
+reported as a malformed row, not as an unexpected point.
 
 Campaign figures (offset Monte Carlo, `campaign_figures` in the mapping):
 statistics that live in a committed campaign summary JSON rather than a PVT
@@ -95,6 +102,9 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO / "sim" / "lib"))
+from point_identity import norm_corner, norm_num, validate_rows  # noqa: E402
+
 MAPPING = "manifests/spec-section2-figures.json"
 SPEC = "spec/target-spec.md"
 RECORDS_GLOB = "sim/*/records"
@@ -260,10 +270,6 @@ def filtered(fig, rows):
     return rows
 
 
-def _num(x):
-    return round(float(x), 6)
-
-
 def _fmt(t):
     return f"{t[0]}/{t[1]:g} C/{t[2]:g} V"
 
@@ -274,7 +280,7 @@ def expected_points(m):
     if "points" in m:
         if "axes" in m:
             raise ValueError("matrix gives both points and axes")
-        pts = [(p["corner"], _num(p["temp_c"]), _num(p[sk])) for p in m["points"]]
+        pts = [(norm_corner(p["corner"]), norm_num(p["temp_c"]), norm_num(p[sk])) for p in m["points"]]
         if len(set(pts)) != len(pts):
             raise ValueError("matrix points contain duplicates")
         return set(pts)
@@ -283,17 +289,19 @@ def expected_points(m):
         by = sup["by_corner"]
         if set(by) != set(axes["corner"]):
             raise ValueError("supply.by_corner keys must equal axes.corner")
-        pts = [(c, _num(t), _num(by[c])) for c in axes["corner"] for t in axes["temp_c"]]
+        pts = [(norm_corner(c), norm_num(t), norm_num(by[c]))
+               for c in axes["corner"] for t in axes["temp_c"]]
     elif sup["mode"] == "cartesian":
-        pts = [(c, _num(t), _num(v)) for c in axes["corner"] for t in axes["temp_c"] for v in sup["values"]]
+        pts = [(norm_corner(c), norm_num(t), norm_num(v))
+               for c in axes["corner"] for t in axes["temp_c"] for v in sup["values"]]
     else:
         raise ValueError(f"unknown supply mode {sup['mode']!r}")
     if len(set(pts)) != len(pts):
         raise ValueError("matrix axes contain repeated values")
     pts = set(pts)
     for ex in m.get("exclude", []):
-        hit = {p for p in pts if p[0] == ex["corner"] and p[1] == _num(ex["temp_c"])
-               and (sk not in ex or p[2] == _num(ex[sk]))}
+        hit = {p for p in pts if p[0] == norm_corner(ex["corner"]) and p[1] == norm_num(ex["temp_c"])
+               and (sk not in ex or p[2] == norm_num(ex[sk]))}
         if not hit:
             raise ValueError(f"exclusion {ex} matches no expected point")
         pts -= hit
@@ -301,34 +309,23 @@ def expected_points(m):
 
 
 def check_matrix(name, m, rows, keys):
-    """Errors for one matrix against its (already filtered) rows."""
+    """Errors for one matrix against its (already filtered) rows.
+
+    Row identity/validation is point_identity.validate_rows; the `want`/`seen`
+    set arithmetic below is this mapping's own and stays here.
+    """
     sk = m.get("supply_key", "vdd_v")
     try:
         want = expected_points(m)
     except (KeyError, TypeError, ValueError) as e:
         return [f"matrix {name}: bad matrix definition: {e!r}"]
-    errs, seen = [], {}
-    for i, r in enumerate(rows, 1):
-        try:
-            t = (r["corner"], _num(r["temp_c"]), _num(r[sk]))
-        except (KeyError, TypeError, ValueError) as e:
-            errs.append(f"matrix {name}: row {i} has no usable corner/temp_c/{sk}: {e!r}")
-            continue
-        seen.setdefault(t, []).append(i)
-        for k in keys:
-            try:
-                ok = math.isfinite(float(r[k]))
-            except (KeyError, TypeError, ValueError):
-                ok = False
-            if not ok:
-                errs.append(f"matrix {name}: point {_fmt(t)} has nonfinite or missing {k}: {r.get(k)!r}")
-    for t in sorted(want - set(seen)):
+    v = validate_rows(rows, keys, f"matrix {name}", sk, _fmt)
+    errs = list(v.errors)
+    for t in sorted(want - set(v.seen)):
         errs.append(f"matrix {name}: missing expected point {_fmt(t)}")
-    for t in sorted(set(seen) - want):
+    for t in sorted(set(v.seen) - want):
         errs.append(f"matrix {name}: unexpected point {_fmt(t)}")
-    for t, idx in sorted(seen.items()):
-        if len(idx) > 1:
-            errs.append(f"matrix {name}: duplicate point {_fmt(t)} in rows {idx}")
+    errs += v.duplicate_errors
     return errs
 
 

@@ -287,6 +287,42 @@ class MatrixTests(FixtureTests):
             self.csv(CSV.replace("66.0", bad))
             self.assertTrue(any("point tt/27 C/1.8 V has nonfinite" in e for e in self.errs()), bad)
 
+    # --- point-identity rows (issue #291): a malformed identity is a malformed
+    # row, never a corner that happens to be named "" or a temperature of nan.
+    # These are the three inputs on which this gate and
+    # sim/opamp-characterization/variants/compare.py used to disagree.
+
+    def test_blank_corner_is_a_malformed_row_not_an_unexpected_point(self):
+        self.csv(CSV.replace("tt,27.0,1.8,66.0", ",27.0,1.8,66.0"))
+        e = self.errs()
+        self.assertTrue(any("row 1 has no usable corner/temp_c/vdd_v" in x
+                            and "empty corner" in x for x in e), e)
+        self.assertFalse(any("unexpected point" in x for x in e), e)
+        self.assertTrue(any("missing expected point tt/27 C/1.8 V" in x for x in e), e)
+
+    def test_padded_corner_keys_as_the_stripped_corner(self):
+        self.csv(CSV.replace("tt,27.0,1.8,66.0", " tt ,27.0,1.8,66.0"))
+        self.assertEqual(self.errs(), [])
+
+    def test_nonfinite_identity_is_a_malformed_row(self):
+        """A nan temp_c used to become its own dict key (nan != nan), so it was
+        reported as an unexpected point and could never trip the duplicate
+        check. Both copies of the row are now malformed rows."""
+        self.csv(CSV + "tt,nan,1.8,66.0\ntt,nan,1.8,67.0\n")
+        e = self.errs()
+        for n in (4, 5):
+            self.assertTrue(any(f"row {n} has no usable corner/temp_c/vdd_v" in x
+                                and "nonfinite value" in x for x in e), (n, e))
+        self.assertFalse(any("nan" in x and "unexpected point" in x for x in e), e)
+        self.assertFalse(any("missing expected point" in x for x in e), e)
+
+    def test_nonfinite_supply_is_a_malformed_row(self):
+        self.csv(CSV.replace("tt,27.0,1.8,66.0", "tt,27.0,inf,66.0"))
+        e = self.errs()
+        self.assertTrue(any("row 1 has no usable corner/temp_c/vdd_v" in x
+                            and "nonfinite value" in x for x in e), e)
+        self.assertFalse(any("unexpected point" in x for x in e), e)
+
     def test_axes_paired_supply_and_exclusion(self):
         self.matrix(points=None)
         m = json.loads((self.tmp / sf.MAPPING).read_text())
