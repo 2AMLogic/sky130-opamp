@@ -63,6 +63,11 @@ REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
+from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+    DEFAULT_CORNERS,
+    DEFAULT_TEMPS_C,
+    VDD_BY_CORNER,
+)
 from spice_harness import (  # noqa: E402
     KLT_CMD,
     KltSimError,
@@ -80,9 +85,12 @@ SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / dut_identity.CURRENT_NETLIST_REL
 _DUT_INCLUDE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
-DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
-DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
-VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
+# DEFAULT_CORNERS, DEFAULT_TEMPS_C and VDD_BY_CORNER come from
+# sim/lib/corners.py (imported above), which owns the ratified table and its
+# DR-002 Sec (f) / spec/target-spec.md Sec 1 citation -- including why sf/fs
+# take nominal VDD. Re-exported here so importers keep reading them off this
+# module. Never re-type the numbers; this bench must sweep the same table
+# pvt_sweep.py does or two records labelled `ss` mean different supplies.
 
 # Frequency grid: `dec PPD F0 F1`. Index k <-> f = F0 * 10**(k/PPD).
 PPD = 20
