@@ -56,6 +56,7 @@ EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+from corners import DEFAULT_CORNERS, DEFAULT_TEMPS_C  # noqa: E402  -- the ratified PVT table
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     HarnessError,
     Pdk,
@@ -77,11 +78,13 @@ RECORDS_DIR = EXP_DIR / "records"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 
 DEVICES = ("nfet", "pfet")
-DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
+# DEFAULT_CORNERS / DEFAULT_TEMPS_C are imported from sim/lib/corners.py above:
+# this bench sweeps the same ratified table as the opamp benches (DR-002 Sec (f),
+# spec/target-spec.md Sec 1), so the gm/ID data behind sizing is taken at the
+# corners the characterization campaigns grade against.
 DEFAULT_LENGTHS_UM = (0.15, 0.3, 0.6, 1.2)
-DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
 DEFAULT_GMID_TARGETS = (20.0, 15.0, 10.0, 5.0)
-VDD = 1.8
+VDD = 1.8  # this bench biases at nominal only; it is not a corner->VDD pairing
 
 
 # --------------------------------------------------------------------------

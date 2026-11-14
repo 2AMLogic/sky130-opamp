@@ -124,6 +124,11 @@ REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
+from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+    DEFAULT_CORNERS,
+    DEFAULT_TEMPS_C,
+    VDD_BY_CORNER,
+)
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     KLT_CMD,
     HarnessError,
@@ -156,21 +161,16 @@ DESIGN_NETLIST = REPO_ROOT / "design" / "netlist" / "opamp_core.spice"
 # immutable per-campaign snapshot before any analysis is scheduled.
 ACTIVE_DUT: list[Path] = [DESIGN_NETLIST]
 
-DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
-DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
 DEFAULT_ANALYSES = ("ac", "tran_sr", "dc_swing")  # icmr/cmrr (issue #53) are opt-in: they go to the klt batch fleet
 DEFAULT_KLT_BACKEND = "batch"
 
 CL_F = "2p"  # DR-001's CL = 2 pF
 IBIAS_A = "5u"  # DR-002 (a): 5 uA external reference into `ibias`
 
-# Corner -> VDD mapping. Matches DR-002 Sec (f)'s own pairing (ss -> 1.62V
-# worst-case-low, ff -> 1.98V worst-case-high, tt -> 1.80V nominal,
-# per spec/target-spec.md Sec 1). sf/fs have no such named pairing in either
-# DR-002 or target-spec.md -- nominal VDD is used for both, a stated
-# methodology choice (see ../README.md), not a re-derivation of a
-# process/supply correlation this repo has not decided.
-VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
+# DEFAULT_CORNERS, DEFAULT_TEMPS_C and VDD_BY_CORNER are imported above from
+# sim/lib/corners.py, which owns the ratified table and carries its DR-002
+# Sec (f) / spec/target-spec.md Sec 1 citation. They are re-exported here, so
+# `pvt.VDD_BY_CORNER` and friends keep resolving for importers of this module.
 
 # Supply modes (issue #110). "paired" (default, historical methodology) ties one
 # VDD to each process via VDD_BY_CORNER. "cartesian" treats the supply as an
