@@ -539,6 +539,69 @@ class ScopeProvenanceTests(unittest.TestCase):
         self.assertTrue(any("does not occur within" in e for e in self.errs()))
 
 
+class RecordResolutionTests(FixtureTests):
+    """Campaign records are written as `<rid>-<campaign>.json` with no bare
+    `<rid>.json` sibling (issue #282: the PSRR/noise campaign writes only
+    `<rid>-psrr-noise.json`). Both the section-2 citation check and the
+    figure's own provenance load must resolve that spelling, and an id that
+    matches two campaign records must be an error rather than a silent pick.
+    Inherits the whole FixtureTests battery, re-run against that spelling."""
+
+    CAMPAIGN = "psrr-noise"
+
+    def setUp(self):
+        super().setUp()
+        rec = self.tmp / sf.OPAMP_RECORDS
+        (rec / f"{RID}.json").rename(rec / f"{RID}-{self.CAMPAIGN}.json")
+
+    def test_resolve_record_finds_the_campaign_file(self):
+        path, err = sf.resolve_record(self.tmp, RID)
+        self.assertIsNone(err)
+        self.assertEqual(path.name, f"{RID}-{self.CAMPAIGN}.json")
+
+    def test_bare_spelling_still_wins_when_both_exist(self):
+        (self.tmp / sf.OPAMP_RECORDS / f"{RID}.json").write_text("{}")
+        path, err = sf.resolve_record(self.tmp, RID)
+        self.assertIsNone(err)
+        self.assertEqual(path.name, f"{RID}.json")
+
+    def test_replay_envelope_siblings_are_not_records(self):
+        # `<rid>-<bench>.klt.json` / `.request.json` are replay envelopes, and
+        # several share one record id: they must not resolve, and must not
+        # manufacture an ambiguity between themselves.
+        rec = self.tmp / sf.OPAMP_RECORDS
+        (rec / f"{RID}-{self.CAMPAIGN}.json").rename(rec / f"{RID}-psrr-vdd.klt.json")
+        (rec / f"{RID}-psrr-vss.klt.json").write_text("{}")
+        (rec / f"{RID}-psrr-vdd.request.json").write_text("{}")
+        path, err = sf.resolve_record(self.tmp, RID)
+        self.assertIsNone(err)
+        self.assertIsNone(path)
+        errs = sf.check(self.tmp)
+        self.assertTrue(any("does not exist" in e for e in errs), errs)
+
+    def test_two_campaign_records_are_ambiguous_not_a_silent_pick(self):
+        (self.tmp / sf.OPAMP_RECORDS / f"{RID}-ac-pvt.json").write_text("{}")
+        path, err = sf.resolve_record(self.tmp, RID)
+        self.assertIsNone(path)
+        self.assertIn("ambiguously", err)
+        errs = sf.check(self.tmp)
+        self.assertTrue(any("ambiguously" in e for e in errs), errs)
+        self.assertTrue(any(e.startswith("Open-loop DC gain:") and "ambiguously" in e
+                            for e in errs), errs)
+
+    def test_md_only_campaign_record_satisfies_the_citation_check(self):
+        rec = self.tmp / sf.OPAMP_RECORDS
+        (rec / f"{RID}-{self.CAMPAIGN}.json").rename(rec / f"{RID}-{self.CAMPAIGN}.md")
+        path, err = sf.resolve_record(self.tmp, RID)
+        self.assertIsNone(err)
+        self.assertEqual(path.name, f"{RID}-{self.CAMPAIGN}.md")
+        # ...but a figure still needs the record JSON for its DUT identity.
+        path, err = sf.resolve_record(self.tmp, RID, exts=(".json",),
+                                      dirs=(sf.OPAMP_RECORDS,))
+        self.assertIsNone(err)
+        self.assertIsNone(path)
+
+
 class CommittedTests(unittest.TestCase):
     def test_committed_spec_agrees_with_records(self):
         self.assertEqual(sf.check(_paths.REPO), [])
@@ -550,15 +613,16 @@ class CommittedTests(unittest.TestCase):
         # Offset evidence has no canonical campaign: it must stay explicitly historical.
         self.assertTrue(all(f["scope"] == "historical" and f.get("legacy_unverified")
                             for f in m["campaign_figures"]))
-        # Deterministic current claims cite the DR-013 canonical records or
-        # the issue-#110 independent-supply (cartesian) campaign on the same
-        # canonical DUT snapshot.
+        # Deterministic current claims cite the DR-013 canonical records, the
+        # issue-#110 independent-supply (cartesian) campaign, or the issue-#282
+        # PSRR re-run -- all on the same canonical DUT snapshot.
         for f in m["figures"]:
             if f["scope"] == "current":
                 self.assertIn(f["record"], (
                     "20261011-140526-04489d4-7e5893",  # DR-013 paired ac/tran-sr/dc-swing
                     "20261011-141126-04489d4-b4ac6f",  # DR-013 paired icmr/cmrr/tran-step
                     "20261011-194651-046fe81-86146b",  # issue #110 cartesian fleet campaign
+                    "20261114-032827-96d9fbc-288af8",  # issue #282 PSRR+/PSRR- re-run
                 ))
 
 
