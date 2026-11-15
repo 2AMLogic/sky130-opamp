@@ -53,6 +53,9 @@ REPO_ROOT = EXP_DIR.parent.parent
 PVT_SWEEP = EXP_DIR / "bin" / "pvt_sweep.py"
 RECORDS_DIR = EXP_DIR / "records"
 
+sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+from corners import VDD_BY_CORNER  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+
 ANALYSES = "ac,tran_sr,dc_swing,icmr"
 
 # analysis CSV suffix -> measurement columns exported as spec rows
@@ -164,15 +167,9 @@ def main(argv=None) -> int:
     dut = art / "dut.spice"
     dut.write_text(flatten_dut(text))
 
-    sys.path.insert(0, str(EXP_DIR / "bin"))
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("pvt_sweep", PVT_SWEEP)
-    pvt = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(pvt)
-
     record_id = run_campaign(dut, corners, temps)
     print(f"pex_measure: side={side} record={record_id}", file=sys.stderr)
-    doc = document(read_rows(record_id), corners, temps, pvt.VDD_BY_CORNER)
+    doc = document(read_rows(record_id), corners, temps, VDD_BY_CORNER)
     doc["record_id"] = record_id
     json.dump(doc, sys.stdout)
     sys.stdout.write("\n")
