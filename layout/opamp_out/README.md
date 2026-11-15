@@ -16,9 +16,8 @@ topology and unit counts are unchanged. Multiplicity follows the repo's rule
 ## Scope and limits
 
 A partial cell, not the op-amp layout. It is not joined to `opamp_stage1/`,
-`opamp_bias/` or `opamp_comp/`, so T1 item 2 stays `unmet`, no manifest cites
-it, and the integrator GDS stays null. Nothing here closes #27 (ERC), the
-slew target, or the compensation resistor-head Magic failure
+`opamp_bias/` or `opamp_comp/`, and no manifest cites it. Nothing here closes
+#27 (ERC), the slew target, or the compensation resistor-head Magic failure
 (`opamp_comp/`). It is the canonical output stage as netlisted. DR-012
 withholds adoption of the experimental sink (#47) and the #197 bias study
 recommends no candidate; a later approved topology change needs its own layout,

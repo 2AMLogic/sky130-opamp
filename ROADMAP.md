@@ -64,12 +64,13 @@ file's snapshot: #281, #282, #283 and #284, in the order below.
    corner, and a `proposed` decision record states a target, following the
    CMRR precedent (DR-008). Proposing is not ratifying.
 3. **Bring the integrator view and status prose up to the assembled core.**
-   `manifests/integrator.json` still says no full-core layout exists (`gds`
-   and `area_um2` null, evaluated at `8b3ec92`), `README.md` says the
-   full-core layout "remains pending", and `layout/README.md` says nothing in
-   `manifests/` cites `opamp_core`. Done when: all three match
-   `layout/opamp_core/README.md`, the Magic caveat is carried, and
-   `python design/bin/integrator_check.py validate` passes.
+   Largely done by PR #310: `manifests/integrator.json` is populated and
+   `layout/README.md` cites the core. What remains is the root `README.md`
+   sentence "The full-core layout remains pending" — owner-gated by the
+   item-10 hygiene attestation, so it is #307's, not startable from an
+   ordinary PR. Done when: root `README.md` describes the assembled core
+   with the Magic caveat carried, and `python design/bin/integrator_check.py
+   validate` passes.
 4. **Record the measured area and refresh the consumer verdicts.** The Area
    row reads "no `layout/` exists yet" and the Consumers tables are evaluated
    at `8b3ec92` (they still quote the pre-resize GBW). DR-004 requires both
