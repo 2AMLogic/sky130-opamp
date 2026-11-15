@@ -9,6 +9,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
 
 ## Very Important
 
@@ -28,18 +29,15 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#294**: layout/: Magic drc_total and per-rule box counts are presented as if additive in evidence READMEs
+_None._
 
 ## In Progress
 
 Issues currently being built (`loom:building`).
 
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
-- **#283**: Bring manifests/integrator.json and the status prose up to the assembled opamp_core layout
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
-- **#288**: Single-source the PVT corner/temp/supply table into sim/lib: four copies, one with the DR citation
-- **#293**: Plumb batch.capacity_wait_s into the remaining klt sim campaign runners
-- **#295**: Consolidate the duplicated DUT-include rewriting and the triplicated validate loop into sim/lib/dut_identity.py
+- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module
 
 ## PRs Awaiting Review
 
@@ -52,10 +50,8 @@ _None._
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
-- **#297**: refactor(sim): give the ratified PVT corner/temp/supply table one owner
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
-- **#306**: refactor: single-source DUT-include rewrite and validate report loop in dut_identity
-- **#310**: manifests: populate integrator gds and area from the assembled core layout
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
 
 ## Proposed
 
@@ -66,10 +62,8 @@ Issues carrying `loom:curated`.
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 - **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits) *(curated)*
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)*
-- **#283**: Bring manifests/integrator.json and the status prose up to the assembled opamp_core layout *(curated)*
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence *(curated)*
-- **#293**: Plumb batch.capacity_wait_s into the remaining klt sim campaign runners *(curated)*
-- **#294**: layout/: Magic drc_total and per-rule box counts are presented as if additive in evidence READMEs *(curated)*
+- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -85,14 +79,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 2 |
+| Operator merge-risk holds | 3 |
 | Very important | 1 |
 | Important | 3 |
-| Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 6 |
+| Ready (`loom:issue`) | 0 |
+| In Progress (`loom:building`) | 3 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 5 |
-| Curated | 9 |
+| Approved PRs awaiting merge | 3 |
+| Curated | 7 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
