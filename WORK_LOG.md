@@ -4,6 +4,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-15
 
+- **PR #312**: docs: replace WORK_PLAN currency claim with snapshot wording
+- **Issue #303** (closed): WORK_PLAN.md asserts 'current' label state but carries no generation timestamp
 - **PR #308**: test: hold pin-sync negative control to 1:1 anchor/location correspondence
 - **PR #300**: refactor(sim): give the PVT point-identity convention one owner that both validators share
 - **Issue #299** (closed): Pin-sync negative control: make the 1:1 anchor invariant a distinctness check, not a count check

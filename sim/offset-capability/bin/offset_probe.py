@@ -48,7 +48,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import math
 import os
 import subprocess
@@ -68,7 +67,6 @@ DESIGN_NETLIST = REPO / "design" / "netlist" / "opamp_core.spice"
 BENCH_TEMPLATE = EXP / "bench" / "offset_dc.cir"
 RENDERED_BENCH = "offset_dc.spice"   # in the snapshot dir; ``*.spice`` so dut_identity checks its include
 PLAN_NAME = "campaign.plan.json"
-_INCLUDE_LINE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
 VDD = 1.8
 VREF = VDD / 2          # output reference for the offset crossing
@@ -88,10 +86,10 @@ CORNERS = ("tt", "ss", "ff", "sf", "fs")
 
 def render_bench(template_text: str) -> str:
     """The offset bench with its DUT include pointed at the sibling snapshot."""
-    out, n = _INCLUDE_LINE.subn(rf'\1"{dut_identity.SNAPSHOT_NAME}"', template_text)
-    if n != 1:
-        raise ProbeError(f"offset bench template must include the DUT exactly once (found {n})")
-    return out
+    try:
+        return dut_identity.render_dut_include(template_text)
+    except dut_identity.RenderError as e:
+        raise ProbeError(str(e)) from None
 
 
 def capture_offset_dut(snap_dir: Path, src: Path | None = None) -> dict:

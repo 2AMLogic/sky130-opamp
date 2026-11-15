@@ -49,7 +49,6 @@ import csv
 import json
 import math
 import os
-import re
 import platform
 import shutil
 import sys
@@ -84,7 +83,6 @@ RECORDS_DIR = EXP_DIR / "records"
 ARTIFACT_BENCH = "opamp-psrr-noise"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / dut_identity.CURRENT_NETLIST_REL
-_DUT_INCLUDE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
 # DEFAULT_CORNERS, DEFAULT_TEMPS_C and VDD_BY_CORNER come from
 # sim/lib/corners.py (imported above), which owns the ratified table and its
@@ -206,15 +204,6 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
     return req
 
 
-def render_bench(template_text: str) -> str:
-    """The bench body with its DUT include pointed at the sibling snapshot copy
-    (bare name; `klt sim` resolves it against the request's directory)."""
-    out, n = _DUT_INCLUDE.subn(rf'\1"{dut_identity.SNAPSHOT_NAME}"', template_text)
-    if n != 1:
-        raise ValueError(f"bench body must include the DUT exactly once (found {n})")
-    return out
-
-
 def capture_benches(snap_dir: Path, benches: list[str], src: Path | None = None,
                     repo_root: Path | None = None) -> tuple[dict, dict[str, Path]]:
     """Capture the DUT bytes ONCE into a fresh ``snap_dir`` and render every
@@ -228,7 +217,8 @@ def capture_benches(snap_dir: Path, benches: list[str], src: Path | None = None,
     bodies = {}
     for bench in benches:
         body = snap_dir / f"{BENCHES[bench]['tag']}.spice"
-        write_new(body, render_bench((TESTBENCH_DIR / BENCHES[bench]["netlist"]).read_text()))
+        write_new(body, dut_identity.render_dut_include(
+            (TESTBENCH_DIR / BENCHES[bench]["netlist"]).read_text()))
         bodies[bench] = body
     return dut, bodies
 
