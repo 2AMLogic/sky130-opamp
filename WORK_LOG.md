@@ -4,6 +4,14 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-15
 
+- **PR #305**: fix(sim): plumb batch.capacity_wait_s (600) into the remaining klt sim request builders
+- **Issue #293** (closed): Plumb batch.capacity_wait_s into the remaining klt sim campaign runners
+- **PR #318**: docs: drop integrator-null and item-2-unmet prose overtaken by PR #310
+- **Issue #311** (closed): ROADMAP.md 'Now 3' and layout/opamp_out/README.md still say the integrator GDS is null
+- **PR #317**: fix: single-source the last two escaped corner-list copies into sim/lib/corners.py
+- **Issue #296** (closed): Two more re-typed copies of the ratified corner list escaped #288's scope: offset_probe.py and sizing_check.py
+- **PR #314**: docs: label Magic drc_total separately from drc listall why box counts in layout evidence
+- **Issue #294** (closed): layout/: Magic drc_total and per-rule box counts are presented as if additive in evidence READMEs
 - **PR #306**: refactor: single-source DUT-include rewrite and validate report loop in dut_identity
 - **Issue #295** (closed): Consolidate the duplicated DUT-include rewriting and the triplicated validate loop into sim/lib/dut_identity.py
 - **PR #310**: manifests: populate integrator gds and area from the assembled core layout
