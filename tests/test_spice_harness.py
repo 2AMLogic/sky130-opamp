@@ -236,10 +236,10 @@ def _pvt_batch_request():
         return json.loads(path.read_text())
 
 
-def _psrr_batch_request():
+def _psrr_batch_request(backend):
     psrr = _runner("sim/opamp-characterization/bin/psrr_noise_sweep.py")
     return psrr.build_request("noise", ["tt"], [27.0], "bench.spice", True,
-                              runner_version_check="warn")
+                              backend=backend)
 
 
 def _offset_probe_batch_request():
@@ -300,7 +300,8 @@ class BatchCapacityWaitTests(unittest.TestCase):
 
     BUILDERS = {
         "sim/opamp-characterization/bin/pvt_sweep.py": _pvt_batch_request,
-        "sim/opamp-characterization/bin/psrr_noise_sweep.py": _psrr_batch_request,
+        "sim/opamp-characterization/bin/psrr_noise_sweep.py":
+            lambda: _psrr_batch_request("batch"),
         "sim/offset-capability/bin/offset_probe.py": _offset_probe_batch_request,
         "sim/opamp-characterization/variants/sink_bias_margin.py":
             lambda: _sink_bias_request("batch"),
@@ -342,6 +343,12 @@ class BatchCapacityWaitTests(unittest.TestCase):
         never had -- the wait goes inside the existing `backend == "batch"`
         branch, not above it."""
         self.assertNotIn("batch", _sink_bias_request("local"))
+
+    def test_psrr_noise_sweep_local_backend_has_no_batch_block(self):
+        """Edge (issue #315): same convention for the psrr runner -- the `batch`
+        block is gated on the backend, never on `--runner-version-check`, so a
+        local debug probe still gets no block."""
+        self.assertNotIn("batch", _psrr_batch_request("local"))
 
 
 if __name__ == "__main__":
