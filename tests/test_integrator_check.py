@@ -17,6 +17,12 @@ class IntegratorCheckTests(unittest.TestCase):
             dst = self.tmp / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(_paths.REPO / rel, dst)
+        man = json.loads((self.tmp / ic.MANIFEST).read_text())
+        gds = man.get("gds")
+        if gds:
+            f = self.tmp / gds
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_bytes(b"")
 
     def mutate(self, fn):
         p = self.tmp / ic.MANIFEST
@@ -30,8 +36,8 @@ class IntegratorCheckTests(unittest.TestCase):
     def test_no_tier_awarded(self):
         m = json.loads((_paths.REPO / ic.MANIFEST).read_text())
         self.assertIsNone(m["maturity"]["tier"])
-        self.assertIsNone(m["gds"])
-        self.assertIsNone(m["area_um2"])
+        self.assertEqual(m["gds"], "layout/opamp_core/opamp_core.gds")
+        self.assertEqual(m["area_um2"], 9352.465)
 
     def test_parses_xschem_comment_and_plain_subckt(self):
         self.assertEqual(ic.parse_subckt("**.subckt a x y\n"), ("a", ["x", "y"]))
@@ -116,7 +122,7 @@ class IntegratorCheckTests(unittest.TestCase):
 
     def test_gds_regular_file_in_allowed_location_passes(self):
         f = self.tmp / "layout" / "opamp_core" / "opamp_core.gds"
-        f.parent.mkdir(parents=True)
+        f.parent.mkdir(parents=True, exist_ok=True)
         f.write_bytes(b"")
         self.assertEqual(self._gds_errs("layout/opamp_core/opamp_core.gds"), [])
         self.assertEqual(self._gds_errs("./layout/opamp_core/../opamp_core/opamp_core.gds"), [])
@@ -131,8 +137,8 @@ class IntegratorCheckTests(unittest.TestCase):
         self.assertEqual(ic.check(self.tmp), [])
         m = json.loads((self.tmp / ic.MANIFEST).read_text())
         self.assertEqual(m["consumers"], [{"repo": "x"}])
-        self.assertIsNone(m["gds"])
-        self.assertIn("layout/opamp_stage1", m["gds_note"])
+        self.assertEqual(m["gds"], "layout/opamp_core/opamp_core.gds")
+        self.assertIn("not a foundry-DRC-clean claim", m["gds_note"])
 
 
 if __name__ == "__main__":

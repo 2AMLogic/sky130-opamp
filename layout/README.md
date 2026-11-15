@@ -20,8 +20,13 @@ control mismatches, `--check` reproduces it. The PDK's Magic `drc(full)` of
 the assembled core **fails**: it inherits the unfixed `opamp_comp` resistor-head
 finding (2 errors, `licon.1c`), and netgen's pin lists differ because Magic
 exports the internal labelled nets as ports (devices and nets match uniquely);
-see `opamp_core/README.md`. It is not foundry-DRC-clean. Nothing in
-`manifests/` cites this directory yet (follow-up).
+see `opamp_core/README.md`. It is not foundry-DRC-clean. The assembled core
+is cited: `manifests/sky130-opamp.json` holds five `layout/opamp_core/`
+evidence citations (`extract.json`, `drc.json` and `lvs.json` for T1 items
+2, 3 and 4; `erc.json` and `lvs.json` again in the item-11 block), and
+`manifests/integrator.json` points `gds` at
+`layout/opamp_core/opamp_core.gds`; `manifests/README.md` and
+`manifests/sky130-opamp.signoff.json` also reference the directory.
 
 ## The flow
 
