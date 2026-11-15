@@ -330,13 +330,10 @@ class BatchCapacityWaitTests(unittest.TestCase):
                 self.assertEqual(batch.get("capacity_wait_s"), sh.BATCH_CAPACITY_WAIT_S, path)
 
     def test_wait_value_has_a_single_owner(self):
-        """`BATCH_CAPACITY_WAIT_S = <literal>` definitions across the repo: the
-        shared owner in sim/lib/spice_harness.py, plus pvt_sweep.py's
-        grandfathered copy -- migrating that literal is PR #297's, which owns
-        pvt_sweep.py; drop it from this set once that lands."""
+        """`BATCH_CAPACITY_WAIT_S = <literal>` definitions across the repo:
+        exactly one, the shared owner in sim/lib/spice_harness.py."""
         owners = {path for path, _line in _git_grep(r"BATCH_CAPACITY_WAIT_S\s*=\s*[0-9]", "*.py")}
-        self.assertEqual(owners, {"sim/lib/spice_harness.py",
-                                  "sim/opamp-characterization/bin/pvt_sweep.py"})
+        self.assertEqual(owners, {"sim/lib/spice_harness.py"})
 
     def test_sink_bias_margin_local_backend_has_no_batch_block(self):
         """Edge (issue #293): `--backend local` must not grow a `batch` block it

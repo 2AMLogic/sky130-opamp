@@ -130,6 +130,7 @@ from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.
     VDD_BY_CORNER,
 )
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
+    BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
     HarnessError,
     Pdk,
@@ -752,10 +753,6 @@ def swing_measurements() -> list[dict]:
 KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 instances at once
 CAPACITY_RETRIES = 30
 CAPACITY_WAIT_S = 60
-# Per-submit wall-clock budget klt itself spends waiting out a Spot capacity or
-# fleet concurrency refusal (`batch.capacity_wait_s`); the host rule for this
-# worker requires it on every batch `klt sim` (2am#6872).
-BATCH_CAPACITY_WAIT_S = 600
 # Directory (repo-relative) a campaign writes its `klt sim` response envelopes to
 # instead of the git-ignored stage, set by --export-envelopes. An exported
 # envelope is committed evidence (it is what the block manifest cites), so it is
