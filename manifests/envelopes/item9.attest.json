@@ -3,14 +3,14 @@
   "kind": "generic",
   "status": "pass",
   "t1_item": 9,
-  "summary": "T1 item 9 (Testbenches shipped): 19/19 attestation checks passed (klt signoff --attest)",
+  "summary": "T1 item 9 (Testbenches shipped): 20/20 attestation checks passed (klt signoff --attest)",
   "source": "manifests/inventory/item9.json",
   "attestation": {
     "producer": "klt signoff --attest",
     "inventory_schema_version": 1,
     "hash_algorithm": "sha256-raw-bytes",
-    "check_count": 19,
-    "passed_count": 19,
+    "check_count": 20,
+    "passed_count": 20,
     "checks": [
       {
         "check": "present",
@@ -46,6 +46,13 @@
         "path": "sim/gm-id-characterization/testbench/pfet_gmid.spice.tmpl",
         "passed": true,
         "content_hash": "sha256:534b188dc974124841bf74ac95dc13907a546b67473e300df5c3471bd04df83c"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/lib/corners.py",
+        "passed": true,
+        "content_hash": "sha256:aa7f0d868e406fba529a837a590e3d3305aad026f00ad120fa3f6784a021b7b2"
       },
       {
         "check": "present",
@@ -171,7 +178,7 @@
         "path": "manifests/inventory/item9.json",
         "scope": "repo"
       },
-      "content_hash": "sha256:b21d1408fe3d97a7bdedeb53ba494cdabe5970cbb9263ab26e3f97b02abd92d1"
+      "content_hash": "sha256:48cc9b09976adec645225040dcf3874154ad38c182b391309157abe0409a66ae"
     }
   }
 }
