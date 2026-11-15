@@ -1,6 +1,6 @@
 # Work Plan
 
-This roadmap is generated from the repository's current Loom label state.
+Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
 ## Operator Attention: Merge-Risk-Hold Pileup
