@@ -42,7 +42,7 @@ What the two unmet items actually rest on:
   taken on the DR-007 widths, not the current DR-013 netlist.
 
 Caveat on the met layout items: the PDK's Magic `drc(full)` **fails** on the
-assembled core (2 errors, `licon.1c`, inherited from the `opamp_comp`
+assembled core (`drc_total` 2, `licon.1c`, inherited from the `opamp_comp`
 resistor heads), so the layout is not foundry-DRC-clean. Spec: 13 of 17 rows
 ratified (DR-003); DR-008 through DR-014 are `proposed`.
 
