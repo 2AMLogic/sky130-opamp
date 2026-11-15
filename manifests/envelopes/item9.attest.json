@@ -73,7 +73,7 @@
         "role": "testbench",
         "path": "sim/offset-capability/bin/offset_probe.py",
         "passed": true,
-        "content_hash": "sha256:a166e160e3f8c3466b849b71fa86418c29d9c353ff5382ecf4f33d87e38adf1a"
+        "content_hash": "sha256:54208ef97e0ec33a05d393b6461b2742b20b6060b8fa8289d6b22c6533544e5b"
       },
       {
         "check": "present",
@@ -87,7 +87,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/psrr_noise_sweep.py",
         "passed": true,
-        "content_hash": "sha256:e18b43e8d1ba796ddd46b75c5fd52888115a0e41b7fa911cd1713b7103172de1"
+        "content_hash": "sha256:e83dd54fc00cf521093372a5119000aea3732495f62b71f3ad4c523a2b3c5daf"
       },
       {
         "check": "present",
