@@ -4,6 +4,12 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-15
 
+- **PR #306**: refactor: single-source DUT-include rewrite and validate report loop in dut_identity
+- **Issue #295** (closed): Consolidate the duplicated DUT-include rewriting and the triplicated validate loop into sim/lib/dut_identity.py
+- **PR #310**: manifests: populate integrator gds and area from the assembled core layout
+- **Issue #283** (closed): Bring manifests/integrator.json and the status prose up to the assembled opamp_core layout
+- **PR #297**: refactor(sim): give the ratified PVT corner/temp/supply table one owner
+- **Issue #288** (closed): Single-source the PVT corner/temp/supply table into sim/lib: four copies, one with the DR citation
 - **PR #312**: docs: replace WORK_PLAN currency claim with snapshot wording
 - **Issue #303** (closed): WORK_PLAN.md asserts 'current' label state but carries no generation timestamp
 - **PR #308**: test: hold pin-sync negative control to 1:1 anchor/location correspondence
