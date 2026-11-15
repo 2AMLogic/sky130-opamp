@@ -60,6 +60,7 @@ REPO = EXP.parent.parent
 RECORDS = EXP / "records"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 import dut_identity  # noqa: E402
+from corners import DEFAULT_CORNERS  # noqa: E402  -- the ratified corner list; sim/lib/corners.py owns it
 from spice_harness import (BATCH_CAPACITY_WAIT_S, KltSimError,  # noqa: E402
                            allocate_record_id, klt_sim, klt_version, write_new)
 
@@ -68,7 +69,7 @@ BENCH_TEMPLATE = EXP / "bench" / "offset_dc.cir"
 RENDERED_BENCH = "offset_dc.spice"   # in the snapshot dir; ``*.spice`` so dut_identity checks its include
 PLAN_NAME = "campaign.plan.json"
 
-VDD = 1.8
+VDD = 1.8               # bench biasing at nominal only; not a corner->VDD pairing
 VREF = VDD / 2          # output reference for the offset crossing
 VCM = 0.9               # inn held here; inp = VCM + vd
 SWEEP_LO, SWEEP_HI, SWEEP_STEP = -0.03, 0.03, 20e-6   # vd bracket / resolution (V)
@@ -79,9 +80,6 @@ CONTROL_TOL_V = 2 * EXTRACTION_RES_V   # mismatch-off spread / replay mismatch
 
 class ProbeError(RuntimeError):
     pass
-
-
-CORNERS = ("tt", "ss", "ff", "sf", "fs")
 
 
 def render_bench(template_text: str) -> str:
@@ -354,9 +352,9 @@ def open_campaign_dut(a) -> tuple[Path, dict, dict]:
               "corners": [c.strip() for c in (a.corners or "tt,ss,ff").split(",") if c.strip()],
               "n_total": a.n_total if a.n_total is not None else 300,
               "chunk": a.chunk if a.chunk is not None else 100}
-    bad = [c for c in params["corners"] if c not in CORNERS]
+    bad = [c for c in params["corners"] if c not in DEFAULT_CORNERS]
     if bad:
-        raise SystemExit(f"unknown corner(s) {bad}; choose from {CORNERS}")
+        raise SystemExit(f"unknown corner(s) {bad}; choose from {DEFAULT_CORNERS}")
     RECORDS.mkdir(exist_ok=True)
     dut = capture_offset_dut(snap_dir, Path(a.netlist).resolve() if getattr(a, "netlist", None) else None)
     write_new(snap_dir / PLAN_NAME, json.dumps({"campaign": a.label, **params, "dut": dut}, indent=2) + "\n")

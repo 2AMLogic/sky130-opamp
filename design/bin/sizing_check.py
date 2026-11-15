@@ -72,6 +72,12 @@ W_N = 3.835     # MB1 (m = 1), M5 (m = 2), M7 (m = 10)  nfet_01v8, L = 1.2 um
 
 L_IN, L_P, L_N = 1.2, 0.6, 1.2
 
+# Corner extremes replayed from DR-002 Sec (f) (cf. spec/target-spec.md Sec 1):
+# one worst-case (corner, temp, VDD) triple per process. These are PINNED
+# historical-replay constants -- deliberately NOT derived from
+# sim/lib/corners.py's VDD_BY_CORNER (issue #296): if the ratified table were
+# ever amended, this replay must keep reproducing DR-002 at the supplies
+# DR-002 itself used, not silently follow the amendment.
 CORNERS = [("tt", 27.0, 1.80), ("ss", -40.0, 1.62), ("ff", 125.0, 1.98)]
 
 

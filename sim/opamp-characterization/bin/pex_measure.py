@@ -54,7 +54,7 @@ PVT_SWEEP = EXP_DIR / "bin" / "pvt_sweep.py"
 RECORDS_DIR = EXP_DIR / "records"
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
-from corners import VDD_BY_CORNER  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+from corners import DEFAULT_CORNERS, DEFAULT_TEMPS_C, VDD_BY_CORNER  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
 
 ANALYSES = "ac,tran_sr,dc_swing,icmr"
 
@@ -149,8 +149,10 @@ def run_campaign(dut: Path, corners: list[str], temps: list[float]) -> str:
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("netlist", type=Path)
-    p.add_argument("--corners", default="tt,ff,ss,sf,fs")
-    p.add_argument("--temps", default="-40,27,125")
+    p.add_argument("--corners", default=",".join(DEFAULT_CORNERS))
+    # :g, not str(): renders -40,27,125 byte-identical to the pre-#296 literal;
+    # str(t) would emit -40.0,27.0,125.0 and change the default request grid.
+    p.add_argument("--temps", default=",".join(f"{t:g}" for t in DEFAULT_TEMPS_C))
     p.add_argument("--flatten-only", action="store_true", help="print the adapted DUT netlist and exit")
     args = p.parse_args(argv)
 
