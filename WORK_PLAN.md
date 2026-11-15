@@ -13,7 +13,7 @@ _None._
 
 `loom:very-important` (one counts per workspace); every stage takes these first.
 
-_None._
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
 
 ## Important
 
@@ -22,6 +22,7 @@ _None._
 - **#196**: Measure paired offset drift before prototyping foreground trim
 - **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits)
 - **#277**: Reconcile the ratified quiescent-power row with its T1 item-5 grading: what tolerance does its "≈" carry?
+- **#281**: Clear the Magic resistor-head DRC failure in opamp_comp now that klayout-tools#3077 is closed
 
 ## Ready
 
@@ -39,7 +40,7 @@ _None._
 
 PRs waiting on Judge (`loom:review-requested`).
 
-_None._
+- **#280**: docs: roadmap as of 2026-11-13
 
 ## Approved (Awaiting Merge)
 
@@ -69,11 +70,11 @@ _None._
 | Bucket | Count |
 |------|-------|
 | Operator merge-risk holds | 0 |
-| Very important | 0 |
-| Important | 3 |
+| Very important | 1 |
+| Important | 4 |
 | Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 0 |
-| PRs awaiting review | 0 |
+| PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 0 |
 | Curated | 4 |
 | Architect / Hermit proposals | 1 |

@@ -160,7 +160,16 @@ Magic signoff was not run on the scratch composite.
 `compose-cell.py` refuses to run on a different klt commit or PDK unless
 given `--allow-unpinned`. The klt pin is newer than the sibling's
 `5edb557f`, the curator's candidate: it is the build this worker fleet
-provisions, and the evidence was produced and re-checked on it. To run
+provisions, and the evidence was produced and re-checked on it.
+
+This pin is an untagged source commit, and so is deliberately **not** the
+`klayout-tools==0.8.0` release `.github/workflows/signoff.yml` pins. Issue
+#281 regenerated `opamp_comp/` on `v0.8.0` and measured it: every klt-level
+gate passed, but the PDK's Magic `drc(full)` went from 2 errors to 7, so the
+bump was rejected and the divergence kept. CI never re-derives `layout/`
+evidence (it runs `klt signoff` grading, not `compose-cell.py`), so the two
+pins do not have to agree. Full measurement:
+`opamp_comp/README.md`, "klt 0.8.0 evaluated and rejected". To run
 exactly the pinned klt without touching any shared install, use a
 throwaway venv:
 
@@ -171,8 +180,13 @@ uv pip install --python /tmp/klt-4cbdfa7/bin/python \
 PATH=/tmp/klt-4cbdfa7/bin:$PATH python3 layout/bin/compose-cell.py layout/opamp_stage1/cell.json --check
 ```
 
-The PDK is resolved by `klt pdk find` (search root `~/.volare`, installed
-with `volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b`).
+The PDK is resolved by `klt pdk find`, from `~/.volare`, installed with
+`volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b`. Under
+the pinned klt that is the default search root. **On klt `0.8.0` and newer it
+is not**: `klt pdk find` resolves `~/.ciel` (a different open_pdks commit)
+and reports `~/.volare` only under `ambiguous_sources`, so those revisions
+need `PDK_ROOT=$HOME/.volare` exported or `compose-cell.py` refuses on the
+open_pdks pin (measured, issue #281).
 `magic-signoff.py` additionally needs `magic`, `netgen` and a `klayout`
 binary (used only to flatten the GDS) on `PATH`. It reads `sky130A.tech`
 and `sky130A_setup.tcl` from the same pinned PDK.
@@ -240,8 +254,12 @@ directory or an extension of one, with the same evidence set.
    routed, LVS-verified network is now [`opamp_comp/`](opamp_comp/README.md)
    (issue #167): klt DRC clean, klt LVS and netgen match, negative control
    fails as required, but the PDK's Magic `drc(full)` reports `licon.1c`
-   resistor-head violations (klayout-tools#3077), so it is not foundry-DRC
-   clean. Its placement is reusable; final integration may reposition it.
+   resistor-head violations, so it is not foundry-DRC clean. The generator
+   gap first reported as klayout-tools#3077 is fixed as of klt `v0.8.0`;
+   issue #281 measured that revision and did **not** adopt it, because it
+   clears one `licon.1c` rule and adds five `rpm.1` violations (2 errors ->
+   7). The remaining generator-side gap is filed as klayout-tools#5659. See
+   `opamp_comp/README.md`, "klt 0.8.0 evaluated and rejected". Its placement is reusable; final integration may reposition it.
    The probes' Magic "clean" result did not see the resistor
    (`opamp_comp/README.md`, "Magic DRC blocker").
 5. **Top-level assembly `opamp_core`: done (#220).** The sub-blocks are

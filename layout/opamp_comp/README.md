@@ -69,7 +69,11 @@ python3 layout/bin/magic-signoff.py layout/opamp_comp/cell.json                 
   poly outline. `res_array` draws the first two over the body only and no
   NPC; without them the PDK's Magic does not see a resistor at all (the Magic
   DRC would be "clean" while checking no resistor rule, and extraction would
-  omit the device). klt does not need them; see klayout-tools#3077.
+  omit the device). klt does not need them. The generator gap that made this
+  block necessary (klayout-tools#3077) is fixed as of klt `v0.8.0`, which
+  draws all three itself -- but that revision is evaluated and NOT adopted
+  here, for reasons measured under "Magic DRC blocker" below, so the block
+  stays.
 - `Rz` x origin is 2.005 um. Magic resolves a 9.765 um body only when its
   edges sit at a 5 nm offset from its 10 nm input scale; at x = 2.000 it
   extracts a generic `res_high_po w=0.705 l=10.47` with both terminals on
@@ -116,7 +120,110 @@ This is a generator limitation, not a wiring fault: the klt deck is clean,
 the topology matches in both klt and netgen, and the capacitor, routing and
 tap pass Magic DRC. Closing the blocker needs a resistor head geometry with
 a 2.0 um contact bar and 2.16 um extension (the klt generator, or a
-hand-drawn head, which this PR deliberately does not do because it would
-replace the generator output the DR-010 geometry decision rests on). It is
-reported as klayout-tools#3077. Until then this block must not be described
-as foundry-DRC-clean.
+hand-drawn head, which this directory deliberately does not do because it
+would replace the generator output the DR-010 geometry decision rests on).
+Until then this block must not be described as foundry-DRC-clean. The
+generator-side gap is tracked upstream as klayout-tools#5659; the revision
+that closed klayout-tools#3077 was evaluated and rejected, below.
+
+### klt 0.8.0 evaluated and rejected (issue #281, measured 2026-11-14)
+
+klayout-tools#3077 was closed COMPLETED on 2026-10-15 by upstream PR #3344.
+**The revision that contains the fix is klt `v0.8.0`**, git
+`c572046be644e0407f693f2410f3abb799d68a3a` (`klt version --format json`
+reports `is_release: true`, `klayout_version: 0.30.13`); upstream PR #3344's
+merge commit `d2513c2be158edfd1d38f056048e5662697373fa` is an ancestor of
+that tag and a descendant of `v0.7.0`. It is also the revision
+`.github/workflows/signoff.yml` already pins.
+
+**It was regenerated, measured end to end, and NOT adopted.** This directory
+stays on klt `0.7.0+g4cbdfa769875` with the `rz_masks` block in place. klt
+0.8.0 clears one of the two committed `licon.1c` rules and introduces five
+violations of a third, taking Magic `drc(full)` from **2 errors to 7**.
+
+What klt 0.8.0 genuinely fixes: the generator draws RPM 86/20, PSDM 94/20 and
+NPC 95/20 itself (one merged 11.045 x 2.600 um shape each over the whole
+unit), so `rz_masks` is no longer needed to make the device visible, and
+Magic recognises it in the *bare generator output* for the first time.
+Measured on a standalone `klt gen res_array` unit, no repo geometry present:
+
+| standalone unit | Magic types seen | `drc(full)` |
+|---|---|---|
+| klt `0.7.0+g4cbdfa769875` (committed `gen/rz.gds`) | `poly polycont locali` -- **no `ppolyres`** | 0 errors, **vacuously**: Magic sees no resistor |
+| klt `0.8.0` | `xpolycontact ppolyres locali` | **6 errors** (`licon.1c + li.5` x1, `rpm.1` x3, `poly.2` x2) |
+
+So the generator's own output is not Magic-DRC-clean once Magic can see the
+device. In the composed cell the net effect is:
+
+| `sky130A.tech` rule | klt 0.7.0 | klt 0.8.0 | |
+|---|---|---|---|
+| `area xpc/li 700000 350` -- "poly resistor contact length < 2.0um (licon.1c)" | 1 box | **0** | cleared |
+| `extend xpc/a xhrpoly,uhrpoly 2160` -- "poly contact extends poly resistor by < 2.16um (licon.1c + li.5)" | 2 boxes | 2 boxes | unchanged |
+| `cifwidth rpm_generate 1270` -- "Width of RPM/URPM < 1.27um (rpm.1)" | 0 | **5 boxes** | new |
+| **total** | **2** | **7** | |
+
+Mechanisms, read off `sky130A.tech` rather than inferred from the verdict:
+
+- **Cleared.** `area xpc/li 700000 350` requires the resistor contact's
+  local-metal pad to be at least 0.7 um2 with no dimension under 0.35 um. klt
+  0.7.0's pad is 0.420 x 1.410 = 0.5922 um2 and fails; klt 0.8.0's is
+  0.390 x 2.200 = 0.858 um2 and passes. The 0.190 x 2.000 um end contacts
+  klt 0.8.0's own `drc_hints` note advertises are what make room for it.
+- **Unchanged.** `extend xpc/a xhrpoly,uhrpoly 2160` measures the *contact*
+  (`xpc`), and wants 2.160 um. Magic's two error boxes are each 1.695 um wide
+  and span exactly the 1.410 um body width, i.e. 1.695 um of the required
+  extension is absent. klt 0.8.0's 2.200 um figure is the **pad height**, not
+  the `xpc` extension this rule measures, so the new head does not touch it.
+  Which edges Magic measures here is still not traced through `sky130A.tech`
+  in full; what is measured is that the count does not move.
+- **New.** `rpm.1` is a `cifwidth` check on `rpm_generate`, which
+  `sky130A.tech` *derives* (`bloat-all xhrpoly,uhrpoly xpc; grow 620;
+  shrink 420; mask-hints RPM; mask-hints URPM; and-not rpm_block`) -- it is
+  not the drawn RPM. The committed `rz_masks` RPM is drawn exactly coincident
+  with the poly outline (x 2.005 .. 12.610, y 22.0 .. 23.41 -- the outline
+  itself), so the drawn and derived regions agree and the rule stays silent.
+  klt 0.8.0's generator-drawn RPM instead overhangs the unit by 0.250 um on
+  every side (x -0.250 .. 10.795, y -0.595 .. 2.005 in unit coordinates),
+  which leaves steps narrower than the 1.270 um minimum. `klt gen --list`
+  exposes no `res_array` parameter controlling the marker margin, so the
+  recipe cannot suppress this, and a marker cannot be subtracted in GDS.
+
+Everything *except* Magic passed on klt 0.8.0, so the rejection is the PDK's
+Magic rules alone: klt `drc --deck sky130` `clean`/0 violations (on a deck
+that grew to a new `content_hash`
+`sha256:ba0f97887e3d231aec8b54f1f52f2941ded0228f0234b6759712bcaca0e942e6`),
+`klt lvs` `match` 2/2 devices and 4/4 nets, the `XRz:w=d2` negative control
+still `mismatch` (12), `compose-cell.py --check` byte-identical, netgen
+`Circuits match uniquely.` with `pins_matched: true`, and the POLYRES body
+still exactly 9.765 x 1.410 um so DR-010 is unaffected. The regenerated
+top-cell GDS SHA-256 would be
+`77e6f0358f1139b7b58f007373cb168e577c5e0a901cc3ff430bb8b0b9e018dd` and the
+bounding box is unchanged at -6.0 .. 39.5 x 0.0 .. 25.965 um. `rz` x stays
+2.005 (the POLYRES left edge moves 2.425 -> 2.395 um, preserving the 5 nm
+offset the extraction depends on) and `pin_cz` x stays 20.0 (the cz backbone
+centre line moves 16.200 -> 16.180 um, still on the 0.005 um grid; a
+full-vertex scan of the regenerated stream found no off-grid coordinate).
+
+**Why it is not adopted.** Adopting it would raise this directory's recorded
+foundry-DRC failure from 2 errors to 7 and hand the same regression to
+`layout/opamp_core/`, which imports `opamp_comp.gds` by path, for no design
+benefit -- the `rz_masks` deletion it enables is cosmetic, because those three
+rectangles lie strictly inside klt 0.8.0's generator-drawn markers and the
+painted union is identical either way. The remaining gap is filed upstream in
+generic terms as **klayout-tools#5659**, with a standalone reproducer that
+needs no geometry from this repo: the oversized RPM marker with no parameter
+to control it, and the still-unsatisfied `xpc` extension. Adopting the bump is
+one command set
+(`layout/pdk.json` -> klt 0.8.0 / `c572046be644...` / KLayout 0.30.13, delete
+the `rz_masks` block, then the "Regenerate and check" recipe with
+`PDK_ROOT=$HOME/.volare` exported) if a later reader weighs the trade
+differently.
+
+Note for anyone re-running this on klt 0.8.0 or newer: `klt pdk find` now
+resolves `~/.ciel` (open_pdks `f6eeac7d...`) by default and lists `~/.volare`
+only as an `ambiguous_sources` entry, so **`PDK_ROOT=$HOME/.volare` must be
+exported** or `compose-cell.py` refuses on the open_pdks pin. klt 0.8.0 then
+reports `provenance.pdk.compatibility.status: "mismatch"` in every generated
+JSON; that is cosmetic and must *not* be "fixed" by moving to the `~/.ciel`
+PDK, because `layout/pdk.json`'s `open_pdks_commit` has to equal
+`sim/gm-id-characterization/pdk.json`'s.
