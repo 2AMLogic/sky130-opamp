@@ -68,6 +68,7 @@ from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.
     VDD_BY_CORNER,
 )
 from spice_harness import (  # noqa: E402
+    BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
     KltSimError,
     allocate_record_id,
@@ -198,7 +199,8 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
         "options": options,
     }
     if runner_version_check:
-        req["batch"] = {"runner_version_check": runner_version_check}
+        req["batch"] = {"runner_version_check": runner_version_check,
+                        "capacity_wait_s": BATCH_CAPACITY_WAIT_S}
     return req
 
 

@@ -35,7 +35,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(REPO / "sim" / "lib"))
 import sink_sizing as ss  # noqa: E402
+from spice_harness import BATCH_CAPACITY_WAIT_S  # noqa: E402
 
 CANON = REPO / "design" / "netlist" / "opamp_core.spice"
 OUT_DIR = HERE / "bias-margin"
@@ -223,7 +225,8 @@ def build_static_request(pvt, req_dir: Path, tag: str, backend: str, mc: dict | 
         "options": {"timeout_s": 600, "keep_artifacts": True},
     }
     if backend == "batch":
-        req["batch"] = {"runner_version_check": "warn"}
+        req["batch"] = {"runner_version_check": "warn",
+                        "capacity_wait_s": BATCH_CAPACITY_WAIT_S}
     if mc:
         req["monte_carlo"] = {"n": mc["n"], "seed": mc["seed"], "vary": "mismatch"}
     p = req_dir / f"{tag}-request.json"

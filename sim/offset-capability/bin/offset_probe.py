@@ -61,8 +61,8 @@ RECORDS = EXP / "records"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 import dut_identity  # noqa: E402
 from corners import DEFAULT_CORNERS  # noqa: E402  -- the ratified corner list; sim/lib/corners.py owns it
-from spice_harness import (KltSimError, allocate_record_id, klt_sim,  # noqa: E402
-                           klt_version, write_new)
+from spice_harness import (BATCH_CAPACITY_WAIT_S, KltSimError,  # noqa: E402
+                           allocate_record_id, klt_sim, klt_version, write_new)
 
 DESIGN_NETLIST = REPO / "design" / "netlist" / "opamp_core.spice"
 BENCH_TEMPLATE = EXP / "bench" / "offset_dc.cir"
@@ -153,7 +153,8 @@ def build_request(bench: str, mismatch: bool, mc: dict | None,
         "analysis": analysis,
         "measurements": meas,
         "options": {"timeout_s": 600, "keep_artifacts": keep_artifacts},
-        "batch": {"runner_version_check": "warn"},
+        "batch": {"runner_version_check": "warn",
+                  "capacity_wait_s": BATCH_CAPACITY_WAIT_S},
     }
     if mc:
         req["monte_carlo"] = {"n": mc["n"], "seed": mc["seed"], "vary": "mismatch"}
