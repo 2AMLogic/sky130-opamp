@@ -169,7 +169,8 @@ def measurements(bench: str) -> list[dict]:
 
 
 def build_request(bench: str, corners: list[str], temps: list[float], netlist_rel: str,
-                  keep_artifacts: bool, runner_version_check: str | None = None) -> dict:
+                  keep_artifacts: bool, runner_version_check: str | None = None,
+                  backend: str = "local") -> dict:
     spec = BENCHES[bench]
     supplies = sorted({VDD_BY_CORNER[c] for c in corners})
     exclude = []
@@ -198,9 +199,10 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
         "measurements": measurements(bench),
         "options": options,
     }
-    if runner_version_check:
-        req["batch"] = {"runner_version_check": runner_version_check,
-                        "capacity_wait_s": BATCH_CAPACITY_WAIT_S}
+    if backend == "batch":
+        req["batch"] = {"capacity_wait_s": BATCH_CAPACITY_WAIT_S}
+        if runner_version_check:
+            req["batch"]["runner_version_check"] = runner_version_check
     return req
 
 
@@ -387,9 +389,15 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         results: dict[str, dict] = {}
         failures: list[str] = []
         prepared: dict[str, tuple[dict, Path, Path]] = {}
+        # Resolved before request construction so every emitted request -- dry-run
+        # snapshots included -- is gated on the backend it will actually run on
+        # (issue #315): a batch backend must carry the capacity wait, a local one
+        # must carry no `batch` block at all.
+        backend_label = args.backend or os.environ.get("KLT_SIM_BACKEND") or "local"
         for bench in benches:
             req = build_request(bench, corners, temps, str(bodies[bench]), keep_artifacts=True,
-                                runner_version_check=args.runner_version_check)
+                                runner_version_check=args.runner_version_check,
+                                backend=backend_label)
             req_path = tmpdir / f"{bench}.request.json"
             req_path.write_text(json.dumps(req, indent=2) + "\n")
             # Replayable request beside its body and the DUT copy.
@@ -409,7 +417,6 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         # each is a thin client waiting on its own backend job (the batch fleet
         # does the ngspice work); no ngspice runs on this host unless the
         # backend is `local`, in which case they are run one at a time.
-        backend_label = args.backend or os.environ.get("KLT_SIM_BACKEND") or "local"
 
         def submit(bench):
             req, req_path, outdir = prepared[bench]
