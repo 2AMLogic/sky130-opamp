@@ -15,9 +15,8 @@ topology and the 1 : 2 ratio are unchanged (unit count only, DR-002/DR-007).
 ## Scope and limits
 
 This is a partial cell, not the op-amp layout. It is not joined to
-`opamp_stage1/`, `opamp_comp/` or the (not yet drawn) output stage, so T1
-item 2 stays `unmet`, no manifest cites it, and the integrator GDS stays
-null. It does not close #27's full-layout ERC requirement. It does not adopt
+`opamp_stage1/`, `opamp_comp/` or `opamp_out/`, and no manifest cites it. It
+does not close #27's full-layout ERC requirement. It does not adopt
 any output-stage/sink topology (#47, #197 experiment); it is the canonical
 group as netlisted, and a later approved topology change needs its own
 layout. Parasitics are not extracted, so nothing here says the matching
