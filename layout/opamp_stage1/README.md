@@ -18,9 +18,9 @@ device cards, in both `klt lvs` and netgen, with all seven boundary pins
 
 This is the first-stage sub-block only. It is not the op-amp's layout: the
 bias/tail mirror, the output stage, the compensation network (`opamp_comp/`
-is a separate, unjoined cell) and the cross-block routing are not here. T1
-item 2 stays `unmet` and no manifest cites this directory. Parasitics are
-not extracted, so nothing here says the matching survives routing (see
+is a separate, unjoined cell) and the cross-block routing are not here. No
+manifest cites this directory. Parasitics are not extracted, so nothing here
+says the matching survives routing (see
 [Routing and pins](#routing-and-pins)).
 
 The PMOS width is the grid-legal `W=4.635 um` of

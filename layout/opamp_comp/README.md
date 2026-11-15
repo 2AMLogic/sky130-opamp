@@ -11,9 +11,8 @@ XCc cz out    sky130_fd_pr__cap_mim_m3_1     W=15.62 L=15.62 MF=1 m=1
 ```
 
 **It is a sub-block, not the op-amp's layout.** Full-core GDS stays
-unqualified, T1 item 2 stays `unmet`, and nothing in `manifests/` cites this
-directory. No schematic, spec or target changed, so no new PVT campaign was
-run.
+unqualified, and nothing in `manifests/` cites this directory. No schematic,
+spec or target changed, so no new PVT campaign was run.
 
 **Status: klt DRC, extraction, LVS and netgen pass; the PDK's Magic
 `drc(full)` does NOT pass.** The Magic DRC failure is a resistor-head
