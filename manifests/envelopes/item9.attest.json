@@ -73,7 +73,7 @@
         "role": "testbench",
         "path": "sim/offset-capability/bin/offset_probe.py",
         "passed": true,
-        "content_hash": "sha256:54208ef97e0ec33a05d393b6461b2742b20b6060b8fa8289d6b22c6533544e5b"
+        "content_hash": "sha256:386860582046bcfa1deb1bb00dd28be4fefae905e797d3d61763c713d98bcc1a"
       },
       {
         "check": "present",
