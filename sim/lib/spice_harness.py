@@ -314,8 +314,8 @@ def report_pdk(
 # rule requires the wait on every batch `klt sim` (2am#6872). The value is fixed
 # by the host rule, not tunable; every request builder that emits a `batch` block
 # must carry it (tests/test_spice_harness.py enumerates the builders, issue
-# #293). pvt_sweep still defines its own copy (PR #297 owns that file); the
-# other builders import this one.
+# #293); every builder imports this one (PR #322 retired pvt_sweep's local
+# copy).
 BATCH_CAPACITY_WAIT_S = 600
 
 
