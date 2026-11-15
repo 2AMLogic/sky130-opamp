@@ -2,6 +2,21 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-11-15
+
+- **PR #308**: test: hold pin-sync negative control to 1:1 anchor/location correspondence
+- **PR #300**: refactor(sim): give the PVT point-identity convention one owner that both validators share
+- **Issue #299** (closed): Pin-sync negative control: make the 1:1 anchor invariant a distinctness check, not a count check
+- **Issue #291** (closed): Single-source the (corner, temp_c, vdd_v) point-identity convention: three copies, and the two validating copies already disagree
+
+### 2026-11-14
+
+- **PR #292**: docs(opamp_comp): record klt 0.8.0 as measured-and-rejected for the resistor-head DRC blocker
+- **PR #290**: test: extract the shared pin-sync harness and deepen the PDK negative control
+- **PR #280**: docs: roadmap as of 2026-11-13
+- **Issue #286** (closed): Consolidate the duplicated pin-sync test harness: test_pdk_pin_sync and test_klt_pin_sync have drifted
+- **Issue #281** (closed): Clear the Magic resistor-head DRC failure in opamp_comp now that klayout-tools#3077 is closed
+
 ### 2026-11-13
 
 - **PR #275**: feat(item5): grade the ratified spec rows inside the klt sim envelopes and cite them

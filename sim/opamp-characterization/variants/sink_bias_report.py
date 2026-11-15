@@ -4,7 +4,10 @@
 Reads only committed records. `bias-margin/records.json` lists, per variant tag, the
 fleet record ids that carry its measurements (any number of pvt_sweep records, one static
 record, optional mc records) plus the canonical reference ids. Points are keyed by the full
-(corner, temp_c, vdd_v) tuple. Failed/missing units are listed, never dropped.
+(corner, temp_c, vdd_v) tuple, using the shared identity in sim/lib/point_identity.py — the same
+owner the spec CI gate and variants/compare.py use, so a row this report accepts is a row they
+accept (issue #291). A row with a blank corner or a nonfinite temp/supply is refused with its row
+number rather than keyed silently. Failed/missing units are listed, never dropped.
 
 Evidence validation (every record, before any of its rows is used):
 
@@ -50,6 +53,7 @@ SNAP = REPO / "sim" / "opamp-characterization" / "netlist-snapshots"
 MANIFEST = HERE / "bias-margin" / "records.json"
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 import dut_identity  # noqa: E402
+from point_identity import IDENTITY_EXC, point_key  # noqa: E402
 
 SCREEN_POINTS = {  # label -> (corner, temp, vdd), analyses beyond ac
     "TT/27": ("tt", 27.0, 1.8), "SS/-40": ("ss", -40.0, 1.62),
@@ -68,7 +72,12 @@ LEVELS_RE = re.compile(r"LITERAL levels ([-+0-9.eE]+) and ([-+0-9.eE]+)")
 
 
 def key(r):
-    return (r["corner"], round(float(r["temp_c"]), 6), round(float(r["vdd_v"]), 6))
+    """(corner, temp_c, vdd_v) identity, from the one owner in sim/lib (issue #291).
+
+    Raises one of IDENTITY_EXC for a row that cannot be keyed (blank corner,
+    nonfinite or missing temp/supply); callers surface that, never silence it.
+    """
+    return point_key(r)
 
 
 def read(rid, suffix=None):
@@ -105,10 +114,18 @@ def check_dut(rid, meta, expect_sha, kind=None, tag=None):
 
 
 def unique_rows(rows, kfn, where):
-    """Key rows; a key that repeats inside one record is an error, never last-row-wins."""
+    """Key rows; a key that repeats inside one record is an error, never last-row-wins.
+
+    A row whose measurement key is unusable (blank corner, nonfinite or missing
+    temp_c/vdd_v) is refused with its row number, so a malformed row can no
+    longer reach a generated bias-margin table unremarked (issue #291).
+    """
     out = {}
-    for r in rows:
-        k = kfn(r)
+    for i, r in enumerate(rows, 1):
+        try:
+            k = kfn(r)
+        except IDENTITY_EXC as e:
+            raise SystemExit(f"{where}: row {i} has no usable measurement key: {e!r}")
         if k in out:
             raise SystemExit(f"{where}: duplicate measurement key {k} within one record")
         out[k] = r
@@ -191,7 +208,12 @@ def snapshot_files(meta):
 def check_stimulus(rid, meta):
     """The masked ICMR-aware step levels must be exactly the ones the record reports for that point."""
     probs = []
-    rows = {key(r): r for r in read(rid, "tran-sr-icmr")}
+    rows = {}
+    for i, r in enumerate(read(rid, "tran-sr-icmr"), 1):
+        try:
+            rows[key(r)] = r
+        except IDENTITY_EXC as e:
+            probs.append(f"{rid}: tran-sr-icmr row {i} has no usable measurement key: {e!r}")
     snap = REPO / Path(meta["dut"]["snapshot_path"]).parent
     for p in sorted(snap.glob("tran-sr-icmr-*-body.spice")):
         mt = ICMR_BODY_RE.match(p.name)
@@ -200,7 +222,7 @@ def check_stimulus(rid, meta):
         if len(levels) != 1 or len(pulse) != 1:
             probs.append(f"{rid}: {p.name} step levels not stated once and consistently ({sorted(levels)})")
             continue
-        r = rows.get((mt[1], round(float(mt[2]), 6), round(float(mt[3]), 6)))
+        r = rows.get(point_key({"corner": mt[1], "temp_c": mt[2], "vdd_v": mt[3]}))
         if r is None:
             continue   # failed unit: no measurement uses this body; the record's errors carry it
         lo, hi = (float(v) for v in pulse[0])

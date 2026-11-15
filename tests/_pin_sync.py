@@ -53,13 +53,11 @@ class PinSyncMixin:
             self.assertRegex(pin, "^" + self.PIN_RE + "$", name)
 
     def test_negative_control_each_copy_detected(self):
-        """Changing any single live copy in a temp tree must break equality."""
-        pin = next(iter(collect(self.PIN_LOCATIONS, REPO).values()))
-        # the drift this harness exists to prevent: a PIN_LOCATIONS entry whose
-        # copy is never perturbed, leaving the control silently shallower
-        self.assertEqual(
-            sum(len(self.anchors(rel, pin)) for rel in self.FILES),
-            len(self.PIN_LOCATIONS), "one anchor per PIN_LOCATIONS entry")
+        """Changing any single live copy in a temp tree must break equality,
+        and the anchors must cover every PIN_LOCATIONS entry one-to-one."""
+        base = collect(self.PIN_LOCATIONS, REPO)
+        pin = next(iter(base.values()))
+        perturbed = set()
         for rel in self.FILES:
             for anchor in self.anchors(rel, pin):
                 with self.subTest(rel=rel, anchor=anchor):
@@ -68,6 +66,16 @@ class PinSyncMixin:
                     text = p.read_text()
                     self.assertIn(anchor, text)
                     p.write_text(
-                        text.replace(anchor, anchor.replace(pin, self.BAD_PIN), 1))
-                    self.assertGreater(
-                        len(set(collect(self.PIN_LOCATIONS, tmp).values())), 1)
+                        text.replace(anchor, anchor.replace(pin, self.BAD_PIN),
+                                     1))
+                    after = collect(self.PIN_LOCATIONS, tmp)
+                    changed = {name for name, value in after.items()
+                               if value != base[name]}
+                    self.assertEqual(
+                        1, len(changed),
+                        f"anchor {anchor!r} in {rel} perturbs {sorted(changed)}"
+                        ": expected exactly one location")
+                    perturbed |= changed
+        uncovered = sorted(set(self.PIN_LOCATIONS) - perturbed)
+        self.assertFalse(
+            uncovered, f"PIN_LOCATIONS entries no anchor perturbs: {uncovered}")
