@@ -4,6 +4,12 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-15
 
+- **PR #325**: fix(sim): gate psrr_noise_sweep's batch block on the backend, not --runner-version-check
+- **Issue #315** (closed): psrr_noise_sweep emits its batch block only with --runner-version-check, so the default fleet submit carries no capacity_wait_s
+- **PR #323**: docs: drop stale T1-item-2-unmet and GDS-null clauses from sub-block READMEs
+- **Issue #319** (closed): Three sibling sub-block READMEs still say T1 item 2 is `unmet` and the integrator GDS is null
+- **PR #322**: refactor: import BATCH_CAPACITY_WAIT_S from spice_harness in pvt_sweep
+- **Issue #321** (closed): Remove pvt_sweep's duplicate BATCH_CAPACITY_WAIT_S: #297 landed, grandfathering is over
 - **PR #305**: fix(sim): plumb batch.capacity_wait_s (600) into the remaining klt sim request builders
 - **Issue #293** (closed): Plumb batch.capacity_wait_s into the remaining klt sim campaign runners
 - **PR #318**: docs: drop integrator-null and item-2-unmet prose overtaken by PR #310
