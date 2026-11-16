@@ -10,6 +10,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#327**: chore(loom): resync installed Loom to v0.19.1302
 
 ## Very Important
 
@@ -29,7 +30,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-_None._
+- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module
 
 ## In Progress
 
@@ -37,7 +38,6 @@ Issues currently being built (`loom:building`).
 
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
-- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module
 
 ## PRs Awaiting Review
 
@@ -52,6 +52,7 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#327**: chore(loom): resync installed Loom to v0.19.1302
 
 ## Proposed
 
@@ -79,13 +80,13 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 3 |
+| Operator merge-risk holds | 4 |
 | Very important | 1 |
 | Important | 3 |
-| Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 3 |
+| Ready (`loom:issue`) | 1 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 3 |
+| Approved PRs awaiting merge | 4 |
 | Curated | 7 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
