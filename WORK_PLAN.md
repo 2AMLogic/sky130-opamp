@@ -10,7 +10,6 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
-- **#327**: chore(loom): resync installed Loom to v0.19.1302
 
 ## Very Important
 
@@ -52,7 +51,7 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
-- **#327**: chore(loom): resync installed Loom to v0.19.1302
+- **#329**: chore(loom): resync installed Loom to v0.19.1305
 
 ## Proposed
 
@@ -80,7 +79,7 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 4 |
+| Operator merge-risk holds | 3 |
 | Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`) | 1 |
