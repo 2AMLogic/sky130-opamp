@@ -10,6 +10,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#329**: chore(loom): resync installed Loom to v0.19.1305
 
 ## Very Important
 
@@ -79,7 +80,7 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 3 |
+| Operator merge-risk holds | 4 |
 | Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`) | 1 |
