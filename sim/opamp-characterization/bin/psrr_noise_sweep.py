@@ -49,7 +49,6 @@ import csv
 import json
 import math
 import os
-import re
 import platform
 import shutil
 import sys
@@ -63,7 +62,13 @@ REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 import artifact_store  # noqa: E402
 import dut_identity  # noqa: E402
+from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+    DEFAULT_CORNERS,
+    DEFAULT_TEMPS_C,
+    VDD_BY_CORNER,
+)
 from spice_harness import (  # noqa: E402
+    BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
     KltSimError,
     allocate_record_id,
@@ -78,11 +83,13 @@ RECORDS_DIR = EXP_DIR / "records"
 ARTIFACT_BENCH = "opamp-psrr-noise"
 SNAPSHOT_DIR = EXP_DIR / "netlist-snapshots"
 DESIGN_NETLIST = REPO_ROOT / dut_identity.CURRENT_NETLIST_REL
-_DUT_INCLUDE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
 
-DEFAULT_CORNERS = ("tt", "ff", "ss", "sf", "fs")
-DEFAULT_TEMPS_C = (-40.0, 27.0, 125.0)
-VDD_BY_CORNER = {"tt": 1.80, "ff": 1.98, "ss": 1.62, "sf": 1.80, "fs": 1.80}
+# DEFAULT_CORNERS, DEFAULT_TEMPS_C and VDD_BY_CORNER come from
+# sim/lib/corners.py (imported above), which owns the ratified table and its
+# DR-002 Sec (f) / spec/target-spec.md Sec 1 citation -- including why sf/fs
+# take nominal VDD. Re-exported here so importers keep reading them off this
+# module. Never re-type the numbers; this bench must sweep the same table
+# pvt_sweep.py does or two records labelled `ss` mean different supplies.
 
 # Frequency grid: `dec PPD F0 F1`. Index k <-> f = F0 * 10**(k/PPD).
 PPD = 20
@@ -120,13 +127,6 @@ BENCHES = {
     "noise": {"netlist": "noise.cir", "kind": "noise", "tag": "noise"},
 }
 
-# Per-submit wall-clock budget klt itself spends waiting out a Spot capacity or
-# fleet concurrency refusal (`batch.capacity_wait_s`); the host rule for this
-# worker requires it on every batch `klt sim` (2am#6872). Same name and value as
-# pvt_sweep.py so the two campaigns read alike. This script records nothing on a
-# failed submit, so without the wait a burst of bench submits onto the
-# vCPU-budgeted fleet loses the whole run to `batch_no_capacity`.
-BATCH_CAPACITY_WAIT_S = 600
 
 
 def measurements(bench: str) -> list[dict]:
@@ -170,7 +170,8 @@ def measurements(bench: str) -> list[dict]:
 
 
 def build_request(bench: str, corners: list[str], temps: list[float], netlist_rel: str,
-                  keep_artifacts: bool, runner_version_check: str | None = None) -> dict:
+                  keep_artifacts: bool, runner_version_check: str | None = None,
+                  backend: str = "local") -> dict:
     spec = BENCHES[bench]
     supplies = sorted({VDD_BY_CORNER[c] for c in corners})
     exclude = []
@@ -199,23 +200,11 @@ def build_request(bench: str, corners: list[str], temps: list[float], netlist_re
         "measurements": measurements(bench),
         "options": options,
     }
-    # Always carry `batch`: `capacity_wait_s` is unconditional (the host rule),
-    # while `runner_version_check` stays opt-in via --runner-version-check.
-    # A `local` run ignores the block, so emitting it always keeps the request
-    # files replayable on either backend.
-    req["batch"] = {"capacity_wait_s": BATCH_CAPACITY_WAIT_S}
-    if runner_version_check:
-        req["batch"]["runner_version_check"] = runner_version_check
+    if backend == "batch":
+        req["batch"] = {"capacity_wait_s": BATCH_CAPACITY_WAIT_S}
+        if runner_version_check:
+            req["batch"]["runner_version_check"] = runner_version_check
     return req
-
-
-def render_bench(template_text: str) -> str:
-    """The bench body with its DUT include pointed at the sibling snapshot copy
-    (bare name; `klt sim` resolves it against the request's directory)."""
-    out, n = _DUT_INCLUDE.subn(rf'\1"{dut_identity.SNAPSHOT_NAME}"', template_text)
-    if n != 1:
-        raise ValueError(f"bench body must include the DUT exactly once (found {n})")
-    return out
 
 
 def capture_benches(snap_dir: Path, benches: list[str], src: Path | None = None,
@@ -231,7 +220,8 @@ def capture_benches(snap_dir: Path, benches: list[str], src: Path | None = None,
     bodies = {}
     for bench in benches:
         body = snap_dir / f"{BENCHES[bench]['tag']}.spice"
-        write_new(body, render_bench((TESTBENCH_DIR / BENCHES[bench]["netlist"]).read_text()))
+        write_new(body, dut_identity.render_dut_include(
+            (TESTBENCH_DIR / BENCHES[bench]["netlist"]).read_text()))
         bodies[bench] = body
     return dut, bodies
 
@@ -400,9 +390,15 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         results: dict[str, dict] = {}
         failures: list[str] = []
         prepared: dict[str, tuple[dict, Path, Path]] = {}
+        # Resolved before request construction so every emitted request -- dry-run
+        # snapshots included -- is gated on the backend it will actually run on
+        # (issue #315): a batch backend must carry the capacity wait, a local one
+        # must carry no `batch` block at all.
+        backend_label = args.backend or os.environ.get("KLT_SIM_BACKEND") or "local"
         for bench in benches:
             req = build_request(bench, corners, temps, str(bodies[bench]), keep_artifacts=True,
-                                runner_version_check=args.runner_version_check)
+                                runner_version_check=args.runner_version_check,
+                                backend=backend_label)
             req_path = tmpdir / f"{bench}.request.json"
             req_path.write_text(json.dumps(req, indent=2) + "\n")
             # Replayable request beside its body and the DUT copy.
@@ -422,7 +418,6 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         # each is a thin client waiting on its own backend job (the batch fleet
         # does the ngspice work); no ngspice runs on this host unless the
         # backend is `local`, in which case they are run one at a time.
-        backend_label = args.backend or os.environ.get("KLT_SIM_BACKEND") or "local"
 
         def submit(bench):
             req, req_path, outdir = prepared[bench]

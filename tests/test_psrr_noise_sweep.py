@@ -169,17 +169,18 @@ class BuildRequestTests(unittest.TestCase):
         self.assertIn("vn_int_band", [x["name"] for x in r["measurements"]])
 
     def test_options_and_version_check(self):
-        # `batch.capacity_wait_s` is unconditional (issue #282: the host rule
-        # requires it on every batch `klt sim`, and this script records nothing
-        # on a failed submit, so a capacity refusal would lose the whole run);
-        # `runner_version_check` stays opt-in.
+        # `capacity_wait_s` rides the batch block only (issue #315: a batch
+        # backend must carry it, a local one must carry no `batch` block at
+        # all); `runner_version_check` stays opt-in.
         r = self.req("noise")
         self.assertTrue(r["options"]["keep_artifacts"])
+        # Default backend is "local": the case that must still have no block.
+        self.assertNotIn("batch", r)
+        r = self.req("noise", backend="batch")
         self.assertEqual(r["batch"], {"capacity_wait_s": m.BATCH_CAPACITY_WAIT_S})
-        self.assertNotIn("runner_version_check", r["batch"])
-        r = self.req("noise", runner_version_check="enforce")
-        self.assertEqual(r["batch"], {"capacity_wait_s": m.BATCH_CAPACITY_WAIT_S,
-                                      "runner_version_check": "enforce"})
+        r = self.req("noise", backend="batch", runner_version_check="enforce")
+        self.assertEqual(r["batch"], {"runner_version_check": "enforce",
+                                      "capacity_wait_s": m.BATCH_CAPACITY_WAIT_S})
 
     def test_capacity_wait_matches_pvt_sweep(self):
         """The two campaigns must not drift apart on the host-rule budget."""
@@ -189,7 +190,7 @@ class BuildRequestTests(unittest.TestCase):
 
     def test_every_selected_bench_carries_the_capacity_wait(self):
         for bench in m.BENCHES:
-            self.assertEqual(self.req(bench)["batch"]["capacity_wait_s"],
+            self.assertEqual(self.req(bench, backend="batch")["batch"]["capacity_wait_s"],
                              m.BATCH_CAPACITY_WAIT_S, bench)
 
     def test_unknown_bench_and_corner_raise(self):

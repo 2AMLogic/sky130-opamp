@@ -5,11 +5,14 @@ Simulator-free; reads only committed CSVs under ../records/. Every number in
 README.md's comparison table is printed by this script (no hand transcription).
 
 A measurement point is identified by the full tuple (corner, temp_c, vdd_v);
-supply is read from the CSV, never inferred from the corner name. Rows with a
-missing or nonfinite identity field, a duplicate full tuple, or a nonfinite
-compared metric are rejected (nonzero exit). Per-point deltas are taken only
-where candidate and first baseline share the exact full tuple; other points
-are reported as unmatched.
+supply is read from the CSV, never inferred from the corner name. That identity
+and its row validation live in sim/lib/point_identity.py, shared with the spec
+CI gate (design/bin/spec_figures_check.py) so the two cannot disagree about
+whether a committed row is well formed. Rows with a blank, missing or nonfinite
+identity field, a duplicate full tuple, or a nonfinite compared metric are
+rejected (nonzero exit). Per-point deltas are taken only where candidate and
+first baseline share the exact full tuple; other points are reported as
+unmatched.
 
 Usage:
     python3 sim/opamp-characterization/variants/compare.py CANDIDATE_ID BASELINE_ID [BASELINE_ID ...]
@@ -17,13 +20,15 @@ Usage:
 from __future__ import annotations
 
 import csv
-import math
 import os
 import sys
 
-RECORDS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "records")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+RECORDS = os.path.join(os.path.dirname(_HERE), "records")
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(_HERE)), "lib"))
+from point_identity import SUPPLY_KEY, norm_num, validate_rows  # noqa: E402
+
 SUFFIXES = ("ac", "tran-sr", "dc-swing")
-SUPPLY_KEY = "vdd_v"
 
 # (label, csv suffix, column, scale, worst = min|max, unit)
 METRICS = [
@@ -46,14 +51,6 @@ class CompareError(ValueError):
     """Input records cannot be compared (malformed, duplicate or nonfinite)."""
 
 
-def _num(x):
-    """Finite float rounded like design/bin/spec_figures_check.py's identity."""
-    v = float(x)
-    if not math.isfinite(v):
-        raise ValueError(f"nonfinite value {x!r}")
-    return round(v, 6)
-
-
 def _fmt(k):
     return f"{k[0].upper()}/{k[1]:g}C/{k[2]:g}V"
 
@@ -69,35 +66,16 @@ def columns_for(suffix):
 def index_rows(rows, columns, source="<rows>"):
     """Key rows by (corner, temp_c, vdd_v); collect every validation error.
 
-    Follows the full-tuple convention of design/bin/spec_figures_check.py
-    check_matrix: unusable identity, nonfinite/missing value and duplicate
-    point are all errors. Raises CompareError listing them.
+    The identity and the validation are sim/lib/point_identity's, shared with
+    design/bin/spec_figures_check.py's check_matrix: unusable identity,
+    nonfinite/missing value and duplicate point are all errors. Raises
+    CompareError listing them.
     """
-    errs, seen, out = [], {}, {}
-    for i, r in enumerate(rows, 1):
-        try:
-            corner = (r.get("corner") or "").strip()
-            if not corner:
-                raise ValueError("empty corner")
-            k = (corner, _num(r["temp_c"]), _num(r[SUPPLY_KEY]))
-        except (KeyError, TypeError, ValueError) as e:
-            errs.append(f"{source}: row {i} has no usable corner/temp_c/{SUPPLY_KEY}: {e!r}")
-            continue
-        seen.setdefault(k, []).append(i)
-        for c in columns:
-            try:
-                ok = math.isfinite(float(r[c]))
-            except (KeyError, TypeError, ValueError):
-                ok = False
-            if not ok:
-                errs.append(f"{source}: point {_fmt(k)} has nonfinite or missing {c}: {r.get(c)!r}")
-        out[k] = r
-    for k, idx in sorted(seen.items()):
-        if len(idx) > 1:
-            errs.append(f"{source}: duplicate point {_fmt(k)} in rows {idx}")
+    v = validate_rows(rows, columns, source, SUPPLY_KEY, _fmt)
+    errs = v.errors + v.duplicate_errors
     if errs:
         raise CompareError("\n".join(errs))
-    return out
+    return v.index
 
 
 def load(rid, suffix, records=None):
@@ -176,7 +154,7 @@ def report(ids, data):
     p("Named points:")
     for label, corner, temp in NAMED:
         suf, col, scale, unit = next((m[1], m[2], m[3], m[5]) for m in METRICS if m[0] == label)
-        t = _num(temp)
+        t = norm_num(temp)
         supplies = sorted({k[2] for rid in ids for k in data[rid][suf] if k[0] == corner and k[1] == t})
         if not supplies:
             p(f"  {label} @ {corner.upper()}/{temp:g}C: not measured in any record")

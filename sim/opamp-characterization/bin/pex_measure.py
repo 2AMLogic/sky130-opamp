@@ -53,6 +53,9 @@ REPO_ROOT = EXP_DIR.parent.parent
 PVT_SWEEP = EXP_DIR / "bin" / "pvt_sweep.py"
 RECORDS_DIR = EXP_DIR / "records"
 
+sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+from corners import DEFAULT_CORNERS, DEFAULT_TEMPS_C, VDD_BY_CORNER  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+
 ANALYSES = "ac,tran_sr,dc_swing,icmr"
 
 # analysis CSV suffix -> measurement columns exported as spec rows
@@ -146,8 +149,10 @@ def run_campaign(dut: Path, corners: list[str], temps: list[float]) -> str:
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("netlist", type=Path)
-    p.add_argument("--corners", default="tt,ff,ss,sf,fs")
-    p.add_argument("--temps", default="-40,27,125")
+    p.add_argument("--corners", default=",".join(DEFAULT_CORNERS))
+    # :g, not str(): renders -40,27,125 byte-identical to the pre-#296 literal;
+    # str(t) would emit -40.0,27.0,125.0 and change the default request grid.
+    p.add_argument("--temps", default=",".join(f"{t:g}" for t in DEFAULT_TEMPS_C))
     p.add_argument("--flatten-only", action="store_true", help="print the adapted DUT netlist and exit")
     args = p.parse_args(argv)
 
@@ -164,15 +169,9 @@ def main(argv=None) -> int:
     dut = art / "dut.spice"
     dut.write_text(flatten_dut(text))
 
-    sys.path.insert(0, str(EXP_DIR / "bin"))
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("pvt_sweep", PVT_SWEEP)
-    pvt = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(pvt)
-
     record_id = run_campaign(dut, corners, temps)
     print(f"pex_measure: side={side} record={record_id}", file=sys.stderr)
-    doc = document(read_rows(record_id), corners, temps, pvt.VDD_BY_CORNER)
+    doc = document(read_rows(record_id), corners, temps, VDD_BY_CORNER)
     doc["record_id"] = record_id
     json.dump(doc, sys.stdout)
     sys.stdout.write("\n")

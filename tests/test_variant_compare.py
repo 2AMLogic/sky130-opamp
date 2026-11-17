@@ -154,6 +154,12 @@ class Rejection(_RecordsDir):
                                    "row 1 has", "row 2 has", "row 3 has", "row 4 has")
         self.assertIn("empty corner", err)
 
+    def test_padded_corner_keys_as_the_stripped_corner(self):
+        """Issue #291: the shared identity strips the corner, so a padded corner
+        is the same point here and in design/bin/spec_figures_check.py's gate."""
+        self.write("c", [], raw={"ac": self.HDR + " tt ,27,1.8,1e-4,60,2e7,60\n"})
+        self.assertEqual(list(cmp.load("c", "ac", str(self.dir))), [("tt", 27.0, 1.8)])
+
     def test_nonfinite_or_missing_metric(self):
         self.assert_rejected(self.HDR + "tt,27,1.8,1e-4,nan,2e7,60\nss,27,1.62,1e-4,60,,60\n"
                              "ff,27,1.98,1e-4,60,2e7,-inf\n",

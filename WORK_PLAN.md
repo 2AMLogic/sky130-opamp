@@ -1,19 +1,22 @@
 # Work Plan
 
-This roadmap is generated from the repository's current Loom label state.
+Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
-_None._
+- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
+- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#333**: chore(loom): resync installed Loom to v0.19.1306
 
 ## Very Important
 
 `loom:very-important` (one counts per workspace); every stage takes these first.
 
-_None._
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
 
 ## Important
 
@@ -33,7 +36,8 @@ _None._
 
 Issues currently being built (`loom:building`).
 
-_None._
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
+- **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
 
 ## PRs Awaiting Review
 
@@ -45,7 +49,10 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-_None._
+- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
+- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#333**: chore(loom): resync installed Loom to v0.19.1306
 
 ## Proposed
 
@@ -55,10 +62,15 @@ Issues carrying `loom:curated`.
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 - **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits) *(curated)*
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)*
+- **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence *(curated)*
+- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module *(curated)*
 
 ## Proposed (Architect / Hermit)
 
 - **#278**: Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path *(hermit)*
+- **#298**: Drop the 263 legacy waveform.raw.json blobs: 116 MiB (72% of tracked bytes) that no record cites *(hermit)*
+- **#301**: Consolidate the two comment-unaware SPICE continuation parsers in sim/offset-capability (the #237 remainder) *(hermit)*
 
 ## Epics
 
@@ -68,14 +80,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 0 |
-| Very important | 0 |
+| Operator merge-risk holds | 4 |
+| Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 0 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
-| Approved PRs awaiting merge | 0 |
-| Curated | 4 |
-| Architect / Hermit proposals | 1 |
+| Approved PRs awaiting merge | 4 |
+| Curated | 7 |
+| Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
