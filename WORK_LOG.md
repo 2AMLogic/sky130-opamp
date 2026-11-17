@@ -4,6 +4,7 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-17
 
+- **Issue #339** (closed): WORK_PLAN's Ready bucket reports 0 while #302 carries loom:issue
 - **PR #333**: chore(loom): resync installed Loom to v0.19.1306
 
 ### 2026-11-16
