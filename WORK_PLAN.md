@@ -10,7 +10,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
-- **#329**: chore(loom): resync installed Loom to v0.19.1305
+- **#333**: chore(loom): resync installed Loom to v0.19.1306
 
 ## Very Important
 
@@ -30,7 +30,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module
+_None._
 
 ## In Progress
 
@@ -52,7 +52,7 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
-- **#329**: chore(loom): resync installed Loom to v0.19.1305
+- **#333**: chore(loom): resync installed Loom to v0.19.1306
 
 ## Proposed
 
@@ -83,7 +83,7 @@ _None._
 | Operator merge-risk holds | 4 |
 | Very important | 1 |
 | Important | 3 |
-| Ready (`loom:issue`) | 1 |
+| Ready (`loom:issue`) | 0 |
 | In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 4 |
