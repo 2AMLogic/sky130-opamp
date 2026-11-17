@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# install-xschem -- credential-free install of the fleet-pinned xschem for CI
+# (issue #336; fleet-wide ask 2AMLogic/2am#7275, batched follow-up 2am#7326;
+# ported near-verbatim from the pilot .github/scripts/install-xschem in
+# sg13g2-lna#259).
+#
+#   .github/scripts/install-xschem           # build + install + verify
+#   .github/scripts/install-xschem --check   # verify an existing install only
+#
+# WHY NOT APT. Ubuntu noble's archive ships xschem 3.4.4, and the repo's
+# netlist pin is the fleet's 3.4.7 -- the master pin is 2AMLogic/klayout-tools
+# docker/eda-sim/pdk-versions.json tools.xschem (mirrored in the 2am
+# batch-image pins). CI holds no infra credentials, so the S3 build artifact
+# the batch image bakes is out; a source build of the pinned tag from the
+# upstream public repo is the remaining route until klayout-tools publishes
+# the pinned build as a release asset (2AMLogic/klayout-tools#6219) --
+# switch to it when it ships. This script mirrors the fleet's build recipe
+# (2AMLogic/2am infra/aws/build-xschem-artifact.py): same repo, same
+# tag-to-commit assertion, same build deps and configure line. A pin bump
+# lands in klayout-tools first, then the fleet mirrors, then here -- grep
+# XSCHEM_COMMIT when bumping.
+#
+# The build lands under "$RUNNER_TEMP/xschem" (a plain local prefix, no
+# root needed) and the bin dir is exported to GITHUB_PATH so later steps
+# resolve `xschem` to it. Runtime libraries are apt's tcl/tk/X11 stack,
+# which ubuntu-latest images carry; the -dev packages below are build-time
+# only.
+#
+# A headless netlist smoke follows the build, because xschem's CLI exit
+# status is unreliable on an -x run -- the verdict is the output file, and
+# proving that once per runner beats debugging it inside netlist_check.py.
+# Bounded by `timeout` either way. Unlike the pilot's stock-symbol probe,
+# this smoke netlists this repo's schematic through this repo's
+# design/xschemrc -- the exact route design/bin/netlist_check.py takes --
+# so it needs the pinned sky130 PDK installed first (the workflow runs
+# 'Install pinned sky130 PDK' before this script). The rc resolves the
+# PDK's sky130_fd_pr symbols through the PDK xschemrc it sources and this
+# repo's own cells through the repo-root entries it appends; the explicit
+# -o sends the netlist to a scratch dir so the checkout stays untouched.
+set -euo pipefail
+
+XSCHEM_REPO="https://github.com/StefanSchippers/xschem"
+XSCHEM_TAG="3.4.7"
+XSCHEM_COMMIT="92dd8fe5f4d5c1057489710d8a22f18fdc9d7ed0"
+PREFIX="${RUNNER_TEMP:-${TMPDIR:-/tmp}}/xschem"
+
+die() { echo "install-xschem: $1" >&2; exit 1; }
+
+version_of() { "$1" --version 2>&1 | grep -oE 'XSCHEM V[0-9]+\.[0-9]+\.[0-9]+' | head -n 1; }
+
+if [ "${1:-}" = "--check" ]; then
+  command -v xschem >/dev/null 2>&1 || die "no xschem on PATH"
+  got="$(version_of xschem)" || die "cannot read xschem --version"
+  [ "$got" = "XSCHEM V${XSCHEM_TAG}" ] \
+    || die "xschem is ${got:-unknown}, want XSCHEM V${XSCHEM_TAG}"
+  echo "install-xschem: ok ($got)"
+  exit 0
+fi
+
+[ "$(version_of "${PREFIX}/bin/xschem" 2>/dev/null || true)" = "XSCHEM V${XSCHEM_TAG}" ] && {
+  echo "install-xschem: ${PREFIX} already has xschem ${XSCHEM_TAG}; skipping the build"
+  exit 0
+}
+
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update -qq
+sudo apt-get install -y --no-install-recommends \
+  ca-certificates git build-essential bison flex gawk \
+  libcairo2-dev libx11-dev libxcb1-dev libxpm-dev libxrender-dev \
+  tcl-dev tk-dev >/dev/null
+
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+git clone -q --depth 1 --branch "$XSCHEM_TAG" "$XSCHEM_REPO" "$work/xschem"
+got="$(git -C "$work/xschem" rev-parse HEAD)"
+[ "$got" = "$XSCHEM_COMMIT" ] \
+  || die "tag ${XSCHEM_TAG} resolved to ${got}, pinned to ${XSCHEM_COMMIT}"
+
+(cd "$work/xschem" && ./configure --prefix="$PREFIX" >/dev/null)
+make -C "$work/xschem" -s -j"$(nproc)" >/dev/null
+make -C "$work/xschem" -s install >/dev/null
+
+got="$(version_of "${PREFIX}/bin/xschem")" || die "built xschem reports no version"
+[ "$got" = "XSCHEM V${XSCHEM_TAG}" ] || die "built xschem is ${got}, want XSCHEM V${XSCHEM_TAG}"
+
+# Headless netlist smoke over the repo's real netlisting route: the same
+# xschem flags design/bin/netlist_check.py uses, with design/xschemrc
+# passed as --rcfile. -x keeps xschem from starting Tk; the verdict is the
+# output netlist, whatever the exit status.
+pdk_root="${PDK_ROOT:-$HOME/.volare}"
+pdk="${PDK:-sky130A}"
+[ -f "$pdk_root/$pdk/libs.tech/xschem/xschemrc" ] \
+  || die "no PDK xschemrc at $pdk_root/$pdk/libs.tech/xschem/xschemrc -- install the pinned sky130 PDK first (see design/xschemrc; CI runs 'Install pinned sky130 PDK' before this script)"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+rc="$repo_root/design/xschemrc"
+sch="$repo_root/design/opamp_core.sch"
+[ -f "$rc" ] || die "missing $rc (run this script from a repo checkout)"
+[ -f "$sch" ] || die "missing $sch (run this script from a repo checkout)"
+smoke="$work/smoke"
+mkdir -p "$smoke/netlist"
+HOME="$smoke" PDK_ROOT="$pdk_root" PDK="$pdk" \
+  timeout -k 5 300 "${PREFIX}/bin/xschem" -n -x -q -r \
+  --rcfile "$rc" -o "$smoke/netlist" "$sch" >"$smoke/log" 2>&1 || true
+grep -q 'subckt opamp_core' "$smoke/netlist/opamp_core.spice" \
+  || die "headless netlist smoke failed ($(tail -n 5 "$smoke/log" 2>/dev/null | tr '\n' ' '))"
+
+if [ -n "${GITHUB_PATH:-}" ] && [ -n "${CI:-}" ]; then
+  echo "${PREFIX}/bin" >> "$GITHUB_PATH"
+else
+  echo "install-xschem: add ${PREFIX}/bin to PATH to use it" >&2
+fi
+echo "install-xschem: built ${got} at ${PREFIX} (commit ${XSCHEM_COMMIT})"
