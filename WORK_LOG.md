@@ -2,6 +2,10 @@
 
 Chronological record of merged pull requests and closed issues, maintained by the Loom Guide role. Newest entries appear first.
 
+### 2026-11-17
+
+- **PR #333**: chore(loom): resync installed Loom to v0.19.1306
+
 ### 2026-11-16
 
 - **PR #327**: chore(loom): resync installed Loom to v0.19.1302
