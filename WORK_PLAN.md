@@ -39,6 +39,7 @@ Issues currently being built (`loom:building`).
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests
+- **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates
 
 ## PRs Awaiting Review
 
@@ -46,6 +47,7 @@ PRs waiting on Judge (`loom:review-requested`).
 
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests
+- **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base
 
 ## Approved (Awaiting Merge)
 
@@ -68,6 +70,7 @@ Issues carrying `loom:curated`.
 - **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module *(curated)*
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7 *(curated)*
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests *(curated)*
+- **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -87,10 +90,10 @@ _None._
 | Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 4 |
-| PRs awaiting review | 2 |
+| In Progress (`loom:building`) | 5 |
+| PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 3 |
-| Curated | 9 |
+| Curated | 10 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
