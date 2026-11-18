@@ -38,6 +38,7 @@ Issues currently being built (`loom:building`).
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7
+- **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests
 
 ## PRs Awaiting Review
 
@@ -65,6 +66,7 @@ Issues carrying `loom:curated`.
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence *(curated)*
 - **#302**: T1 item 9: no sim/lib module is attested, so the ratified corner table leaves the hashed surface once it has an owner module *(curated)*
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7 *(curated)*
+- **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -84,10 +86,10 @@ _None._
 | Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 3 |
+| In Progress (`loom:building`) | 4 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 3 |
-| Curated | 8 |
+| Curated | 9 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
