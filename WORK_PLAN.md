@@ -45,6 +45,7 @@ Issues currently being built (`loom:building`).
 PRs waiting on Judge (`loom:review-requested`).
 
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4
+- **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests
 
 ## Approved (Awaiting Merge)
 
@@ -87,7 +88,7 @@ _None._
 | Important | 3 |
 | Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
 | In Progress (`loom:building`) | 4 |
-| PRs awaiting review | 1 |
+| PRs awaiting review | 2 |
 | Approved PRs awaiting merge | 3 |
 | Curated | 9 |
 | Architect / Hermit proposals | 3 |
