@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-"""Run the simulator-free CI gate locally (stdlib only).
+"""Run the simulator-free CI gate (stdlib only).
 
-Mirrors .github/workflows/tests.yml plus the tool-free CompareUnit controls of
-design/bin/test_netlist_check.py. The workflows stay the source of truth; this
-is a local entrypoint so `npm test` / `npm run check:ci` are not vacuous.
+Single source of the gate commands: CI's `unit-tests` workflow and local
+runs (`python3 design/bin/check_ci.py` here, or `npm test`) both execute
+this script, so the command list exists in exactly one place. CI passes
+--pr-base origin/<base_ref> on pull_request to add the committed-only
+append-only check; locally the same check runs with --local when the base
+resolves.
 
 Never runs netlist_check.py regeneration or the EndToEnd cases (they need
 xschem and the pinned PDK; see design-sources.yml). Runs sequentially and
 stops at the first failure.
 """
 
+import argparse
 import subprocess
 import sys
 from pathlib import Path
@@ -38,10 +42,10 @@ def default_checks(py=None):
     ]
 
 
-def append_only_check(py=None, local=False):
-    """PR form (committed only) by default; local=True adds staged/working-tree."""
+def append_only_check(py=None, local=False, base=BASE_REF):
+    """PR form (committed only, --base REF) by default; local=True adds staged/working-tree."""
     py = py or sys.executable
-    cmd = [py, "sim/lib/append_only_check.py", "--base", BASE_REF]
+    cmd = [py, "sim/lib/append_only_check.py", "--base", base]
     if local:
         cmd.append("--local")
     return ("append-only evidence", cmd)
@@ -67,9 +71,13 @@ def run_checks(checks, repo=REPO, run=subprocess.run):
     return 0, None
 
 
-def main(repo=REPO, resolves=ref_resolves, run=subprocess.run):
+def main(repo=REPO, resolves=ref_resolves, run=subprocess.run, pr_base=None):
+    """pr_base (from --pr-base) = CI/PR mode: committed-only append-only
+    check against that ref, never skipped, no --local. Default = local mode."""
     checks = default_checks()
-    if resolves(BASE_REF, repo):
+    if pr_base is not None:
+        checks.append(append_only_check(base=pr_base, local=False))
+    elif resolves(BASE_REF, repo):
         checks.append(append_only_check(local=True))
     else:
         print(f"==> append-only evidence: SKIPPED ({BASE_REF} does not resolve; "
@@ -81,4 +89,12 @@ def main(repo=REPO, resolves=ref_resolves, run=subprocess.run):
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    parser = argparse.ArgumentParser(
+        description="Run the simulator-free CI gate (the single source of the "
+                    "gate commands; CI's unit-tests workflow calls this script).")
+    parser.add_argument(
+        "--pr-base", metavar="REF",
+        help="PR mode: append the committed-only append-only check against REF "
+             "(no --local, never skipped); e.g. --pr-base origin/main")
+    args = parser.parse_args()
+    sys.exit(main(pr_base=args.pr_base))
