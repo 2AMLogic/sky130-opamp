@@ -27,7 +27,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 ## Ready
 
-Human-approved issues ready for implementation (`loom:issue`).
+Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
 
 _None._
 
@@ -49,9 +49,9 @@ PRs waiting on Judge (`loom:review-requested`).
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
-- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
-- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015 — closes #282
+- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent — closes #284
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory — closes #302
 
 ## Proposed
 
@@ -83,7 +83,7 @@ _None._
 | Operator merge-risk holds | 3 |
 | Very important | 1 |
 | Important | 3 |
-| Ready (`loom:issue`) | 0 |
+| Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
 | In Progress (`loom:building`) | 3 |
 | PRs awaiting review | 1 |
 | Approved PRs awaiting merge | 3 |
