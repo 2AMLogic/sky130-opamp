@@ -69,8 +69,9 @@ def inventory_problems(workflow_text, checks):
 
     - every local check (except LOCAL_ONLY) must appear as a workflow command;
     - every unconditional workflow command must be a local check, same order;
-    - conditional workflow commands must be exactly the PR-only append-only
-      check, which the local runner appends separately (base ref differs).
+    - conditional workflow commands must be exactly the PR/merge-queue
+      append-only check (base-plumbing shell lines + python command), which
+      the local runner appends separately (base ref differs).
     """
     uncond, cond = workflow_commands(workflow_text)
     local = [["python"] + c[1:] for _, c in checks
@@ -85,7 +86,15 @@ def inventory_problems(workflow_text, checks):
     if not problems and local != uncond:
         problems.append("local check order differs from workflow")
     ao = check_ci.append_only_check("python")[1]
-    if [c[:3] for c in cond] != [ao[:2] + ["--base"]]:
+    # Issue #347: the step runs on pull_request and merge_group; the two shell
+    # lines pick origin/<base_ref> or merge_group.base_sha as the base before
+    # the python command. Only the base token differs from the local runner.
+    expected_cond = [
+        ["BASE=origin/$BASE_REF"],
+        ["[", "$EVENT", "=", "merge_group", "]", "&&", "BASE=$MG_BASE"],
+        ao[:2] + ["--base", "$BASE"],
+    ]
+    if cond != expected_cond:
         problems.append("unexpected conditional workflow commands: %r" % (cond,))
     return problems
 

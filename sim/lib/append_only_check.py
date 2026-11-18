@@ -19,7 +19,10 @@ the index (staged) and the working tree are each compared with HEAD, with the
 same rules, so uncommitted edits are caught before commit. They are separate
 comparisons so a staged destructive change is still seen when an unstaged edit
 restores the file. Untracked files are additions and are not reported. PR CI
-uses the committed-only comparison (no --local).
+uses the committed-only comparison (no --local); a merge_queue run passes
+github.event.merge_group.base_sha as --base (head = HEAD, the trial merge).
+An empty or unresolvable --base is a hard error, never a pass: an undiffable
+base means append-only was NOT verified.
 
 Usage: append_only_check.py [--base origin/main] [--allowlist FILE] [--local]
        git diff --name-status -z -M A...B | append_only_check.py --stdin
@@ -111,6 +114,28 @@ def remediation(violations, allowlist_path=DEFAULT_ALLOWLIST) -> str:
     return "\n".join(lines)
 
 
+def require_resolvable_base(base: str) -> None:
+    """Exit with an explicit message unless `base` resolves to a commit.
+
+    A merge_group CI run passes github.event.merge_group.base_sha as --base;
+    if that plumbing ever arrives empty, or the sha is missing from the
+    fetched history (shallow checkout), the diff would die with a bare
+    CalledProcessError traceback. Failing here with a message instead keeps
+    the failure honest: an undiffable base means append-only was NOT
+    verified, so the run must not pass.
+    """
+    if not base.strip():
+        print("append-only check: --base is empty (merge_group.base_sha absent?); "
+              "refusing to claim append-only was verified", file=sys.stderr)
+        sys.exit(2)
+    r = subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}"],
+                       capture_output=True)
+    if r.returncode != 0:
+        print(f"append-only check: --base {base!r} does not resolve to a commit; "
+              "refusing to claim append-only was verified", file=sys.stderr)
+        sys.exit(2)
+
+
 def git_name_status(*diff_args) -> str:
     return subprocess.run(
         ["git", "diff", "--name-status", "-z", "-M", *diff_args, "--", "sim/", "manifests/artifacts/"],
@@ -137,6 +162,8 @@ def main(argv=None) -> int:
 
     if args.stdin and args.local:
         ap.error("--stdin and --local are mutually exclusive")
+    if not args.stdin:
+        require_resolvable_base(args.base)
     if args.stdin:
         buf = getattr(sys.stdin, "buffer", None)
         sources = [("stdin", buf.read().decode("utf-8", "surrogateescape")
