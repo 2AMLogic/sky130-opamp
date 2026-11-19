@@ -329,7 +329,8 @@ envelopes under `manifests/envelopes/`; see `manifests/README.md` item 5.
 ```bash
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --check-env
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py          # all three benches, 15 corners each
-python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch   # the 15-corner noise record (2026-10-30)
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch   # the 15-corner noise record (2026-10-30; graded under DR-018 since 2026-11-19)
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch --export-envelopes manifests/envelopes   # graded run whose envelope item 5 cites
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches psrr_vdd,psrr_vss --runner-version-check warn
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --backend local --corners tt --temps 27 --benches noise   # single-corner debug probe only
 python3 sim/opamp-characterization/bin/validate_psrr_noise.py       # four single-corner cross-checks (local)
@@ -1299,6 +1300,82 @@ curves are in the CSV.)
 - Limitation: pre-layout schematic only; the response's PDK stamp comparison is
   `not_comparable` (client stamp unavailable), and the fleet job-ceiling check
   warned (job bound above 3600 s) but the job completed in 94 s.
+
+### Result: noise graded under DR-018 (appended 2026-11-19; earlier text unchanged)
+
+The graded quantity DR-003 left undecided is now fixed and submitted for
+ratification: [DR-018](../../spec/decision-records/DR-018-noise-graded-quantity.md)
+(issue #274, carrying the 2026-11-18 decision block) grades the row as the
+**minimum reported spot density from 100 kHz through 10 MHz, inclusive** — the
+nine 4-points/decade samples in that window, not the 41 underlying sweep
+samples — against the unchanged ≤ 30 nV/√Hz bound. The noise request now emits
+that reduction natively: measurement `en_floor` (unit `V/rtHz`) carries
+`limits.max = 30e-9` (`SPEC_NOISE_FLOOR_MAX_V_RTHZ`) and
+`spec_row: "input_referred_noise"`, computed as pairwise ngspice `let` minima
+(`0.5*(a+b-abs(a-b))`) over the reported `en_k*` lets in declaration order.
+The individual spots and the 100 Hz – 1 MHz integral stay ungraded diagnostics,
+and neither PSRR request gained any graded measurement.
+
+`psrr_noise_sweep.py --benches noise --backend batch --export-envelopes
+manifests/envelopes` (client klt 0.9.3.dev) ran as batch job
+`klt-sim-f682e14d3430` (ngspice 47): **15 corners, 4 pass / 11 fail /
+0 errored**, record
+[`20261119-030444-02cc663-b6d61e`](records/20261119-030444-02cc663-b6d61e-psrr-noise.json)
+with graded envelope
+[`manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json`](../../manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json)
+(input hash `sha256:efdf6f90…cfe484e8`, cited on T1 item 5 in
+`manifests/sky130-opamp.json`). The envelope's top-level status is `fail` —
+that is the finding, not a run failure: every corner produced a complete
+graded value, and the 11 misses are limit violations (`status: "fail"` with a
+negative margin), cleanly distinguished from the zero runner/measurement
+errors. All values are pre-layout (same DUT snapshot as the 2026-11-13 item 5
+campaign, `sha256:e954d17d…918ce79`).
+
+Graded sampled floor per corner (nV/√Hz; deck value from the envelope, with
+the independent Python minimum of the reported spots beside it):
+
+| Corner | T (°C) | VDD | Graded floor | Python min | vs 30 nV/√Hz |
+|---|---|---|---|---|---|
+| tt | −40 | 1.80 | 29.16 | 29.16 | pass |
+| tt | 27 | 1.80 | 35.75 | 35.75 | fail |
+| tt | 125 | 1.80 | 45.41 | 45.41 | fail |
+| ff | −40 | 1.98 | **28.19** | 28.19 | pass |
+| ff | 27 | 1.98 | 34.60 | 34.60 | fail |
+| ff | 125 | 1.98 | 43.85 | 43.85 | fail |
+| ss | −40 | 1.62 | 30.49 | 30.49 | fail |
+| ss | 27 | 1.62 | 37.13 | 37.13 | fail |
+| ss | 125 | 1.62 | **47.25** | 47.25 | fail |
+| sf | −40 | 1.80 | 28.44 | 28.44 | pass |
+| sf | 27 | 1.80 | 34.93 | 34.93 | fail |
+| sf | 125 | 1.80 | 44.81 | 44.81 | fail |
+| fs | −40 | 1.80 | 29.78 | 29.78 | pass |
+| fs | 27 | 1.80 | 36.50 | 36.50 | fail |
+| fs | 125 | 1.80 | 46.10 | 46.10 | fail |
+
+- **4 of 15 corners meet the bound; the misses are all warm.** Worst case
+  **47.25 nV/√Hz @ ss / 125 °C / 1.62 V** (envelope `worst_case`, margin
+  −17.25 nV/√Hz); the passing set is exactly the four −40 °C corners of the
+  October grid. The row is ratified as a target only, so this is a **recorded
+  finding**: no threshold or convention was tuned to change it, and closing
+  the warm-corner floor is design work outside this record.
+- **The deck's reduction reproduces the October record at every corner** to
+  the printed digits (e.g. tt/27 °C 35.7536 nV/√Hz both runs; the same worst
+  value 47.2526), so the graded value is the same floor the bench always
+  reported — only now it is graded, with the binding corner in the envelope.
+- **Native-vs-Python cross-check**: the record's `floor_grading` block
+  compares the envelope's `en_floor` against an independent Python minimum of
+  the same reported spots in the same response — **max absolute delta 0.0 V**
+  over all 15 corners (`klt_vs_python.agrees: true`). The CSV carries both
+  columns (`en_floor_nv_rthz`, `en_floor_graded_nv_rthz`).
+- **Inclusive endpoints**: the graded reduction reduces over exactly the nine
+  reported spots 100 kHz … 10 MHz inclusive
+  (`tests/test_psrr_noise_sweep.py` pins the window, the tree's leaves, and
+  the exact 30e-9 bound; klt grades `limits.max` inclusively — a value
+  exactly at the bound passes, strictly above fails).
+- `manifests/sky130-opamp.json`'s `spec_rows."5"` drops the noise gap; the
+  item-5 citation list gains this envelope. `DR-018` is **proposed** in this
+  tree — the convention becomes binding when the PR carrying it merges
+  (two-key ratification, per the record's own Status line).
 
 ### Validation of the benches (`bin/validate_psrr_noise.py`)
 

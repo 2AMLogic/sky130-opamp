@@ -262,20 +262,24 @@ RAD_TO_DEG = "57.29577951308232"
 # `spec_rows."5"`. One id per `spec/target-spec.md` Sec 2 row.
 ITEM5_GRADED_ROWS = ("open_loop_dc_gain", "gbw_cl2pf", "phase_margin", "slew_rate",
                      "input_common_mode_range", "quiescent_power")
-# Sec 2 rows no `klt sim` request of this harness grades, and the short reason,
+# Sec 2 rows no `klt sim` request of THIS harness grades, and the short reason,
 # echoed into every record's `spec_row_grading` so a campaign states its own
-# coverage. These are item 5's declared gaps; the AUTHORITATIVE text -- with the
-# issue each gap is tracked by -- is the manifest's `spec_rows."5"`, which
-# `klt signoff` quotes into the committed record's `detail.declared_gaps`.
-# Keep the two consistent in the same PR.
+# coverage. These are the rows this harness leaves to other evidence; the
+# AUTHORITATIVE item 5 state -- which rows are cited, which are declared gaps,
+# and under which issue each gap is tracked -- is the manifest's
+# `spec_rows."5"`, which `klt signoff` quotes into the committed record's
+# `detail.declared_gaps`. A row here may be graded by another campaign (noise
+# is, by the psrr-noise envelope) while staying ungraded by pvt_sweep.py's own
+# requests; keep this echo and the manifest consistent in the same PR.
 ITEM5_UNGRADED_ROWS = {
     "output_swing": "the ratified grading rule is a contiguous-run reduction over a swept waveform "
                     "(largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` "
                     "measurement form expresses it (klayout-tools#5518), so the row is measured "
                     "(dc_swing waveform, -dc-swing.csv) but graded by no envelope",
-    "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, "
-                            "but carry no limits/spec_row and DR-003 left the graded quantity undecided "
-                            "(issue #274)",
+    "input_referred_noise": "graded by the psrr-noise campaign's own envelope, not this harness's requests: "
+                            "issue #54's noise bench emits the sampled floor with limits/spec_row per DR-018 "
+                            "(issue #274's 2026-11-18 floor decision), so this row is covered there and is no "
+                            "gap on item 5",
     "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
     "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); "
                              "target proposed by DR-009, not ratified",

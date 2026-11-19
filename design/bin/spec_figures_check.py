@@ -261,6 +261,12 @@ def record_exists(root, rid):
     for d in Path(root).glob(RECORDS_GLOB):
         if any((d / f"{rid}{ext}").is_file() for ext in (".json", ".md")):
             return True
+        # Records of multi-bench campaigns carry a campaign tag before the
+        # extension (e.g. <rid>-psrr-noise.json), so a bare <rid> citation
+        # resolves through the tag (issue #274). Existence only: any record
+        # file with this rid counts, and the id is allocated unique per run.
+        if any(d.glob(f"{rid}-*.json")) or any(d.glob(f"{rid}-*.md")):
+            return True
     return False
 
 

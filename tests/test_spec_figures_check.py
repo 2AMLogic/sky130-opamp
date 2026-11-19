@@ -579,6 +579,21 @@ class CommittedTests(unittest.TestCase):
     def test_committed_spec_agrees_with_records(self):
         self.assertEqual(sf.check(_paths.REPO), [])
 
+    def test_record_exists_resolves_campaign_tag(self):
+        # Multi-bench campaigns commit their metadata as <rid>-<campaign>.json
+        # (e.g. <rid>-psrr-noise.json), while a spec citation names the bare
+        # <rid>; existence must resolve through the tag (issue #274).
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        rec = tmp / sf.OPAMP_RECORDS
+        rec.mkdir(parents=True)
+        self.assertFalse(sf.record_exists(tmp, RID))          # nothing yet
+        (rec / f"{RID}-psrr-noise.json").write_text("{}")
+        self.assertTrue(sf.record_exists(tmp, RID))           # via the tag
+        self.assertFalse(sf.record_exists(tmp, RID.replace("abcdef1", "1234567")))
+        (rec / f"{RID}.md").write_text("x")
+        self.assertTrue(sf.record_exists(tmp, RID))           # bare .md still wins
+
     def test_committed_scopes_are_explicit(self):
         m = json.loads((_paths.REPO / sf.MAPPING).read_text(encoding="utf-8"))
         allf = m["figures"] + m["campaign_figures"]
