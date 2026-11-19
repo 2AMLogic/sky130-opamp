@@ -47,7 +47,7 @@ Measured values (committed envelope above, worst case, SS / 1.62 V /
 
 (The 45-point independent-supply grid, record
 `20261011-194651-046fe81-86146b`, has rise 19.79 V/µs and fall 9.13 V/µs
-at FS / −40 °C / 1.62 V; rise grid-wide maximum is 20.89 V/µs.)
+at FS / −40 °C / 1.62 V; rise grid-wide maximum is 20.97 V/µs.)
 
 ## Decision
 
@@ -95,7 +95,7 @@ the verdict. No fall-edge work is decided here (see DR-012).
   because the ratified row already says "≈", and a zero band makes the
   symbol meaningless.
 - **`±3 %` (floor 19.4, ceiling 20.6).** Rejected: a ceiling on a minimum
-  fails better amplifiers, and rise already measures up to 20.89 V/µs at
+  fails better amplifiers, and rise already measures up to 20.97 V/µs at
   some grid points, so it would fail on excess slew.
 - **`+0 % / −1 %` (floor 19.8) or tighter.** Rejected as a departure from
   the 3 % default with no stated consumer reason; picking 1 % would be
