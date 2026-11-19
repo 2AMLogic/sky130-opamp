@@ -3,7 +3,7 @@
 Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-19T00:29:51Z (snapshot; compare against live labels)_
+_Generated: 2026-11-19T02:15:27Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -11,6 +11,8 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#350**: spec: propose DR-016 grading band for the slew-rate row
+- **#352**: spec: propose DR-017 grading band for the quiescent-power row
 
 ## Very Important
 
@@ -24,7 +26,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 - **#196**: Measure paired offset drift before prototyping foreground trim *(held)*
 - **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits)
-- **#277**: Reconcile the ratified quiescent-power row with its T1 item-5 grading: what tolerance does its "≈" carry?
+- **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it
 
 ## Ready
 
@@ -36,6 +38,7 @@ _None._
 
 Issues currently being built (`loom:building`).
 
+- **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
 - **#289**: The ratified slew row is also an "≈" row: item 5 grades rise SR at zero tolerance (19.88 vs 20.0 V/µs) while the spec calls it met
@@ -58,6 +61,8 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 - **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015 — closes #282
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent — closes #284
 - **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory — closes #302
+- **#350**: spec: propose DR-016 grading band for the slew-rate row — closes #289
+- **#352**: spec: propose DR-017 grading band for the quiescent-power row — closes #277
 
 ## Proposed
 
@@ -67,6 +72,7 @@ Issues carrying `loom:curated`.
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)* *(held)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)* *(held)*
 - **#274**: Grade the ratified input-referred-noise row on T1 item 5 (bench landed in #54; needs a graded quantity and limits) *(curated)*
+- **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it *(curated)*
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)*
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence *(curated)*
 - **#289**: The ratified slew row is also an "≈" row: item 5 grades rise SR at zero tolerance (19.88 vs 20.0 V/µs) while the spec calls it met *(curated)*
@@ -89,14 +95,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 3 |
+| Operator merge-risk holds | 5 |
 | Very important | 1 |
 | Important | 3 |
 | Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 6 |
+| In Progress (`loom:building`) | 7 |
 | PRs awaiting review | 3 |
-| Approved PRs awaiting merge | 3 |
-| Curated | 11 |
+| Approved PRs awaiting merge | 5 |
+| Curated | 12 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
