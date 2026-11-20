@@ -321,6 +321,25 @@ class KltBenchTests(unittest.TestCase):
         self.assertEqual(keep, {(c, pvt.VDD_BY_CORNER[c]) for c in pvt.DEFAULT_CORNERS})
         self.assertEqual(req["batch"]["runner_version_check"], pvt.RUNNER_VERSION_CHECK[0])
 
+    def test_cmrr_bounds_only_the_two_dr008_spots_at_each_bias(self):
+        for bias in ("mid", "window"):
+            with self.subTest(bias=bias):
+                request, _body, _tag = klt_request("cmrr", bias)
+                cards = {m["name"]: m for m in request["measurements"]}
+                names = list(cards)
+                spots = {"cmrr_1hz_db", "cmrr_1khz_db"}
+                self.assertEqual({n for n, m in cards.items() if "limits" in m}, spots)
+                self.assertEqual({n for n, m in cards.items() if "spec_row" in m}, spots)
+                for spot in ("1hz", "1khz"):
+                    name = f"cmrr_{spot}_db"
+                    adm, acm = f"adm_{spot}_db", f"acm_{spot}_db"
+                    self.assertLess(names.index(adm), names.index(name))
+                    self.assertLess(names.index(acm), names.index(name))
+                    self.assertEqual(cards[name]["spice"], f".meas ac {name} param='{adm}-{acm}'")
+                    self.assertEqual(cards[name]["unit"], "dB")
+                    self.assertEqual(cards[name]["limits"], {"min": 50})
+                    self.assertEqual(cards[name]["spec_row"], "cmrr")
+
     def test_icmr_request_is_one_per_corner_with_literal_midpoint(self):
         groups = pvt.vdd_groups(list(pvt.DEFAULT_CORNERS))
         self.assertEqual(sorted(groups), [1.62, 1.8, 1.98])
@@ -384,6 +403,13 @@ class KltBenchTests(unittest.TestCase):
         self.assertEqual(set(pvt.ITEM5_GRADED_ROWS) & set(pvt.ITEM5_UNGRADED_ROWS), set())
         self.assertEqual(len(pvt.ITEM5_GRADED_ROWS) + len(pvt.ITEM5_UNGRADED_ROWS), 12)
         self.assertTrue(all(v and isinstance(v, str) for v in pvt.ITEM5_UNGRADED_ROWS.values()))
+
+    def test_proposed_cmrr_does_not_displace_ratified_rows_in_campaign_coverage(self):
+        measurements = [{"name": row, "spec_row": row, "status": "pass"}
+                        for row in (*pvt.ITEM5_GRADED_ROWS, "cmrr")]
+        summary = pvt.spec_row_grading([("example", {"measurements": measurements})], {})
+        self.assertTrue(summary["all_graded_rows_present"])
+        self.assertIn("cmrr", summary["ungraded_rows"])
 
     def test_icmr_bound_is_containment_of_the_target_window(self):
         by = {m["name"]: m for m in pvt.icmr_measurements(1.8)}

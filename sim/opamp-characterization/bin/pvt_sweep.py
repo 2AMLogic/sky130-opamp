@@ -262,7 +262,7 @@ RAD_TO_DEG = "57.29577951308232"
 # `spec_rows."5"`. One id per `spec/target-spec.md` Sec 2 row.
 ITEM5_GRADED_ROWS = ("open_loop_dc_gain", "gbw_cl2pf", "phase_margin", "slew_rate",
                      "input_common_mode_range", "quiescent_power")
-# Sec 2 rows no `klt sim` request of this harness grades, and the short reason,
+# Sec 2 rows this harness cannot grade against a ratified bound, and the short reason,
 # echoed into every record's `spec_row_grading` so a campaign states its own
 # coverage. These are item 5's declared gaps; the AUTHORITATIVE text -- with the
 # issue each gap is tracked by -- is the manifest's `spec_rows."5"`, which
@@ -279,7 +279,7 @@ ITEM5_UNGRADED_ROWS = {
     "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
     "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); "
                              "target proposed by DR-009, not ratified",
-    "cmrr": "target proposed by DR-008, not ratified: no ratified bound to grade",
+    "cmrr": "the CMRR bench checks DR-008's proposed 50 dB bound; item 5 awaits ratification",
     "area": "not a PVT-simulated row (post-layout quantity, [TBD])",
 }
 # Relative tolerance of the klt-card-vs-Python-column cross-check in the record.
@@ -648,6 +648,13 @@ def cmrr_measurements() -> list[dict]:
     for label, f in CMRR_SPOTS:
         ms.append({"name": f"adm_{label}_db", "unit": "dB", "spice": f".meas ac adm_{label}_db find vdb(out_d) at={f}"})
         ms.append({"name": f"acm_{label}_db", "unit": "dB", "spice": f".meas ac acm_{label}_db find vdb(out_c) at={f}"})
+    # DR-008 proposes 50 dB at these two spots at both biases. Each param card
+    # uses the differential and common-mode gains from the same AC solve.
+    for label in ("1hz", "1khz"):
+        name = f"cmrr_{label}_db"
+        ms.append({"name": name, "unit": "dB",
+                   "spice": f".meas ac {name} param='adm_{label}_db-acm_{label}_db'",
+                   "limits": {"min": 50}, "spec_row": "cmrr"})
     ms.append({"name": "gbw_hz", "unit": "Hz", "spice": ".meas ac gbw_hz when vdb(out_d)=0 cross=1"})
     return ms
 
@@ -834,7 +841,7 @@ def spec_row_grading(reports: list[tuple[str, dict]], results: dict) -> dict:
     return {"rows": rows, "klt_vs_python": agree,
             "klt_vs_python_agrees": all(c["agrees"] for c in agree) if agree else None,
             "ungraded_rows": ITEM5_UNGRADED_ROWS,
-            "all_graded_rows_present": sorted(rows) == sorted(ITEM5_GRADED_ROWS)}
+            "all_graded_rows_present": set(ITEM5_GRADED_ROWS).issubset(rows)}
 
 
 def write_klt_response(log_dir: Path, tag: str, report: dict) -> str:
