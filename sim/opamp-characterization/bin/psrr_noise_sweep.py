@@ -26,6 +26,9 @@ Records (append-only; a new timestamped set per run, never overwritten):
 
     records/<id>-psrr-vdd.csv  records/<id>-psrr-vss.csv  records/<id>-noise.csv
     records/<id>-<bench>.klt.json      the unmodified `klt sim` response
+                                       (--export-envelopes DIR commits it to
+                                       manifests/envelopes/ instead, the T1
+                                       item 5 citation surface; never both)
     records/<id>-psrr-noise.json/.md   metadata (backend, remote job ids, pins)
     manifests/artifacts/opamp-psrr-noise-<id>.manifest.json  per-corner ngspice logs, stored in the
                                        fleet artifact store (issue #240); never committed as bytes
@@ -40,6 +43,10 @@ Records (append-only; a new timestamped set per run, never overwritten):
     --backend NAME    forwarded to `klt sim --backend` (default: leave to
                       $KLT_SIM_BACKEND / request / local)
     --label TEXT      free-text label stored in the record (e.g. 'debug probe')
+    --export-envelopes DIR   repo-relative dir for the raw `klt sim` response
+                      envelopes instead of records/ (pvt_sweep.py's issue-#246
+                      convention; the manifest cites the exported copy on T1
+                      item 5)
 """
 
 from __future__ import annotations
@@ -120,12 +127,94 @@ NOISE_LO_IDX = idx_of(1e2)
 NOISE_HI_IDX = idx_of(1e6)
 FLOOR_LO_IDX = idx_of(1e5)  # white-floor proxy: minimum spot density over
 FLOOR_HI_IDX = idx_of(1e7)  # 100 kHz - 10 MHz (below the closed-loop peaking)
+# The sampled population the floor is graded over: the *reported* spots
+# (CURVE_IDX) inside the closed window above -- 9 samples, 100 kHz through
+# 10 MHz inclusive. DR-018 pins the graded quantity to these nine; taking the
+# minimum over all 41 underlying sweep samples in the range would silently
+# change the sampled population (issue #274).
+FLOOR_WINDOW_IDX = [k for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
+
+# --------------------------------------------------------------------------
+# T1 item 5 noise-row grading (issue #274, DR-018).
+#
+# The bound is the RATIFIED target, read off `spec/target-spec.md` Sec 2 and
+# DR-003's per-row ratification ("RATIFY AS TARGET: ~ 30 nV/sqrt(Hz) thermal
+# floor, band 100 Hz-1 MHz"), and is NEVER loosened or tightened here
+# (CLAUDE.md: "agents do not relax the ratified spec to make results pass").
+# DR-003 ratified the number but left WHICH quantity is graded undecided;
+# the 2026-11-18 decision block on issue #274 selected it (option "floor"):
+# the minimum reported spot density from 100 kHz through 10 MHz, inclusive.
+# DR-018 (spec/decision-records/DR-018-noise-graded-quantity.md) records that
+# convention and carries it through the repo's ordinary DR ratification path
+# -- this constant copies the ratified 30 nV/sqrt(Hz) figure, not a new one.
+# Attached as a klt `limits.max` it makes the `klt sim` envelope record
+# per-corner pass/fail and the binding corner, and `spec_row` is what lets
+# `klt signoff --manifest` derive item 5's row coverage from the envelope
+# (`klt >= 0.8.0` derived coverage). A `fail` here is a recorded finding, not
+# a tuning signal: on the committed October record the floor passes at 4 of
+# 15 corners and fails warm.
+SPEC_NOISE_FLOOR_MAX_V_RTHZ = 30e-9
+
+
+def min2_expr(a: str, b: str) -> str:
+    """min(a, b) as one ngspice `let` expression: 0.5*(a+b-abs(a-b)).
+
+    Exact for reals; ngspice's control expression language has vecmin for
+    whole vectors but no n-ary minimum over *selected* samples, and slicing
+    `inoise_spectrum[lo,hi]` would take all 41 underlying samples -- the
+    population DR-018 pins to the nine reported spots. The graded reduction
+    therefore references the reported `en_k*` lets, pairwise via this
+    identity, in declaration order (klt emits one `let` per expr measurement
+    in list order, so a later expr resolves the earlier lets)."""
+    return f"0.5*({a}+{b}-abs({a}-{b}))"
+
+
+def noise_floor_measurements() -> list[dict]:
+    """The graded sampled-floor reduction (issue #274, DR-018): one scalar
+    `en_floor` per corner -- the minimum over the nine reported spots in
+    FLOOR_WINDOW_IDX -- plus the pairwise helper `let`s it needs. The helpers
+    are ungraded diagnostics (no limits/spec_row); only `en_floor` carries
+    the ratified bound, so the envelope grades the row exactly once."""
+    ms: list[dict] = []
+    work = [f"en_k{k:03d}" for k in FLOOR_WINDOW_IDX]
+    rnd = 0
+    while len(work) > 2:
+        nxt = [f"en_floor_r{rnd}m{i // 2}" for i in range(0, len(work) - 1, 2)]
+        ms.extend({"name": n, "expr": min2_expr(work[i], work[i + 1]), "unit": "V/rtHz"}
+                  for i, n in zip(range(0, len(work) - 1, 2), nxt))
+        if len(work) % 2:
+            nxt.append(work[-1])
+        work = nxt
+        rnd += 1
+    ms.append({"name": "en_floor", "expr": min2_expr(work[0], work[1]), "unit": "V/rtHz",
+               "limits": {"max": SPEC_NOISE_FLOOR_MAX_V_RTHZ},
+               "spec_row": "input_referred_noise"})
+    return ms
 
 BENCHES = {
     "psrr_vdd": {"netlist": "psrr_vdd.cir", "kind": "ac", "tag": "psrr-vdd"},
     "psrr_vss": {"netlist": "psrr_vss.cir", "kind": "ac", "tag": "psrr-vss"},
     "noise": {"netlist": "noise.cir", "kind": "noise", "tag": "noise"},
 }
+
+# Directory (repo-relative) a campaign writes its `klt sim` response envelopes
+# to instead of records/, set by --export-envelopes. Mirrors pvt_sweep.py's
+# issue-#246 mechanism (followed here per issue #274): an exported envelope is
+# committed evidence -- it is what the block manifest cites on T1 item 5 --
+# and is deliberately NOT also written to records/, so no committed byte
+# exists at two repo paths.
+EXPORT_ENVELOPE_DIR: list[Path | None] = [None]
+
+
+def envelope_path(record_id: str, tag: str) -> Path:
+    """Where this campaign's raw `klt sim` response for `tag` is committed:
+    manifests/envelopes/<id>-<tag>.klt.json under --export-envelopes (the
+    item-5 citation surface), records/<id>-<tag>.klt.json otherwise (the
+    bench's own record set, issue #54)."""
+    out = EXPORT_ENVELOPE_DIR[0]
+    if out is not None:
+        return out / f"{record_id}-{tag}.klt.json"
+    return RECORDS_DIR / f"{record_id}-{tag}.klt.json"
 
 
 def measurements(bench: str) -> list[dict]:
@@ -165,6 +254,9 @@ def measurements(bench: str) -> list[dict]:
             "expr": f"sqrt(ln(10) / {PPD} * ({integrand_body} - ({edge})))",
             "unit": "V",
         })
+        # The graded sampled floor (DR-018) after the spot lets it references;
+        # `vn_int_band` and the spots stay ungraded diagnostics.
+        m.extend(noise_floor_measurements())
     return m
 
 
@@ -277,6 +369,12 @@ def corner_rows(bench: str, payload: dict) -> tuple[list[dict], list[str]]:
             floor_pts = [spot[k] for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
             floor = min(floor_pts) if floor_pts and all(v is not None for v in floor_pts) else None
             row["en_floor_nv_rthz"] = floor * 1e9 if floor is not None else None
+            # The deck's graded value of the same reduction (DR-018): the
+            # envelope's own en_floor, reported beside the Python minimum so
+            # the two can be cross-checked per corner. None when the corner
+            # produced no value (error) -- never zero.
+            graded = num(c, "en_floor")
+            row["en_floor_graded_nv_rthz"] = graded * 1e9 if graded is not None else None
             corner_hz = None
             if all(v is not None for v in spot.values()) and floor:
                 corner_hz = log_interp_crossing(
@@ -303,6 +401,56 @@ def write_csv(path: Path, rows: list[dict], fields: list[str]) -> None:
             w.writerow([fmt(r[k]) for k in fields])
 
 
+FLOOR_KLT_VS_PYTHON_REL_TOL = 1e-6  # both sides read the same printed spot values
+
+
+def floor_grading_meta(payload: dict) -> dict:
+    """What the campaign's noise envelope graded, and the independent
+    cross-check (issue #274): the deck's graded `en_floor` against the Python
+    minimum of the same reported spots in the same response. The two must
+    agree to print precision -- a disagreement means the graded reduction
+    does not reduce what the bench reports. Corners whose `en_floor` carries
+    no value (errored) are listed, never folded into the minimum."""
+    checks, worst, worst_at, n_graded = [], None, None, 0
+    for c in payload["corners"]:
+        spot = {k: num(c, f"en_k{k:03d}") for k in CURVE_IDX}
+        pts = [spot[k] for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
+        py_min = min(pts) if pts and all(v is not None for v in pts) else None
+        graded = num(c, "en_floor")
+        if graded is None:
+            checks.append({"corner_id": c["corner_id"], "graded": None,
+                           "python_min": py_min, "agrees": None})
+            continue
+        n_graded += 1
+        if py_min is None:
+            checks.append({"corner_id": c["corner_id"], "graded": graded,
+                           "python_min": None, "agrees": False})
+            continue
+        delta = abs(graded - py_min)
+        rel = delta / py_min if py_min else 0.0
+        agrees = rel <= FLOOR_KLT_VS_PYTHON_REL_TOL
+        if worst is None or delta > worst:
+            worst, worst_at = delta, c["corner_id"]
+        checks.append({"corner_id": c["corner_id"], "graded": graded,
+                       "python_min": py_min, "rel_delta": rel, "agrees": agrees})
+    return {
+        "measurement": "en_floor", "spec_row": "input_referred_noise",
+        "graded_quantity": "minimum reported spot density over "
+                           f"[{freq_of(FLOOR_LO_IDX):g}, {freq_of(FLOOR_HI_IDX):g}] Hz, "
+                           f"{len(FLOOR_WINDOW_IDX)} reported spots, inclusive endpoints",
+        "window_hz": [freq_of(FLOOR_LO_IDX), freq_of(FLOOR_HI_IDX)],
+        "reported_spots": len(FLOOR_WINDOW_IDX),
+        "limits_max_v_rthz": SPEC_NOISE_FLOOR_MAX_V_RTHZ,
+        "decision": "issue #274 decision block 2026-11-18 (option floor)",
+        "dr": "spec/decision-records/DR-018-noise-graded-quantity.md",
+        "klt_vs_python": {"graded_points": n_graded,
+                          "max_abs_delta_v": worst, "at": worst_at,
+                          "rel_tol": FLOOR_KLT_VS_PYTHON_REL_TOL,
+                          "agrees": all(c["agrees"] for c in checks) if checks else None},
+        "corners": checks,
+    }
+
+
 def check_env() -> int:
     ok = 0
     for tool in ("klt", "ngspice"):
@@ -327,10 +475,22 @@ def main(argv=None) -> int:
                    help="forwarded as batch.runner_version_check (batch backend only)")
     p.add_argument("--allow-errors", action="store_true",
                    help="record a bench even if some corners errored (default: write nothing)")
+    p.add_argument("--export-envelopes", default=None, metavar="DIR",
+                   help="write the raw `klt sim` response envelopes to this committed "
+                        "repo-relative directory (the T1 item 5 citation surface) "
+                        "instead of records/; never both (pvt_sweep.py issue-#246 "
+                        "convention, followed here per issue #274)")
     args = p.parse_args(argv)
 
     if args.check_env:
         return check_env()
+
+    if args.export_envelopes:
+        EXPORT_ENVELOPE_DIR[0] = (REPO_ROOT / args.export_envelopes).resolve()
+        if not EXPORT_ENVELOPE_DIR[0].is_relative_to(REPO_ROOT):
+            print(f"ERROR: --export-envelopes must stay inside the checkout: "
+                  f"{args.export_envelopes}", file=sys.stderr)
+            return 1
 
     benches = [b.strip() for b in args.benches.split(",") if b.strip()]
     corners = [c.strip() for c in args.corners.split(",") if c.strip()]
@@ -467,7 +627,7 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 manifest_path, _summary = artifact_store.store(ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
             except artifact_store.ArtifactError as exc:
                 print(f"ERROR: raw outputs not stored; no record written: {exc}", file=sys.stderr)
-                return 1
+                return 1, False  # (exit, record written) -- main() subscripts rc[1]
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
@@ -478,7 +638,9 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
             req_rec = dict(res["request"])
             req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
             write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
-            write_new(RECORDS_DIR / f"{record_id}-{tag}.klt.json", json.dumps(payload, indent=2) + "\n")
+            env_path = envelope_path(record_id, tag)
+            env_path.parent.mkdir(parents=True, exist_ok=True)
+            write_new(env_path, json.dumps(payload, indent=2) + "\n")
             n_art = n_logs[bench]
             for c in payload["corners"]:
                 src = (c.get("artifacts") or {}).get("deck")
@@ -497,7 +659,10 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 "rendered_body": bodies[bench].relative_to(REPO_ROOT).as_posix(),
                 "request_snapshot": (snap_dir / f"{tag}.request.json").relative_to(REPO_ROOT).as_posix(),
                 "csv": f"sim/opamp-characterization/records/{csv_path.name}",
+                "envelope": env_path.relative_to(REPO_ROOT).as_posix(),
             }
+            if bench == "noise":
+                meta_benches[bench]["floor_grading"] = floor_grading_meta(payload)
             any_bad |= payload["status"] not in ("pass", "pass_partial")
 
         meta = {
