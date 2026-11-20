@@ -362,6 +362,11 @@ class KltBenchTests(unittest.TestCase):
         # the two ratified quiescent-power figures ARE that current at their supplies
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.98, 128.7e-6, places=9)
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.80, 117.0e-6, places=9)
+        # output swing (issue #358): "~ 0.072 - 1.464 V (~ 1.39 Vpp)" -- the row's
+        # own numbers, graded as window containment plus the endpoints' difference
+        self.assertEqual(pvt.SPEC_SWING_LOW_MAX_V, 0.072)
+        self.assertEqual(pvt.SPEC_SWING_HIGH_MIN_V, 1.464)
+        self.assertAlmostEqual(pvt.SPEC_SWING_VPP_MIN_V, 1.464 - 0.072, places=12)
 
     def test_every_graded_row_is_tagged_exactly_once_per_request_set(self):
         tagged = {}
@@ -389,6 +394,52 @@ class KltBenchTests(unittest.TestCase):
         by = {m["name"]: m for m in pvt.icmr_measurements(1.8)}
         self.assertEqual(by["lo_40db"]["limits"], {"max": pvt.TARGET_ICMR_V[0]})
         self.assertEqual(by["hi_40db"]["limits"], {"min": pvt.TARGET_ICMR_V[1]})
+
+    # -- native slope_band swing emission (issue #358) -----------------------
+
+    def test_swing_slope_band_is_gated_off_by_default(self):
+        """The pinned CI client (klt 0.8.0) cannot run the slope_band form, so the
+        default dc_swing request must stay `.meas`-only (unchanged shape)."""
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
+        req, _body, _tag = klt_request("dc_swing")
+        self.assertTrue(all("slope_band" not in m for m in req["measurements"]))
+        self.assertTrue(all("spice" in m for m in req["measurements"]))
+
+    def test_swing_slope_band_emits_the_ratified_row_natively(self):
+        was = pvt.SWING_SLOPE_BAND[0]
+        pvt.SWING_SLOPE_BAND[0] = True
+        try:
+            by = {m["name"]: m for m in pvt.swing_slope_band_measurements()}
+            self.assertEqual(sorted(by), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+            for name, m in by.items():
+                self.assertNotIn("spice", m, name)  # slope_band is an exclusive form
+                self.assertEqual(m["spec_row"], "output_swing", name)
+                self.assertIn("limits", m, name)  # a spec_row tag without limits covers nothing
+                sb = m["slope_band"]
+                self.assertEqual(sorted(sb), ["anchor", "max_slope", "min_slope", "report", "x", "y"], name)
+                self.assertEqual((sb["y"], sb["x"]), ("v(out)", "v(inp)"), name)
+                # swing_row()'s own band constants: the native rule cannot drift
+                self.assertEqual((sb["min_slope"], sb["max_slope"]),
+                                 (pvt.SWING_SLOPE_MIN, pvt.SWING_SLOPE_MAX), name)
+                # anchor: mid-supply at the nominal rail (one number per request;
+                # inside swing_row()'s mid-supply run at every corner of the grid)
+                self.assertEqual(sb["anchor"], 0.5 * pvt.VDD_BY_CORNER["tt"], name)
+            self.assertEqual(by["swing_lo_v"]["slope_band"]["report"], "y_lo")
+            self.assertEqual(by["swing_hi_v"]["slope_band"]["report"], "y_hi")
+            self.assertEqual(by["swing_vpp_v"]["slope_band"]["report"], "y_span")
+            # containment plus span, exactly as the ratified row states them
+            self.assertEqual(by["swing_lo_v"]["limits"], {"max": pvt.SPEC_SWING_LOW_MAX_V})
+            self.assertEqual(by["swing_hi_v"]["limits"], {"min": pvt.SPEC_SWING_HIGH_MIN_V})
+            self.assertEqual(by["swing_vpp_v"]["limits"], {"min": pvt.SPEC_SWING_VPP_MIN_V})
+            # the gated request carries all four, names unique (klt requires it)
+            req, _body, _tag = klt_request("dc_swing")
+            names = [m["name"] for m in req["measurements"]]
+            self.assertEqual(names[0], "vout_mid_v")
+            self.assertEqual(sorted(names[1:]), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+            self.assertEqual(len(names), len(set(names)))
+        finally:
+            pvt.SWING_SLOPE_BAND[0] = was
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
 
     def test_slew_numerator_is_the_level_difference_not_a_vdd_literal(self):
         """0.6*span == v(l80) - v(l20) at EVERY supply, so one request spans the
