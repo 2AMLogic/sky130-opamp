@@ -247,6 +247,24 @@ CARTESIAN_SUPPLIES_V = (1.62, 1.80, 1.98)
 #                      so the measured 40 dB window must CONTAIN it: low edge
 #                      <= 0.888 V and high edge >= 1.024 V.
 #
+#                     output_swing     NOT in ITEM5_GRADED_ROWS yet (Phase A of issue #358): no
+#                     committed envelope grades the row until a released klt
+#                     carries klayout-tools#5518's `slope_band` form (v0.9.2,
+#                     2026-11-15, predates the close). The bounds exist so the
+#                     opt-in native emission (--swing-slope-band,
+#                     swing_slope_band_measurements) already grades the ratified
+#                     row verbatim. target-spec.md Sec 2 "Output swing": "~ 0.072
+#                     - 1.464 V (~ 1.39 Vpp, ~ 86% of the 1.62 V worst-case-low
+#                     rail) [P]" -- like the ratified ICMR window, a range the
+#                     design commits to COVERING, so it grades as containment
+#                     plus span: low edge <= 0.072 V, high edge >= 1.464 V, and
+#                     vpp >= 1.392 V (the row's own endpoints' difference; the
+#                     row prints it rounded as "~ 1.39 Vpp"). The expected
+#                     outcome is a graded FAIL at the binding corner -- the row
+#                     itself already records 0.948 Vpp @ SS/-40 C/1.62 V vs the
+#                     ~1.39 Vpp estimate ("measured, partially closed") -- a
+#                     finding, never a reason to touch the bounds.
+#
 # Rows this harness's `klt sim` requests cannot grade are declared gaps in
 # `manifests/sky130-opamp.json` (`spec_rows."5"`), never silently dropped --
 # see manifests/README.md item 5 and ITEM5_UNGRADED_ROWS below.
@@ -255,6 +273,9 @@ SPEC_GBW_MIN_HZ = 16e6
 SPEC_PM_MIN_DEG = 60.0
 SPEC_SR_MIN_V_PER_US = 20.0
 SPEC_IQ_MAX_A = 65e-6
+SPEC_SWING_LOW_MAX_V = 0.072
+SPEC_SWING_HIGH_MIN_V = 1.464
+SPEC_SWING_VPP_MIN_V = 1.392
 # Radians -> degrees as an ngspice `.meas ... param=` literal (no `pi` in a
 # param expression); 180/pi to 16 significant digits.
 RAD_TO_DEG = "57.29577951308232"
@@ -516,22 +537,31 @@ def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
     return row, deck
 
 
+# The ratified swing rule's unity-slope band (spec/target-spec.md Sec 2 "Output
+# swing"; ../testbench/opamp_dc_swing.spice.tmpl's header states the rationale).
+# One owner for both consumers of the rule: swing_row()'s Python reduction and
+# the native slope_band emission (swing_slope_band_measurements) -- the two can
+# never drift into grading different bands.
+SWING_SLOPE_MIN = 0.8
+SWING_SLOPE_MAX = 1.2
+
+
 def swing_row(corner: str, temp: float, vdd: float, vin: list[float], vout: list[float]) -> dict:
     """Output-swing metrics from a unity-gain-buffer DC transfer sweep (shared by
     the local-ngspice and the klt-waveform paths so the rule cannot diverge).
 
     Finds the largest contiguous run around mid-supply where the local slope
-    d(vout)/d(vin) stays within [0.8, 1.2] of unity -- see
+    d(vout)/d(vin) stays within [SWING_SLOPE_MIN, SWING_SLOPE_MAX] of unity -- see
     ../testbench/opamp_dc_swing.spice.tmpl's header for the rationale."""
     n = len(vin)
     slopes = [(vout[i + 1] - vout[i]) / (vin[i + 1] - vin[i]) if vin[i + 1] != vin[i] else 0.0
               for i in range(n - 1)]
     center = min(range(n), key=lambda i: abs(vin[i] - 0.5 * vdd))
     lo = center
-    while lo > 0 and 0.8 <= slopes[min(lo - 1, len(slopes) - 1)] <= 1.2:
+    while lo > 0 and SWING_SLOPE_MIN <= slopes[min(lo - 1, len(slopes) - 1)] <= SWING_SLOPE_MAX:
         lo -= 1
     hi = center
-    while hi < n - 1 and 0.8 <= slopes[min(hi, len(slopes) - 1)] <= 1.2:
+    while hi < n - 1 and SWING_SLOPE_MIN <= slopes[min(hi, len(slopes) - 1)] <= SWING_SLOPE_MAX:
         hi += 1
     vout_min, vout_max = vout[lo], vout[hi]
     return {
@@ -746,8 +776,51 @@ def tran_sr_measurements() -> list[dict]:
 
 
 def swing_measurements() -> list[dict]:
-    """One sanity `.meas` (mid-sweep output); the sweep itself is the waveform artifact."""
-    return [{"name": "vout_mid_v", "unit": "V", "spice": ".meas dc vout_mid_v find v(out) at=0.5"}]
+    """One sanity `.meas` (mid-sweep output); the sweep itself is the waveform
+    artifact. With SWING_SLOPE_BAND[0] set (issue #358, --swing-slope-band) the
+    contiguous-run reduction also rides the request natively as three
+    `measurements[].slope_band` entries; swing_row()'s waveform reduction of
+    record, and this CSV it writes, are unchanged either way."""
+    ms = [{"name": "vout_mid_v", "unit": "V", "spice": ".meas dc vout_mid_v find v(out) at=0.5"}]
+    if SWING_SLOPE_BAND[0]:
+        ms += swing_slope_band_measurements()
+    return ms
+
+
+def swing_slope_band_measurements() -> list[dict]:
+    """Native twin of swing_row()'s rule (issue #358; klayout-tools#5518): three
+    `slope_band` entries -- low end, high end, difference -- reducing the dc
+    sweep to the largest contiguous run around mid-supply over which d(vout)/
+    d(vinp) stays in [SWING_SLOPE_MIN, SWING_SLOPE_MAX], each tagged
+    `spec_row: output_swing` and graded against the ratified row's own numbers
+    (SPEC_SWING_*_V: window containment plus span).
+
+    The anchor is mid-supply at the nominal rail (0.5 * VDD_BY_CORNER["tt"] =
+    0.9 V). A slope_band anchor is ONE number per request and the paired supply
+    axis spans 1.62/1.8/1.98 V, so no literal is mid-supply at every corner; the
+    run the rule grades is the one CONTAINING the anchor, and at all 15 corners
+    of record 20261113-150556-60489db-8101bf the 0.9 V point and that corner's
+    own mid-supply sit inside the SAME in-band run, so this anchor reproduces
+    swing_row()'s mid-supply-centred run everywhere on the committed grid.
+
+    The klt-side numerics still differ from swing_row()'s by construction:
+    slope_band grades central-difference slopes AT sample points (edges are the
+    outermost in-band points, no interpolation), swing_row() forward-difference
+    slopes on the segments between points -- on that record the two agree to
+    <= 2 sweep steps per edge (VDD/360 = 4.5-5.5 mV; worst vpp difference
+    9.98 mV, binding corner ss/-40C/1.62V). Needs klt >= the first release
+    carrying klayout-tools#5518; the pinned CI client (0.8.0) must never see
+    these entries, hence the SWING_SLOPE_BAND gate."""
+    band = {"y": "v(out)", "x": "v(inp)", "anchor": 0.5 * VDD_BY_CORNER["tt"],
+            "min_slope": SWING_SLOPE_MIN, "max_slope": SWING_SLOPE_MAX}
+    return [
+        {"name": "swing_lo_v", "unit": "V", "slope_band": {**band, "report": "y_lo"},
+         "limits": {"max": SPEC_SWING_LOW_MAX_V}, "spec_row": "output_swing"},
+        {"name": "swing_hi_v", "unit": "V", "slope_band": {**band, "report": "y_hi"},
+         "limits": {"min": SPEC_SWING_HIGH_MIN_V}, "spec_row": "output_swing"},
+        {"name": "swing_vpp_v", "unit": "V", "slope_band": {**band, "report": "y_span"},
+         "limits": {"min": SPEC_SWING_VPP_MIN_V}, "spec_row": "output_swing"},
+    ]
 
 
 KLT_MAX_PARALLEL_SUBMITS = 2  # the fleet is shared and capped; do not grab 5 instances at once
@@ -761,6 +834,14 @@ CAPACITY_WAIT_S = 60
 EXPORT_ENVELOPE_DIR: list[Path | None] = [None]
 RUNNER_VERSION_CHECK = ["warn"]  # set from --batch-runner-check
 KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set from --timeout-s
+# --swing-slope-band (issue #358): also emit the dc_swing request's contiguous-run
+# reduction natively (swing_slope_band_measurements). Default OFF: the form needs
+# klt >= the first release carrying klayout-tools#5518 (closed 2026-11-17, after
+# v0.9.2), and the pinned CI client (0.8.0) neither validates nor runs it -- a
+# default-on emission would break every committed request shape. Phase B of
+# issue #358 (batch re-run + committed envelope) flips the row's grading
+# provenance once such a release exists.
+SWING_SLOPE_BAND = [False]
 
 
 # (tag, report) of every `klt sim` response this campaign collected, so the
@@ -2391,6 +2472,12 @@ def parse_args(argv):
                         "instead of into the git-ignored stage, for a campaign whose envelopes are "
                         "cited as T1 item 5 evidence in manifests/sky130-opamp.json (issue #246). "
                         "An exported envelope is never also handed to the artifact store")
+    p.add_argument("--swing-slope-band", action="store_true",
+                   help="dc_swing only (issue #358): additionally emit the contiguous-run swing "
+                        "reduction as native measurements[].slope_band entries (low/high/difference) "
+                        "graded against the ratified output_swing row. Needs klt >= the first release "
+                        "carrying klayout-tools#5518 (after v0.9.2); default off so the pinned CI "
+                        "client (0.8.0) sees an unchanged request. swing_row()'s CSV is unchanged")
     p.add_argument("--keep-work", action="store_true")
     args = p.parse_args(argv)
     args.backend = resolve_backend(args.backend)
@@ -2402,6 +2489,7 @@ def main(argv=None) -> int:
     RUNNER_VERSION_CHECK[0] = args.batch_runner_check
     LOCAL_SIM_FORBIDDEN[0] = bool(args.fleet and args.backend == "batch")
     KLT_TIMEOUT_S[0] = args.timeout_s
+    SWING_SLOPE_BAND[0] = args.swing_slope_band
     EXPORT_ENVELOPE_DIR[0] = (REPO_ROOT / args.export_envelopes).resolve() if args.export_envelopes else None
     if EXPORT_ENVELOPE_DIR[0] is not None and not EXPORT_ENVELOPE_DIR[0].is_relative_to(REPO_ROOT):
         raise HarnessError(f"--export-envelopes must stay inside the checkout: {args.export_envelopes}")
