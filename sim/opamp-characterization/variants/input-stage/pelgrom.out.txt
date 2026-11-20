@@ -1,0 +1,13 @@
+op source: one local ngspice .op, tt, 27 C, VDD 1.8 V, Iref 5 uA, Vd = +151 uV (same stimulus convention as pelgrom_handcalc.OP; the variant settles v(out) = 1.0377 V open-loop there), netlist variants/input-stage/icmr-rebias.spice -- see op-probe.out.txt
+XM1: .model sky130_fd_pr__nfet_01v8__model.4 nmos  W*L*mult=17.36 um2  sigma_VT=0.805 mV  sigma_beta/beta=0.083 %
+XM3: .model sky130_fd_pr__pfet_01v8__model.6 pmos  W*L*mult=4.113 um2  sigma_VT=3.627 mV  sigma_beta/beta=0.318 %
+XM6: .model sky130_fd_pr__pfet_01v8__model.6 pmos  W*L*mult=41.13 um2  sigma_VT=1.147 mV  sigma_beta/beta=0.100 %
+XM7: .model sky130_fd_pr__nfet_01v8__model.4 nmos  W*L*mult=93.84 um2  sigma_VT=0.346 mV  sigma_beta/beta=0.036 %
+XMB1: .model sky130_fd_pr__nfet_01v8__model.4 nmos  W*L*mult=9.384 um2  sigma_VT=1.096 mV  sigma_beta/beta=0.112 %
+A1 = 54.3   eps7 = 2.103 %
+  pair        1.140 mV (input-referred, 1 sigma)
+  mirror      3.851 mV (input-referred, 1 sigma)
+  stage2      0.021 mV (input-referred, 1 sigma)
+  bias        0.024 mV (input-referred, 1 sigma)
+  passives    0.000 mV (input-referred, 1 sigma)
+  TOTAL       4.016 mV
