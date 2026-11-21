@@ -139,8 +139,9 @@ Comparison per source:
 - **This block is not ahead on headline performance.** Its fall slew rate
   (11.03 V/µs worst) and output swing (0.948 Vpp, 58.5 % worst) do not meet
   their own targets. PSRR− drops to 54.90 dB at SS / −40 °C. The 15-corner
-  noise grid is not recorded. There is no layout yet, whereas S1 has full
-  post-layout characterisation.
+  noise grid is not recorded. A layout now exists (`layout/opamp_core/`,
+  klt DRC clean / LVS matching), but not the post-layout *simulation*
+  characterisation S1 already shows.
 
 ## 3. Position
 
@@ -159,9 +160,16 @@ The differentiator is the **evidence chain**, not headline performance:
 - **Contradictions are recorded, not hidden.** Hand estimates that simulation
   contradicted (GBW on the DR-002 sizing, fall slew, swing) are written up as
   findings. No target in `target-spec.md` was relaxed to make a result pass.
-- **What this block does not yet have.** It has no layout, DRC/LVS or
-  post-layout evidence, which S1 already shows. Until that exists, the
-  evidence chain is complete only up to schematic level.
+- **What this block does not yet have.** The signoff picture has since
+  split three ways (`layout/opamp_core/`): the layout and its **klt**
+  DRC/LVS verdicts now exist (`drc` clean, `lvs` match); the independent
+  **Magic/netgen** signoff does not pass — Magic `drc(full)` reports
+  `drc_total` 2 (the inherited `opamp_comp` poly-resistor contact-head
+  rule, klayout-tools#5659; in-repo record: `layout/opamp_comp/README.md`,
+  "klt 0.8.0 evaluated and rejected") and netgen `pins_matched` is false;
+  and post-layout *simulation* evidence, which S1 already shows, still
+  does not exist at all. Until that last piece exists, the evidence chain
+  runs through layout verdicts but is complete only up to schematic level.
 
 ## 4. Method and limits of this survey
 
