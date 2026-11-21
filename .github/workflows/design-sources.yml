@@ -30,20 +30,33 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install xschem
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends xschem
-          xschem --version | head -1
-
       # xschem resolves sky130_fd_pr/*.sym from the PDK's own xschemrc, so
-      # the pinned PDK is needed (only the sky130_fd_pr library).
+      # the pinned PDK is needed (only the sky130_fd_pr library). It is
+      # installed before xschem because install-xschem's headless smoke
+      # netlists design/opamp_core.sch through design/xschemrc.
       - name: Install pinned sky130 PDK
         run: |
           pip install volare
           volare enable --pdk sky130 --pdk-root "$HOME/.volare" \
             --include-libraries sky130_fd_pr "$PDK_VERSION"
           ls "$HOME/.volare/sky130A/libs.tech/xschem" | head
+
+      # Fleet-pinned xschem 3.4.7 / 92dd8fe5 (2AMLogic/klayout-tools
+      # docker/eda-sim/pdk-versions.json tools.xschem; 2am#7275), built from
+      # source: Ubuntu noble's apt package is 3.4.4, not a fleet version.
+      - name: Install xschem
+        run: |
+          set -euo pipefail
+          .github/scripts/install-xschem
+
+      # install-xschem exports the bin dir via GITHUB_PATH, which only takes
+      # effect for steps after the one that appends it -- verify in a
+      # follow-up step, not in-step.
+      - name: Pinned xschem is on PATH
+        run: |
+          set -euo pipefail
+          command -v xschem
+          .github/scripts/install-xschem --check
 
       - name: Netlist matches a fresh xschem netlist of the schematic
         run: |
