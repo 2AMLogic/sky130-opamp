@@ -100,8 +100,10 @@ unstaged change restores the file), applying the same guarded-path and allowlist
 rules. Untracked new evidence is an addition and passes. PR CI keeps the
 committed-only invocation. If `origin/main` does not resolve the append-only
 check is skipped with an explicit message (so uncommitted edits are then not
-checked either; run `git fetch origin main`). The runner mirrors `.github/workflows/tests.yml` (the source
-of truth); it never runs xschem. The separate xschem + pinned-PDK gate
+checked either; run `git fetch origin main`). The runner is the single source
+of the gate commands: `.github/workflows/tests.yml` calls this same script
+(on `pull_request` with `--pr-base origin/<base_ref>`, the committed-only
+form); it never runs xschem. The separate xschem + pinned-PDK gate
 (`netlist_check.py` regeneration and the `EndToEnd` netlist tests) runs only in
 `.github/workflows/design-sources.yml`.
 
