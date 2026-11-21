@@ -1,0 +1,43 @@
+** EXPERIMENTAL VARIANT (issue #359) -- NOT the canonical design. Tag icmr-rebias:
+** input-stage low-headroom re-bias at UNCHANGED currents (candidate (a) of
+** variants/input-stage/PLAN.md). Base: design/netlist/opamp_core.spice (DR-013
+** grid-legal widths, sha256:e954d17d...), copied verbatim except FIVE cards:
+**   XM1, XM2        nfet L=1.2  W 6.030 -> 14.470 um  (gm/ID 17 -> 20 at TT/27C)
+**   XM3, XM4, XM6   pfet L=0.3  W 4.635 -> 13.710 um  (gm/ID 14 -> 16 at TT/27C)
+** XM3:XM4:XM6 move as ONE width (mirror ratio 1:1:10 and I(XM6)=50 uA preserved
+** by construction); the NMOS bias group XMB1:XM5:XM7 (1:2:10) is untouched.
+** Flat netlist, ports vdd vss inn inp out ibias, as the canonical file. Generator
+** and checks: variants/input-stage/input_stage_rebias.py (generate / check).
+** All widths on the 0.005 um grid, nf = 1.
+**.subckt opamp_core vdd vss inn inp out ibias
+*.iopin vdd
+*.iopin vss
+*.iopin inn
+*.iopin inp
+*.iopin out
+*.iopin ibias
+XM3 d1 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=13.710 nf=1 ad=3.9759 as=3.9759 pd=28 ps=28 nrd=0.021152443471918306
++ nrs=0.021152443471918306 sa=0 sb=0 sd=0 mult=1 m=1
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM4 d2 d1 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=13.710 nf=1 ad=3.9759 as=3.9759 pd=28 ps=28 nrd=0.021152443471918306
++ nrs=0.021152443471918306 sa=0 sb=0 sd=0 mult=1 m=1
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=1 m=1
+XM1 d1 inn tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=14.470 nf=1 ad=4.1963 as=4.1963 pd=29.52 ps=29.52 nrd=0.020041465100207323
++ nrs=0.020041465100207323 sa=0 sb=0 sd=0 mult=1 m=1
++ nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM2 d2 inp tail vss sky130_fd_pr__nfet_01v8 L=1.2 W=14.470 nf=1 ad=4.1963 as=4.1963 pd=29.52 ps=29.52 nrd=0.020041465100207323
++ nrs=0.020041465100207323 sa=0 sb=0 sd=0 mult=1 m=1
++ nrs=0.0480928689883914 sa=0 sb=0 sd=0 mult=1 m=1
+XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=2 m=2
+XMB1 ibias ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=1 m=1
+XM6 out d2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.3 W=13.710 nf=1 ad=3.9759 as=3.9759 pd=28 ps=28 nrd=0.021152443471918306
++ nrs=0.021152443471918306 sa=0 sb=0 sd=0 mult=10 m=10
++ nrs=0.0625674217907228 sa=0 sb=0 sd=0 mult=10 m=10
+XM7 out ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1 ad=2.2678 as=2.2678 pd=16.22 ps=16.22 nrd=0.0370843989769821
++ nrs=0.0370843989769821 sa=0 sb=0 sd=0 mult=10 m=10
+XRz cz d2 vss sky130_fd_pr__res_high_po_1p41 L=9.765 mult=1 m=1
+XCc cz out sky130_fd_pr__cap_mim_m3_1 W=15.62 L=15.62 MF=1 m=1
+**.ends
+.end

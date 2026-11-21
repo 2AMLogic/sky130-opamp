@@ -1,0 +1,396 @@
+{
+  "record_id": "20261121-162850-e5877a5-a2eb9a",
+  "timestamp": "2026-11-21T16:31:33.937526+00:00",
+  "git": {
+    "sha": "e5877a5"
+  },
+  "dut": {
+    "source_path": "sim/opamp-characterization/variants/input-stage/icmr-rebias.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261121-162850-e5877a5-a2eb9a/opamp_core.spice",
+    "sha256": "sha256:8c1160ee1c6cbb3eb411245280694f60fc539e69bc040e58444d08aac0b86a6d"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "sf"
+    ],
+    "temps_c": [
+      125.0
+    ],
+    "analyses": [
+      "icmr",
+      "tran_sr_icmr"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "cartesian",
+    "supplies_v": [
+      1.8
+    ],
+    "expected_tuples": [
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 1,
+    "n_runs": 2,
+    "n_failed": 0,
+    "execution": {
+      "klt_analyses": [
+        "icmr",
+        "tran_sr_icmr"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    },
+    "tran_sr_icmr": {
+      "guard_v": 0.05,
+      "min_span_v": 0.2,
+      "stimulus": "standard 0.3..0.7*VDD intersected with [ICMR_low+guard, ICMR_high-guard] of the same point",
+      "end_margin_s": 1e-08,
+      "timing": {
+        "delay_s": 2e-07,
+        "edge_s": 1e-09,
+        "pw_s": 1e-06,
+        "stop_s": 2.2e-06
+      },
+      "reach_tol": 0.1,
+      "settle_tol": 0.01,
+      "rate_window_s": 6e-09,
+      "plateau_frac_of_peak": 0.9,
+      "slew_limited_min_fraction": 0.4,
+      "linear_max_fraction": 0.15,
+      "tail_vds_loss_v": 0.1,
+      "pair_vds_loss_v": 0.1,
+      "gain_ratio": 1.1,
+      "same_band_ratio": 0.9,
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1017-aws x86_64",
+    "klt": "klt 0.9.3.dev2586+g9bac82596e2f",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "icmr-sf-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 80.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-fcf3942efba9",
+        "region": "us-east-1",
+        "instance_id": "i-09e769df482062d4e",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 24,
+        "client_submitted_at": "2026-11-21T16:28:51.187237Z",
+        "client_launched_at": "2026-11-21T16:29:08.623575Z",
+        "client_status_terminal_at": "2026-11-21T16:30:10.761745Z",
+        "client_collected_at": "2026-11-21T16:30:11.429758Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2586+g9bac82596e2f",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8375C CPU @ 2.90GHz",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 1
+        },
+        "by_severity": {
+          "warning": 1
+        },
+        "corners_with_diagnostics": 1
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261121-162850-e5877a5-a2eb9a/icmr-sf-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261121-162850-e5877a5-a2eb9a/klt-icmr-sf-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 80.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-244a44ab139a",
+        "region": "us-east-1",
+        "instance_id": "i-0a13b63b7ee05f103",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 22,
+        "client_submitted_at": "2026-11-21T16:30:12.038613Z",
+        "client_launched_at": "2026-11-21T16:30:29.178193Z",
+        "client_status_terminal_at": "2026-11-21T16:31:31.186275Z",
+        "client_collected_at": "2026-11-21T16:31:31.951810Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2586+g9bac82596e2f",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8375C CPU @ 2.90GHz",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261121-162850-e5877a5-a2eb9a/tran-sr-icmr-sf-125C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261121-162850-e5877a5-a2eb9a/klt-tran-sr-icmr-sf-125C-1.8V-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "spec_row_grading": {
+    "rows": {
+      "input_common_mode_range": {
+        "status": "pass",
+        "graded_measurement_points": 2,
+        "measurements": [
+          {
+            "envelope": "icmr-sf-1.8V",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/125C",
+              "value": 0.517476,
+              "margin": 0.37052399999999996
+            }
+          },
+          {
+            "envelope": "icmr-sf-1.8V",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/125C",
+              "value": 1.53549,
+              "margin": 0.51149
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "icmr-sf-1.8V",
+          "measurement": "lo_40db",
+          "corner_id": "sf/1.800V/125C",
+          "value": 0.517476,
+          "margin": 0.37052399999999996,
+          "unit": "V"
+        }
+      }
+    },
+    "klt_vs_python": [],
+    "klt_vs_python_agrees": null,
+    "ungraded_rows": {
+      "output_swing": "the ratified grading rule is a contiguous-run reduction over a swept waveform (largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` measurement form expresses it (klayout-tools#5518), so the row is measured (dc_swing waveform, -dc-swing.csv) but graded by no envelope",
+      "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, but carry no limits/spec_row and DR-003 left the graded quantity undecided (issue #274)",
+      "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
+      "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); target proposed by DR-009, not ratified",
+      "cmrr": "target proposed by DR-008, not ratified: no ratified bound to grade",
+      "area": "not a PVT-simulated row (post-layout quantity, [TBD])"
+    },
+    "all_graded_rows_present": false
+  },
+  "tran_sr_icmr_summary": {
+    "points": 1,
+    "verdict_counts": {
+      "standard_inside_icmr": 1
+    },
+    "fall_class_counts": {
+      "slew_limited": 1,
+      "linear": 0,
+      "inconclusive": 0,
+      "invalid": 0
+    },
+    "note": "diagnostic metric only; no target closure or topology adoption is implied",
+    "unavailable_reasons": [
+      "tran_sr not run in this campaign (add it to --analyses): no same-DUT standard reference"
+    ]
+  },
+  "links": {
+    "icmr_csv": "sim/opamp-characterization/records/20261121-162850-e5877a5-a2eb9a-icmr.csv",
+    "tran_sr_icmr_csv": "sim/opamp-characterization/records/20261121-162850-e5877a5-a2eb9a-tran-sr-icmr.csv"
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-characterization-20261121-162850-e5877a5-a2eb9a.manifest.json"
+  },
+  "errors": [],
+  "elapsed_s": 161.4
+}

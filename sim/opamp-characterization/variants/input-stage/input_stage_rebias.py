@@ -47,8 +47,10 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent.parent
+sys.path.insert(0, str(REPO / "sim" / "lib"))
 sys.path.insert(0, str(HERE.parent))
 import sink_sizing as ss  # noqa: E402  (committed CSV loader / interpolation)
+from corners import VDD_BY_CORNER  # noqa: E402  (single owner of the ratified table)
 
 CANON = REPO / "design" / "netlist" / "opamp_core.spice"
 OUT_DIR = HERE
@@ -58,7 +60,6 @@ VARIANT = OUT_DIR / f"{VARIANT_TAG}.spice"
 I_UNIT_UA = 5.0                    # first-stage branch unit current (unchanged)
 GM_ID_PAIR = 20.0                  # was 17 (DR-007 pair target)
 GM_ID_MIRROR = 16.0                # was 14 (DR-007 M3/M4/M6 target)
-VDD_BY_CORNER = {"ss": 1.62, "tt": 1.8, "ff": 1.98, "sf": 1.8, "fs": 1.8}
 ICMR_MEASURED_SS_N40 = (0.7168, 1.1686)   # record 20261011-141126-04489d4-b4ac6f
 ICMR_MEASURED_FS_N40_LOW = 0.7388         # highest low edge on the 15-point grid
 CONSUMER_POINT_V = 0.73                   # sky130-bandgap sense point (FS/-40C miss)

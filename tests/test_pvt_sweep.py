@@ -244,8 +244,14 @@ class CommittedRecordShapeTests(unittest.TestCase):
             for analysis in m["analyses"]:
                 with self.subTest(record=p.name, analysis=analysis):
                     if f"{analysis}_csv" not in d["links"]:
-                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors
-                        self.assertTrue(any(e.startswith(f"{analysis}:") for e in d["errors"]), analysis)
+                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors.
+                        # Request tags are dash-form ("tran-sr", "swing-fixcm"; build_klt_request), and a
+                        # bench can also fail per-unit with the tuple-suffixed label ("tran-sr-icmr-sf--40C-1.62V"),
+                        # so accept the bare analysis, the bare tag, or a suffixed tag.
+                        tag = analysis.replace("_", "-")
+                        self.assertTrue(any(e.startswith(f"{analysis}:") or e.startswith(f"{tag}:")
+                                            or e.startswith(f"{tag}-")
+                                            for e in d["errors"]), analysis)
                         continue
                     rel = d["links"][f"{analysis}_csv"]
                     path = REPO / rel
