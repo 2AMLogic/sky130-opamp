@@ -114,14 +114,11 @@ class AppendOnlyTests(unittest.TestCase):
                 self.assertEqual(ao.main(["--stdin", "--allowlist", "/nonexistent"]), rc)
 
 
-class LocalModeGitTests(unittest.TestCase):
-    """Real temp git repos: committed base..HEAD plus index/worktree vs HEAD."""
-
-    EV = "sim/blk/records/r.md"
-    EV2 = "sim/blk/corners/c.log"
+class GitRepoTests(unittest.TestCase):
+    """Shared harness: a temp git repo with self.git()/self.git_out()/self.write()."""
 
     def setUp(self):
-        import os, subprocess, tempfile
+        import os, tempfile
         self._tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self._tmp.cleanup)
         self.repo = Path(self._tmp.name)
@@ -131,22 +128,37 @@ class LocalModeGitTests(unittest.TestCase):
         self.git("config", "user.email", "t@example.com")
         self.git("config", "user.name", "t")
         self.git("config", "commit.gpgsign", "false")
-        self.write(self.EV, "evidence\n")
-        self.write(self.EV2, "corner data\n")
-        self.write("sim/blk/README.md", "prose\n")
-        self.git("add", "-A")
-        self.git("commit", "-qm", "base")
-        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
         os.chdir(self.repo)
 
     def git(self, *a):
         import subprocess
         subprocess.run(["git", *a], cwd=self.repo, check=True, capture_output=True)
 
+    def git_out(self, *a):
+        import subprocess
+        r = subprocess.run(["git", *a], cwd=self.repo, check=True, capture_output=True)
+        return r.stdout.decode("utf-8").strip()
+
     def write(self, rel, text):
         p = self.repo / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(text)
+
+
+class LocalModeGitTests(GitRepoTests):
+    """Real temp git repos: committed base..HEAD plus index/worktree vs HEAD."""
+
+    EV = "sim/blk/records/r.md"
+    EV2 = "sim/blk/corners/c.log"
+
+    def setUp(self):
+        super().setUp()
+        self.write(self.EV, "evidence\n")
+        self.write(self.EV2, "corner data\n")
+        self.write("sim/blk/README.md", "prose\n")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "base")
+        self.git("update-ref", "refs/remotes/origin/main", "HEAD")
 
     def run_main(self, *extra, local=True):
         import io, contextlib
@@ -228,6 +240,61 @@ class LocalModeGitTests(unittest.TestCase):
     def test_stdin_and_local_exclusive(self):
         with self.assertRaises(SystemExit):
             self.run_main("--stdin")
+
+
+class MergeGroupBaseTests(GitRepoTests):
+    """Merge-queue CI mode: --base is a raw merge_group.base_sha.
+
+    An empty base (event field absent) or one missing from history must fail
+    explicitly — never pass — and a resolvable sha must diff exactly like
+    origin/main does in PR runs (issue #347).
+    """
+
+    EV = "sim/blk/records/r.md"
+
+    def setUp(self):
+        super().setUp()
+        self.write(self.EV, "evidence\n")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "base")
+        self.base = self.git_out("rev-parse", "HEAD")
+
+    def run_main(self, base):
+        import io, contextlib
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), \
+             contextlib.redirect_stderr(err):
+            try:
+                rc = ao.main(["--base", base, "--allowlist", "/nonexistent"])
+            except SystemExit as e:
+                rc = e.code
+        return rc, err.getvalue()
+
+    def test_absent_base_fails_explicitly(self):
+        rc, err = self.run_main("")
+        self.assertNotEqual(rc, 0)
+        self.assertIn("refusing to claim append-only was verified", err)
+
+    def test_unavailable_base_fails_explicitly(self):
+        # a well-formed sha that is not reachable from this checkout
+        rc, err = self.run_main("0" * 40)
+        self.assertNotEqual(rc, 0)
+        self.assertIn("refusing to claim append-only was verified", err)
+        self.assertIn("0" * 40, err)
+
+    def test_valid_base_catches_edit(self):
+        self.write(self.EV, "edited\n")
+        self.git("commit", "-qam", "edit evidence")
+        rc, err = self.run_main(self.base)
+        self.assertEqual(rc, 1)
+        self.assertIn(self.EV, err)
+
+    def test_valid_base_passes_pure_add(self):
+        self.write("sim/blk/records/new.md", "new\n")
+        self.git("add", "-A")
+        self.git("commit", "-qm", "append evidence")
+        rc, _ = self.run_main(self.base)
+        self.assertEqual(rc, 0)
 
 
 if __name__ == "__main__":

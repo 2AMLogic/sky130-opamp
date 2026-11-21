@@ -15,6 +15,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
   workflow_dispatch:
 
 permissions:
@@ -60,6 +61,17 @@ jobs:
       - name: Run layout flow unit tests
         run: python -m unittest discover -s layout/bin -p 'test_*.py' -v
 
-      - name: Append-only evidence check (PRs only)
-        if: github.event_name == 'pull_request'
-        run: python sim/lib/append_only_check.py --base "origin/${{ github.base_ref }}"
+      # PRs: base = origin/<base_ref>. Merge queue (merge_group): base =
+      # merge_group.base_sha (head is HEAD, the trial merge commit). An empty
+      # or unresolvable base makes append_only_check.py exit non-zero with an
+      # explicit message — a merge-queue run must never pass by skipping.
+      - name: Append-only evidence check (PRs and merge queue)
+        if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          MG_BASE: ${{ github.event.merge_group.base_sha }}
+        run: |
+          BASE="origin/$BASE_REF"
+          [ "$EVENT" = merge_group ] && BASE="$MG_BASE"
+          python sim/lib/append_only_check.py --base "$BASE"
