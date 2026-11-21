@@ -169,6 +169,9 @@ class BuildRequestTests(unittest.TestCase):
         self.assertIn("vn_int_band", [x["name"] for x in r["measurements"]])
 
     def test_options_and_version_check(self):
+        # `capacity_wait_s` rides the batch block only (issue #315: a batch
+        # backend must carry it, a local one must carry no `batch` block at
+        # all); `runner_version_check` stays opt-in.
         r = self.req("noise")
         self.assertTrue(r["options"]["keep_artifacts"])
         # Default backend is "local": the case that must still have no block.
@@ -178,6 +181,17 @@ class BuildRequestTests(unittest.TestCase):
         r = self.req("noise", backend="batch", runner_version_check="enforce")
         self.assertEqual(r["batch"], {"runner_version_check": "enforce",
                                       "capacity_wait_s": m.BATCH_CAPACITY_WAIT_S})
+
+    def test_capacity_wait_matches_pvt_sweep(self):
+        """The two campaigns must not drift apart on the host-rule budget."""
+        pvt = _paths.load_module(
+            "pvt_sweep", _paths.REPO / "sim" / "opamp-characterization" / "bin" / "pvt_sweep.py")
+        self.assertEqual(m.BATCH_CAPACITY_WAIT_S, pvt.BATCH_CAPACITY_WAIT_S)
+
+    def test_every_selected_bench_carries_the_capacity_wait(self):
+        for bench in m.BENCHES:
+            self.assertEqual(self.req(bench, backend="batch")["batch"]["capacity_wait_s"],
+                             m.BATCH_CAPACITY_WAIT_S, bench)
 
     def test_unknown_bench_and_corner_raise(self):
         with self.assertRaises(KeyError):

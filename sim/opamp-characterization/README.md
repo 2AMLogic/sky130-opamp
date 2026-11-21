@@ -1115,6 +1115,12 @@ lower device currents at a fixed `gm/ID` bias point, expected and benign).
   amp has no PSRR row of its own (`[TBD]`, unset), so no pass/fail is graded
   against a local target and the 60 dB consumer figure is stated as the
   *consumer's loop-level requirement*, not an allocation to this amplifier.
+  (**Updated 2026-11-14, issue #282**: the row is no longer `[TBD]` — `DR-015`
+  now *proposes* ≥ 50 dB over DC–1 kHz, graded over both polarities, and the
+  row reads **measured** while staying OPEN under DR-003. The sentence above
+  describes the state at the 2026-10-09 grid and the clause about the consumer
+  figure still holds: it is not an allocation to this amplifier. Pass/fail
+  against the proposed figure is graded in `spec/target-spec.md`, not here.)
   The noise band is the spec row's proposed **100 Hz – 1 MHz** `[P]`; the
   row states no integrated-noise limit, so only the thermal-floor estimate
   (≈ 30 nV/√Hz) is a comparison point, and no 1/f corner or integrated figure
@@ -1170,6 +1176,81 @@ Record `20261009-073254-e06f2fc`
 - **Finding, not hidden**: the DC–1 kHz window is flat, but PSRR+ falls
   steeply above ≈ 20 kHz (≈ 26–30 dB at 1 MHz). A consumer with switching
   ripple above the window is not covered by the 60 dB figure.
+
+### Result: PSRR, current-DUT re-run (appended 2026-11-14, issue #282; earlier text unchanged)
+
+The grid above was taken at `e06f2fc` on 2026-10-09. That record carries
+**no `dut` block** (`"dut": null`) and predates [`DR-013`](../../spec/decision-records/DR-013-grid-legal-mos-widths.md)'s
+grid-legal widths (2026-10-11), and `records/20261009-200000-ca03ee8-dut-identity-clarification.md`
+(issue #104) forbids back-filling a hash onto it. So it could not bind a PSRR
+claim to the committed netlist, and issue #282 re-ran both benches rather than
+re-cite it. The old record is untouched.
+
+Record `20261114-032827-96d9fbc-288af8`
+([`psrr-vdd.csv`](records/20261114-032827-96d9fbc-288af8-psrr-vdd.csv),
+[`psrr-vss.csv`](records/20261114-032827-96d9fbc-288af8-psrr-vss.csv),
+[`psrr-noise.json`](records/20261114-032827-96d9fbc-288af8-psrr-noise.json) metadata,
+decks and DUT snapshot in `netlist-snapshots/20261114-032827-96d9fbc-288af8-psrr-noise/`),
+both benches `pass` with 15/15 corners and 0 failed, run on the Spot batch
+fleet (`psrr_vdd`: job `klt-sim-98f59c885da6`, 27 s; `psrr_vss`: job
+`klt-sim-cbeb5c357c71`, 30 s; both m7i.4xlarge, ngspice 47, runner klt 0.9.0
+against client 0.9.2.dev1022, `runner_compatibility: match`). Its
+`dut.sha256` is `e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79`,
+equal to the committed `design/netlist/opamp_core.spice`, so
+`design/bin/spec_figures_check.py` reports both figures among those "verified
+against the canonical DUT". **Worst PSRR over DC–1 kHz, dB**
+(`psrr_window_min_db`; larger is better):
+
+| PSRR+ (vdd) | −40 °C | 27 °C | 125 °C |
+|---|---|---|---|
+| tt | 67.94 | 67.72 | 66.82 |
+| ff | 66.91 | 66.54 | 65.50 |
+| ss | 66.19 | 67.05 | 66.85 |
+| sf | 69.38 | 69.54 | 69.00 |
+| fs | 65.07 | 64.69 | **63.57** |
+
+| PSRR− (vss) | −40 °C | 27 °C | 125 °C |
+|---|---|---|---|
+| tt | 74.38 | 75.17 | 75.15 |
+| ff | 83.69 | 83.64 | 82.88 |
+| ss | **54.90** | 58.65 | 61.49 |
+| sf | 78.12 | 78.97 | 79.21 |
+| fs | 69.05 | 70.08 | 70.07 |
+
+- **The figures reproduce the pre-DR-013 grid to within 0.002 dB** at every
+  one of the 30 points (max |Δ| 0.0019 dB on `psrr_vdd`, 0.0006 dB on
+  `psrr_vss`), across both a netlist change and an ngspice version change
+  (46 → 47). The DR-013 edit is grid-legality rounding at the 1 nm level
+  (W 4.634 → 4.635 µm, 7.819 → 7.820 µm, Rz L 9.763 → 9.765 µm), so this
+  is the expected outcome. It is a cross-check, not the basis of the claim:
+  the new record is what binds the numbers to this DUT.
+- **PSRR+ worst case 63.57 dB @ FS / 125 °C**; ≥ 60 dB at all 15 points.
+  Flat across the window (the minimum is within 0.07 dB of the 0.1 Hz value
+  everywhere), then crossing 60 dB at **14.8–28.0 kHz** and decaying
+  ≈ 20 dB/decade to **26.05–29.57 dB at 1 MHz**.
+- **PSRR− worst case 54.90 dB @ SS / −40 °C**, with SS / 27 °C at 58.65 dB;
+  the other 13 points are ≥ 61.4 dB. Flat to within 0.0001 dB across the
+  window, and it stays above 60 dB out to **0.74–3.54 MHz** at those 13
+  points.
+- **The two polarities bind at opposite ends of both axes** — PSRR+ at
+  FS / 125 °C, PSRR− at SS / −40 °C, 8.7 dB apart — so neither is a proxy
+  for the other. Above the window the ordering inverts: PSRR+ is the side
+  that falls.
+- **The row now has a proposed target.** `spec/target-spec.md` §2's PSRR row
+  moves from `[TBD]` / "not started" to **measured**, citing this record,
+  with ≥ 50 dB over DC–1 kHz graded across both polarities proposed by
+  [`DR-015`](../../spec/decision-records/DR-015-psrr-target.md) (status
+  *proposed*; the row stays OPEN under DR-003). Both figures are bound in
+  `manifests/spec-section2-figures.json` (`s282-psrr-vdd`, `s282-psrr-vss`,
+  `scope: "current"`), so either number drifting fails CI.
+- **Bench limits, unchanged from the first grid and now carried into the spec
+  row**: `ibias` is an **ideal current source** (the reference's own supply
+  path is outside the measurement) and the netlist is **pre-layout** (no
+  extracted parasitics, no rail IR drop, no package or board impedance).
+  Both omissions can only lower a real PSRR, so these are upper bounds.
+- **`manifests/integrator.json` is still unchanged.** No consumer row moved:
+  the bandgap's `PSRR > 60 dB DC–1 kHz` remains a whole-loop requirement on
+  the bandgap, at a 3.3 V rail this block does not serve (`DR-005`).
 
 ### Result: noise (bench verified; PVT grid NOT recorded)
 

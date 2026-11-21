@@ -80,14 +80,14 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:274e347106bceef6fc8c64a8a8472f02099ece6b5dff0f2e762cad44a11ad60a"
+        "content_hash": "sha256:6d3eaa7eee6458ad4a4f9ccbcc13ef9a612b8de1ef5bb306c4d5616c17b87b7e"
       },
       {
         "check": "present",
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/psrr_noise_sweep.py",
         "passed": true,
-        "content_hash": "sha256:55ef1704446a407689de1cd4dfe6ef978c43adc5cf3cbae3da294ad89dd3df0f"
+        "content_hash": "sha256:aca2313817009f4162b66e20a1577200e813abe4544884418af44e31937e0eaf"
       },
       {
         "check": "present",
