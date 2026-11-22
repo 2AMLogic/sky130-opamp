@@ -55,6 +55,13 @@ RECORDS_DIR = EXP_DIR / "records"
 
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
 from corners import DEFAULT_CORNERS, DEFAULT_TEMPS_C, VDD_BY_CORNER  # noqa: E402  -- the ratified PVT table; sim/lib/corners.py owns it
+from point_identity import (  # noqa: E402  -- the (corner, temp_c, vdd_v) identity; sim/lib/point_identity.py owns it
+    IDENTITY_EXC,
+    format_point,
+    norm_corner,
+    norm_num,
+    point_key,
+)
 
 ANALYSES = "ac,tran_sr,dc_swing,icmr"
 
@@ -99,15 +106,28 @@ def num(raw: str):
 
 
 def read_rows(record_id: str) -> dict[tuple[str, float, float], dict[str, float | None]]:
-    """{(corner, temp_c, vdd_v): {measurement: value}} from the record's CSVs."""
+    """{(corner, temp_c, vdd_v): {measurement: value}} from the record's CSVs.
+
+    Keys are sim/lib/point_identity's normalised identity, so a padded corner or
+    a 7th-decimal supply still matches. A row that cannot be keyed, or a point
+    duplicated within one suffix CSV, raises instead of being silently dropped
+    or last-row-overwritten: klt pex would otherwise turn a produced
+    measurement into a `value: null` error row."""
     points: dict[tuple[str, float, float], dict[str, float | None]] = {}
     for suffix, names in MEASURES.items():
         path = RECORDS_DIR / f"{record_id}-{suffix}.csv"
         if not path.is_file():
             continue
+        seen: set[tuple[str, float, float]] = set()
         with path.open(newline="") as f:
-            for row in csv.DictReader(f):
-                key = (row["corner"], float(row["temp_c"]), float(row["vdd_v"]))
+            for i, row in enumerate(csv.DictReader(f), 1):
+                try:
+                    key = point_key(row)
+                except IDENTITY_EXC as e:
+                    raise ValueError(f"{path.name}: row {i} has no usable corner/temp_c/vdd_v: {e!r}") from e
+                if key in seen:
+                    raise ValueError(f"{path.name}: row {i} duplicates point {format_point(key)}")
+                seen.add(key)
                 slot = points.setdefault(key, {})
                 for name in names:
                     slot[name] = num(row.get(name))
@@ -120,7 +140,7 @@ def document(points, corners: list[str], temps: list[float], vdd_by_corner: dict
     for corner in corners:
         for temp in temps:
             vdd = vdd_by_corner[corner]
-            slot = points.get((corner, temp, vdd), {})
+            slot = points.get((norm_corner(corner), norm_num(temp), norm_num(vdd)), {})
             docs.append({
                 "corner_id": corner_id(corner, vdd, temp),
                 "measurements": [

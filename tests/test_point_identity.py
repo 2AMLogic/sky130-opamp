@@ -29,6 +29,8 @@ CONSUMERS = (
     Path("design/bin/spec_figures_check.py"),
     Path("sim/opamp-characterization/variants/compare.py"),
     Path("sim/opamp-characterization/variants/sink_bias_report.py"),
+    Path("sim/opamp-characterization/bin/pex_measure.py"),
+    Path("sim/opamp-characterization/bin/pvt_sweep.py"),
 )
 
 

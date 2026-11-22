@@ -20,7 +20,8 @@
     "sim/offset-capability/bin/offset_probe.py",
     "sim/offset-capability/bench/offset_dc.cir",
     "sim/offset-capability/bench/pair_diag.cir",
-    "sim/lib/corners.py"
+    "sim/lib/corners.py",
+    "sim/lib/point_identity.py"
   ],
   "cold_start": {
     "argv": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*sweep.py"]

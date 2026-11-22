@@ -70,6 +70,66 @@ def delta_rows(ref, ext):
     return rows
 
 
+class ReadRowsIdentityTests(unittest.TestCase):
+    """Issue #369: read_rows keys rows with sim/lib/point_identity, so the
+    silent paths (padded corner, 7th-decimal supply, nonfinite field, duplicate
+    point) are gone: malformed rows raise, duplicates raise, and klt pex never
+    sees a `value: null` error row for a measurement the campaign produced."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def write_ac(self, record_id: str, rows: list[dict]):
+        with (self.root / f"{record_id}-ac.csv").open("w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["corner", "temp_c", "vdd_v", "gain_dc_db", "gbw_hz", "phase_margin_deg", "pq_w"])
+            for r in rows:
+                w.writerow([r["corner"], r["temp_c"], r["vdd_v"],
+                            r.get("gain_dc_db", "65"), "1e6", "60", "1e-4"])
+
+    def rows(self, record_id: str):
+        with mock.patch.object(pm, "RECORDS_DIR", self.root):
+            return pm.read_rows(record_id)
+
+    def test_padded_corner_and_seventh_decimal_supply_still_match(self):
+        self.write_ac("rec", [{"corner": " tt ", "temp_c": "27.0", "vdd_v": "1.8000001"}])
+        points = self.rows("rec")
+        self.assertIn(("tt", 27.0, 1.8), points)
+        with mock.patch.object(pm, "RECORDS_DIR", self.root):
+            doc = pm.document(points, ["tt"], [27.0], {"tt": 1.8})
+        vals = {m["name"]: m["value"] for m in doc["corners"][0]["measurements"]}
+        self.assertEqual(vals["gain_dc_db"], 65.0)
+        self.assertEqual({m["status"] for m in doc["corners"][0]["measurements"]
+                          if m["name"] in COLUMNS["ac"]}, {"pass"})
+
+    def test_nonfinite_field_or_blank_corner_raises(self):
+        for bad in ({"corner": "tt", "temp_c": "nan", "vdd_v": "1.8"},
+                    {"corner": "tt", "temp_c": "27", "vdd_v": "inf"},
+                    {"corner": "   ", "temp_c": "27", "vdd_v": "1.8"}):
+            with self.subTest(bad=bad):
+                self.write_ac("rec", [bad])
+                with self.assertRaises(ValueError):
+                    self.rows("rec")  # was: silently keyed, then value: null on every corner
+
+    def test_duplicate_point_within_one_suffix_csv_raises(self):
+        self.write_ac("rec", [{"corner": "tt", "temp_c": "27", "vdd_v": "1.8", "gain_dc_db": "65"},
+                              {"corner": "tt", "temp_c": "27.0", "vdd_v": "1.8000001", "gain_dc_db": "70"}])
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            self.rows("rec")  # was: last-row-wins, 70.0 silently overwrote 65.0
+
+    def test_same_point_across_suffix_csvs_is_not_a_duplicate(self):
+        self.write_ac("rec", [{"corner": "tt", "temp_c": "27", "vdd_v": "1.8"}])
+        with (self.root / "rec-tran-sr.csv").open("w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["corner", "temp_c", "vdd_v", "sr_rise_v_per_us", "sr_fall_v_per_us"])
+            w.writerow(["tt", "27", "1.8", "2.0", "1.9"])
+        points = self.rows("rec")
+        self.assertEqual(points[("tt", 27.0, 1.8)]["gain_dc_db"], 65.0)
+        self.assertEqual(points[("tt", 27.0, 1.8)]["sr_rise_v_per_us"], 2.0)
+
+
 class NegativeControl(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()

@@ -129,6 +129,7 @@ from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.
     DEFAULT_TEMPS_C,
     VDD_BY_CORNER,
 )
+from point_identity import norm_corner, norm_num, point_key  # noqa: E402  -- the (corner, temp_c, vdd_v) identity; sim/lib/point_identity.py owns it
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
@@ -1161,17 +1162,18 @@ def klt_fieldnames_cmrr() -> list[str]:
 REPO_REL_RECORDS = "sim/opamp-characterization/records"
 
 
-def _supply_key(v) -> float | None:
-    return None if v in (None, "") else round(float(v), 6)
-
-
 def _num(v) -> float | None:
     return None if v in (None, "") else float(v)
 
 
 def _ref_key(r: dict) -> tuple:
-    """Join key of an AC reference point: process, temperature, supply."""
-    return (r["corner"], float(r["temp_c"]), _supply_key(r.get("vdd_v")))
+    """Join key of an AC reference point: process, temperature, supply.
+
+    sim/lib/point_identity.py owns the normalisation; the supply stays None for
+    legacy AC rows that pre-date per-corner supplies (it joins the key only when
+    the row carries one)."""
+    v = r.get("vdd_v")
+    return (norm_corner(r["corner"]), norm_num(r["temp_c"]), None if v in (None, "") else norm_num(v))
 
 
 def _unavailable_reference(reasons: list[str], skipped: list[dict] | None = None) -> dict:
@@ -1459,20 +1461,16 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
     Report only: `agrees` is None when there is no AC reference at the point,
     else whether |measured - AC-PM-implied| <= tol_pp. Nothing here edits or
     gates a spec target."""
-    def key(r):  # supply joins the key only when the rows carry it (cartesian campaigns)
-        v = r.get("vdd_v")
-        return (r["corner"], float(r["temp_c"]), None if v in (None, "") else round(float(v), 6))
-
     ac: dict[tuple, float] = {}
     dup: set[tuple] = set()
     for r in ac_rows:
-        k = key(r)
+        k = _ref_key(r)
         if k in ac:
             dup.add(k)
         ac[k] = float(r["phase_margin_deg"])
     out = []
     for r in step_rows:
-        k, pm, ref_status = key(r), None, "matched"
+        k, pm, ref_status = _ref_key(r), None, "matched"
         if k in dup:
             ref_status = "duplicate_reference"
         elif k in ac:
@@ -1489,8 +1487,8 @@ def pm_overshoot_table(ac_rows: list[dict], step_rows: list[dict], tol_pp: float
                "expected_overshoot_pct": None, "measured_overshoot_pct": float(r["overshoot_pct"]),
                "delta_pp": None, "agrees": None, "settle_1pct_ns": float(r["settle_1pct_ns"]),
                "reference_status": ref_status}
-        if key(r)[2] is not None:
-            row["vdd_v"] = key(r)[2]
+        if k[2] is not None:
+            row["vdd_v"] = k[2]
         if pm is not None:
             row["expected_overshoot_pct"] = pm_to_overshoot_pct(pm)
             row["delta_pp"] = row["measured_overshoot_pct"] - row["expected_overshoot_pct"]
@@ -1772,15 +1770,12 @@ def swing_fixcm_comparison(fixcm_rows: list[dict], swing_rows: list[dict] | None
     edited or re-graded. A point lacking a buffer row is not attributed; a
     point whose fixed Vcm is outside its ICMR window (or has no ICMR row) is
     attributed with `vcm_inside_icmr` False/None and `conclusive` False."""
-    def key(r):
-        return (r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6))
-
-    sw = {key(r): r for r in swing_rows or []}
-    ic = {key(r): r for r in icmr_rows or []}
+    sw = {point_key(r): r for r in swing_rows or []}
+    ic = {point_key(r): r for r in icmr_rows or []}
     bh = buffer_headroom or {}
     table, unmatched = [], []
     for f in fixcm_rows:
-        k = key(f)
+        k = point_key(f)
         b = sw.get(k)
         name = f"{k[0]}/{k[1]:g}C/{k[2]:g}V"
         if b is None:
@@ -2080,7 +2075,7 @@ def tran_sr_icmr_row(corner: str, temp: float, info: dict, vdd: float,
 
 def plan_icmr_steps(icmr_rows: list[dict]) -> dict[tuple, dict]:
     """select_icmr_step for every icmr row of the campaign, keyed (corner, temp, vdd)."""
-    return {(r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6)):
+    return {point_key(r):
             select_icmr_step(float(r["vdd_v"]), float(r["icmr_low_v"]), float(r["icmr_high_v"]))
             for r in icmr_rows}
 
@@ -2101,7 +2096,7 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
     rows. Batch failures are reported, never retried locally."""
     ICMR_SR_STEPS.clear()
     ICMR_SR_STEPS.update(plan_icmr_steps(icmr_rows))
-    std = {(r["corner"], float(r["temp_c"]), round(float(r["vdd_v"]), 6)): r for r in std_rows or []}
+    std = {point_key(r): r for r in std_rows or []}
     out = results["tran_sr_icmr"]
     todo = []
     for (corner, temp, vdd), step in ICMR_SR_STEPS.items():

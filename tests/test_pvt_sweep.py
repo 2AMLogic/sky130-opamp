@@ -625,6 +625,62 @@ class ReferenceBindingTests(unittest.TestCase):
         self.assertEqual(pvt.pm_overshoot_summary(dup)["points_without_ac_reference"], ["tt/27C/1.62V (duplicate_reference)"])
 
 
+class PointIdentityKeyTests(unittest.TestCase):
+    """Issue #369: every (corner, temp_c, vdd_v) join in this bench keys through
+    sim/lib/point_identity (via `_ref_key`/`point_key`), so a padded corner or a
+    7th-decimal supply joins its point, and a nonfinite field raises instead of
+    silently keying a point that never equals itself."""
+
+    def test_ref_key_normalises_and_keeps_legacy_optional_supply(self):
+        self.assertEqual(pvt._ref_key({"corner": " tt ", "temp_c": "27.0", "vdd_v": "1.8000001"}),
+                         ("tt", 27.0, 1.8))
+        self.assertEqual(pvt._ref_key({"corner": "ss", "temp_c": "-40", "vdd_v": ""}), ("ss", -40.0, None))
+        self.assertEqual(pvt._ref_key({"corner": "ss", "temp_c": "-40"}), ("ss", -40.0, None))
+
+    def test_ref_key_rejects_unusable_identity(self):
+        for bad in ({"corner": "  ", "temp_c": "27", "vdd_v": "1.8"},
+                    {"corner": "tt", "temp_c": "nan", "vdd_v": "1.8"},
+                    {"corner": "tt", "temp_c": "27", "vdd_v": "inf"}):
+            with self.subTest(bad=bad):
+                with self.assertRaises((KeyError, TypeError, ValueError)):
+                    pvt._ref_key(bad)
+
+    def test_pm_overshoot_table_joins_padded_corner_and_seventh_decimal_supply(self):
+        ac = [{"corner": " tt ", "temp_c": "27.0", "vdd_v": "1.8000001", "phase_margin_deg": "65"}]
+        step = [{"corner": "tt", "temp_c": 27.0, "vdd_v": 1.8, "overshoot_pct": pvt.pm_to_overshoot_pct(65.0),
+                 "settle_1pct_ns": 10.0}]
+        tab = pvt.pm_overshoot_table(ac, step)
+        self.assertEqual(tab[0]["reference_status"], "matched")
+        self.assertEqual(tab[0]["vdd_v"], 1.8)
+        self.assertTrue(tab[0]["agrees"])
+
+    def test_pm_overshoot_table_rejects_nonfinite_rows(self):
+        ac = [{"corner": "tt", "temp_c": "nan", "vdd_v": "1.8", "phase_margin_deg": "65"}]
+        step = [{"corner": "tt", "temp_c": "nan", "vdd_v": "1.8", "overshoot_pct": "5", "settle_1pct_ns": "10"}]
+        with self.assertRaises(ValueError):
+            pvt.pm_overshoot_table(ac, step)  # was: silent missing_reference (nan != nan)
+
+    def test_swing_fixcm_comparison_rejects_nonfinite_rows(self):
+        f = {"corner": "tt", "temp_c": "nan", "vdd_v": "1.8", "vcm_v": "0.9", "out_width_v": "1.0"}
+        sw = {"corner": "tt", "temp_c": "27", "vdd_v": "1.8", "vpp_v": "1.0"}
+        with self.assertRaises(ValueError):
+            pvt.swing_fixcm_comparison([f], [sw], [])  # was: unmatched diagnostic on a nan key
+
+    def test_plan_icmr_steps_rejects_nonfinite_rows(self):
+        rows = [{"corner": "tt", "temp_c": "nan", "vdd_v": "1.8", "icmr_low_v": "0.4", "icmr_high_v": "1.3"}]
+        with self.assertRaises(ValueError):
+            pvt.plan_icmr_steps(rows)  # was: silently keyed {("tt", nan, 1.8): ...}
+
+    def test_std_row_join_survives_the_key_owner(self):
+        """run_tran_sr_icmr's std-row index and the ICMR_SR_STEPS plan are keyed
+        by the same owner, so a padded/over-precise std row still joins."""
+        plan = pvt.plan_icmr_steps([{"corner": "tt", "temp_c": "27", "vdd_v": "1.8",
+                                     "icmr_low_v": "0.3", "icmr_high_v": "1.5"}])
+        std_row = {"corner": " tt ", "temp_c": "27.0000001", "vdd_v": "1.8000001",
+                   "sr_rise_v_per_us": "2.0", "sr_fall_v_per_us": "1.9"}
+        self.assertIn(pvt.point_key(std_row), plan)
+
+
 def synthetic_step(vdd=1.8, zeta=0.5, wn=2 * math.pi * 20e6, v_ofs=0.0, t_stop=pvt.STEP_T_STOP_S, dt=0.25e-9,
                    gain=1.0):
     """v(out) of a closed-loop second-order system for the +-20 mV step at
