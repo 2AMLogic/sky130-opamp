@@ -3,7 +3,6 @@
 Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-19T10:44:05Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -28,12 +27,14 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#196**: Measure paired offset drift before prototyping foreground trim *(held)*
 - **#274**: Grade the input-referred white-noise floor on T1 item 5
 - **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it
+- **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share)
+- **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
 
 ## Ready
 
-Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
+Ready counts issues with `loom:issue`. It excludes issues on hold (`loom:blocked`, `loom:operator`, or `loom:frozen`), issues already being built (`loom:building`), and issues an open approved PR (`loom:pr`) will close. The Approved section lists those PRs and their issues.
 
-_None._
+- **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
 
 ## In Progress
 
@@ -47,10 +48,12 @@ Issues currently being built (`loom:building`).
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests
 - **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates
+- **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed
+- **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share)
 
 ## PRs Awaiting Review
 
-PRs waiting on Judge (`loom:review-requested`).
+PRs with `loom:review-requested`. Judge can review a held PR once its operator hold is lifted.
 
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
@@ -83,6 +86,9 @@ Issues carrying `loom:curated`.
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7 *(curated)*
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests *(curated)*
 - **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates *(curated)*
+- **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed *(curated)*
+- **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share) *(curated)*
+- **#361**: T1 item 5: commit a CMRR klt sim envelope with DR-008's proposed limits on the current DUT, then open DR-008's ratification PR *(curated)* *(held)*
 
 ## Proposed (Architect / Hermit)
 
@@ -100,12 +106,12 @@ _None._
 |------|-------|
 | Operator merge-risk holds | 6 |
 | Very important | 1 |
-| Important | 3 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 0 |
-| In Progress (`loom:building`) | 8 |
+| Important | 5 |
+| Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
+| In Progress (`loom:building`) | 10 |
 | PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 6 |
-| Curated | 12 |
+| Curated | 15 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
