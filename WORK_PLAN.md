@@ -3,7 +3,6 @@
 Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-21T05:40:26Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -33,7 +32,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 ## Ready
 
-Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
+Ready counts issues with `loom:issue`. It excludes issues on hold (`loom:blocked`, `loom:operator`, or `loom:frozen`), issues already being built (`loom:building`), and issues an open approved PR (`loom:pr`) will close. The Approved section lists those PRs and their issues.
 
 - **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
 
@@ -54,7 +53,7 @@ Issues currently being built (`loom:building`).
 
 ## PRs Awaiting Review
 
-PRs waiting on Judge (`loom:review-requested`).
+PRs with `loom:review-requested`. Judge can review a held PR once its operator hold is lifted.
 
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
@@ -108,7 +107,7 @@ _None._
 | Operator merge-risk holds | 6 |
 | Very important | 1 |
 | Important | 5 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 1 |
+| Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
 | In Progress (`loom:building`) | 10 |
 | PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 6 |
