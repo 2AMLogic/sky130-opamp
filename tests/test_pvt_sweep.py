@@ -206,6 +206,16 @@ def pvt_records():
     return out
 
 
+def analysis_error(analysis, error):
+    """A unit label belongs to the longest matching bench tag."""
+    label, colon, _ = error.partition(":")
+    tag = label.replace("_", "-")
+    benches = (*pvt.FIELDNAMES, "ac_iq")  # ac-iq has its own errors but no CSV
+    matches = (a for a in benches if tag == a.replace("_", "-")
+               or tag.startswith(a.replace("_", "-") + "-"))
+    return bool(colon) and max(matches, key=len, default=None) == analysis
+
+
 class CommittedRecordShapeTests(unittest.TestCase):
     TOP = {"record_id", "timestamp", "git", "experiment", "matrix", "pdk",
            "tools", "links", "errors", "elapsed_s"}
@@ -215,6 +225,14 @@ class CommittedRecordShapeTests(unittest.TestCase):
 
     def test_at_least_one_pvt_record_is_committed(self):
         self.assertTrue(pvt_records())
+
+    def test_diagnostic_slew_error_cannot_explain_missing_standard_slew(self):
+        failure = "tran-sr-icmr-sf--40C-1.62V: no JSON report"
+        self.assertTrue(analysis_error("tran_sr_icmr", failure))
+        self.assertFalse(analysis_error("tran_sr", failure))
+        self.assertFalse(analysis_error("ac", "ac-iq: no JSON report"))
+        for label in ("tran_sr", "tran-sr", "tran-sr-sf--40C-1.62V"):
+            self.assertTrue(analysis_error("tran_sr", f"{label}: no JSON report"))
 
     def test_json_shape(self):
         for p, d in pvt_records():
@@ -245,13 +263,7 @@ class CommittedRecordShapeTests(unittest.TestCase):
                 with self.subTest(record=p.name, analysis=analysis):
                     if f"{analysis}_csv" not in d["links"]:
                         # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors.
-                        # Request tags are dash-form ("tran-sr", "swing-fixcm"; build_klt_request), and a
-                        # bench can also fail per-unit with the tuple-suffixed label ("tran-sr-icmr-sf--40C-1.62V"),
-                        # so accept the bare analysis, the bare tag, or a suffixed tag.
-                        tag = analysis.replace("_", "-")
-                        self.assertTrue(any(e.startswith(f"{analysis}:") or e.startswith(f"{tag}:")
-                                            or e.startswith(f"{tag}-")
-                                            for e in d["errors"]), analysis)
+                        self.assertTrue(any(analysis_error(analysis, e) for e in d["errors"]), analysis)
                         continue
                     rel = d["links"][f"{analysis}_csv"]
                     path = REPO / rel

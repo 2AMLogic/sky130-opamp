@@ -83,6 +83,24 @@ class Collation(unittest.TestCase):
                         "Offset impact"):
             self.assertIn(section, text)
 
+    def test_report_prints_coverage_for_both_duts(self):
+        text = COL.build(self.manifest)
+        self.assertIn("baseline ICMR covers the target window at 17/17 points "
+                      "and 0.73 V at 15/17 points", text)
+        self.assertIn("candidate ICMR covers the target window at 17/17 points "
+                      "and 0.73 V at 17/17 points", text)
+        table = text.split("## ICMR window edges")[1].split("## ")[0]
+        misses = [line.split("|")[1].strip() for line in table.splitlines()
+                  if line.endswith(" | 0 |")]
+        self.assertEqual(misses, ["FS/-40C/1.62V", "FS/-40C/1.8V"])
+
+    def test_named_slew_recovery_and_swing_edges(self):
+        callouts = COL.build(self.manifest).split("## Named callouts")[1].split("## ")[0]
+        for pt, share in (("SS", "25.8%"), ("SF", "4.2%"), ("FS", "36.2%")):
+            self.assertRegex(callouts, rf"\| {pt}/-40C/1\.62V \|[^\n]*\| {share} \|")
+        self.assertIn("0.2545–1.2029", callouts)
+        self.assertIn("0.2249–1.2355", callouts)
+
     def test_merge_role_filtering(self):
         rows = [{"corner": "sf", "temp_c": -40.0, "vdd_v": 1.8, "vpp_v": "1.0", "elapsed_s": "1"},
                 {"corner": "sf", "temp_c": -40.0, "vdd_v": 1.62, "vpp_v": "0.9", "elapsed_s": "1"}]

@@ -27,11 +27,10 @@ at SS/-40C is already ~33 mV, and the group move would drag the output sink
 XM7 out of input-stage scope).  Every width is on the 0.005 um manufacturing
 grid, nf = 1.
 
-Candidate (b), a complementary PMOS input pair, is REJECTED BY HAND
-CALCULATION before any fleet request (PLAN.md): Vth_n + |Vth_p| = 1.732 V >
-VDD = 1.62 V at SS/-40C leaves a common-mode window where neither pair
-conducts, so the contiguous unity-buffer swing at the binding corner does not
-improve at all.  `sizing` prints that table too; no netlist is generated.
+Candidate (b), a complementary PMOS input pair, was dropped at the hand
+screen (PLAN.md). At SS/-40C, Vth_n + |Vth_p| = 1.732 V exceeds VDD = 1.62 V.
+The estimate leaves an interval without strong-inversion overlap. Continuous
+closed-loop swing through that interval would need a circuit measurement.
 """
 from __future__ import annotations
 
@@ -150,15 +149,14 @@ def sizing_report() -> str:
     qcur, qnew = at_J(p, j_mir_cur), at_J(p, j_mir_new)
     th2 = ICMR_MEASURED_SS_N40[1] - (1.62 - (vp + qcur[1]))
     A("")
-    A(f"SS/-40C/1.62V edges (first order):")
+    A("SS/-40C/1.62V input common-mode edges (first order):")
     A(f"  low : cur ~ {m5[1]+vn+vcur[1]:.3f} V, cand ~ {m5[1]+vn+vnew[1]:.3f} V;"
       f" measured ICMR low edge {ICMR_MEASURED_SS_N40[0]:.4f} V")
-    A(f"        CEILING (Vov -> 0 on pair and tail) = Vth_n(SS/-40C) = {vn:.4f} V;"
-      f" ratified low edge 0.072 V => >= {vn-0.072:.3f} V structurally short")
+    A(f"        At zero pair and tail overdrive, estimated Vin_min = Vth_n = {vn:.4f} V.")
     A(f"  high: cur ~ {1.62-(vp+qcur[1])+th2:.3f} V, cand ~ {1.62-(vp+qnew[1])+th2:.3f} V;"
       f" measured ICMR high edge {ICMR_MEASURED_SS_N40[1]:.4f} V (Vth2_eff = {th2:.3f} V implied)")
-    A(f"        CEILING (|Vov_p| -> 0) = {1.62-vp+th2:.3f} V; ratified high edge 1.464 V"
-      f" => >= {1.464-(1.62-vp+th2):.3f} V structurally short")
+    A(f"        At zero mirror overdrive, estimated Vin_max = {1.62-vp+th2:.3f} V.")
+    A("  See the dc_swing callouts in report.out.md for measured unity-buffer output edges.")
     A("")
     A("FS/-40C consumer point: pair Vov %.0f -> %.0f mV; measured ICMR low edge"
       % (at_J(nf[("fs", -40.0)], j_pair_cur)[1] * 1e3, at_J(nf[("fs", -40.0)], j_pair_new)[1] * 1e3))
@@ -166,17 +164,12 @@ def sizing_report() -> str:
       f" vs consumer point {CONSUMER_POINT_V:g} V (currently missed by"
       f" {ICMR_MEASURED_FS_N40_LOW-CONSUMER_POINT_V:.4f} V)")
     A("")
-    A("Candidate (b), complementary PMOS pair -- REJECTED BY HAND CALCULATION:")
-    A(f"  PMOS assist conducts only for Vin < VDD - |Vth_p| - |Vov_p| - Vov_tailp"
-      f" ~ {1.62-vp-0.03-0.03:.2f} V at SS/-40C/1.62V;")
-    A(f"  NMOS pair needs Vin > Vth_n + Vov_n + Vov_M5 ~ {vn+0.03+0.03:.2f} V."
-      f"  Neither pair conducts in between (dead zone ~[{1.62-vp-0.06:.2f},{vn+0.06:.2f}]).")
-    A("  The dc_swing extraction takes the contiguous run containing mid-supply"
-      " (0.81 V), whose low edge stays NMOS-limited: the binding-corner")
-    A("  swing row does not improve at all, while power, offset (extra pair +"
-      " tail, Pelgrom), GBW/PM spread (gm doubles in the overlap region at")
-    A("  nominal corners) and DR-001's input-pair polarity all pay.  No fleet"
-      " request is spent on (b); the numbers above are its screen.")
+    A("Candidate (b), complementary PMOS pair (hand screen only):")
+    A(f"  PMOS strong-inversion upper estimate: VDD - |Vth_p| - |Vov_p| - Vov_tailp"
+      f" ~ {1.62-vp-0.03-0.03:.2f} V at SS/-40C/1.62V.")
+    A(f"  NMOS strong-inversion lower estimate: Vth_n + Vov_n + Vov_M5 ~ {vn+0.03+0.03:.2f} V.")
+    A("  Weak-inversion gain and contiguous unity-buffer swing between these estimates"
+      " remain unmeasured. Candidate (b) received no fleet request.")
     return "\n".join(L)
 
 

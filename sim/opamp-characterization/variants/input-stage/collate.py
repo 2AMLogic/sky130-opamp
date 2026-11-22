@@ -225,8 +225,9 @@ def build(manifest: dict) -> str:
 
     A("## ICMR window edges (candidate vs canonical DR-013 baseline)")
     A("")
-    A("| Point | cand low | base low | Δlow | cand high | base high | Δhigh | cand width | base width | Δwidth | covers 0.888–1.024 (cand) | covers 0.73 V (cand) |")
-    A("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    A("| Point | cand low | base low | Δlow | cand high | base high | Δhigh | cand width | base width | Δwidth "
+      "| covers 0.888–1.024 (cand) | covers 0.888–1.024 (base) | covers 0.73 V (cand) | covers 0.73 V (base) |")
+    A("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
     for k in sorted(set(cand["icmr"]) | set(base["icmr"])):
         c, b = cand["icmr"].get(k), base["icmr"].get(k)
         if c and b:
@@ -236,7 +237,8 @@ def build(manifest: dict) -> str:
               f"| {float(c['icmr_high_v'])-float(b['icmr_high_v']):+.4f} "
               f"| {float(c['icmr_width_v']):.4f} | {float(b['icmr_width_v']):.4f} "
               f"| {float(c['icmr_width_v'])-float(b['icmr_width_v']):+.4f} "
-              f"| {c['covers_target_window']} | {c['covers_0v73']} |")
+              f"| {c['covers_target_window']} | {b['covers_target_window']} "
+              f"| {c['covers_0v73']} | {b['covers_0v73']} |")
         else:
             A(f"| {fmt_pt(k)} | " + "unmatched" + " |")
     A("")
@@ -285,21 +287,37 @@ def build(manifest: dict) -> str:
 
     A("## Named callouts — unity-buffer swing and standard fall SR, 1.62 V / -40 C")
     A("")
-    A("| Point | swing cand Vpp | swing base Vpp | ΔVpp | vs 1.392 Vpp target | fall SR cand | fall SR base | Δ | in-window fall cand |")
-    A("|---|---|---|---|---|---|---|---|---|")
+    A("| Point | base Vout range (V) | cand Vout range (V) | swing base Vpp | swing cand Vpp | ΔVpp | vs 1.392 Vpp target |")
+    A("|---|---|---|---|---|---|---|")
     for k in NAMED_CALLOUTS:
         c, b = cand["dc_swing"].get(k), base["dc_swing"].get(k)
-        cs, bs = cand["tran_sr"].get(k), base["tran_sr"].get(k)
-        ci = cand["tran_sr_icmr"].get(k)
-        if not (c and b and cs and bs):
+        if not (c and b):
             A(f"| {fmt_pt(k)} | unmatched |")
             continue
         vpp = float(c["vpp_v"])
+        base_vpp = float(b["vpp_v"])
+        A(f"| {fmt_pt(k)} | {float(b['vout_min_v']):.4f}–{float(b['vout_max_v']):.4f} "
+          f"| {float(c['vout_min_v']):.4f}–{float(c['vout_max_v']):.4f} "
+          f"| {base_vpp:.4f} | {vpp:.4f} | {vpp-base_vpp:+.4f} | {vpp/SWING_TGT_VPP:.1%} |")
+    A("")
+    A(f"Fall-slew gap recovered = (candidate − baseline) / ({SR_TGT_V_US:g} V/µs − baseline), "
+      "using the standard slew at the same point. A baseline at or above target has no gap.")
+    A("")
+    A("| Point | std fall base (V/µs) | std fall cand (V/µs) | Δ (V/µs) | gap recovered | in-window fall cand (V/µs) |")
+    A("|---|---|---|---|---|---|")
+    for k in NAMED_CALLOUTS:
+        cs, bs = cand["tran_sr"].get(k), base["tran_sr"].get(k)
+        ci = cand["tran_sr_icmr"].get(k)
+        if not (cs and bs):
+            A(f"| {fmt_pt(k)} | unmatched |")
+            continue
+        base_sr = float(bs["sr_fall_v_per_us"])
+        cand_sr = float(cs["sr_fall_v_per_us"])
+        delta = cand_sr - base_sr
+        gap = SR_TGT_V_US - base_sr
+        recovered = f"{delta/gap:.1%}" if gap > 0 else "—"
         inwin = f"{float(ci['fall_sr_claim_v_per_us']):.3f}" if ci else "—"
-        A(f"| {fmt_pt(k)} | {vpp:.4f} | {float(b['vpp_v']):.4f} "
-          f"| {vpp-float(b['vpp_v']):+.4f} | {vpp/SWING_TGT_VPP*100:.1f}% "
-          f"| {float(cs['sr_fall_v_per_us']):.3f} | {float(bs['sr_fall_v_per_us']):.3f} "
-          f"| {float(cs['sr_fall_v_per_us'])-float(bs['sr_fall_v_per_us']):+.3f} | {inwin} |")
+        A(f"| {fmt_pt(k)} | {base_sr:.3f} | {cand_sr:.3f} | {delta:+.3f} | {recovered} | {inwin} |")
     A("")
 
     A("## Verdict inputs against the ratified bounds (all rows, worse included)")
@@ -339,10 +357,15 @@ def build(manifest: dict) -> str:
     A(f"- Phase margin below {PM_MIN_DEG:g}°: cand {len(pm_bad)}/{len(c_ac)} points"
       + (f" ({', '.join(pm_bad)})" if pm_bad else "")
       + f"; base {len(pm_bad_b)}/{len(b_ac)}" + (f" ({', '.join(pm_bad_b)})" if pm_bad_b else ""))
-    A(f"- ICMR covers the ratified 0.888–1.024 V window at "
-      f"{sum(int(cand['icmr'][k]['covers_target_window']) for k in cand['icmr'])}/{len(cand['icmr'])} points; "
-      f"covers the 0.73 V consumer point at "
-      f"{sum(int(cand['icmr'][k]['covers_0v73']) for k in cand['icmr'])}/{len(cand['icmr'])} points")
+    gbw_ratios = [float(c_ac[k]["gbw_hz"]) / float(b_ac[k]["gbw_hz"]) for k in c_ac.keys() & b_ac.keys()]
+    if gbw_ratios:
+        A(f"- Measured GBW increase at {len(gbw_ratios)} common points ranges from "
+          f"{min(gbw_ratios)-1:.1%} to {max(gbw_ratios)-1:.1%}.")
+    for name, rows in (("baseline", base["icmr"]), ("candidate", cand["icmr"])):
+        window = sum(int(r["covers_target_window"]) for r in rows.values())
+        consumer = sum(int(r["covers_0v73"]) for r in rows.values())
+        A(f"- {name} ICMR covers the target window at {window}/{len(rows)} points "
+          f"and 0.73 V at {consumer}/{len(rows)} points.")
     A("")
     vs, bs_area = gate_area(REPO / var["netlist"]), gate_area(REPO / "design/netlist/opamp_core.spice")
     A("## Drawn MOS gate area (W·L·mult, parsed from the committed netlists)")

@@ -157,3 +157,17 @@ FS/-40 C) with gain/PM/GBW/power quantified. The decision record (next free
 number, DR-015 as of `95d518f` — the curation comment's "after DR-018" does
 not match the tree, re-derived per the re-verification rule) records this as
 `proposed`; adoption is a separate ratification and is not sought here.
+
+## Post-screen correction (2026-11-22)
+
+The pre-fleet predictions above are preserved as submitted. The measured
+unity-buffer output at SS / −40 °C / 1.62 V reaches 0.2545 V in the baseline
+and 0.2249 V in the candidate. This rules out the predicted 0.6669 V floor
+on output swing. The threshold calculation estimates input common-mode
+headroom. Its high-side estimate of 1.230 V agrees with the candidate's
+measured 1.2257 V ICMR edge. For candidate (b), the 0.49–0.73 V interval
+is a gap in estimated strong-inversion coverage. Its weak-inversion gain
+and contiguous swing were never measured. The nominal pair gm/ID change at
+fixed current is +17.6% (20/17 − 1). Measured GBW rises 10.2–21.2% across
+the grid. The measured results and their interpretation are in
+[the screen report](report.out.md) and [DR-015](../../../../spec/decision-records/DR-015-input-stage-screen.md).
