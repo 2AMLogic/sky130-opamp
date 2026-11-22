@@ -82,6 +82,27 @@ def _summary(i, verdict="clean"):
     return {"id": f"p{i}", "klt_drc": {"status": verdict, "violation_count": 0}}
 
 
+class KltCmd(unittest.TestCase):
+    def test_env_override(self):
+        with mock.patch.dict(pp.os.environ, {"KLT_CMD": "uvx --from pkg klt"}):
+            self.assertEqual(pp.klt_cmd(), ["uvx", "--from", "pkg", "klt"])
+
+    def test_reads_shlex_word_from_pins_klt_install(self):
+        pin = {"klt_install": 'uvx --from "klayout-tools @ git+https://x@gitcommit" klt'}
+        with mock.patch.object(pp, "PDK_PIN") as pin_path:
+            pin_path.read_text.return_value = json.dumps(pin)
+            self.assertEqual(pp.klt_cmd(), [
+                "uvx", "--from", "klayout-tools @ git+https://x@gitcommit", "klt",
+            ])
+
+    def test_default_reads_the_committed_pin(self):
+        argv = pp.klt_cmd()
+        pin = json.loads(pp.PDK_PIN.read_text())
+        self.assertEqual(argv[0], "uvx")
+        self.assertEqual(argv[-1], "klt")
+        self.assertIn(f"@{pin['klt_commit']}", " ".join(argv))
+
+
 class MainCheck(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -96,11 +117,11 @@ class MainCheck(unittest.TestCase):
 
     def _run(self, built):
         by_id = {p["id"]: s for p, s in zip(pp.PROBES, built)}
-        tool = {**self.tools, "magic_tech": Path("/nonexistent.tech")}
+        pdk = {"variant": "sky130A", "assets": {"magic": "/x/libs.tech/magic"}}
         patches = [
             mock.patch.object(pp, "OUT_ROOT", self.out_root),
             mock.patch.object(pp, "klt_cmd", return_value=["klt"]),
-            mock.patch.object(pp, "check_toolchain", return_value=tool),
+            mock.patch.object(pp, "check_toolchain", return_value=({**self.tools}, pdk)),
             mock.patch.object(pp, "build_probe",
                               side_effect=lambda probe, *a, **k: by_id[probe["id"]]),
         ]

@@ -90,7 +90,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from _klt_common import BuildError, run_klt, write_json  # noqa: E402
+from _klt_common import BuildError, check_toolchain, run_klt, write_json  # noqa: E402
 from stage_reference import (  # noqa: E402
     PASSIVE_MODELS,
     ReferenceError,
@@ -104,7 +104,6 @@ from stage_reference import (  # noqa: E402
 )
 
 REPO_ROOT = HERE.parents[1]
-PDK_PIN = REPO_ROOT / "layout" / "pdk.json"
 
 #: Verdict-bearing fields --check compares, per artifact (sibling's set).
 CHECK_FIELDS: dict[str, tuple[str, ...]] = {
@@ -263,32 +262,6 @@ def stage_import(block: dict, source: Path, *, gen_dir: Path) -> dict:
     }
     write_json(gen_dir / f"{bid}{IMPORT_RECORD}", record)
     return record
-
-
-# --------------------------------------------------------------------------
-# Toolchain pin
-# --------------------------------------------------------------------------
-
-
-def check_toolchain(env: dict[str, str], variant: str, allow_unpinned: bool) -> dict:
-    pin = json.loads(PDK_PIN.read_text())
-    version = run_klt(["version"], env=env)
-    pdk = run_klt(["pdk", "find", "--pdk", variant], env=env)
-    problems = []
-    if version.get("git_commit") != pin["klt_commit"]:
-        problems.append(
-            f"klt git_commit {version.get('git_commit')} != pinned {pin['klt_commit']}"
-        )
-    if pin["open_pdks_commit"] not in str(pdk.get("version")):
-        problems.append(
-            f"PDK version {pdk.get('version')!r} != pinned {pin['open_pdks_commit']}"
-        )
-    if problems:
-        message = "toolchain does not match layout/pdk.json: " + "; ".join(problems)
-        if not allow_unpinned:
-            raise BuildError(message + " (see layout/README.md, 'Toolchain')")
-        print(f"warning: {message}", file=sys.stderr)
-    return {"klt": version.get("version"), "pdk": pdk.get("version")}
 
 
 # --------------------------------------------------------------------------
@@ -608,7 +581,7 @@ def compose_cell(
     deck = spec["pdk"]["deck"]
     env = {**os.environ, "PDK": variant}
     sources = validate_blocks(spec, spec_dir)  # before any tool runs
-    toolchain = check_toolchain(env, variant, allow_unpinned)
+    toolchain, _ = check_toolchain(env, variant=variant, allow_unpinned=allow_unpinned)
 
     blocks_request = build_blocks(
         spec, variant=variant, env=env, out_dir=out_dir, sources=sources
