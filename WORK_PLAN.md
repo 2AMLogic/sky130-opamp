@@ -13,6 +13,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#350**: spec: propose DR-016 grading band for the slew-rate row
 - **#352**: spec: propose DR-017 grading band for the quiescent-power row
 - **#355**: spec: grade the noise row as the sampled floor per DR-018 with live fleet evidence
+- **#365**: sim: input-stage icmr-rebias screen — 17-point fleet evidence, collation, DR-015 (proposed)
 
 ## Very Important
 
@@ -69,6 +70,7 @@ PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 - **#350**: spec: propose DR-016 grading band for the slew-rate row — closes #289
 - **#352**: spec: propose DR-017 grading band for the quiescent-power row — closes #277
 - **#355**: spec: grade the noise row as the sampled floor per DR-018 with live fleet evidence — closes #274
+- **#365**: sim: input-stage icmr-rebias screen — 17-point fleet evidence, collation, DR-015 (proposed) — closes #359
 
 ## Proposed
 
@@ -104,13 +106,13 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 6 |
+| Operator merge-risk holds | 7 |
 | Very important | 1 |
 | Important | 5 |
 | Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
 | In Progress (`loom:building`) | 10 |
 | PRs awaiting review | 3 |
-| Approved PRs awaiting merge | 6 |
+| Approved PRs awaiting merge | 7 |
 | Curated | 15 |
 | Architect / Hermit proposals | 3 |
 | Active epics | 0 |
