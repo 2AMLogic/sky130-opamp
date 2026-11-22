@@ -3,7 +3,6 @@
 Snapshot of the repository's Loom label state at the generating Guide tick — see this file's last commit date. Rows may have moved since; the live label state is authoritative.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-21T05:40:26Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -25,7 +24,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 `loom:important`; taken before unlabelled work.
 
-- **#196**: Measure paired offset drift before prototyping foreground trim *(held)*
+- **#196**: Measure paired offset drift before prototyping foreground trim
 - **#274**: Grade the input-referred white-noise floor on T1 item 5
 - **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it
 - **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share)
@@ -33,7 +32,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 ## Ready
 
-Human-approved issues (`loom:issue`) ready for implementation — excluding held (`loom:blocked`/`loom:operator`/`loom:frozen`), `loom:building`, and issues closed by an open `loom:pr` PR (listed under Approved).
+Human-approved issues ready for implementation (`loom:issue`).
 
 - **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
 
@@ -56,28 +55,28 @@ Issues currently being built (`loom:building`).
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
-- **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
-- **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base *(held)*
+- **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4
+- **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests
+- **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base
 
 ## Approved (Awaiting Merge)
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015 — closes #282
-- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent — closes #284
-- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory — closes #302
-- **#350**: spec: propose DR-016 grading band for the slew-rate row — closes #289
-- **#352**: spec: propose DR-017 grading band for the quiescent-power row — closes #277
-- **#355**: spec: grade the noise row as the sampled floor per DR-018 with live fleet evidence — closes #274
+- **#287**: feat(spec): fill the PSRR row from a current-DUT grid and propose DR-015
+- **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
+- **#320**: manifests: attest sim/lib/corners.py in the item-9 inventory
+- **#350**: spec: propose DR-016 grading band for the slew-rate row
+- **#352**: spec: propose DR-017 grading band for the quiescent-power row
+- **#355**: spec: grade the noise row as the sampled floor per DR-018 with live fleet evidence
 
 ## Proposed
 
 Issues carrying `loom:curated`.
 
-- **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)* *(held)*
-- **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)* *(held)*
-- **#196**: Measure paired offset drift before prototyping foreground trim *(curated)* *(held)*
+- **#3**: Track the gap to T1 sim-validated / bronze (klayout-tools design-evidence tiers) *(curated)*
+- **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)*
+- **#196**: Measure paired offset drift before prototyping foreground trim *(curated)*
 - **#274**: Grade the input-referred white-noise floor on T1 item 5 *(curated)*
 - **#277**: Propose a quiescent-power tolerance and report the T1 item-5 grade under it *(curated)*
 - **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)*
@@ -89,13 +88,13 @@ Issues carrying `loom:curated`.
 - **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates *(curated)*
 - **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed *(curated)*
 - **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share) *(curated)*
-- **#361**: T1 item 5: commit a CMRR klt sim envelope with DR-008's proposed limits on the current DUT, then open DR-008's ratification PR *(curated)* *(held)*
+- **#361**: T1 item 5: commit a CMRR klt sim envelope with DR-008's proposed limits on the current DUT, then open DR-008's ratification PR *(curated)*
 
 ## Proposed (Architect / Hermit)
 
-- **#278**: Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path *(hermit)* *(held)*
-- **#298**: Drop the 263 legacy waveform.raw.json blobs: 116 MiB (72% of tracked bytes) that no record cites *(hermit)* *(held)*
-- **#301**: Consolidate the two comment-unaware SPICE continuation parsers in sim/offset-capability (the #237 remainder) *(hermit)* *(held)*
+- **#278**: Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path *(hermit)*
+- **#298**: Drop the 263 legacy waveform.raw.json blobs: 116 MiB (72% of tracked bytes) that no record cites *(hermit)*
+- **#301**: Consolidate the two comment-unaware SPICE continuation parsers in sim/offset-capability (the #237 remainder) *(hermit)*
 
 ## Epics
 
@@ -108,7 +107,7 @@ _None._
 | Operator merge-risk holds | 6 |
 | Very important | 1 |
 | Important | 5 |
-| Ready (`loom:issue`, net of holds/building/merge-pending) | 1 |
+| Ready (`loom:issue`) | 1 |
 | In Progress (`loom:building`) | 10 |
 | PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 6 |
