@@ -1,13 +1,12 @@
 import csv
 import json
 import math
-import re
 import tempfile
 import unittest
 from pathlib import Path
 
 import _paths
-from _paths import EXP, RECORDS, REPO, TESTBENCH
+from _paths import EXP, RECORDS, REPO
 import spice_harness as sh
 import dut_identity
 from unittest import mock
@@ -30,13 +29,6 @@ def fake_artifact_patches(root):
             mock.patch.object(artifact_store, "store", store)]
 
 pvt = _paths.load_module("pvt_sweep", EXP / "bin" / "pvt_sweep.py")
-
-TEMPLATES = {
-    "ac": "opamp_ac.spice.tmpl",
-    "tran_sr": "opamp_tran_sr.spice.tmpl",
-    "dc_swing": "opamp_dc_swing.spice.tmpl",
-}
-PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
 def klt_backend_env(value):
@@ -73,39 +65,7 @@ class FakePdk:
         return [Path("/pdk/rc/base.spice"), Path("/pdk/rc/lin.spice")]
 
 
-def ac_subs(vdd=1.8):
-    s = pvt.common_subs(FakePdk(), "tt", 27.0, vdd)
-    s.update({"VCM": 0.5 * vdd, "RFB": "1e12", "CFB": "1", "FSTART": "1",
-              "FSTOP": "1g", "PTS_PER_DEC": "20"})
-    return s
-
-
-class ParseMeasTests(unittest.TestCase):
-    def test_parses_plain_and_trailer_lines(self):
-        out = pvt.parse_meas(
-            "gain_dc_db = 7.2e+01\n"
-            "sr_rise_s = 2.5e-08 targ= 1.1e-06 trig= 1.0e-06\n"
-            "noise: not a meas line\n"
-            "  iq_a=6.4e-05\n"
-        )
-        self.assertEqual(out["gain_dc_db"], 72.0)
-        self.assertEqual(out["sr_rise_s"], 2.5e-08)
-        self.assertEqual(out["iq_a"], 6.4e-05)
-        self.assertEqual(len(out), 3)
-
-    def test_ignores_non_numeric_values(self):
-        self.assertEqual(pvt.parse_meas("x = failed\ny = -.5\n"), {"y": -0.5})
-
-
-class CommonSubsTests(unittest.TestCase):
-    def test_pin_resolution_into_subs(self):
-        s = pvt.common_subs(FakePdk(), "ff", 125.0, 1.98)
-        self.assertEqual(s["CORNER_INCLUDE"], Path("/pdk/corners/ff.spice"))
-        self.assertEqual(s["RC_INCLUDE_BASE"], Path("/pdk/rc/base.spice"))
-        self.assertEqual(s["RC_INCLUDE_LIN"], Path("/pdk/rc/lin.spice"))
-        self.assertEqual((s["TEMP"], s["VDD"]), (125.0, 1.98))
-        self.assertEqual(s["OPAMP_NETLIST"], pvt.DESIGN_NETLIST)
-
+class OpampPdkTests(unittest.TestCase):
     def test_opamp_pdk_rc_includes_from_own_pin(self):
         own = json.loads((EXP / "pdk.json").read_text())
         pin = json.loads((pvt.GMID_PDK_PIN_FILE).read_text())
@@ -120,50 +80,11 @@ class CommonSubsTests(unittest.TestCase):
         self.assertAlmostEqual(pvt.VDD_BY_CORNER["ss"], 0.9 * 1.8)
 
 
-class TemplateTests(unittest.TestCase):
-    def test_ac_template_renders_with_runner_subs(self):
-        text = sh.render(TESTBENCH / TEMPLATES["ac"], ac_subs())
-        self.assertNotIn("{", text)
-        self.assertIn("/pdk/corners/tt.spice", text)
-
-    def test_every_template_placeholder_is_supplied_by_the_runner(self):
-        """Each analysis's runner-side keys must cover its template's placeholders.
-
-        Keys are taken from the runner source (the literal strings passed to
-        subs/common_subs), so a renamed placeholder in either place fails.
-        """
-        src = (EXP / "bin" / "pvt_sweep.py").read_text()
-        common = set(pvt.common_subs(FakePdk(), "tt", 27.0, 1.8))
-        for analysis, name in TEMPLATES.items():
-            fn_src = src.split(f"def run_{analysis}(", 1)[1].split("\ndef ", 1)[0]
-            supplied = common | set(re.findall(r'"([A-Z][A-Z0-9_]*)":', fn_src))
-            wanted = set(PLACEHOLDER.findall((TESTBENCH / name).read_text()))
-            self.assertTrue(wanted, name)
-            self.assertLessEqual(wanted, supplied,
-                                 f"{name}: unsupplied {sorted(wanted - supplied)}")
-
-    def test_missing_placeholder_fails_render(self):
-        subs = ac_subs()
-        del subs["CL_F"]
-        with self.assertRaises(sh.HarnessError) as cm:
-            sh.render(TESTBENCH / TEMPLATES["ac"], subs)
-        self.assertIn("CL_F", str(cm.exception))
-
-    def test_scratch_copy_with_broken_placeholder_fails(self):
-        """Deliberate break: a misspelled placeholder in a copy is caught."""
-        text = (TESTBENCH / TEMPLATES["ac"]).read_text().replace("{VCM}", "{VCMM}")
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d) / "broken.tmpl"
-            p.write_text(text)
-            with self.assertRaises(sh.HarnessError):
-                sh.render(p, ac_subs())
-
-
 class AggregationTests(unittest.TestCase):
     def test_analyses_and_fieldnames_agree(self):
-        self.assertEqual(set(pvt.ANALYSES) | set(pvt.KLT_ANALYSES), set(pvt.FIELDNAMES))
-        # the legacy ngspice-loop analyses are the default set; icmr/cmrr are opt-in
-        self.assertEqual(set(pvt.ANALYSES), set(pvt.DEFAULT_ANALYSES))
+        self.assertEqual(set(pvt.FLEET_ANALYSES) | set(pvt.KLT_ANALYSES), set(pvt.FIELDNAMES))
+        # the fleet analyses are the historical default set; the rest are opt-in
+        self.assertEqual(set(pvt.FLEET_ANALYSES), set(pvt.DEFAULT_ANALYSES))
         self.assertFalse(set(pvt.KLT_ANALYSES) & set(pvt.DEFAULT_ANALYSES))
 
     def test_csv_roundtrip_with_runner_fieldnames(self):
@@ -782,15 +703,6 @@ class CartesianSupplyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             pvt.supply_values(self.CORNERS, "bogus")
 
-    def test_artifact_names_unique_per_point(self):
-        for mode, n in (("paired", 15), ("cartesian", 45)):
-            pts = pvt.supply_points(self.CORNERS, self.TEMPS, mode)
-            names = {pvt.point_tag("ac", c, t, v, mode) for c, t, v in pts}
-            self.assertEqual(len(names), n, mode)
-        self.assertEqual(pvt.point_tag("ac", "tt", 27.0, 1.8, "paired"), "ac-tt-27C")
-        self.assertNotEqual(pvt.point_tag("ac", "tt", 27.0, 1.62, "cartesian"),
-                            pvt.point_tag("ac", "tt", 27.0, 1.98, "cartesian"))
-
     def test_cartesian_request_has_all_supplies_and_no_exclusions(self):
         with tempfile.TemporaryDirectory() as d:
             path, tag = pvt.build_klt_request("cmrr", "mid", None, FakeKltPdk(), self.CORNERS, self.TEMPS,
@@ -831,29 +743,6 @@ class CartesianSupplyTests(unittest.TestCase):
         self.assertAlmostEqual(row["vcm_v"], 0.99)
         row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
         self.assertEqual(row["vdd_v"], 1.8)  # default still the paired voltage
-
-    def test_local_stimuli_use_point_voltage(self):
-        captured = []
-
-        def fake_run(ngspice, deck_text, workdir, log_path, timeout_s=120):
-            captured.append(deck_text)
-            return "iq_a=1e-5\npq_w=1e-5\ngain_dc_db=60\ngbw_hz=1e6\nphase_at_gbw_rad=-2\n" \
-                   "sr_rise_s=1e-8\nsr_fall_s=1e-8\n", 0.1
-
-        real = pvt.run_ngspice
-        pvt.run_ngspice = fake_run
-        try:
-            with tempfile.TemporaryDirectory() as d:
-                row, deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
-                self.assertEqual((row["vdd_v"], row["vcm_v"]), (1.98, 0.99))
-                self.assertIn("1.98", deck)
-                row, _deck = pvt.run_tran_sr(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
-                self.assertAlmostEqual(row["v_low_v"], 0.3 * 1.98)
-                self.assertAlmostEqual(row["v_high_v"], 0.7 * 1.98)
-                row, _deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l")
-                self.assertEqual(row["vdd_v"], 1.62)  # omitted -> paired mapping
-        finally:
-            pvt.run_ngspice = real
 
     def test_pm_overshoot_table_distinguishes_supplies(self):
         ac = [{"corner": "tt", "temp_c": "27", "vdd_v": v, "phase_margin_deg": pm}
@@ -1258,14 +1147,6 @@ class FleetAnalysisTests(unittest.TestCase):
         self.assertEqual(results["ac"], [])
         self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", errors[0])
 
-    def test_local_ngspice_is_forbidden_for_a_batch_fleet_campaign(self):
-        pvt.LOCAL_SIM_FORBIDDEN[0] = True
-        try:
-            with self.assertRaises(sh.HarnessError):
-                pvt.run_ngspice("ngspice", "* deck", Path("/nonexistent"), Path("/nonexistent/log"))
-        finally:
-            pvt.LOCAL_SIM_FORBIDDEN[0] = False
-
     def test_cli_fleet_and_netlist_flags(self):
         # issue #163: the default backend depends on $KLT_SIM_BACKEND -- pin it unset
         with klt_backend_env(None):
@@ -1275,8 +1156,9 @@ class FleetAnalysisTests(unittest.TestCase):
             self.assertEqual((a.fleet, a.netlist), (True, "/x/cand.spice"))
 
     def test_end_to_end_fleet_record_with_selected_netlist(self):
-        """main(): --fleet --netlist writes a 45-unit record, snapshots the INPUT netlist, leaves the
-        canonical design untouched and never starts a local simulator."""
+        """main(): the default invocation (--netlist, no --fleet) writes a 45-unit
+        record via klt sim, snapshots the INPUT netlist, leaves the canonical
+        design untouched and never starts a local simulator (issue #278)."""
         import hashlib
         from unittest import mock
 
@@ -1300,7 +1182,6 @@ class FleetAnalysisTests(unittest.TestCase):
                 mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
                 mock.patch.object(pvt, "klt_version", lambda: "klt-test"), mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
                 mock.patch.object(pvt, "run_klt_sim", self._fake_klt(Path(d))),
-                mock.patch.object(pvt, "first_line", lambda *_a, **_k: self.fail("ngspice version probed")),
                 mock.patch.object(pvt, "ACTIVE_DUT", [canon]),
             ]
             (Path(d) / "dummy").mkdir()
@@ -1308,15 +1189,17 @@ class FleetAnalysisTests(unittest.TestCase):
                 for p in patches:
                     p.start()
                 try:
-                    rc = pvt.main(["--fleet", "--netlist", str(cand), "--backend", "batch"])
+                    rc = pvt.main(["--netlist", str(cand), "--backend", "batch"])
                 finally:
                     mock.patch.stopall()
-                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
             self.assertEqual(rc, 0)
             rec = json.loads(next(records.glob("*.json")).read_text())
             self.assertEqual(rec["matrix"]["n_failed"], 0)
             self.assertEqual(rec["matrix"]["n_runs"], 45)
+            self.assertEqual(rec["matrix"]["execution"]["klt_analyses"], list(pvt.FLEET_ANALYSES))
             self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+            self.assertIs(rec["matrix"]["execution"]["fleet_flag"], False)
+            self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
             self.assertEqual(rec["matrix"]["execution"]["solver_settings"]["policy"], "DR-006")
             self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
             self.assertEqual(rec["dut"]["sha256"], "sha256:" + hashlib.sha256(cand.read_bytes()).hexdigest())
@@ -1692,11 +1575,10 @@ class SwingFixcmTests(unittest.TestCase):
                 for p in patches:
                     p.start()
                 try:
-                    rc = pvt.main(["--fleet", "--backend", "batch", "--analyses", "dc_swing,swing_fixcm",
+                    rc = pvt.main(["--backend", "batch", "--analyses", "dc_swing,swing_fixcm",
                                    "--netlist", str(cand)])
                 finally:
                     mock.patch.stopall()
-                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
             self.assertEqual(rc, 0)
             rec = json.loads(next(records.glob("*.json")).read_text())
             rows = list(csv.DictReader((records / Path(rec["links"]["swing_fixcm_csv"]).name).open()))
@@ -1734,213 +1616,6 @@ class EffectiveBackendTests(unittest.TestCase):
         self.assertEqual(self.backend(["--backend", "batch"], env="local"), "batch")
         self.assertEqual(self.backend(["--backend", "local"], env="batch"), "local")
 
-
-class BatchLocalGridRefusalTests(unittest.TestCase):
-    """Issue #163: on the effective batch backend, a request needing more than
-    one local ngspice execution unit (local analyses x supply points) exits
-    non-zero before any tool/PDK check, simulator/version probe, klt submission
-    or record/snapshot allocation. Every later stage is armed to fail the test."""
-
-    def refuse(self, argv, env=None):
-        import contextlib
-        import io
-        import subprocess as sp
-        from unittest import mock
-
-        def fail(stage):
-            def _fail(*a, **k):
-                raise AssertionError(f"{stage} reached despite the refusal")
-            return _fail
-
-        with tempfile.TemporaryDirectory() as d:
-            records, snaps = Path(d) / "records", Path(d) / "snaps"
-            records.mkdir()
-            snaps.mkdir()
-            err = io.StringIO()
-            with klt_backend_env(env), \
-                    mock.patch.object(sp, "run", fail("local subprocess")), \
-                    mock.patch.object(pvt, "resolve_pdk", fail("PDK resolution")), \
-                    mock.patch.object(pvt, "klt_available", fail("klt probe")), \
-                    mock.patch.object(pvt, "first_line", fail("tool version probe")), \
-                    mock.patch.object(pvt, "allocate_record_id", fail("record allocation")), \
-                    mock.patch.object(pvt, "run_klt_sim", fail("klt submission")), \
-                    mock.patch.object(pvt, "RECORDS_DIR", records), \
-                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
-                    contextlib.redirect_stderr(err):
-                rc = pvt.main(list(argv))
-            self.assertEqual(list(records.iterdir()), [], "refusal wrote record files")
-            self.assertEqual(list(snaps.iterdir()), [], "refusal wrote snapshots")
-        self.assertNotEqual(rc, 0)
-        return err.getvalue()
-
-    def test_default_campaign_refuses_naming_45_units_and_the_fleet_escape(self):
-        err = self.refuse([])
-        self.assertIn("45 local ngspice unit", err)
-        self.assertIn("'--fleet --backend batch'", err)
-
-    def test_env_batch_refuses_identically(self):
-        err = self.refuse([], env="batch")
-        self.assertIn("45 local ngspice unit", err)
-
-    def test_cli_batch_beats_env_local(self):
-        err = self.refuse(["--backend", "batch"], env="local")
-        self.assertIn("'--fleet --backend batch'", err)
-
-    def test_two_local_analyses_at_one_supply_point_are_two_units(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,tran_sr"])
-        self.assertIn("2 local ngspice unit", err)
-        self.assertIn("2 local analysis(es) x 1 supply point", err)
-
-    def test_repeated_analysis_entries_are_not_deduplicated(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,ac"])
-        self.assertIn("2 local ngspice unit", err)
-
-    def test_two_cartesian_supplies_at_one_point_are_two_units(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac",
-                           "--supply-mode", "cartesian", "--supplies", "1.62,1.98"])
-        self.assertIn("2 local ngspice unit", err)
-        self.assertIn("1 local analysis(es) x 2 supply point", err)
-
-    def test_unknown_analysis_still_reports_the_pre_guard_error(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,bogus"])
-        self.assertIn("unknown analysis 'bogus'", err)
-        self.assertNotIn("--fleet --backend batch", err)
-
-    def test_duplicate_supply_tuple_still_reports_the_pre_guard_error(self):
-        err = self.refuse(["--corners", "tt,tt", "--temps", "27", "--analyses", "ac"])
-        self.assertIn("duplicate (process, temperature, supply) tuple", err)
-        self.assertNotIn("--fleet --backend batch", err)
-
-
-class LocalExecutionAllowanceTests(unittest.TestCase):
-    """Issue #163: what the batch guard lets through -- exactly one local unit,
-    an explicit local backend of any grid size, an env-selected local backend,
-    mixed local+klt selections (remote work does not consume the local
-    allowance) and the zero-local-unit --fleet / klt-only paths -- with the
-    unchanged record schema, and no routing state leaking between main() calls."""
-
-    NGSPICE_OUT = ("iq_a=1e-5\npq_w=1e-5\ngain_dc_db=60\ngbw_hz=1e6\nphase_at_gbw_rad=-2\n"
-                   "sr_rise_s=1e-8\nsr_fall_s=1e-8\n")
-
-    class LocalPdk(FakePdk):
-        variant = "sky130A"
-        matches_pin, root, installed_commit = True, Path("/pdk"), "abc"
-        pin = {"open_pdks_commit": "abc"}
-        own_pin = {"rc_corner": {"choice": "typical"}}
-
-    def run_main(self, argv, env=None):
-        """main() to completion against mocked local/klt runners and temporary
-        record/snapshot dirs; returns (rc, record, local_decks, klt_campaigns)."""
-        import contextlib
-        import io
-        from unittest import mock
-
-        local_decks, klt_campaigns = [], []
-
-        def fake_ngspice(_ngspice, deck_text, _workdir, _log_path, timeout_s=120):
-            local_decks.append(deck_text)
-            return self.NGSPICE_OUT, 0.1
-
-        def fake_klt_campaign(analyses, pdk, corners, temps, backend, req_dir, log_dir,
-                              snapshot_run_dir, results, errors, klt_jobs,
-                              supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
-            klt_campaigns.append((list(analyses), backend))
-            klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
-
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d) / "repo"
-            records, snaps = root / "records", root / "snaps"
-            records.mkdir(parents=True)
-            snaps.mkdir(parents=True)
-            out = io.StringIO()
-            patches = [
-                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root),
-                mock.patch.object(pvt, "RECORDS_DIR", records),
-                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps),
-                mock.patch.object(pvt, "resolve_pdk", lambda: self.LocalPdk()),
-                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
-                mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
-                mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
-                mock.patch.object(pvt, "first_line", lambda *a, **k: "fake-ngspice v42"),
-                mock.patch.object(pvt.shutil, "which", lambda n: f"/bin/{n}"),
-                mock.patch.object(pvt, "run_ngspice", fake_ngspice),
-                mock.patch.object(pvt, "run_klt_analyses", fake_klt_campaign),
-                mock.patch.object(pvt, "ACTIVE_DUT", [pvt.DESIGN_NETLIST]),
-            ]
-            with klt_backend_env(env):
-                for p in patches:
-                    p.start()
-                try:
-                    with contextlib.redirect_stderr(out), contextlib.redirect_stdout(out):
-                        rc = pvt.main(list(argv))
-                finally:
-                    mock.patch.stopall()
-            recs = list(records.glob("*.json"))
-            rec = json.loads(recs[0].read_text()) if recs else None
-        return rc, rec, local_decks, klt_campaigns
-
-    def test_single_unit_probe_runs_locally_on_batch(self):
-        rc, rec, decks, klt = self.run_main(["--corners", "tt", "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc, len(decks), klt), (0, 1, []))
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac"])
-        self.assertEqual(rec["matrix"]["n_runs"], 1)
-        self.assertIsNone(rec["matrix"]["execution"]["backend"])
-        self.assertEqual(rec["tools"]["ngspice"], "fake-ngspice v42")
-        self.assertIn("ac_csv", rec["links"])
-
-    def test_explicit_local_backend_runs_any_grid(self):
-        rc, rec, decks, klt = self.run_main(["--backend", "local", "--corners", "tt,ss",
-                                             "--temps", "27", "--analyses", "ac,tran_sr"])
-        self.assertEqual((rc, klt), (0, []))
-        self.assertEqual(len(decks), 4)  # 2 local analyses x 2 supply points
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac", "tran_sr"])
-
-    def test_env_selected_local_preserves_the_full_local_campaign(self):
-        rc, rec, decks, klt = self.run_main(["--analyses", "ac,tran_sr"], env="local")
-        self.assertEqual((rc, klt), (0, []))
-        self.assertEqual(len(decks), 30)  # 2 local analyses x 15 supply points, no refusal
-        self.assertEqual(rec["matrix"]["n_runs"], 30)
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac", "tran_sr"])
-
-    def test_mixed_selection_counts_only_the_local_portion(self):
-        rc, rec, decks, klt = self.run_main(["--corners", "tt", "--temps", "27",
-                                             "--analyses", "ac,icmr"])
-        self.assertEqual(rc, 0)
-        self.assertEqual(len(decks), 1)  # one local unit allowed on batch
-        self.assertEqual(klt, [(["icmr"], "batch")])  # remote work is not constrained
-        self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac"])
-        self.assertEqual([j["backend"] for j in rec["klt_jobs"]], ["batch"])
-
-    def test_klt_only_selection_is_never_rejected(self):
-        rc, rec, decks, klt = self.run_main(["--analyses", "icmr,cmrr,tran_step"])
-        self.assertEqual((rc, decks, rec["matrix"]["n_failed"]), (0, [], 0))
-        self.assertEqual(klt, [(["icmr", "cmrr", "tran_step"], "batch")])
-
-    def test_fleet_counts_zero_local_units(self):
-        rc, rec, decks, klt = self.run_main(["--fleet", "--backend", "batch"])
-        self.assertEqual((rc, decks), (0, []))
-        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
-        self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
-
-    def test_consecutive_main_calls_leave_no_routing_state_stuck(self):
-        # fleet/batch sets LOCAL_SIM_FORBIDDEN for its own run; each later call
-        # must re-derive the flag and the backend from its own argv/environment.
-        self.addCleanup(pvt.LOCAL_SIM_FORBIDDEN.__setitem__, 0, False)
-        rc0, _r0, decks0, klt0 = self.run_main(["--fleet", "--backend", "batch",
-                                                "--corners", "tt", "--temps", "27"])
-        self.assertEqual((rc0, decks0), (0, []))
-        self.assertEqual(klt0, [(["ac", "tran_sr", "dc_swing"], "batch")])
-        self.assertTrue(pvt.LOCAL_SIM_FORBIDDEN[0])  # left set, as the fleet run does today
-        rc1, _r1, decks1, _k1 = self.run_main(["--corners", "tt", "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc1, len(decks1)), (0, 1))  # one-unit probe not poisoned by the fleet call
-        self.assertFalse(pvt.LOCAL_SIM_FORBIDDEN[0])
-        rc2, _r2, decks2, _k2 = self.run_main(["--backend", "local", "--corners", "tt,ss",
-                                               "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc2, len(decks2)), (0, 2))
-        pvt.LOCAL_SIM_FORBIDDEN[0] = False
-
     def test_check_env_reports_the_effective_backend_and_precedence(self):
         import contextlib
         import io
@@ -1959,6 +1634,161 @@ class LocalExecutionAllowanceTests(unittest.TestCase):
         self.assertIn("klt sim backend: local", text)
         self.assertIn("KLT_SIM_BACKEND='batch'", text)
         self.assertIn("--backend", text)
+
+    def test_check_env_fails_when_klt_is_missing(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        out = io.StringIO()
+        with mock.patch.object(pvt, "report_tool_status", lambda: 0), \
+                mock.patch.object(pvt, "report_pdk", lambda resolve, corners, label: (0, None)), \
+                mock.patch.object(pvt, "klt_available", lambda: None), \
+                contextlib.redirect_stdout(out):
+            rc = pvt.check_env()
+        self.assertNotEqual(rc, 0)  # klt is required for every analysis now (issue #278)
+        self.assertIn("klt     : MISSING", out.getvalue())
+
+
+class PreValidationTests(unittest.TestCase):
+    """Analysis-name and supply-tuple validation errors exit non-zero before
+    any tool/PDK check, klt probe, record/snapshot allocation or klt
+    submission. Every later stage is armed to fail the test."""
+
+    def refuse(self, argv, env=None):
+        import contextlib
+        import io
+        from unittest import mock
+
+        def fail(stage):
+            def _fail(*a, **k):
+                raise AssertionError(f"{stage} reached despite the refusal")
+            return _fail
+
+        with tempfile.TemporaryDirectory() as d:
+            records, snaps = Path(d) / "records", Path(d) / "snaps"
+            records.mkdir()
+            snaps.mkdir()
+            err = io.StringIO()
+            with klt_backend_env(env), \
+                    mock.patch.object(pvt, "resolve_pdk", fail("PDK resolution")), \
+                    mock.patch.object(pvt, "klt_available", fail("klt probe")), \
+                    mock.patch.object(pvt, "allocate_record_id", fail("record allocation")), \
+                    mock.patch.object(pvt, "run_klt_sim", fail("klt submission")), \
+                    mock.patch.object(pvt, "RECORDS_DIR", records), \
+                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
+                    contextlib.redirect_stderr(err):
+                rc = pvt.main(list(argv))
+            self.assertEqual(list(records.iterdir()), [], "refusal wrote record files")
+            self.assertEqual(list(snaps.iterdir()), [], "refusal wrote snapshots")
+        self.assertNotEqual(rc, 0)
+        return err.getvalue()
+
+    def test_unknown_analysis_still_reports_the_pre_guard_error(self):
+        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,bogus"])
+        self.assertIn("unknown analysis 'bogus'", err)
+
+    def test_duplicate_supply_tuple_still_reports_the_pre_guard_error(self):
+        err = self.refuse(["--corners", "tt,tt", "--temps", "27", "--analyses", "ac"])
+        self.assertIn("duplicate (process, temperature, supply) tuple", err)
+
+
+class DefaultKltDispatchTests(unittest.TestCase):
+    """Issue #278: without --fleet, the default analyses dispatch ac,tran_sr,dc_swing
+    through `klt sim` on the resolved backend; --fleet stays accepted as a no-op."""
+
+    class Pdk(FakePdk):
+        variant = "sky130A"
+        matches_pin, root, installed_commit = True, Path("/pdk"), "abc"
+        pin = {"open_pdks_commit": "abc"}
+        own_pin = {"rc_corner": {"choice": "typical"}}
+
+    def run_main(self, argv, env=None):
+        """main() to completion against a mocked klt campaign and temporary
+        record/snapshot dirs; returns (rc, record, klt_campaigns)."""
+        import contextlib
+        import io
+        from unittest import mock
+
+        klt_campaigns = []
+
+        def fake_klt_campaign(analyses, pdk, corners, temps, backend, req_dir, log_dir,
+                              snapshot_run_dir, results, errors, klt_jobs,
+                              supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
+            klt_campaigns.append((list(analyses), backend))
+            klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            records, snaps = root / "records", root / "snaps"
+            records.mkdir(parents=True)
+            snaps.mkdir(parents=True)
+            out = io.StringIO()
+            patches = [
+                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root),
+                mock.patch.object(pvt, "RECORDS_DIR", records),
+                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps),
+                mock.patch.object(pvt, "resolve_pdk", lambda: self.Pdk()),
+                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
+                mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
+                mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
+                mock.patch.object(pvt, "run_klt_analyses", fake_klt_campaign),
+                mock.patch.object(pvt, "ACTIVE_DUT", [pvt.DESIGN_NETLIST]),
+            ]
+            with klt_backend_env(env):
+                for p in patches:
+                    p.start()
+                try:
+                    with contextlib.redirect_stderr(out), contextlib.redirect_stdout(out):
+                        rc = pvt.main(list(argv))
+                finally:
+                    mock.patch.stopall()
+            recs = list(records.glob("*.json"))
+            rec = json.loads(recs[0].read_text()) if recs else None
+        return rc, rec, klt_campaigns
+
+    def test_default_invocation_dispatches_fleet_analyses_via_klt(self):
+        rc, rec, klt = self.run_main([])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
+        self.assertEqual(rec["matrix"]["execution"]["klt_analyses"], ["ac", "tran_sr", "dc_swing"])
+        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+        self.assertIs(rec["matrix"]["execution"]["fleet_flag"], False)
+        self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
+        self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
+
+    def test_fleet_flag_is_an_accepted_no_op(self):
+        rc, rec, klt = self.run_main(["--fleet", "--backend", "batch"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
+        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+        self.assertIs(rec["matrix"]["execution"]["fleet_flag"], True)
+
+    def test_backend_local_routes_the_same_analyses_locally_via_klt(self):
+        rc, rec, klt = self.run_main(["--backend", "local", "--corners", "tt", "--temps", "27"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "local")])
+        self.assertEqual(rec["matrix"]["execution"]["backend"], "local")
+
+    def test_missing_klt_fails_before_any_work(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            records, snaps = Path(d) / "records", Path(d) / "snaps"
+            records.mkdir()
+            snaps.mkdir()
+            err = io.StringIO()
+            with mock.patch.object(pvt, "klt_available", lambda: None), \
+                    mock.patch.object(pvt, "RECORDS_DIR", records), \
+                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
+                    contextlib.redirect_stderr(err):
+                rc = pvt.main([])
+            self.assertNotEqual(rc, 0)
+            self.assertIn("klt not found on PATH", err.getvalue())
+            self.assertEqual(list(records.iterdir()), [], "run wrote record files")
+            self.assertEqual(list(snaps.iterdir()), [], "run wrote snapshots")
 
 
 def follower_wave(lo, hi, sr=15e6, k=1e8, vdd=1.8, t_stop=2.2e-6, dt=2e-9, offset=0.0, sr_fall=None,
