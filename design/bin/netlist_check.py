@@ -62,11 +62,6 @@ EXPR_RE = re.compile(r"""^expr\('(?P<body>.*)'\)$""")
 SAFE_BODY_RE = re.compile(r"^[0-9@A-Za-z_ .+\-*/()]*$")
 
 
-def logical_lines(text: str) -> list[str]:
-    """Comment-aware join; the line-1 ``** sch_path:`` comment is dropped with the rest."""
-    return join_continuations(text)
-
-
 def split_tokens(line: str) -> list[str]:
     # whitespace split that keeps expr('...') (which contains spaces) whole
     return re.findall(r"""(?:expr\('[^']*'\)|\S)+""", line)
@@ -128,8 +123,8 @@ def derived_equal(key: str, a: float, b: float) -> bool:
 
 def compare(fresh_text: str, committed_text: str) -> list[str]:
     problems: list[str] = []
-    fresh = parse(logical_lines(fresh_text))
-    comm = parse(logical_lines(committed_text))
+    fresh = parse(join_continuations(fresh_text))
+    comm = parse(join_continuations(committed_text))
     if len(fresh) != len(comm):
         problems.append(f"line count differs: regenerated {len(fresh)}, committed {len(comm)}")
     for (fl, fpos, fkv), (cl, cpos, ckv) in zip(fresh, comm):

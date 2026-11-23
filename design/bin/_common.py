@@ -8,29 +8,17 @@ without a ``sys.path`` shim.
 from __future__ import annotations
 
 import hashlib
+import sys
 from pathlib import Path
+
+_LIB = Path(__file__).resolve().parents[2] / "lib"
+if str(_LIB) not in sys.path:
+    sys.path.insert(0, str(_LIB))
+from spice_text import join_continuations  # noqa: E402
+
+__all__ = ["join_continuations", "sha256_prefixed"]
 
 
 def sha256_prefixed(path) -> str:
     """Return ``sha256:<hex>`` of the file's bytes (the evidence-JSON form)."""
     return "sha256:" + hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def join_continuations(text: str) -> list[str]:
-    """Return SPICE logical lines: comments and blanks dropped, ``+`` joined.
-
-    Comment (``*``) and blank lines are dropped *before* joining, so a comment
-    between a card and its ``+`` continuation does not swallow the continuation.
-    Each line is stripped; a ``+`` line is appended to the previous card with a
-    single space. A leading orphan ``+`` (no card to join to) starts its own line.
-    """
-    out: list[str] = []
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("*"):
-            continue
-        if line.startswith("+") and out:
-            out[-1] += " " + line[1:].strip()
-        else:
-            out.append(line)
-    return out

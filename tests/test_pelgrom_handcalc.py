@@ -1,6 +1,8 @@
 """Simulator-free tests for sim/offset-capability/bin/pelgrom_handcalc.py (issue #107)."""
 import math
+import tempfile
 import unittest
+from pathlib import Path
 
 import _paths
 from _paths import REPO
@@ -14,6 +16,18 @@ class Core(unittest.TestCase):
         self.assertEqual((c["XM1"]["kind"], c["XM1"]["w"], c["XM1"]["l"]), ("nfet", 6.03, 1.2))
         self.assertEqual((c["XM3"]["kind"], c["XM3"]["w"], c["XM3"]["l"]), ("pfet", 4.635, 0.3))
         self.assertEqual(c["XM6"]["mult"], 10.0)
+
+    def test_comment_between_card_and_continuation_keeps_geometry(self):
+        # issue #301: `mult=` lives on the `+` line; a comment interleaved with
+        # it must not make parse_core silently default the multiplier.
+        lines = hc.CORE.read_text().splitlines()
+        i = next(i for i, ln in enumerate(lines) if ln.startswith("XM5 ")) + 1
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "opamp_core.spice"
+            p.write_text("\n".join(lines[:i] + ["*.ipin tail"] + lines[i:]) + "\n")
+            c = hc.parse_core(p)
+        self.assertEqual(c["XM5"]["mult"], 2.0)
+        self.assertEqual(c, hc.parse_core())
 
 
 class Calc(unittest.TestCase):
