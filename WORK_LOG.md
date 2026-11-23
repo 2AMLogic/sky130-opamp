@@ -328,9 +328,3 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 - **PR #39**: docs: add DR-006 recording the keep-ngspice-default solver-tolerance convention
 - **Issue #38** (closed): ngspice solver-tolerance convention: keep the default (coordination from sg13g2-opamp DR-0005)
-
-### 2026-09-23
-
-- **PR #37**: docs: record DR-005 declining the 3.3 V I/O-device flavor
-- **Issue #36** (closed): spec: both same-PDK consumers need a 3.3 V-rail / 5 V-gate amplifier position this block's 1.8 V-core scope does not serve (2am rule 9 step 4)
-
