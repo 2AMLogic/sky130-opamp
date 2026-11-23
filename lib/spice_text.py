@@ -1,11 +1,12 @@
-"""Shared SPICE logical-line handling for the design and sim trees (issue #301).
+"""Shared SPICE logical-line handling for the design, sim and layout trees (issue #301).
 
 One definition of ``+`` continuation semantics, so a comment or blank between
 a card and its continuation can never swallow the continuation's parameters
 (``mult=`` lives there for every MOS device in the core netlist). Stdlib-only
-and repo-rooted so neither tree imports the other; callers resolve it
-relative to their own script location (design/bin/_common.py and
-sim/offset-capability/bin/{attribution,pelgrom_handcalc}.py).
+and repo-rooted so no tree imports another; callers resolve it relative to
+their own script location (design/bin/_common.py,
+sim/offset-capability/bin/{attribution,pelgrom_handcalc}.py and
+layout/bin/stage_reference.py).
 
 Two modes:
 

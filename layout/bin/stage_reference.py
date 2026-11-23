@@ -39,7 +39,13 @@ selected card touches, or an internal net that duplicates or overlaps a pin.
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
+
+_LIB = Path(__file__).resolve().parents[2] / "lib"
+if str(_LIB) not in sys.path:
+    sys.path.insert(0, str(_LIB))
+from spice_text import join_continuations  # noqa: E402
 
 
 class ReferenceError(ValueError):
@@ -49,23 +55,22 @@ class ReferenceError(ValueError):
 def logical_lines(text: str) -> list[str]:
     """Join SPICE ``+`` continuation lines onto their parent line.
 
-    Comment lines (``*``) and blank lines are dropped *before* joining, so a
-    comment between a card and its continuation does not split it (SPICE
-    semantics), and a commented-out ``**.subckt`` header never becomes a
-    card. Whitespace inside a card is normalised to single spaces.
+    Thin wrapper over the shared ``join_continuations`` from
+    ``lib/spice_text.py`` (the one definition of continuation semantics,
+    issues #226/#237/#301) in parse mode: comment lines (``*``) and blanks
+    are dropped *before* joining, so a comment between a card and its
+    continuation does not split it (SPICE semantics), and a commented-out
+    ``**.subckt`` header never becomes a card. Two behaviours stay local
+    to this flow: an orphan leading ``+`` (no card to join to; the shared
+    joiner emits it as its own line) is a hard :class:`ReferenceError`,
+    and whitespace inside a card is normalised to single spaces.
     """
-    out: list[str] = []
-    for raw in text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("*"):
-            continue
+    lines: list[str] = []
+    for line in join_continuations(text):
         if line.startswith("+"):
-            if not out:
-                raise ReferenceError("continuation line before any card")
-            out[-1] = f"{out[-1]} {line[1:].strip()}"
-            continue
-        out.append(line)
-    return [" ".join(line.split()) for line in out]
+            raise ReferenceError("continuation line before any card")
+        lines.append(" ".join(line.split()))
+    return lines
 
 
 #: ``X`` subckt calls to sky130 MOS models carry four terminals (d g s b).
