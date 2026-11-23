@@ -2,6 +2,11 @@
 
 Sections moved byte-for-byte from [WORK_LOG.md](../WORK_LOG.md) by `loom-daemon work-docs archive`.
 
+### 2026-09-23
+
+- **PR #37**: docs: record DR-005 declining the 3.3 V I/O-device flavor
+- **Issue #36** (closed): spec: both same-PDK consumers need a 3.3 V-rail / 5 V-gate amplifier position this block's 1.8 V-core scope does not serve (2am rule 9 step 4)
+
 ### 2026-09-22
 
 - **PR #34**: docs: name consumers in spec, publish integrator view (2am rule 9)
