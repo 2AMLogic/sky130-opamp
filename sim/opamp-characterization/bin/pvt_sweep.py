@@ -611,31 +611,49 @@ def swing_measurements() -> list[dict]:
     return ms
 
 
+def item5_row_partition(swing_graded: bool = False) -> tuple[tuple[str, ...], dict[str, str]]:
+    """(graded_rows, ungraded_rows) partition of the 12 Sec 2 rows.
+
+    Default (Phase A of issue #358): `ITEM5_GRADED_ROWS` (6) +
+    `ITEM5_UNGRADED_ROWS` (6, including `output_swing`). When `swing_graded` is
+    True (`--swing-slope-band` or envelopes that already grade `output_swing`),
+    `output_swing` moves from the ungraded gap dict into the graded tuple so the
+    two remain disjoint and still partition all 12 rows. The committed signoff
+    manifest's gap stays untouched until Phase B of issue #358."""
+    if not swing_graded:
+        return ITEM5_GRADED_ROWS, dict(ITEM5_UNGRADED_ROWS)
+    return (*ITEM5_GRADED_ROWS, "output_swing"), {
+        k: v for k, v in ITEM5_UNGRADED_ROWS.items() if k != "output_swing"
+    }
+
+
 def swing_slope_band_measurements() -> list[dict]:
     """Native twin of swing_row()'s rule (issue #358; klayout-tools#5518): three
     `slope_band` entries -- low end, high end, difference -- reducing the dc
-    sweep to the largest contiguous run around mid-supply over which d(vout)/
-    d(vinp) stays in [SWING_SLOPE_MIN, SWING_SLOPE_MAX], each tagged
-    `spec_row: output_swing` and graded against the ratified row's own numbers
-    (SPEC_SWING_*_V: window containment plus span).
+    sweep to the largest contiguous run around each corner's own VDD/2 over
+    which d(vout)/d(vinp) stays in [SWING_SLOPE_MIN, SWING_SLOPE_MAX], each
+    tagged `spec_row: output_swing` and graded against the ratified row's own
+    numbers (SPEC_SWING_*_V: window containment plus span).
 
-    The anchor is mid-supply at the nominal rail (0.5 * VDD_BY_CORNER["tt"] =
-    0.9 V). A slope_band anchor is ONE number per request and the paired supply
-    axis spans 1.62/1.8/1.98 V, so no literal is mid-supply at every corner; the
-    run the rule grades is the one CONTAINING the anchor, and at all 15 corners
-    of record 20261113-150556-60489db-8101bf the 0.9 V point and that corner's
-    own mid-supply sit inside the SAME in-band run, so this anchor reproduces
-    swing_row()'s mid-supply-centred run everywhere on the committed grid.
+    A slope_band anchor is ONE number per request, while the paired and
+    cartesian supply axes span multiple VDDs (1.62/1.8/1.98 V). The dc_swing
+    body exposes `Bmid inp_mid 0 V = v(inp) - 0.5*v(vdd)`, so `v(inp_mid) == 0`
+    at EVERY corner's own active VDD/2 (0.81 V at 1.62 V, 0.90 V at 1.80 V,
+    0.99 V at 1.98 V) with identical slope d(v(out))/d(v(inp_mid)) ==
+    d(v(out))/d(v(inp)) in V/V and unchanged reported output voltages (`y =
+    v(out)`). One request therefore spans the whole supply axis without ever
+    pinning an off-nominal corner to TT's 0.9 V midpoint.
 
     The klt-side numerics still differ from swing_row()'s by construction:
     slope_band grades central-difference slopes AT sample points (edges are the
     outermost in-band points, no interpolation), swing_row() forward-difference
-    slopes on the segments between points -- on that record the two agree to
-    <= 2 sweep steps per edge (VDD/360 = 4.5-5.5 mV; worst vpp difference
-    9.98 mV, binding corner ss/-40C/1.62V). Needs klt >= the first release
-    carrying klayout-tools#5518; the pinned CI client (0.8.0) must never see
-    these entries, hence the SWING_SLOPE_BAND gate."""
-    band = {"y": "v(out)", "x": "v(inp)", "anchor": 0.5 * VDD_BY_CORNER["tt"],
+    slopes on the segments between points -- on record
+    20261113-150556-60489db-8101bf the two agree to <= 2 sweep steps per edge
+    (VDD/360 = 4.5-5.5 mV; worst vpp difference 9.98 mV, binding corner
+    ss/-40C/1.62V). Needs klt >= the first release carrying
+    klayout-tools#5518; the pinned CI client (0.8.0) must never see these
+    entries, hence the SWING_SLOPE_BAND gate."""
+    band = {"y": "v(out)", "x": "v(inp_mid)", "anchor": 0.0,
             "min_slope": SWING_SLOPE_MIN, "max_slope": SWING_SLOPE_MAX}
     return [
         {"name": "swing_lo_v", "unit": "V", "slope_band": {**band, "report": "y_lo"},
@@ -673,7 +691,8 @@ SWING_SLOPE_BAND = [False]
 KLT_REPORTS: list[tuple[str, dict]] = []
 
 
-def spec_row_grading(reports: list[tuple[str, dict]], results: dict) -> dict:
+def spec_row_grading(reports: list[tuple[str, dict]], results: dict, *,
+                     swing_slope_band: bool | None = None) -> dict:
     """Per-spec-row rollup of what the campaign's `klt sim` envelopes graded.
 
     Reads the envelopes' own `measurements[]` rollup (so it reports what klt
@@ -736,10 +755,12 @@ def spec_row_grading(reports: list[tuple[str, dict]], results: dict) -> dict:
         agree.append({"measurement": meas_name, "python_column": f"{analysis}.{col}", "points": n,
                       "max_rel_delta": worst, "at": worst_at, "rel_tol": KLT_VS_PYTHON_REL_TOL,
                       "agrees": worst <= KLT_VS_PYTHON_REL_TOL})
+    swing_opt_in = SWING_SLOPE_BAND[0] if swing_slope_band is None else bool(swing_slope_band)
+    graded_rows, ungraded_rows = item5_row_partition(swing_opt_in or ("output_swing" in rows))
     return {"rows": rows, "klt_vs_python": agree,
             "klt_vs_python_agrees": all(c["agrees"] for c in agree) if agree else None,
-            "ungraded_rows": ITEM5_UNGRADED_ROWS,
-            "all_graded_rows_present": sorted(rows) == sorted(ITEM5_GRADED_ROWS)}
+            "ungraded_rows": ungraded_rows,
+            "all_graded_rows_present": sorted(rows) == sorted(graded_rows)}
 
 
 def write_klt_response(log_dir: Path, tag: str, report: dict) -> str:

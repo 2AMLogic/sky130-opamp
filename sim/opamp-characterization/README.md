@@ -300,14 +300,21 @@ Python.
 reduction **natively**: three `slope_band` entries (low end / high end /
 difference of the same mid-supply run) tagged `spec_row: output_swing` and
 graded against the ratified row's own numbers (`0.072` / `1.464` / `1.392 Vpp`
-— containment plus span). Developed against a klayout-tools `main` build; a
-released klt carrying #5518 must exist before any committed envelope uses it
-(the pinned CI client 0.8.0 cannot run the form). Cross-checked on all 15
-corners of record `20261113-150556-60489db-8101bf` (issue #358): native
-`y_lo`/`y_hi`/`y_span` match `swing_row()` to ≤ 2 sweep steps per edge
-(VDD/360 ≈ 4.5–5.5 mV; the two rules grade point-slope vs segment-slope
-conventions), binding corner `ss/-40 °C/1.62 V` at 0.943 Vpp native vs
-0.948 Vpp `swing_row()` — the row's own recorded expected failure.
+— containment plus span). To keep one request valid across every supply rail,
+`opamp_dc_swing.klt.spice.tmpl` exposes `v(inp_mid) = v(inp) - 0.5*v(vdd)` and
+the entries anchor `x = v(inp_mid)` at `0.0` V — each corner's own active
+`VDD/2`, preserving `d(v(out))/d(v(inp_mid)) == d(v(out))/d(v(inp))` in V/V and
+unchanged `v(out)` outputs. When `--swing-slope-band` is active (or an envelope
+grades `output_swing`), `spec_row_grading` moves `output_swing` out of
+`ungraded_rows` and expects it in `all_graded_rows_present`. Developed against
+a klayout-tools `main` build; a released klt carrying #5518 must exist before
+any committed envelope uses it (the pinned CI client 0.8.0 cannot run the
+form). Cross-checked on all 15 corners of record
+`20261113-150556-60489db-8101bf` (issue #358): native `y_lo`/`y_hi`/`y_span`
+match `swing_row()` to ≤ 2 sweep steps per edge (VDD/360 ≈ 4.5–5.5 mV; the two
+rules grade point-slope vs segment-slope conventions), binding corner
+`ss/-40 °C/1.62 V` at 0.943 Vpp native vs 0.948 Vpp `swing_row()` — the row's
+own recorded expected failure.
 
 Each record carries a `spec_row_grading` block: per row, the bound, the worst
 value with **its** corner, the binding measurement, and a cross-check of every

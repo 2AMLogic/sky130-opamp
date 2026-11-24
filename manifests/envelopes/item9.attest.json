@@ -87,7 +87,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:c425d5977913cd1fcf2cecb9aad00efdae8b92e7efae2fb84e2f0379bf681c7a"
+        "content_hash": "sha256:771a9f52d74ce7961e150483288f885b1207abe601237879ad9a6ad89cedef8a"
       },
       {
         "check": "present",
@@ -101,7 +101,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:83499e802ab0504a0b63cd28ecfc4b2cef3295f3128b75991949eace06d0aa9c"
+        "content_hash": "sha256:9ab1d9856905c7cdef3a9691c2a9cd1d5d4510572c39cc3d4b3f016614b5f24a"
       },
       {
         "check": "present",
@@ -122,7 +122,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/testbench/opamp_dc_swing.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:3940512a5dd88554176b10f708bd2f4c475550a7c6d06bd332885d619354691c"
+        "content_hash": "sha256:d298e23b155217e4464a50497c502a6b345cd41fedcff27ed19cbaf65e94ac6d"
       },
       {
         "check": "present",
