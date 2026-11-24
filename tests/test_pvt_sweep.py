@@ -283,6 +283,11 @@ class KltBenchTests(unittest.TestCase):
         # the two ratified quiescent-power figures ARE that current at their supplies
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.98, 128.7e-6, places=9)
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.80, 117.0e-6, places=9)
+        # output swing (issue #358): "~ 0.072 - 1.464 V (~ 1.39 Vpp)" -- the row's
+        # own numbers, graded as window containment plus the endpoints' difference
+        self.assertEqual(pvt.SPEC_SWING_LOW_MAX_V, 0.072)
+        self.assertEqual(pvt.SPEC_SWING_HIGH_MIN_V, 1.464)
+        self.assertAlmostEqual(pvt.SPEC_SWING_VPP_MIN_V, 1.464 - 0.072, places=12)
 
     def test_every_graded_row_is_tagged_exactly_once_per_request_set(self):
         tagged = {}
@@ -310,6 +315,180 @@ class KltBenchTests(unittest.TestCase):
         by = {m["name"]: m for m in pvt.icmr_measurements(1.8)}
         self.assertEqual(by["lo_40db"]["limits"], {"max": pvt.TARGET_ICMR_V[0]})
         self.assertEqual(by["hi_40db"]["limits"], {"min": pvt.TARGET_ICMR_V[1]})
+
+    # -- native slope_band swing emission (issue #358) -----------------------
+
+    def test_swing_slope_band_is_gated_off_by_default(self):
+        """The pinned CI client (klt 0.8.0) cannot run the slope_band form, so the
+        default dc_swing request must stay `.meas`-only (unchanged shape)."""
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
+        req, _body, _tag = klt_request("dc_swing")
+        self.assertTrue(all("slope_band" not in m for m in req["measurements"]))
+        self.assertTrue(all("spice" in m for m in req["measurements"]))
+
+    def test_swing_slope_band_emits_the_ratified_row_natively(self):
+        was = pvt.SWING_SLOPE_BAND[0]
+        pvt.SWING_SLOPE_BAND[0] = True
+        try:
+            by = {m["name"]: m for m in pvt.swing_slope_band_measurements()}
+            self.assertEqual(sorted(by), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+            for name, m in by.items():
+                self.assertNotIn("spice", m, name)  # slope_band is an exclusive form
+                self.assertEqual(m["spec_row"], "output_swing", name)
+                self.assertIn("limits", m, name)  # a spec_row tag without limits covers nothing
+                sb = m["slope_band"]
+                self.assertEqual(sorted(sb), ["anchor", "max_slope", "min_slope", "report", "x", "y"], name)
+                self.assertEqual((sb["y"], sb["x"]), ("v(out)", "v(inp_mid)"), name)
+                # swing_row()'s own band constants: the native rule cannot drift
+                self.assertEqual((sb["min_slope"], sb["max_slope"]),
+                                 (pvt.SWING_SLOPE_MIN, pvt.SWING_SLOPE_MAX), name)
+                # anchor at 0.0 on v(inp_mid) = v(inp) - 0.5*v(vdd) -> active VDD/2 at every corner
+                self.assertEqual(sb["anchor"], 0.0, name)
+            self.assertEqual(by["swing_lo_v"]["slope_band"]["report"], "y_lo")
+            self.assertEqual(by["swing_hi_v"]["slope_band"]["report"], "y_hi")
+            self.assertEqual(by["swing_vpp_v"]["slope_band"]["report"], "y_span")
+            # containment plus span, exactly as the ratified row states them
+            self.assertEqual(by["swing_lo_v"]["limits"], {"max": pvt.SPEC_SWING_LOW_MAX_V})
+            self.assertEqual(by["swing_hi_v"]["limits"], {"min": pvt.SPEC_SWING_HIGH_MIN_V})
+            self.assertEqual(by["swing_vpp_v"]["limits"], {"min": pvt.SPEC_SWING_VPP_MIN_V})
+            # full-grid and single-corner SS/FF requests all carry the shifted node and 0.0 anchor
+            for corners, exp_vdd in ((None, [1.62, 1.8, 1.98]), (["ss"], [1.62]), (["ff"], [1.98])):
+                req, body, _tag = klt_request("dc_swing", corners=corners)
+                self.assertEqual(req["corners"]["supply_v"]["vdd"], exp_vdd)
+                self.assertIn("Bmid inp_mid 0 V = v(inp) - 0.5*v(vdd)", body)
+                names = [m["name"] for m in req["measurements"]]
+                self.assertEqual(names[0], "vout_mid_v")
+                self.assertEqual(sorted(names[1:]), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+                self.assertEqual(len(names), len(set(names)))
+                for m in req["measurements"][1:]:
+                    self.assertEqual(m["slope_band"]["x"], "v(inp_mid)")
+                    self.assertEqual(m["slope_band"]["anchor"], 0.0)
+        finally:
+            pvt.SWING_SLOPE_BAND[0] = was
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
+
+    def test_swing_slope_band_mid_supply_shift_tracks_active_vdd(self):
+        """v(inp_mid) = v(inp) - 0.5*v(vdd) puts anchor=0.0 at each corner's own
+        VDD/2 with identical V/V slope and unchanged v(out) values. Covers the
+        off-nominal SS (1.62 V) and FF (1.98 V) cases where a fixed TT 0.9 V
+        anchor sits outside a narrow linear window centred on VDD/2."""
+        def central_slopes(xs, ys):
+            n = len(xs)
+            return ([(ys[1] - ys[0]) / (xs[1] - xs[0])]
+                    + [(ys[i + 1] - ys[i - 1]) / (xs[i + 1] - xs[i - 1]) for i in range(1, n - 1)]
+                    + [(ys[n - 1] - ys[n - 2]) / (xs[n - 1] - xs[n - 2])])
+
+        def run_span_at(xs, ys, anchor):
+            slopes = central_slopes(xs, ys)
+            idx = min(range(len(xs)), key=lambda i: abs(xs[i] - anchor))
+            if not (pvt.SWING_SLOPE_MIN <= slopes[idx] <= pvt.SWING_SLOPE_MAX):
+                return None
+            lo = hi = idx
+            while lo > 0 and pvt.SWING_SLOPE_MIN <= slopes[lo - 1] <= pvt.SWING_SLOPE_MAX:
+                lo -= 1
+            while hi < len(xs) - 1 and pvt.SWING_SLOPE_MIN <= slopes[hi + 1] <= pvt.SWING_SLOPE_MAX:
+                hi += 1
+            return ys[lo], ys[hi], ys[hi] - ys[lo]
+
+        # Judge counterexample (SS, 1.62 V -> VDD/2 = 0.81 V) and FF mirror (1.98 V -> VDD/2 = 0.99 V):
+        # linear window contains VDD/2, excludes TT's 0.9 V.
+        cases = [
+            ("ss", 1.62, 0.74, 0.87, 0.117),
+            ("ff", 1.98, 0.93, 1.06, 0.121),
+        ]
+        for corner, vdd, clip_lo, clip_hi, exp_span in cases:
+            vin = [vdd * k / pvt.SWING_POINTS for k in range(pvt.SWING_POINTS + 1)]
+            x_mid = [v - 0.5 * vdd for v in vin]
+            vout = [max(clip_lo, min(v, clip_hi)) for v in vin]
+            # Shifting x by a constant preserves central-difference slopes in V/V
+            for s_in, s_mid in zip(central_slopes(vin, vout), central_slopes(x_mid, vout)):
+                self.assertAlmostEqual(s_mid, s_in, places=10)
+            # Fixed TT 0.9 V anchor fails (out of band), while shifted x_mid @ 0.0 succeeds
+            self.assertIsNone(run_span_at(vin, vout, 0.5 * pvt.VDD_BY_CORNER["tt"]), corner)
+            got_mid = run_span_at(x_mid, vout, 0.0)
+            got_vdd2 = run_span_at(vin, vout, 0.5 * vdd)
+            self.assertIsNotNone(got_mid, corner)
+            self.assertEqual(got_mid, got_vdd2, corner)
+            self.assertAlmostEqual(got_mid[2], exp_span, delta=0.01, msg=corner)
+
+    def test_spec_row_grading_accounts_for_opt_in_output_swing_in_both_modes(self):
+        """spec_row_grading() keeps graded and ungraded rows disjoint and
+        evaluates all_graded_rows_present consistently in both default mode
+        (6 graded, 6 ungraded) and opt-in output_swing mode (7 graded, 5 ungraded)."""
+        g_off, u_off = pvt.item5_row_partition(False)
+        g_on, u_on = pvt.item5_row_partition(True)
+        self.assertEqual(set(g_off) & set(u_off), set())
+        self.assertEqual(set(g_on) & set(u_on), set())
+        self.assertEqual(len(g_off) + len(u_off), 12)
+        self.assertEqual(len(g_on) + len(u_on), 12)
+        self.assertIn("output_swing", u_off)
+        self.assertNotIn("output_swing", u_on)
+        self.assertIn("output_swing", g_on)
+
+        # Replay the committed campaign envelopes without and with an opt-in dc-swing report
+        env_dir = pvt.REPO_ROOT / "manifests" / "envelopes"
+        prefix = "20261113-150556-60489db-8101bf-"
+        committed = [
+            (p.name[len(prefix):-len(".klt.json")], json.loads(p.read_text()))
+            for p in sorted(env_dir.glob(f"{prefix}*.klt.json"))
+        ]
+        self.assertTrue(committed)
+
+        # Default mode: output_swing is ungraded, all 6 default graded rows present
+        was = pvt.SWING_SLOPE_BAND[0]
+        try:
+            pvt.SWING_SLOPE_BAND[0] = False
+            default_out = pvt.spec_row_grading(committed, {})
+            self.assertNotIn("output_swing", default_out["rows"])
+            self.assertIn("output_swing", default_out["ungraded_rows"])
+            self.assertEqual(set(default_out["rows"]) & set(default_out["ungraded_rows"]), set())
+            self.assertTrue(default_out["all_graded_rows_present"])
+
+            # Simulated dc-swing report carrying the three emitted slope_band measurements
+            swing_meas = pvt.swing_slope_band_measurements()
+            sim_swing_report = {
+                "corner_count": 15,
+                "measurements": [
+                    {**swing_meas[0], "status": "fail",
+                     "worst_case": {"corner_id": "fs/1.800V/-40C", "value": 0.2763, "margin": -0.2043}},
+                    {**swing_meas[1], "status": "fail",
+                     "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 1.2029, "margin": -0.2611}},
+                    {**swing_meas[2], "status": "fail",
+                     "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 0.9431, "margin": -0.4489}},
+                ],
+                "corners": [],
+            }
+            with_swing = [(t, r) for t, r in committed if t != "dc-swing"] + [("dc-swing", sim_swing_report)]
+
+            # Even when called directly without toggling the global flag (as offline replay does),
+            # output_swing must not appear in both rows and ungraded_rows, and all_graded_rows_present stays True.
+            for flag in (False, True):
+                pvt.SWING_SLOPE_BAND[0] = flag
+                opt_out = pvt.spec_row_grading(with_swing, {})
+                self.assertIn("output_swing", opt_out["rows"])
+                self.assertNotIn("output_swing", opt_out["ungraded_rows"])
+                self.assertEqual(set(opt_out["rows"]) & set(opt_out["ungraded_rows"]), set())
+                self.assertEqual(len(opt_out["rows"]) + len(opt_out["ungraded_rows"]), 12)
+                self.assertTrue(opt_out["all_graded_rows_present"])
+                self.assertEqual(opt_out["rows"]["output_swing"]["status"], "fail")
+                self.assertEqual(opt_out["rows"]["output_swing"]["binding"]["measurement"], "swing_vpp_v")
+
+            # Flag enabled, but dc-swing report did NOT grade output_swing -> missing expected row
+            pvt.SWING_SLOPE_BAND[0] = True
+            missing_out = pvt.spec_row_grading(committed, {})
+            self.assertNotIn("output_swing", missing_out["rows"])
+            self.assertNotIn("output_swing", missing_out["ungraded_rows"])
+            self.assertFalse(missing_out["all_graded_rows_present"])
+
+            # Partial campaign (dc-swing only): output_swing is not duplicated in ungraded_rows,
+            # and all_graded_rows_present is False because the other 6 rows are absent
+            pvt.SWING_SLOPE_BAND[0] = False
+            partial_out = pvt.spec_row_grading([("dc-swing", sim_swing_report)], {})
+            self.assertIn("output_swing", partial_out["rows"])
+            self.assertNotIn("output_swing", partial_out["ungraded_rows"])
+            self.assertFalse(partial_out["all_graded_rows_present"])
+        finally:
+            pvt.SWING_SLOPE_BAND[0] = was
 
     def test_slew_numerator_is_the_level_difference_not_a_vdd_literal(self):
         """0.6*span == v(l80) - v(l20) at EVERY supply, so one request spans the

@@ -12,7 +12,11 @@
 *
 * The swept source Vsw runs 0 -> 1 in 1/360 steps and Bin scales it by each
 * corner's own VDD (`alter vdd`), so v(inp) = VDD * k/360 exactly as a
-* `dc Vinp 0 VDD VDD/360` sweep. The sweep itself is returned as a waveform
+* `dc Vinp 0 VDD VDD/360` sweep. Bmid exposes the mid-supply-shifted input
+* node `v(inp_mid) = v(inp) - 0.5*v(vdd)`, so `v(inp_mid) = 0` at every
+* corner's own VDD/2 while preserving `d(v(out))/d(v(inp_mid)) == d(v(out))/d(v(inp))`
+* in V/V -- letting a single native `slope_band` request anchor at 0.0 across
+* the whole supply axis (issue #358). The sweep itself is returned as a waveform
 * artifact (options.waveforms) and bin/pvt_sweep.py applies the unchanged
 * slope-window rule to it -- a contiguous-run search cannot be expressed as
 * a .meas card. The rule: the largest contiguous run around mid-supply
@@ -37,4 +41,5 @@ Xdut vdd vss inn inp out ibias opamp_dut
 Rshort inn out 1m
 Vsw sw 0 dc 0
 Bin inp 0 V = v(vdd)*v(sw)
+Bmid inp_mid 0 V = v(inp) - 0.5*v(vdd)
 Cload out 0 {CL_F}

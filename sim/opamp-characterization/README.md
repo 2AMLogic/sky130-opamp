@@ -285,14 +285,36 @@ details worth knowing before editing them:
   [#277](https://github.com/2AMLogic/sky130-opamp/issues/277). Changing
   `SPEC_IQ_MAX_A` is that ruling's job, not a tuning knob.
 
-**Output swing is deliberately ungraded.** Its ratified rule is the largest
-contiguous run around mid-supply over which `d(vout)/d(vin)` stays in
-`[0.8, 1.2]` — a waveform reduction no `klt sim` measurement form expresses
-(filed generically as
-[klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)).
-The row is still measured on the full grid: `swing_row()` applies the rule to
-the envelope's waveform artifact and writes `-dc-swing.csv`. Same reason the
-`swing_fixcm` and `tran_sr_icmr` diagnostics reduce waveforms in Python.
+**Output swing is deliberately ungraded** by any committed envelope. Its
+ratified rule is the largest contiguous run around mid-supply over which
+`d(vout)/d(vin)` stays in `[0.8, 1.2]` — a waveform reduction no `klt sim`
+measurement form expressed (filed generically as
+[klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518),
+closed 2026-11-17 by the `measurements[].slope_band` form, **after** release
+v0.9.2). The row is still measured on the full grid: `swing_row()` applies the
+rule to the envelope's waveform artifact and writes `-dc-swing.csv`. Same
+reason the `swing_fixcm` and `tran_sr_icmr` diagnostics reduce waveforms in
+Python.
+
+`--swing-slope-band` (issue #358, opt-in, default off) additionally emits the
+reduction **natively**: three `slope_band` entries (low end / high end /
+difference of the same mid-supply run) tagged `spec_row: output_swing` and
+graded against the ratified row's own numbers (`0.072` / `1.464` / `1.392 Vpp`
+— containment plus span). To keep one request valid across every supply rail,
+`opamp_dc_swing.klt.spice.tmpl` exposes `v(inp_mid) = v(inp) - 0.5*v(vdd)` and
+the entries anchor `x = v(inp_mid)` at `0.0` V — each corner's own active
+`VDD/2`, preserving `d(v(out))/d(v(inp_mid)) == d(v(out))/d(v(inp))` in V/V and
+unchanged `v(out)` outputs. When `--swing-slope-band` is active (or an envelope
+grades `output_swing`), `spec_row_grading` moves `output_swing` out of
+`ungraded_rows` and expects it in `all_graded_rows_present`. Developed against
+a klayout-tools `main` build; a released klt carrying #5518 must exist before
+any committed envelope uses it (the pinned CI client 0.8.0 cannot run the
+form). Cross-checked on all 15 corners of record
+`20261113-150556-60489db-8101bf` (issue #358): native `y_lo`/`y_hi`/`y_span`
+match `swing_row()` to ≤ 2 sweep steps per edge (VDD/360 ≈ 4.5–5.5 mV; the two
+rules grade point-slope vs segment-slope conventions), binding corner
+`ss/-40 °C/1.62 V` at 0.943 Vpp native vs 0.948 Vpp `swing_row()` — the row's
+own recorded expected failure.
 
 Each record carries a `spec_row_grading` block: per row, the bound, the worst
 value with **its** corner, the binding measurement, and a cross-check of every
