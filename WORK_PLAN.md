@@ -19,7 +19,7 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 
 `loom:very-important` (one counts per workspace); every stage takes these first.
 
-- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(held)*
 
 ## Important
 
@@ -41,7 +41,6 @@ Ready counts issues with `loom:issue`. It excludes issues on hold (`loom:blocked
 Issues currently being built (`loom:building`).
 
 - **#274**: Grade the input-referred white-noise floor on T1 item 5
-- **#278**: Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests
@@ -59,7 +58,6 @@ PRs with `loom:review-requested`. Judge can review a held PR once its operator h
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
 - **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base *(held)*
-- **#378**: refactor: remove the local ngspice executor from pvt_sweep.py, klt sim becomes the only executor
 
 ## Approved (Awaiting Merge)
 
@@ -81,8 +79,7 @@ Issues carrying `loom:curated`.
 - **#188**: Auditor: refine worktree-write-confinement for sweep checkpoint writes *(curated)* *(held)*
 - **#196**: Measure paired offset drift before prototyping foreground trim *(curated)* *(held)*
 - **#274**: Grade the input-referred white-noise floor on T1 item 5 *(curated)*
-- **#278**: Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path *(curated)*
-- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)*
+- **#282**: Reconcile the PSRR spec row against the committed PSRR benches and propose a target *(curated)* *(held)*
 - **#284**: Record the measured opamp_core area in the spec and refresh the Consumers verdicts to current evidence *(curated)*
 - **#336**: xschem pin migration: migrate sky130-opamp to the fleet 3.4.7 *(curated)*
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests *(curated)*
@@ -95,9 +92,7 @@ Issues carrying `loom:curated`.
 
 ## Proposed (Architect / Hermit)
 
-- **#298**: Drop the 263 legacy waveform.raw.json blobs: 116 MiB (72% of tracked bytes) that no record cites *(hermit)* *(held)*
-- **#301**: Consolidate the two comment-unaware SPICE continuation parsers in sim/offset-capability (the #237 remainder) *(hermit)*
-- **#377**: Consolidate duplicated gm/ID sweep and grid-sizing helpers across sim/opamp-characterization/variants/ *(hermit)*
+_None._
 
 ## Epics
 
@@ -111,10 +106,10 @@ _None._
 | Very important | 1 |
 | Important | 4 |
 | Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
-| In Progress (`loom:building`) | 11 |
-| PRs awaiting review | 4 |
+| In Progress (`loom:building`) | 10 |
+| PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 7 |
-| Curated | 15 |
-| Architect / Hermit proposals | 3 |
+| Curated | 14 |
+| Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
