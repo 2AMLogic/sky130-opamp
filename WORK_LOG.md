@@ -8,6 +8,10 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-24
 
+- **PR #378**: refactor: remove the local ngspice executor from pvt_sweep.py, klt sim becomes the only executor
+- **Issue #278** (closed): Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path
+- **PR #384**: chore: drop 262 uncited waveform.raw.json dumps from sim records
+- **Issue #298** (closed): Drop the 263 legacy waveform.raw.json blobs: 116 MiB (72% of tracked bytes) that no record cites
 - **PR #386**: refactor: derive stage_reference logical_lines from shared spice_text joiner
 - **Issue #385** (closed): Fold layout stage_reference.logical_lines into shared lib/spice_text.join_continuations
 
