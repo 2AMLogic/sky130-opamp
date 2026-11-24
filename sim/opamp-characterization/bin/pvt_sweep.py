@@ -8,9 +8,10 @@ The single documented cold-start invocation named in ../README.md:
 Submits every analysis as a `klt sim` request (issue #278: the hand-rolled
 local `ngspice -b` executor was removed; `klt sim` is the only executor) and
 maps the per-corner measurement values in klt's JSON response into a new
-timestamped, append-only record under ../records/ plus the klt request,
-response and per-corner artifacts under ../records/<record_id>-logs/ and a
-request/body snapshot per analysis under ../netlist-snapshots/<record_id>/.
+timestamped, append-only record under ../records/ plus a request/body snapshot
+per analysis under ../netlist-snapshots/<record_id>/. The klt request, response
+and per-corner raw artifacts are staged into the git-ignored STAGE_REL tree and
+handed to the fleet artifact store (issue #240); git keeps only the manifest.
 
 Reuses (does not re-resolve or duplicate) the MOS process-corner model-file
 resolution already committed at

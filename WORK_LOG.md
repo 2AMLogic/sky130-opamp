@@ -6,6 +6,19 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-24
+
+- **PR #386**: refactor: derive stage_reference logical_lines from shared spice_text joiner
+- **Issue #385** (closed): Fold layout stage_reference.logical_lines into shared lib/spice_text.join_continuations
+
+### 2026-11-23
+
+- **PR #381**: refactor: consolidate SPICE continuation joining into lib/spice_text.py
+- **Issue #301** (closed): Consolidate the two comment-unaware SPICE continuation parsers in sim/offset-capability (the #237 remainder)
+- **Issue #383** (closed): Guide doc-maintenance appended 87 foreign work-log entries to WORK_LOG.md (PR #382)
+- **PR #380**: refactor: extract shared gm/ID helpers into variants/_gmid.py
+- **Issue #377** (closed): Consolidate duplicated gm/ID sweep and grid-sizing helpers across sim/opamp-characterization/variants/
+
 ### 2026-11-22
 
 - **PR #375**: refactor: consolidate duplicate check_toolchain into layout/bin/_klt_common.py
@@ -328,9 +341,3 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 - **PR #39**: docs: add DR-006 recording the keep-ngspice-default solver-tolerance convention
 - **Issue #38** (closed): ngspice solver-tolerance convention: keep the default (coordination from sg13g2-opamp DR-0005)
-
-### 2026-09-23
-
-- **PR #37**: docs: record DR-005 declining the 3.3 V I/O-device flavor
-- **Issue #36** (closed): spec: both same-PDK consumers need a 3.3 V-rail / 5 V-gate amplifier position this block's 1.8 V-core scope does not serve (2am rule 9 step 4)
-
