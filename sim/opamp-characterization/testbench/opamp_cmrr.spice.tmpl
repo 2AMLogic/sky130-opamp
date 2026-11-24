@@ -13,7 +13,7 @@
 * record). The flat xschem netlist is wrapped in a local `.subckt` so it can be
 * instantiated twice (its internal nodes d1/d2/tail/cz become local).
 *
-*   Instance D ("differential"): exactly opamp_ac.spice.tmpl's open-loop
+*   Instance D ("differential"): exactly opamp_ac.klt.spice.tmpl's open-loop
 *     DC-servo bench -- Rfb = 1e12 from out to inn, Cfb = 1 F from inn to
 *     ground, AC 1 on inp only.  vdb(out_d) = Adm.
 *   Instance C ("common mode"): identical servo Rfb, but Cfb returns to the
@@ -29,7 +29,7 @@
 *   `alter vdd`).  bin/pvt_sweep.py runs this deck at two bias points: 0.5*VDD
 *   and a fixed point at the centre of the ratified ICMR target window.
 *
-* IBIAS / CL / R+C corner conventions as opamp_ac.spice.tmpl.
+* IBIAS / CL / R+C corner conventions as opamp_ac.klt.spice.tmpl.
 
 .option scale=1u
 

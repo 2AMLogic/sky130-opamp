@@ -87,7 +87,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:aa1150bc817de537b424e91215573b197ab188d9908d19de73c2cea88f3eac6d"
+        "content_hash": "sha256:daf178e3e4ce98aceeb8113dbeafb075cf8e5fa9f80ed10f03583e59c5cb3d08"
       },
       {
         "check": "present",
@@ -101,7 +101,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:b07bb6296a07b7acaea00b0a1e5a3b787b1df404185640c8692e547603189028"
+        "content_hash": "sha256:0decdc6fb2db186971eed4d3dedae58f4b5ee73510588bfb76ea709885571aa0"
       },
       {
         "check": "present",
@@ -113,23 +113,23 @@
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_ac.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_ac.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:b9dd29b187ae05ab2e92bb27f50418fb451eab7c7fb62176d51892a5bf5f2993"
+        "content_hash": "sha256:01da85226cd650acb90d5d5a5b011ecf4276ff951ad30839f0b0b53edf0931cc"
       },
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_dc_swing.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_dc_swing.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:c5584d41a77c44b8d38d88be21bc0b78ce24666b7b45fb57ac4215e49c3bf0b3"
+        "content_hash": "sha256:3940512a5dd88554176b10f708bd2f4c475550a7c6d06bd332885d619354691c"
       },
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_tran_sr.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_tran_sr.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:50a654ec5d3470d7c1cd9c0d06555777da5980599f44bbb2db82e840f54becd6"
+        "content_hash": "sha256:776718e00dae14fd61dbbec8d2b914a598a365f08949cf430b273cb04290c5d8"
       },
       {
         "check": "command",
@@ -178,7 +178,7 @@
         "path": "manifests/inventory/item9.json",
         "scope": "repo"
       },
-      "content_hash": "sha256:48cc9b09976adec645225040dcf3874154ad38c182b391309157abe0409a66ae"
+      "content_hash": "sha256:9a24a254f531b4205098511e58c3681ed8a407cae9592a19762e077625706a62"
     }
   }
 }
