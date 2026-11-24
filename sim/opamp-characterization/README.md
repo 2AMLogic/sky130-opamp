@@ -162,7 +162,8 @@ simulator (`tools.ngspice: not invoked`), DUT = `design/netlist/opamp_core.spice
 (15 units, 493 s), `tran-sr` `klt-sim-f559608fc9e4` (130 s), `dc-swing`
 `klt-sim-884d4fd53766` (161 s); all `c7i.4xlarge` spot, `ngspice-46`.
 Raw artifacts (per-corner `corner.cir`, `ngspice.log`, and for `dc-swing` the
-`waveform.raw[.json]` sweep) are under `records/<id>-logs/klt-*/`.
+`waveform.raw[.json]` sweep) are under `records/<id>-logs/klt-*/`, except the
+`waveform.raw.json` dumps dropped by #298 (one golden copy kept; rest in git history).
 
 Supported versions: client `klt 0.7.0+g5e5b55992a7f`; the fleet runner image
 reported **klt 0.5.0** (`runner_compatibility: mismatch`, accepted with the

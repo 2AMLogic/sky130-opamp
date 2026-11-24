@@ -87,7 +87,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:274e347106bceef6fc8c64a8a8472f02099ece6b5dff0f2e762cad44a11ad60a"
+        "content_hash": "sha256:aa1150bc817de537b424e91215573b197ab188d9908d19de73c2cea88f3eac6d"
       },
       {
         "check": "present",
@@ -101,7 +101,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:c5c98ab34191f66bd05a5a3047e80185122b3c1fbe38841118e3766fc4229301"
+        "content_hash": "sha256:b07bb6296a07b7acaea00b0a1e5a3b787b1df404185640c8692e547603189028"
       },
       {
         "check": "present",

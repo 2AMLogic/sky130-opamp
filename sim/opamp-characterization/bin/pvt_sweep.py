@@ -11,9 +11,10 @@ renders each of ../testbench/opamp_{ac,tran_sr,dc_swing}.spice.tmpl once per
 (corner, temperature) point against `design/netlist/opamp_core.spice`, drives
 `ngspice -b` on each rendered deck, parses its `.meas`/`print` output (AC,
 transient) or `wrdata` sweep output (DC), and writes a new timestamped,
-append-only record under ../records/ plus a raw ngspice log per run under
-../records/<record_id>-logs/ and a rendered-deck snapshot per run under
-../netlist-snapshots/<record_id>/.
+append-only record under ../records/ plus a rendered-deck snapshot per run under
+../netlist-snapshots/<record_id>/. Raw ngspice logs and klt responses are staged
+into the git-ignored STAGE_REL tree and handed to the fleet artifact store
+(issue #240); git keeps only the manifest.
 
 Reuses (does not re-resolve or duplicate) the MOS process-corner model-file
 resolution already committed at
