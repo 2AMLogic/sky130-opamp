@@ -3,17 +3,15 @@
 
 The single documented cold-start invocation named in ../README.md:
 
-    python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local
+    python3 sim/opamp-characterization/bin/pvt_sweep.py
 
-Regenerates the full evidence set for this experiment from a clean checkout
-(given the pinned PDK in ../gm-id-characterization/pdk.json is installed):
-renders each of ../testbench/opamp_{ac,tran_sr,dc_swing}.spice.tmpl once per
-(corner, temperature) point against `design/netlist/opamp_core.spice`, drives
-`ngspice -b` on each rendered deck, parses its `.meas`/`print` output (AC,
-transient) or `wrdata` sweep output (DC), and writes a new timestamped,
-append-only record under ../records/ plus a raw ngspice log per run under
-../records/<record_id>-logs/ and a rendered-deck snapshot per run under
-../netlist-snapshots/<record_id>/.
+Submits every analysis as a `klt sim` request (issue #278: the hand-rolled
+local `ngspice -b` executor was removed; `klt sim` is the only executor) and
+maps the per-corner measurement values in klt's JSON response into a new
+timestamped, append-only record under ../records/ plus a request/body snapshot
+per analysis under ../netlist-snapshots/<record_id>/. The klt request, response
+and per-corner raw artifacts are staged into the git-ignored STAGE_REL tree and
+handed to the fleet artifact store (issue #240); git keeps only the manifest.
 
 Reuses (does not re-resolve or duplicate) the MOS process-corner model-file
 resolution already committed at
@@ -23,18 +21,18 @@ acceptance criteria. Adds its own ../pdk.json only for the R+C ("typical")
 corner choice this experiment introduces (Rz/Cc are not swept by the sibling
 bare-MOS-device experiment).
 
-The PDK-resolution and ngspice-harness *code* that applies the same principle
-(`HarnessError`, `load_json`, `volare_path`, the `Pdk` base, `first_line`,
+The PDK-resolution and harness *code* that applies the same principle
+(`HarnessError`, `load_json`, `volare_path`, the `Pdk` base,
 `render`, `git_sha`, and the `--check-env` report pair
 `report_tool_status`/`report_pdk`) is likewise not duplicated here -- it lives
 once in `sim/lib/spice_harness.py` and is imported below (issues #23 and #40).
 Only this experiment's own additions stay in this file: the `OpampPdk`
-subclass that resolves the R+C corner includes, the per-analysis run/parse
-logic, and `check_env()`'s own netlist and R+C-include report lines around the
-shared report.
+subclass that resolves the R+C corner includes, the klt-request builders and
+per-analysis row logic, and `check_env()`'s own netlist and R+C-include report
+lines around the shared report.
 
 Stdlib only -- no third-party Python dependencies, so the only tools this
-script itself requires are python3 and ngspice (plus, to resolve the PDK,
+script itself requires are python3 and `klt` (plus, to resolve the PDK,
 either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
 
     --check-env        report tool/PDK availability and exit (no simulation)
@@ -43,27 +41,22 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
     --analyses A,A       subset of {ac,tran_sr,dc_swing,icmr,cmrr,tran_step,swing_fixcm,tran_sr_icmr}
                          (default: ac,tran_sr,dc_swing -- icmr/cmrr/tran_step/swing_fixcm
                          are opt-in klt analyses)
-    --backend NAME       effective `klt sim` backend for the icmr/cmrr/tran_step
-                         requests AND the local-grid guard, resolved once per
-                         run as explicit --backend > nonempty $KLT_SIM_BACKEND
-                         > batch (empty/unset env falls back to batch; the CLI
-                         always wins, in both directions). On batch, a run
-                         needing more than ONE local ngspice execution unit
-                         (local analyses x supply points) is refused up front;
-                         use --fleet --backend batch, or select local to run a
-                         local grid on purpose (issue #163)
-    --klt-cmd CMD        the klt invocation for icmr/cmrr (default: `klt`, or
+    --backend NAME       effective `klt sim` backend for every analysis,
+                         resolved once per run as explicit --backend >
+                         nonempty $KLT_SIM_BACKEND > batch (empty/unset env
+                         falls back to batch; the CLI always wins, in both
+                         directions -- issue #163's resolution order).
+                         `batch` submits the requests to the shared Spot
+                         fleet; `local` runs them on this host via `klt sim`
+    --klt-cmd CMD        the klt invocation (default: `klt`, or
                          $KLT_CMD). The batch fleet refuses a client whose
                          `klt --version` differs from the fleet image's
                          (`batch_runner_version_mismatch`); pin a matching one
                          without touching the host tool, e.g.
                          --klt-cmd 'uvx --from klayout-tools==0.5.0 klt'
-    --fleet             run ac,tran_sr,dc_swing as `klt sim` requests on --backend
-                        (default batch) too -- no local ngspice subprocess at all
-                        (issue #77); default off. Without it, a batch-backend
-                        run executes at most one local ngspice unit: the default
-                        45-unit local campaign refuses and asks for
-                        --fleet --backend batch (or --backend local; issue #163)
+    --fleet             deprecated no-op: every analysis runs as a `klt sim`
+                         request by default (issue #278); accepted so saved
+                         invocations and callers keep working
     --netlist PATH      characterize this flat DUT netlist (ports vdd vss inn inp
                         out ibias) instead of design/netlist/opamp_core.spice; the
                         record snapshots it, the canonical design is not touched
@@ -72,8 +65,6 @@ either `volare` on PATH or PDK_ROOT/PDK set by hand -- see --check-env).
                         append-only) instead of the git-ignored stage, for the
                         campaign whose envelopes are cited as T1 item 5 evidence
                         (issue #246)
-    --keep-work         do not delete the scratch ngspice decks/outputs
-
 Every `klt sim` request grades the ratified spec rows it can express: the
 measurements carry `limits` (the unchanged DR-003 bound) and a `spec_row` tag,
 so the envelope itself records per-corner pass/fail and the binding corner, and
@@ -81,19 +72,18 @@ so the envelope itself records per-corner pass/fail and the binding corner, and
 spec-row grading" block below for the per-row provenance of each bound and for
 the rows no `klt sim` request of this harness can grade (declared gaps).
 
-`ac`, `tran_sr` and `dc_swing` are unchanged: this script renders their full
-decks and drives `ngspice -b` itself, one subprocess per (corner, temperature)
-point -- but only under an effective `local` backend, or as a single-unit probe
-on batch: a multi-unit local grid on the batch backend is refused before any
-work starts (issue #163). `icmr`, `cmrr` (issue #53) and `tran_step` (issue #86) are different by design: their templates
-are `klt sim` circuit BODIES, the whole 5x3 grid of each is declared as ONE
-`klt sim` request (corner/supply/temperature axes) and submitted with
-`klt sim <request> --backend batch`, and the per-corner measurement values in
-klt's JSON response are mapped into the same CSV/record scheme. No ngspice loop
-is ever run for them. Requires `klt` on PATH. `swing_fixcm` (issue #181) is a
-klt analysis of the same kind: an output sweep at a FIXED input common mode,
-returned as a waveform and reduced by `fixcm_extract`; run it together with
-`--fleet --analyses dc_swing,swing_fixcm,icmr` so the record's
+Every analysis runs as ONE `klt sim` request (corner/supply/temperature
+axes) over circuit-BODY templates (`klt` supplies the `.lib`/`.temp`/
+`alter vdd` cards and the `.control` block; the analysis card and the
+`.meas` cards live in the request), submitted with
+`klt sim <request> --backend batch|local`; the per-corner measurement values
+in klt's JSON response are mapped into the CSV/record scheme. `ac`, `tran_sr`
+and `dc_swing` (issue #77) join the klt-only analyses with issue #278: same
+stimulus, same measurement definitions, same row/CSV schema as before -- only
+the executor changed. Requires `klt` on PATH. `swing_fixcm` (issue #181) is a
+klt analysis whose output sweep at a FIXED input common mode is returned as
+a waveform and reduced by `fixcm_extract`; run it together with
+`--analyses dc_swing,swing_fixcm,icmr` so the record's
 `swing_fixcm_comparison` sets it against the unchanged unity-buffer metric and
 the ICMR window of the same DUT snapshot.
 """
@@ -106,10 +96,8 @@ import json
 import math
 import os
 import platform
-import re
 import shlex
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
@@ -135,7 +123,6 @@ from spice_harness import (  # noqa: E402  -- import follows the sys.path bootst
     HarnessError,
     Pdk,
     allocate_record_id,
-    first_line,
     git_sha,
     klt_version,
     load_json,
@@ -162,7 +149,7 @@ DESIGN_NETLIST = REPO_ROOT / "design" / "netlist" / "opamp_core.spice"
 # immutable per-campaign snapshot before any analysis is scheduled.
 ACTIVE_DUT: list[Path] = [DESIGN_NETLIST]
 
-DEFAULT_ANALYSES = ("ac", "tran_sr", "dc_swing")  # icmr/cmrr (issue #53) are opt-in: they go to the klt batch fleet
+DEFAULT_ANALYSES = ("ac", "tran_sr", "dc_swing")  # the historical default set; icmr/cmrr/tran_step/swing_fixcm/tran_sr_icmr are opt-in
 DEFAULT_KLT_BACKEND = "batch"
 
 CL_F = "2p"  # DR-001's CL = 2 pF
@@ -339,13 +326,6 @@ def supply_points(corners: list[str], temps: list[float], mode: str = DEFAULT_SU
     return out
 
 
-def point_tag(analysis: str, corner: str, temp: float, vdd: float, mode: str = DEFAULT_SUPPLY_MODE) -> str:
-    """Deck / log / artifact name of one point. Paired names are the historical
-    ones; cartesian names add the supply so points never collide."""
-    base = f"{analysis}-{corner}-{temp:g}C"
-    return base if mode == "paired" else f"{base}-{vdd:g}V"
-
-
 # --------------------------------------------------------------------------
 # PDK resolution -- the MOS-corner resolution itself lives in
 # sim/lib/spice_harness.py and is driven by ../gm-id-characterization's own
@@ -389,156 +369,22 @@ def check_env(backend: str | None = None) -> int:
     if pdk is not None:
         for inc in pdk.rc_includes():
             print(f"  R+C corner include: {inc}")
-    # klt is only required by the icmr/cmrr analyses -- report it, but a
-    # missing klt must not fail the legacy ac/tran_sr/dc_swing workflow.
+    # klt is required by every analysis: each runs as one `klt sim` request
+    # (issue #278 removed the local ngspice executor).
     klt = klt_available()
     if klt:
         print(f"klt     : OK   {' '.join(KLT_CMD)} ({klt_version()})")
         print(f"  klt sim backend: {resolve_backend(backend)} (precedence: --backend > "
               f"nonempty KLT_SIM_BACKEND={os.environ.get('KLT_SIM_BACKEND', '<unset>')!r} > "
-              f"{DEFAULT_KLT_BACKEND}; at most one local ngspice unit runs on batch, "
-              "issue #163)")
+              f"{DEFAULT_KLT_BACKEND})")
     else:
-        print("klt     : MISSING (not on PATH) -- needed only for --analyses icmr,cmrr")
+        print("klt     : MISSING (not on PATH) -- required: every analysis runs as a `klt sim` request")
+        status |= 1
     return status | pdk_status
 
 
-# --------------------------------------------------------------------------
-# Running + parsing (deck rendering itself is spice_harness.render)
-# --------------------------------------------------------------------------
-
-
-MEAS_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([-+0-9.eE]+)")
-
-
-def parse_meas(stdout: str) -> dict[str, float]:
-    """Parse every `name = value ...` line ngspice's .meas/print emit to stdout.
-
-    `.meas ... trig ... targ ...` lines print extra `targ=... trig=...`
-    trailer text after the primary value -- match only the leading
-    `name = value` token, not the whole line, so those lines still parse.
-    """
-    out: dict[str, float] = {}
-    for line in stdout.splitlines():
-        m = MEAS_RE.match(line.strip())
-        if m:
-            try:
-                out[m.group(1)] = float(m.group(2))
-            except ValueError:
-                continue
-    return out
-
-
-LOCAL_SIM_FORBIDDEN = [False]  # set by main() for --fleet on the batch backend: no local simulator, ever
-
-
-def run_ngspice(ngspice: str, deck_text: str, workdir: Path, log_path: Path, timeout_s: int = 120):
-    if LOCAL_SIM_FORBIDDEN[0]:
-        raise HarnessError("local ngspice is forbidden for a batch/fleet campaign (no silent local fallback)")
-    deck_path = workdir / "tb.spice"
-    deck_path.write_text(deck_text)
-    start = time.monotonic()
-    try:
-        proc = subprocess.run(
-            [ngspice, "-b", str(deck_path)],
-            cwd=workdir,
-            capture_output=True,
-            text=True,
-            timeout=timeout_s,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise HarnessError(f"ngspice timed out after {timeout_s}s") from exc
-    elapsed = time.monotonic() - start
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(
-        f"$ ngspice -b {deck_path.name}\n\n--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}\n"
-    )
-    if proc.returncode != 0:
-        raise HarnessError(f"ngspice failed (exit {proc.returncode}) -- see {log_path}")
-    return proc.stdout, elapsed
-
-
-# --------------------------------------------------------------------------
-# Per-analysis run + parse
-# --------------------------------------------------------------------------
-
-
-def common_subs(pdk: OpampPdk, corner: str, temp: float, vdd: float) -> dict:
-    rc = pdk.rc_includes()
-    return {
-        "CORNER_INCLUDE": pdk.corner_include(corner),
-        "RC_INCLUDE_BASE": rc[0],
-        "RC_INCLUDE_LIN": rc[1],
-        "OPAMP_NETLIST": ACTIVE_DUT[0],
-        "TEMP": temp,
-        "VDD": vdd,
-        "IBIAS_A": IBIAS_A,
-        "CL_F": CL_F,
-    }
-
-
-def run_ac(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
-    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
-    vcm = 0.5 * vdd
-    subs = common_subs(pdk, corner, temp, vdd)
-    subs.update({
-        "VCM": vcm,
-        "RFB": "1e12",
-        "CFB": "1",
-        "FSTART": "1",
-        "FSTOP": "1g",
-        "PTS_PER_DEC": "20",
-    })
-    deck = render(TESTBENCH_DIR / "opamp_ac.spice.tmpl", subs)
-    stdout, elapsed = run_ngspice(ngspice, deck, workdir, log_path)
-    meas = parse_meas(stdout)
-    for key in ("iq_a", "pq_w", "gain_dc_db", "gbw_hz", "phase_at_gbw_rad"):
-        if key not in meas:
-            raise HarnessError(f"ac[{corner}/{temp}C]: missing measurement '{key}' -- see {log_path}")
-    phase_at_gbw_deg = math.degrees(meas["phase_at_gbw_rad"])
-    phase_margin_deg = 180.0 + phase_at_gbw_deg  # gbw phase is negative for a stable 2-pole system
-    row = {
-        "corner": corner, "temp_c": temp, "vdd_v": vdd, "vcm_v": vcm,
-        "iq_a": meas["iq_a"], "pq_w": meas["pq_w"],
-        "gain_dc_db": meas["gain_dc_db"], "gbw_hz": meas["gbw_hz"],
-        "phase_at_gbw_deg": phase_at_gbw_deg, "phase_margin_deg": phase_margin_deg,
-        "elapsed_s": round(elapsed, 2),
-    }
-    return row, deck
-
-
-def run_tran_sr(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
-    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
-    v_lo = 0.5 * vdd - 0.2 * vdd
-    v_hi = 0.5 * vdd + 0.2 * vdd
-    span = v_hi - v_lo
-    v20 = v_lo + 0.2 * span
-    v80 = v_lo + 0.8 * span
-    subs = common_subs(pdk, corner, temp, vdd)
-    subs.update({
-        "V_LOW": v_lo, "V_HIGH": v_hi, "V20": v20, "V80": v80,
-        "T_DELAY": "200n", "T_EDGE": "1n", "T_PW": "1u", "T_PER": "2u",
-        "T_STEP": "2n", "T_STOP": "2.2u",
-    })
-    deck = render(TESTBENCH_DIR / "opamp_tran_sr.spice.tmpl", subs)
-    stdout, elapsed = run_ngspice(ngspice, deck, workdir, log_path)
-    meas = parse_meas(stdout)
-    for key in ("sr_rise_s", "sr_fall_s"):
-        if key not in meas:
-            raise HarnessError(f"tran_sr[{corner}/{temp}C]: missing measurement '{key}' -- see {log_path}")
-    sr_rise_v_per_s = 0.6 * span / meas["sr_rise_s"]
-    sr_fall_v_per_s = 0.6 * span / meas["sr_fall_s"]
-    row = {
-        "corner": corner, "temp_c": temp, "vdd_v": vdd,
-        "v_low_v": v_lo, "v_high_v": v_hi,
-        "sr_rise_v_per_us": sr_rise_v_per_s / 1e6, "sr_fall_v_per_us": sr_fall_v_per_s / 1e6,
-        "elapsed_s": round(elapsed, 2),
-    }
-    return row, deck
-
-
 # The ratified swing rule's unity-slope band (spec/target-spec.md Sec 2 "Output
-# swing"; ../testbench/opamp_dc_swing.spice.tmpl's header states the rationale).
+# swing"; ../testbench/opamp_dc_swing.klt.spice.tmpl's header states the rationale).
 # One owner for both consumers of the rule: swing_row()'s Python reduction and
 # the native slope_band emission (swing_slope_band_measurements) -- the two can
 # never drift into grading different bands.
@@ -547,12 +393,14 @@ SWING_SLOPE_MAX = 1.2
 
 
 def swing_row(corner: str, temp: float, vdd: float, vin: list[float], vout: list[float]) -> dict:
-    """Output-swing metrics from a unity-gain-buffer DC transfer sweep (shared by
-    the local-ngspice and the klt-waveform paths so the rule cannot diverge).
+    """Output-swing metrics from a unity-gain-buffer DC transfer sweep -- the
+    single definition of the slope-window rule, applied to the `dc_swing`
+    `klt sim` waveform (issue #278 removed the local-ngspice path it once
+    shared this rule with).
 
     Finds the largest contiguous run around mid-supply where the local slope
     d(vout)/d(vin) stays within [SWING_SLOPE_MIN, SWING_SLOPE_MAX] of unity -- see
-    ../testbench/opamp_dc_swing.spice.tmpl's header for the rationale."""
+    ../testbench/opamp_dc_swing.klt.spice.tmpl's header for the rationale."""
     n = len(vin)
     slopes = [(vout[i + 1] - vout[i]) / (vin[i + 1] - vin[i]) if vin[i + 1] != vin[i] else 0.0
               for i in range(n - 1)]
@@ -573,37 +421,13 @@ def swing_row(corner: str, temp: float, vdd: float, vin: list[float], vout: list
     }
 
 
-def run_dc_swing(pdk, ngspice, corner, temp, workdir, log_path, vdd=None):
-    vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
-    vstep = vdd / 360.0
-    out_path = workdir / "dc_out.txt"
-    subs = common_subs(pdk, corner, temp, vdd)
-    subs.update({"VSTEP": vstep, "OUT_FILE": out_path})
-    deck = render(TESTBENCH_DIR / "opamp_dc_swing.spice.tmpl", subs)
-    _stdout, elapsed = run_ngspice(ngspice, deck, workdir, log_path)
-    if not out_path.is_file():
-        raise HarnessError(f"dc_swing[{corner}/{temp}C]: missing sweep output -- see {log_path}")
-    vin, vout = [], []
-    for line in out_path.read_text().splitlines():
-        parts = line.split()
-        if not parts:
-            continue
-        vin.append(float(parts[1]))
-        vout.append(float(parts[3]))
-    if len(vin) < 3:
-        raise HarnessError(f"dc_swing[{corner}/{temp}C]: too few sweep points -- see {log_path}")
-    row = swing_row(corner, temp, vdd, vin, vout)
-    row["elapsed_s"] = round(elapsed, 2)
-    return row, deck
-
-
 # --------------------------------------------------------------------------
-# klt-sim analyses (issue #53): ICMR and CMRR.
+# klt-sim analyses: every analysis of this harness is a `klt sim` request.
 #
-# Unlike the three analyses above these are NOT driven through run_ngspice():
-# each is one `klt sim` request that declares the whole corner x supply x
-# temperature grid, submitted on the batch backend. The templates are circuit
-# bodies (see ../testbench/opamp_{icmr,cmrr}.spice.tmpl); the analysis card,
+# Each is one `klt sim` request that declares the whole corner x supply x
+# temperature grid, submitted on the resolved backend (batch by default). The
+# templates are circuit bodies (see ../testbench/opamp_{icmr,cmrr}.spice.tmpl
+# and the .klt.spice.tmpl twins); the analysis card,
 # `.lib`/`.temp`/`alter vdd` cards and the measurements live in the request.
 # --------------------------------------------------------------------------
 
@@ -683,19 +507,19 @@ def cmrr_measurements() -> list[dict]:
 
 
 # --------------------------------------------------------------------------
-# Fleet (klt sim) twins of the three local analyses (issue #77): ac, tran_sr,
-# dc_swing. Same stimulus, same measurement definitions, same row/CSV schema as
-# run_ac/run_tran_sr/run_dc_swing; only the executor differs. Opt-in with
-# --fleet; the bodies are ../testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl.
+# The three historical analyses (issue #77): ac, tran_sr, dc_swing. Since
+# issue #278 they run on the same `klt sim` path as every other analysis --
+# the hand-rolled local ngspice executor was removed. The bodies are
+# ../testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl.
 # --------------------------------------------------------------------------
 
 FLEET_ANALYSES = ("ac", "tran_sr", "dc_swing")
-AC_ARGS = "dec 20 1 1g"  # PTS_PER_DEC=20, FSTART=1, FSTOP=1g of run_ac
+AC_ARGS = "dec 20 1 1g"  # PTS_PER_DEC=20, FSTART=1, FSTOP=1g of the ac request
 AC_RFB, AC_CFB = "1e12", "1"
-SR_TIMING = {"T_DELAY": "200n", "T_EDGE": "1n", "T_PW": "1u", "T_PER": "2u"}  # run_tran_sr
-SR_TRAN_ARGS = "2n 2.2u"  # T_STEP T_STOP of run_tran_sr
+SR_TIMING = {"T_DELAY": "200n", "T_EDGE": "1n", "T_PW": "1u", "T_PER": "2u"}  # tran_sr request
+SR_TRAN_ARGS = "2n 2.2u"  # T_STEP T_STOP of the tran_sr request
 SR_FRAC_LOW, SR_FRAC_HIGH = 0.3, 0.7  # V_LOW/V_HIGH = VDD/2 -/+ 0.2*VDD
-SWING_POINTS = 360  # run_dc_swing: VSTEP = VDD/360
+SWING_POINTS = 360  # dc_swing request: VSTEP = VDD/360
 SWING_END = 1.000001  # sweep end (x VDD): a hair past 1.0 so float step accumulation keeps the k=360 point
 # Solver settings written into every fleet record (DR-006: ngspice defaults,
 # no reltol/abstol/vntol override anywhere; the bodies' only .option is scale).
@@ -704,8 +528,8 @@ SOLVER_SETTINGS = {"policy": "DR-006", "option_scale": "1u", "reltol": "default"
 
 
 def body_template(analysis: str) -> Path:
-    """Circuit-body template of a klt analysis. The fleet twins of ac/tran_sr/dc_swing
-    live next to the full local decks as `.klt.spice.tmpl`."""
+    """Circuit-body template of a klt analysis. The bodies of ac/tran_sr/dc_swing
+    are the `.klt.spice.tmpl` twins; the other analyses use their own templates."""
     analysis = "ac" if analysis == "ac_iq" else analysis
     suffix = ".klt.spice.tmpl" if analysis in FLEET_ANALYSES else ".spice.tmpl"
     return TESTBENCH_DIR / f"opamp_{analysis}{suffix}"
@@ -1165,7 +989,8 @@ def _need(v: dict, label: str, names: Iterable[str], status) -> dict[str, float]
 
 def ac_row(corner: str, temp: float, info: dict, vdd: float | None = None,
            iq_info: dict | None = None) -> dict:
-    """AC row from a fleet response; same columns/definitions as run_ac. `info` is the
+    """AC row from a fleet response; same columns/definitions the local
+    `run_ac` executor had before issue #278 removed it. `info` is the
     `ac` request's unit, `iq_info` the companion `ac_iq` request's unit at the same point
     (a missing companion is a failure, not a zero)."""
     vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
@@ -1185,7 +1010,8 @@ def ac_row(corner: str, temp: float, info: dict, vdd: float | None = None,
 
 
 def tran_sr_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
-    """Slew row from a fleet response; same columns/definitions as run_tran_sr
+    """Slew row from a fleet response; same columns/definitions the local
+    `run_tran_sr` executor had before issue #278 removed it
     (SR = 0.6 * span / 20-80 % transit time)."""
     vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     label = f"tran_sr[{corner}/{temp:g}C]"
@@ -2253,7 +2079,6 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
     out.sort(key=lambda r: (order[r["corner"]], r["temp_c"], r["vdd_v"]))
 
 
-ANALYSES = {"ac": run_ac, "tran_sr": run_tran_sr, "dc_swing": run_dc_swing}
 FIELDNAMES = {
     "ac": ["corner", "temp_c", "vdd_v", "vcm_v", "iq_a", "pq_w", "gain_dc_db",
            "gbw_hz", "phase_at_gbw_deg", "phase_margin_deg", "elapsed_s"],
@@ -2440,18 +2265,17 @@ def parse_args(argv):
     p.add_argument("--temps", default=",".join(str(t) for t in DEFAULT_TEMPS_C))
     p.add_argument("--analyses", default=",".join(DEFAULT_ANALYSES))
     p.add_argument("--backend", default=None,
-                   help="effective `klt sim` backend, resolved as --backend > nonempty $KLT_SIM_BACKEND > "
-                        "batch; on batch at most ONE local ngspice unit (local analyses x supply points) "
-                        "is allowed -- a larger local grid refuses with a pointer at "
-                        "'--fleet --backend batch'; select local to run a local grid on purpose (issue #163)")
+                   help="effective `klt sim` backend for every analysis, resolved as --backend > nonempty "
+                        "$KLT_SIM_BACKEND > batch (issue #163's resolution order); `batch` submits the "
+                        "requests to the shared Spot fleet, `local` runs them on this host via `klt sim`")
     p.add_argument("--batch-runner-check", choices=("warn", "enforce"), default="warn",
                    help="klt batch.runner_version_check (default: warn -- the fleet image's klt is older than "
                         "any client that can submit to it; the skew is recorded in the record's klt_jobs)")
     p.add_argument("--klt-cmd", default=None,
-                   help="klt invocation for icmr/cmrr (default: $KLT_CMD or `klt`); pin the fleet's version "
+                   help="klt invocation (default: $KLT_CMD or `klt`); pin the fleet's version "
                         "with e.g. 'uvx --from klayout-tools==0.5.0 klt'")
     p.add_argument("--timeout-s", type=int, default=1200,
-                   help="per-corner ngspice timeout (s) written into the icmr/cmrr klt requests (default 1200; "
+                   help="per-corner ngspice timeout (s) written into the klt requests (default 1200; "
                         "healthy points finish in 30-160 s, so a short value makes a stalled point fail fast)")
     p.add_argument("--supply-mode", choices=SUPPLY_MODES, default=DEFAULT_SUPPLY_MODE,
                    help="paired (default): one VDD per process (VDD_BY_CORNER); cartesian: every process x "
@@ -2459,10 +2283,9 @@ def parse_args(argv):
     p.add_argument("--supplies", default=",".join(f"{v:g}" for v in CARTESIAN_SUPPLIES_V),
                    help="supply voltages for --supply-mode cartesian (default: 1.62,1.8,1.98; subsets allowed)")
     p.add_argument("--fleet", action="store_true",
-                   help="run ac,tran_sr,dc_swing as `klt sim` requests on --backend (default batch) instead of "
-                        "local ngspice subprocesses; with the batch backend NO local simulator is ever invoked "
-                        "(issue #77). Default off; without it a batch-backend run may execute at most one local "
-                        "unit -- larger local grids need --backend local (issue #163)")
+                   help="deprecated no-op: every analysis already runs as a `klt sim` request on --backend "
+                        "by default (issue #278 removed the local ngspice executor); accepted so saved "
+                        "invocations and callers (pex_measure.py, stage1.sh) keep working")
     p.add_argument("--netlist", default=None,
                    help="DUT netlist to characterize (default: design/netlist/opamp_core.spice). A flat netlist "
                         "with ports vdd vss inn inp out ibias; snapshotted into the record, the canonical design "
@@ -2478,7 +2301,6 @@ def parse_args(argv):
                         "graded against the ratified output_swing row. Needs klt >= the first release "
                         "carrying klayout-tools#5518 (after v0.9.2); default off so the pinned CI "
                         "client (0.8.0) sees an unchanged request. swing_row()'s CSV is unchanged")
-    p.add_argument("--keep-work", action="store_true")
     args = p.parse_args(argv)
     args.backend = resolve_backend(args.backend)
     return args
@@ -2487,7 +2309,6 @@ def parse_args(argv):
 def main(argv=None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
     RUNNER_VERSION_CHECK[0] = args.batch_runner_check
-    LOCAL_SIM_FORBIDDEN[0] = bool(args.fleet and args.backend == "batch")
     KLT_TIMEOUT_S[0] = args.timeout_s
     SWING_SLOPE_BAND[0] = args.swing_slope_band
     EXPORT_ENVELOPE_DIR[0] = (REPO_ROOT / args.export_envelopes).resolve() if args.export_envelopes else None
@@ -2510,36 +2331,21 @@ def main(argv=None) -> int:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 1
     for a in analyses:
-        if a not in ANALYSES and a not in KLT_ANALYSES:
-            print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
+        if a not in FLEET_ANALYSES and a not in KLT_ANALYSES:
+            print(f"ERROR: unknown analysis '{a}' (choices: {sorted([*FLEET_ANALYSES, *KLT_ANALYSES])})", file=sys.stderr)
             return 1
     if "tran_sr_icmr" in analyses and "icmr" not in analyses:
         print("ERROR: tran_sr_icmr needs the same campaign's icmr rows (add icmr to --analyses; issue #185)",
               file=sys.stderr)
         return 1
-    # --fleet routes the three formerly-local analyses through `klt sim` (issue #77)
-    klt_analyses = [a for a in analyses if a in KLT_ANALYSES or (args.fleet and a in ANALYSES)]
-    ngspice_analyses = [a for a in analyses if a in ANALYSES and a not in klt_analyses]
-    # Issue #163: with the effective backend `batch`, refuse a multi-unit local
-    # ngspice grid up front -- before any tool/PDK check, klt probe, DUT capture,
-    # record allocation or klt submission, so nothing is partially launched. One
-    # local unit stays allowed as a debug probe; an explicit `local` backend (CLI
-    # or $KLT_SIM_BACKEND) keeps direct local execution of any grid. The count is
-    # the local loop's own workload: local analyses (repeats included) crossed
-    # with the supply planner's points; klt-only and --fleet selections count 0.
-    local_units = len(expected) * len(ngspice_analyses)
-    if args.backend == "batch" and local_units > 1:
-        print(
-            f"ERROR: backend '{args.backend}' would execute {local_units} local ngspice unit(s) "
-            f"({len(ngspice_analyses)} local analysis(es) x {len(expected)} supply point(s)) -- "
-            "a multi-unit local grid is refused on the batch backend. Use "
-            "'--fleet --backend batch' to send these analyses as klt requests, or "
-            "'--backend local' to run the grid locally on purpose (issue #163).",
-            file=sys.stderr,
-        )
-        return 1
-    if klt_analyses and not klt_available():
-        print("ERROR: klt not found on PATH (needed for the klt analyses and --fleet; see --check-env)", file=sys.stderr)
+    # Every analysis is a `klt sim` request now (issue #278 removed the local
+    # ngspice executor); --fleet is an accepted no-op for saved invocations.
+    # Deduplicate while keeping order: repeated names would submit one request
+    # twice over the same grid.
+    klt_analyses = list(dict.fromkeys(analyses))
+    if not klt_available():
+        print("ERROR: klt not found on PATH (required: every analysis runs as a `klt sim` request; see --check-env)",
+              file=sys.stderr)
         return 1
 
     dut_src = Path(args.netlist).resolve() if args.netlist else DESIGN_NETLIST
@@ -2555,11 +2361,6 @@ def main(argv=None) -> int:
             f"but the resulting record will not be directly comparable to prior ones.",
             file=sys.stderr,
         )
-
-    ngspice = shutil.which("ngspice")
-    if ngspice_analyses and not ngspice:
-        print("ERROR: ngspice not found on PATH", file=sys.stderr)
-        return 1
 
     model_files = load_json(GMID_MODEL_FILES)
     for corner in corners:
@@ -2581,8 +2382,8 @@ def main(argv=None) -> int:
     log_dir = artifact_store.stage_dir(ARTIFACT_BENCH, record_id)
     snapshot_run_dir = SNAPSHOT_DIR / record_id
     make_new_dir(snapshot_run_dir)
-    # Capture the DUT bytes ONCE, before any analysis is scheduled; every local
-    # and klt analysis below uses this copy, so editing the working tree
+    # Capture the DUT bytes ONCE, before any analysis is scheduled; every klt
+    # request below uses this copy, so editing the working tree
     # mid-campaign cannot change later points (issue #104).
     dut_meta = dut_identity.capture_dut(dut_src, snapshot_run_dir, REPO_ROOT)
     ACTIVE_DUT[0] = REPO_ROOT / dut_meta["snapshot_path"]
@@ -2592,35 +2393,6 @@ def main(argv=None) -> int:
     errors: list[str] = []
     n_runs = 0
     t_start = time.monotonic()
-
-    def do_matrix(workdir: Path):
-        nonlocal n_runs
-        for analysis in ngspice_analyses:
-            fn = ANALYSES[analysis]
-            for corner, temp, vdd in expected:
-                if True:
-                    tag = point_tag(analysis, corner, temp, vdd, supply_mode)
-                    log_path = log_dir / f"{tag}.log"
-                    try:
-                        row, deck = fn(pdk, ngspice, corner, temp, workdir, log_path, vdd=vdd)
-                        # replayable from the repo root: point the saved include at the snapshot
-                        (snapshot_run_dir / f"{tag}.spice").write_text(
-                            deck.replace(str(ACTIVE_DUT[0]), dut_meta["snapshot_path"]))
-                        results[analysis].append(row)
-                        n_runs += 1
-                        print(f"[{n_runs:>3}] {tag:<24} OK   {row.get('elapsed_s', 0):.1f}s", file=sys.stderr)
-                    except HarnessError as exc:
-                        n_runs += 1
-                        errors.append(f"{tag}: {exc}")
-                        print(f"[{n_runs:>3}] {tag:<24} FAIL {exc}", file=sys.stderr)
-
-    if args.keep_work:
-        workdir = Path(tempfile.mkdtemp(prefix="opamp-pvt-"))
-        print(f"--keep-work: scratch decks/outputs preserved at {workdir}", file=sys.stderr)
-        do_matrix(workdir)
-    else:
-        with tempfile.TemporaryDirectory(prefix="opamp-pvt-") as tmp:
-            do_matrix(Path(tmp))
 
     klt_jobs: list[dict] = []
     klt_crosscheck = None
@@ -2649,7 +2421,7 @@ def main(argv=None) -> int:
                 sr_icmr_summary["unavailable_reasons"] = [
                     "tran_sr not run in this campaign (add it to --analyses): no same-DUT standard reference"]
             print(f"tran_sr_icmr: {json.dumps(sr_icmr_summary)}", file=sys.stderr)
-        # attempted units, like the ngspice loop above (failed units count; they are in `errors`)
+        # attempted units (failed units count; they are in `errors`)
         n_runs += sum(len(expected) * (len(CMRR_CM_POINTS) if a == "cmrr" else 1) for a in klt_analyses)
         ac_ref = choose_ac_reference(record_id, dut_meta, results.get("ac"))
         if "tran_step" in klt_analyses and results["tran_step"]:
@@ -2723,7 +2495,7 @@ def main(argv=None) -> int:
             "expected_tuples": [{"corner": c, "temp_c": t, "vdd_v": v} for c, t, v in expected],
             "n_expected_tuples_per_analysis": len(expected),
             "n_runs": n_runs, "n_failed": len(errors),
-            "execution": {"klt_analyses": klt_analyses, "local_ngspice_analyses": ngspice_analyses,
+            "execution": {"klt_analyses": klt_analyses, "local_ngspice_analyses": [],
                           "fleet_flag": bool(args.fleet), "backend": args.backend if klt_analyses else None,
                           "solver_settings": SOLVER_SETTINGS},
             **({"klt_backend": args.backend, "icmr_cmrr_floors_db": ICMR_CMRR_FLOORS_DB, "icmr_dv_v": ICMR_DV_V,
@@ -2742,9 +2514,9 @@ def main(argv=None) -> int:
             "rc_corner": pdk.own_pin["rc_corner"]["choice"],
         },
         "tools": {
-            # not probed when every analysis ran through klt: a fleet campaign must not
-            # invoke any local simulator, not even for a version string
-            "ngspice": first_line(["ngspice", "-v"]) if ngspice_analyses else "not invoked (klt/fleet execution)",
+            # no simulator is invoked on this host, not even for a version
+            # string: every analysis ran as a `klt sim` request
+            "ngspice": "not invoked (klt/fleet execution)",
             "python": platform.python_version(),
             "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
@@ -2769,7 +2541,7 @@ def main(argv=None) -> int:
     for p in written:
         print(f"  {p.relative_to(REPO_ROOT)}")
     print(f"  {json_path.relative_to(REPO_ROOT)}")
-    print(f"  {manifest_path.relative_to(REPO_ROOT)} (raw ngspice logs / klt responses and per-corner artifacts, stored)")
+    print(f"  {manifest_path.relative_to(REPO_ROOT)} (klt requests / responses and per-corner artifacts, stored)")
     print(f"  {snapshot_run_dir.relative_to(REPO_ROOT)}/ (rendered deck snapshots)")
 
     if errors:

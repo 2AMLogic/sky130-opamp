@@ -35,11 +35,16 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent.parent
 sys.path.insert(0, str(HERE))
-from _klt_common import BuildError, run_klt, write_json  # noqa: E402
+from _klt_common import (  # noqa: E402
+    BuildError,
+    PDK_PIN,
+    check_toolchain,
+    run_klt,
+    write_json,
+)
 import _magic_common  # noqa: E402
 from _magic_common import flatten_gds, run_magic  # noqa: E402
 
-PDK_PIN = REPO_ROOT / "layout" / "pdk.json"
 OUT_ROOT = REPO_ROOT / "layout" / "passive_probes"
 GRID_UM = 0.005  # sky130 manufacturing grid used by this repo (README, DR-010)
 
@@ -79,22 +84,7 @@ PROBES = [
 def klt_cmd() -> list[str]:
     if os.environ.get("KLT_CMD"):
         return shlex.split(os.environ["KLT_CMD"])
-    pin = json.loads(PDK_PIN.read_text())
-    return ["uvx", "--from", f"klayout-tools @ git+https://github.com/2AMLogic/klayout-tools@{pin['klt_commit']}", "klt"]
-
-
-def check_toolchain(klt: list[str], env: dict) -> dict:
-    pin = json.loads(PDK_PIN.read_text())
-    ver = run_klt(["version"], env=env, cwd=REPO_ROOT, klt=klt)
-    pdk = run_klt(["pdk", "find", "--pdk", pin["variant"]], env=env, cwd=REPO_ROOT, klt=klt)
-    problems = []
-    if ver.get("git_commit") != pin["klt_commit"]:
-        problems.append(f"klt {ver.get('git_commit')} != pinned {pin['klt_commit']}")
-    if pin["open_pdks_commit"] not in str(pdk.get("version", "")):
-        problems.append(f"open_pdks {pdk.get('version')} != pinned {pin['open_pdks_commit']}")
-    if problems:
-        raise BuildError("toolchain does not match layout/pdk.json: " + "; ".join(problems))
-    return {"klt": ver["version"], "pdk": pdk.get("version"), "magic_tech": Path(pdk["assets"]["magic"]) / f"{pin['variant']}.tech"}
+    return shlex.split(json.loads(PDK_PIN.read_text())["klt_install"])
 
 
 def magic_drc(gds: Path, cell: str, tech: Path) -> dict:
@@ -154,8 +144,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     env = {**os.environ, "PDK": "sky130A"}
     klt = klt_cmd()
-    tool = check_toolchain(klt, env)
-    tech = tool.pop("magic_tech")
+    tool, pdk = check_toolchain(env, klt=klt, cwd=REPO_ROOT)
+    try:
+        tech = Path(pdk["assets"]["magic"]) / f"{pdk['variant']}.tech"
+    except (KeyError, TypeError) as exc:
+        raise BuildError(f"klt pdk find response lacks assets.magic/variant: {exc}") from exc
     root = Path(tempfile.mkdtemp(prefix="probe-passives-")) if args.check else OUT_ROOT
     summaries = [build_probe(p, root / p["id"], klt, env, tech) for p in PROBES]
     index = {"schema": "sky130-opamp/passive-probes/1", "tools": tool, "probes": summaries}

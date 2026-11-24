@@ -1,7 +1,7 @@
 * opamp_core PSRR- testbench (circuit body for `klt sim`; issue #54)
 *
 * Unity-gain buffer (real closed loop: inn tied to out through 1 mohm, as in
-* opamp_tran_sr.spice.tmpl). The AC stimulus is on the vss source (vss held at DC 0 V); the signal
+* opamp_tran_sr.klt.spice.tmpl). The AC stimulus is on the vss source (vss held at DC 0 V); the signal
 * input is AC-grounded. Closed-loop gain Acl is ~1 (open-loop gain >= 60 dB at
 * every corner), so the supply-to-output gain Avs = vdb(out) read directly is
 * the output-referred supply gain AND (to within 1/(1+1/A) < 0.01 dB) the

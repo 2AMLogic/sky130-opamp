@@ -36,7 +36,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "sim" / "lib"))
-import sink_sizing as ss  # noqa: E402
+from _gmid import GM_ID_PFET, interp_gmid, legal, load, snap  # noqa: E402
 from spice_harness import BATCH_CAPACITY_WAIT_S  # noqa: E402
 
 CANON = REPO / "design" / "netlist" / "opamp_core.spice"
@@ -49,12 +49,12 @@ VDD_TT = 1.8
 
 
 def widths(frac: float) -> dict:
-    n = ss.load("nfet", 1.2)[("tt", 27.0)]
-    p = ss.load("pfet", 0.3)[("tt", 27.0)]
-    jn, *_ = ss.interp_gmid(n, 18.0)
-    jp, *_ = ss.interp_gmid(p, ss.GM_ID_PFET)
-    return {"n_unit": ss.snap(I_UNIT_UA / jn), "p_rep": ss.snap(I_UNIT_UA / jp),
-            "p_ic": ss.snap(frac * I_UNIT_UA / jp), "jp": jp}
+    n = load("nfet", 1.2)[("tt", 27.0)]
+    p = load("pfet", 0.3)[("tt", 27.0)]
+    jn, *_ = interp_gmid(n, 18.0)
+    jp, *_ = interp_gmid(p, GM_ID_PFET)
+    return {"n_unit": snap(I_UNIT_UA / jn), "p_rep": snap(I_UNIT_UA / jp),
+            "p_ic": snap(frac * I_UNIT_UA / jp), "jp": jp}
 
 
 def card(name, d, g, s_, b, kind, w, l, mult=1):
@@ -151,17 +151,17 @@ def check() -> list[str]:
     """Problems: file differs from the generator, a canonical card changed, or an off-grid width."""
     import re
     probs = []
-    canon_cards = [ln for ln in canonical_body().splitlines()]
+    canon = canonical_body()
     for tag in FRACTIONS:
         p = path(tag)
         if not p.exists() or p.read_text() != netlist(tag):
             probs.append(f"{p.name}: missing or differs from the generator")
             continue
         text = p.read_text()
-        if canonical_body() not in text:
+        if canon not in text:
             probs.append(f"{p.name}: canonical cards not byte-identical")
         for m in re.finditer(r"^(X\w+) .* W=([0-9.]+) ", text, re.M):
-            if not ss.legal(float(m.group(2))):
+            if not legal(float(m.group(2))):
                 probs.append(f"{p.name}: {m.group(1)} W={m.group(2)} off the 0.005 um grid")
     return probs
 

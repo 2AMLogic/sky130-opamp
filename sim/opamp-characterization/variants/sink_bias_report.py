@@ -51,9 +51,11 @@ REPO = HERE.parent.parent.parent
 REC = REPO / "sim" / "opamp-characterization" / "records"
 SNAP = REPO / "sim" / "opamp-characterization" / "netlist-snapshots"
 MANIFEST = HERE / "bias-margin" / "records.json"
+sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 import dut_identity  # noqa: E402
 from point_identity import IDENTITY_EXC, point_key  # noqa: E402
+from sink_bias_margin import STATIC_BOOST_LIMIT_A  # noqa: E402
 
 SCREEN_POINTS = {  # label -> (corner, temp, vdd), analyses beyond ac
     "TT/27": ("tt", 27.0, 1.8), "SS/-40": ("ss", -40.0, 1.62),
@@ -61,7 +63,6 @@ SCREEN_POINTS = {  # label -> (corner, temp, vdd), analyses beyond ac
 SLEW_POINTS = ("TT/27", "SS/-40")
 GAIN_MIN_DB, PM_MIN_DEG = 60.0, 60.0
 FALL_GAIN_TT_MIN, FALL_GAIN_SS_MIN = 1.5, 0.5   # V/us over canonical (PLAN.md screening condition 4)
-RAIL_V, BOOST_A = 0.10, 1e-6
 PVT_TABLES = ("ac", "tran-sr", "tran-sr-icmr", "icmr", "dc-swing")
 RUN_COLS = {"elapsed_s"}   # per-run timing, not a measurement: may differ between replicates
 PDK_FIELDS = ("variant", "installed_commit", "pinned_commit", "matches_pin", "rc_corner")
@@ -401,7 +402,7 @@ def cmd_screen():
             kmax = max(vals, key=lambda t: abs(t[1]))
             print(f"- {tag}: {len(vals)}/{len(st)} units ok; max |I(XMS)| = {abs(kmax[1]):.4f} uA at "
                   f"{kmax[0][0].upper()}/{kmax[0][1]:g}C; flagged > 1 uA: "
-                  f"{sum(1 for _, v, _ in vals if abs(v) * 1e-6 > BOOST_A)}; railed: "
+                  f"{sum(1 for _, v, _ in vals if abs(v) * 1e-6 > STATIC_BOOST_LIMIT_A)}; railed: "
                   f"{sum(1 for _, _, r in vals if r['railed'] == 'True')}; failed: {len(bad)}")
         else:
             print(f"- {tag}: no usable static units ({len(st)} rows)")
@@ -472,7 +473,7 @@ def cmd_mc(tag):
         rows, meta = mc_rows(rid, tag)
         ok = [r for r in rows if r["ok"] == "True"]
         x = sorted(abs(fl(r["i_xms_ua"])) for r in ok)
-        flagged = sum(1 for v in x if v * 1e-6 > BOOST_A)
+        flagged = sum(1 for v in x if v * 1e-6 > STATIC_BOOST_LIMIT_A)
         railed = sum(1 for r in ok if r["railed"] == "True")
         n = meta["mc"]["n"]
         print(f"{rid} {meta['mc']['corner']}_mm/{meta['mc']['temp_c']:g}C n={n}: units {len(rows)}, ok {len(ok)}, "

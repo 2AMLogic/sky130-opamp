@@ -1,7 +1,9 @@
 """Simulator-free tests for sim/offset-capability/bin/sizing_feasibility.py (issue #144)."""
 import math
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 import _paths
 from _paths import REPO
@@ -49,6 +51,32 @@ class Candidates(unittest.TestCase):
                 for x, y in zip(ta, tb):
                     if x != y:
                         self.assertIn(x.split("=")[0], ("L", "W", "ad", "as", "pd", "ps", "nrd", "nrs"), (name, x, y))
+
+    def test_committed_candidates_byte_equal_regeneration(self):
+        for name in sf.CANDIDATES:
+            self.assertEqual(sf.candidate_netlist(name).encode(),
+                             sf.cand_path(name).read_bytes(), name)
+
+    def test_candidate_emission_keeps_mult_and_comment_line(self):
+        # issue #301: with a comment between the XM5 card and its `+` line, the
+        # emitted candidate keeps `mult=2 m=2` on XM5 and the comment on its own line.
+        lines = sf.CANON.read_text().splitlines()
+        i = next(i for i, ln in enumerate(lines) if ln.startswith("XM5 ")) + 1
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "opamp_core.spice"
+            p.write_text("\n".join(lines[:i] + ["*.ipin tail"] + lines[i:]) + "\n")
+            orig_canon, orig_core = sf.CANON, sf.hc.CORE
+            sf.CANON = p
+            sf.hc.CORE = p
+            try:
+                out = sf.candidate_netlist("grid0")
+            finally:
+                sf.CANON, sf.hc.CORE = orig_canon, orig_core
+        out_lines = out.splitlines()
+        xm5 = [ln for ln in out_lines if ln.startswith("XM5 ")]
+        self.assertEqual(len(xm5), 1)
+        self.assertIn("mult=2 m=2", xm5[0])
+        self.assertIn("*.ipin tail", out_lines)
 
 
 class Bounds(unittest.TestCase):
