@@ -46,7 +46,6 @@ Issues currently being built (`loom:building`).
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests
 - **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates
 - **#353**: DR-017 lower-side rationale cites the superseded DR-002 grid without saying so
-- **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed
 - **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share)
 - **#369**: Consolidate the remaining six (corner, temp_c, vdd_v) point-key copies in pvt_sweep.py and pex_measure.py onto sim/lib/point_identity.py
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list
@@ -85,7 +84,7 @@ Issues carrying `loom:curated`.
 - **#342**: Single-source the simulator-free gate: tests.yml calls design/bin/check_ci.py; drop the workflow-comparison tests *(curated)*
 - **#347**: Merge queue: add the merge_group trigger and adapt the PR-metadata gates *(curated)*
 - **#353**: DR-017 lower-side rationale cites the superseded DR-002 grid without saying so *(curated)*
-- **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed *(curated)*
+- **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed *(curated)* *(held)*
 - **#359**: Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share) *(curated)*
 - **#361**: T1 item 5: commit a CMRR klt sim envelope with DR-008's proposed limits on the current DUT, then open DR-008's ratification PR *(curated)* *(held)*
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list *(curated)*
@@ -106,7 +105,7 @@ _None._
 | Very important | 1 |
 | Important | 4 |
 | Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
-| In Progress (`loom:building`) | 10 |
+| In Progress (`loom:building`) | 9 |
 | PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 7 |
 | Curated | 14 |
