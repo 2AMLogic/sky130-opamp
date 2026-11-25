@@ -2245,7 +2245,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
                         row = ac_row(corner, temp, info, vdd, iq_units.get((corner, float(temp), round(vdd, 6))))
                     elif analysis in FLEET_ANALYSES:
                         row = {"tran_sr": tran_sr_row, "dc_swing": dc_swing_row}[analysis](corner, temp, info, vdd)
-                        if analysis == "dc_swing":
+                        if analysis == "dc_swing" and "swing_fixcm" in klt_analyses:
                             try:  # comparison-only proxies; never fails or alters the dc_swing row
                                 BUFFER_HEADROOM[(corner, float(temp), round(vdd, 6))] = buffer_edge_headroom(
                                     info, row, label)

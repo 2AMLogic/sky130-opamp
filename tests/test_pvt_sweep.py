@@ -1225,11 +1225,13 @@ class FleetAnalysisTests(unittest.TestCase):
         return mock.patch.object(subprocess, "run", boom)
 
     def test_paired_campaign_accounts_for_all_45_units_without_local_sim(self):
-        with tempfile.TemporaryDirectory() as d, self._armed():
-            results, errors, jobs, calls = self._campaign(list(pvt.FLEET_ANALYSES), tmp=d)
+        with tempfile.TemporaryDirectory() as d, self._armed(), \
+                mock.patch.object(pvt, "buffer_edge_headroom") as headroom:
+            results, errors, jobs, calls = self._campaign(list(pvt.DEFAULT_ANALYSES), tmp=d)
         self.assertEqual(errors, [])
         self.assertEqual({a: len(r) for a, r in results.items()}, {a: 15 for a in pvt.FLEET_ANALYSES})
         self.assertEqual(sum(len(r) for r in results.values()), 45)
+        self.assertEqual(headroom.call_count, 0)
         self.assertEqual(len(calls), 4)  # ac-iq (Iq companion), ac, tran-sr, dc-swing
         self.assertTrue(all(bk == "batch" for _r, bk in calls))
         for a, rows in results.items():
@@ -1704,6 +1706,14 @@ class SwingFixcmTests(unittest.TestCase):
         self.assertTrue(all(set(r) == set(pvt.FIELDNAMES["swing_fixcm"]) for r in results["swing_fixcm"]))
         self.assertEqual([j["remote"]["job_id"] for j in jobs], ["j-swing-fixcm"])
 
+    def test_buffer_headroom_failure_preserves_dc_swing_rows(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(pvt, "SWING_POINTS", 60), \
+                mock.patch.object(pvt, "buffer_edge_headroom", side_effect=sh.HarnessError("unavailable")) as headroom:
+            results, errors, _jobs = self._campaign(d, ["dc_swing", "swing_fixcm"])
+        self.assertEqual(headroom.call_count, 15)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(results["dc_swing"]), 15)
+
     def test_campaign_failures_are_errors_and_no_remote_is_refused(self):
         from unittest import mock
 
@@ -1771,7 +1781,10 @@ class SwingFixcmTests(unittest.TestCase):
         self.assertEqual((cmp_["points"], cmp_["unmatched"]), (15, []))
         # the mocked follower clips 0.25 V from each rail, the mocked output stage only 0.1 V from it
         self.assertEqual(cmp_["summary"], {"low: input_cm (inconclusive)": 15, "high: input_cm (inconclusive)": 15})
-        self.assertIsNotNone(cmp_["table"][0]["low"]["buffer_headroom"])
+        for point in cmp_["table"]:
+            for side in ("low", "high"):
+                edge = point[side]
+                self.assertEqual(edge["buffer_headroom"]["vout_v"], edge["buffer_edge_v"])
 
 
 class EffectiveBackendTests(unittest.TestCase):
