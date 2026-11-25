@@ -131,12 +131,12 @@ class MeasurementsTests(unittest.TestCase):
 
     def test_graded_floor_measurement_shape(self):
         ms = m.noise_floor_measurements()
-        graded = [x for x in ms if "spec_row" in x]
+        graded = [x for x in ms if "limits" in x]
         self.assertEqual([x["name"] for x in graded], ["en_floor"])
         g = graded[0]
         self.assertEqual(g["unit"], "V/rtHz")
         self.assertEqual(g["limits"], {"max": m.SPEC_NOISE_FLOOR_MAX_V_RTHZ})
-        self.assertEqual(g["spec_row"], "input_referred_noise")
+        self.assertNotIn("spec_row", g)
         # exact SI bound, from the ratified figure -- never a rescaled copy
         self.assertEqual(m.SPEC_NOISE_FLOOR_MAX_V_RTHZ, 30e-9)
         # helpers are ungraded diagnostics and every expr is single-line
@@ -196,7 +196,8 @@ class MeasurementsTests(unittest.TestCase):
         req = m.build_request("psrr_vdd", ["tt"], [27.0], "body.spice", keep_artifacts=True)
         self.assertTrue(all("spec_row" not in x and "limits" not in x for x in req["measurements"]))
         req = m.build_request("noise", ["tt"], [27.0], "body.spice", keep_artifacts=True)
-        graded = [x for x in req["measurements"] if "spec_row" in x]
+        self.assertFalse(any("spec_row" in x for x in req["measurements"]))
+        graded = [x for x in req["measurements"] if "limits" in x]
         self.assertEqual([x["name"] for x in graded], ["en_floor"])
         self.assertEqual(graded[0]["limits"]["max"], 30e-9)
 

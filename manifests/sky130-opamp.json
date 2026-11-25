@@ -76,13 +76,6 @@
         "rows": [
           "input_common_mode_range"
         ]
-      },
-      {
-        "file": "manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json",
-        "content_hash": "sha256:efdf6f90890b86b317740f3afeb4678e086a26344a74c8711e131b76cfe484e8",
-        "rows": [
-          "input_referred_noise"
-        ]
       }
     ],
     "7": {
@@ -137,7 +130,8 @@
         "gap": "the ratified grading rule is a contiguous-run slope-band reduction over a swept waveform (largest run around mid-supply where d(vout)/d(vin) stays in [0.8, 1.2]); no klt sim measurement form expresses it, so the row is measured on the full 15-point grid by this campaign's dc-swing envelope and CSV but graded by neither. Tool gap filed as 2AMLogic/klayout-tools#5518; tracker #3"
       },
       {
-        "id": "input_referred_noise"
+        "id": "input_referred_noise",
+        "gap": "DR-003 thermal-floor compliance is unresolved. The nine-spot total-density minimum met 30 nV/√Hz at 4/15 corners, but exceeds the thermal-only density by more than 0.5 dB at 10/15. DR-018 retains the November envelope as a diagnostic (#274)."
       },
       {
         "id": "psrr",

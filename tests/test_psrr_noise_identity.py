@@ -112,6 +112,19 @@ class SubmissionTests(unittest.TestCase):
             self.assertTrue((snap.parent / f"{tag}.request.json").is_file())
         self.assertEqual(di.validate_psrr_noise(repo.tmp), 0)  # historical integrity survives the edit
 
+    def test_both_envelope_destinations_omit_only_the_client_path(self):
+        repo = Repo(self)
+        payload = fake_payload(None)
+        payload["environment"]["client_ngspice_binary"] = "/workstation/bin/ngspice"
+        expected = {**payload, "environment": {"engine_version": "fake"}}
+        for extra, destination in [(["--export-envelopes", "envelopes"], repo.tmp / "envelopes"),
+                                   ([], repo.records)]:
+            self.assertEqual(self.run_sweep(repo, lambda *args: (0, payload, ""),
+                                            ["--benches", "noise", *extra]), 0)
+            envelope, = destination.glob("*-noise.klt.json")
+            self.assertEqual(json.loads(envelope.read_text()), expected)
+            self.assertIn("client_ngspice_binary", payload["environment"])
+
     def test_failure_writes_no_record_and_no_orphan_snapshot(self):
         repo = Repo(self)
         self.assertEqual(self.run_sweep(repo, lambda *a: (1, None, "boom")), 1)

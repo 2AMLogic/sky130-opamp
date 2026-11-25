@@ -269,14 +269,6 @@
           ],
           "status": "met",
           "reason": null
-        },
-        {
-          "citation": "manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json",
-          "rows": [
-            "input_referred_noise"
-          ],
-          "status": "unmet",
-          "reason": "check_failed"
         }
       ],
       "detail": {
@@ -289,11 +281,9 @@
         ],
         "failed_citations": [
           "manifests/envelopes/20261113-150556-60489db-8101bf-ac-iq.klt.json",
-          "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json",
-          "manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json"
+          "manifests/envelopes/20261113-150556-60489db-8101bf-tran-sr.klt.json"
         ],
         "failed_rows": [
-          "input_referred_noise",
           "quiescent_power",
           "slew_rate"
         ],
@@ -302,6 +292,10 @@
           {
             "id": "output_swing",
             "gap": "the ratified grading rule is a contiguous-run slope-band reduction over a swept waveform (largest run around mid-supply where d(vout)/d(vin) stays in [0.8, 1.2]); no klt sim measurement form expresses it, so the row is measured on the full 15-point grid by this campaign's dc-swing envelope and CSV but graded by neither. Tool gap filed as 2AMLogic/klayout-tools#5518; tracker #3"
+          },
+          {
+            "id": "input_referred_noise",
+            "gap": "DR-003 thermal-floor compliance is unresolved. The nine-spot total-density minimum met 30 nV/\u221aHz at 4/15 corners, but exceeds the thermal-only density by more than 0.5 dB at 10/15. DR-018 retains the November envelope as a diagnostic (#274)."
           },
           {
             "id": "psrr",

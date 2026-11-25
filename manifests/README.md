@@ -173,16 +173,11 @@ identified there.
         perturbs one side and asserts the delta appears (and that a missing point
         stays an error row, never zero). That covers the measurement path; the
         delta arithmetic is `klt pex`'s own.
-    - **Item 5 (corner verification vs a ratified spec)** cites **nine
-      `klt sim` envelopes** of two batch-fleet campaigns: the item-5 campaign
-      of record
+    - **Item 5 (corner verification vs a ratified spec)** cites **eight
+      `klt sim` envelopes** of one batch-fleet campaign, record
       [`20261113-150556-60489db-8101bf`](../sim/opamp-characterization/records/20261113-150556-60489db-8101bf.json)
-      (issue [#246](https://github.com/2AMLogic/sky130-opamp/issues/246)) for
-      eight of them, and
-      [`20261119-030444-02cc663-b6d61e`](../sim/opamp-characterization/records/20261119-030444-02cc663-b6d61e-psrr-noise.json)
-      (issue [#274](https://github.com/2AMLogic/sky130-opamp/issues/274)) for
-      the noise envelope, with the item 5 row set declared under the manifest's
-      top-level
+      (issue [#246](https://github.com/2AMLogic/sky130-opamp/issues/246)), with
+      the item 5 row set declared under the manifest's top-level
       `spec_rows."5"`. `spec/target-spec.md` is **RATIFIED (partial)** (DR-003,
       [#26](https://github.com/2AMLogic/sky130-opamp/issues/26)), so that gate
       has cleared, and item 5's kind restriction to a `sim` envelope is now
@@ -209,22 +204,15 @@ identified there.
         and `tests/test_pvt_sweep.py` asserts each one equals the ratified
         value — the no-relaxation guard `CLAUDE.md` requires.
       - **Item 5 is `unmet` / `check_failed`, and that is the finding, not a
-        tooling failure.** `detail.failed_rows` is
-        `["input_referred_noise", "quiescent_power", "slew_rate"]` — and the
-        three rows are not the same kind of result.
+        tooling failure.** `detail.failed_rows` is `["quiescent_power",
+        "slew_rate"]` — but the two rows are not the same kind of result.
         **Slew rate is a design miss** and binds at **SS / −40 °C**, where the
         80 %–20 % fall transit measures **11.04 V/µs** against the ratified
         20 V/µs (the rise edge is also under, at 19.88 V/µs — `DR-003` ratified
         *both* edges against that bound and itself called a 19.69 V/µs rise
         "marginally under"). **Quiescent power fails only under this pass's own
-        zero-tolerance reading of an `≈` row** — see the next bullet. **Input
-        referred noise is the newest graded row** (issue #274,
-        [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md)): the
-        sampled floor — minimum reported spot density, 100 kHz – 10 MHz
-        inclusive — misses the ratified ≈ 30 nV/√Hz at **11 of 15 corners**,
-        all warm (worst **47.25 nV/√Hz @ SS / 125 °C / 1.62 V**; the four
-        passing corners are the −40 °C ones). No threshold was loosened to make
-        any of the three pass.
+        zero-tolerance reading of an `≈` row** — see the next bullet. No
+        threshold was loosened to make either pass.
       - **The quiescent-power `max` of 65.0 µA is a zero-tolerance reading of an
         `≈` row, and the ratified spec currently disposes of the same numbers
         the other way.** The bound's binding corner is
@@ -236,12 +224,9 @@ identified there.
         facts and then said explicitly that "this record does **not** convert
         them into a ratification tolerance". Grading the row at exactly 65.0 µA
         is therefore a conservative reading *this pass chose*, not a number the
-        spec states — the same kind of undecided graded quantity
-        [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md)
-        resolved for input-referred noise, whose reconciliation took the
-        ordinary DR ratification path
-        ([#274](https://github.com/2AMLogic/sky130-opamp/issues/274); #277
-        carries the quiescent-power options). Under
+        spec states — the same kind of undecided graded quantity that keeps
+        input-referred noise a declared gap
+        ([#274](https://github.com/2AMLogic/sky130-opamp/issues/274)). Under
         that reading the row fails at **13 of the 15 points**, not only at the
         binding corner: **nominal TT / 27 °C included (65.745 µA, 118.34 µW
         against the ≈ 117.0 µW figure)**, with only SS / −40 °C (64.243 µA) and
@@ -262,20 +247,13 @@ identified there.
         binding edge is the lowest high edge, **1.1686 V @ SS / −40 °C**).
       - **Which envelope covers which row.** `…-ac` grades gain, GBW and phase
         margin; `…-ac-iq` grades quiescent power; `…-tran-sr` grades slew rate
-        (both edges); the five `…-icmr-<corner>` envelopes grade the input
-        common-mode range; and the
-        `…20261119-030444-02cc663-b6d61e-noise` envelope (issue #274's own
-        campaign) grades input-referred noise — the sampled floor of
-        [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md),
-        `limits.max = 30 nV/√Hz` on measurement `en_floor` with
-        `spec_row: "input_referred_noise"`, one graded value per corner. The
-        ICMR bench is one request **per process corner**
+        (both edges); and the five `…-icmr-<corner>` envelopes grade the input
+        common-mode range. The ICMR bench is one request **per process corner**
         by construction — its `.meas` cards need a literal mid-supply, and a
         9-unit grouped request stalled on the fleet (see that bench's README) —
-        so its five envelopes together cover the same 15 points. The campaigns'
-        `…-dc-swing` envelope and the noise campaign's spot densities and
-        100 Hz – 1 MHz integral are committed but **deliberately ungraded**:
-        see the output-swing gap below and DR-018's own record.
+        so its five envelopes together cover the same 15 points. The campaign's
+        `…-dc-swing` envelope is committed but **deliberately not cited**: see
+        the output-swing gap below.
       - **Quiescent power is graded as a current, on purpose.** A klt `limits`
         bound is one number across every corner of a request, and the supply
         axis moves with the process corner. The ratified row names two power
@@ -285,7 +263,7 @@ identified there.
         estimate encodes". Grading Iq is therefore the only single bound that
         reproduces both ratified figures exactly; `pq_w` is reported alongside,
         ungraded, so the envelope still carries the power number.
-      - **Five declared gaps keep the item unmet independently of the three
+      - **Six declared gaps keep the item unmet independently of the two
         failures**, each with its reason and issue in `spec_rows."5"` and quoted
         in the record's `detail.declared_gaps`: **output swing** (its ratified
         grading rule is a contiguous-run slope-band reduction over the swept
@@ -294,14 +272,16 @@ identified there.
         the full grid by this campaign's `…-dc-swing` envelope and
         `-dc-swing.csv`. Filed generically as
         [klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)
-        under the friction protocol); **PSRR** and **area** (`[TBD]`, no
-        ratified bound); and **input-referred offset** and **CMRR** (targets
-        *proposed* by `DR-009` and `DR-008`, not ratified, so there is no
-        ratified bound to grade — offset's evidence is a Monte Carlo campaign,
-        which is item 6, not a corner envelope). Input-referred noise was the
-        sixth gap until issue #274 graded it under
-        [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md); it
-        now appears in `detail.failed_rows` instead.
+        under the friction protocol); **input-referred noise** (thermal-floor compliance remains open.
+        The November sampled-minimum diagnostic measured 4 of 15 within
+        30 nV/√Hz, with the worst at 47.25 nV/√Hz. Source decomposition
+        found the proxy outside a 0.5 dB accuracy budget at ten corners.
+        See [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md));
+        **PSRR** and **area** (`[TBD]`, no ratified bound); and
+        **input-referred offset** and **CMRR** (targets *proposed* by `DR-009`
+        and `DR-008`, not ratified, so there is no ratified bound to grade —
+        offset's evidence is a Monte Carlo campaign, which is item 6, not a
+        corner envelope).
       - **This campaign reproduces the canonical DR-013 figures.** It ran on the
         batch fleet at `runner_compatibility: match` (klt 0.9.0 both sides, nine
         job ids in the record's `klt_jobs[].remote`), on the same DUT snapshot,
@@ -474,20 +454,16 @@ is inside [`sky130-opamp.signoff.json`](sky130-opamp.signoff.json):
   (inventory-derived, re-checked in CI).
 - **Item 7 (post-layout) — `met`** on the `klt pex` report described above,
   with the extraction-model limits and the device-only attribution split there.
-- **Item 5 (corner verification) — `unmet` / `check_failed`**, cited on nine
+- **Item 5 (corner verification) — `unmet` / `check_failed`**, cited on eight
   `klt sim` envelopes that grade the ratified rows themselves.
-  `detail.failed_rows` names `input_referred_noise`, `quiescent_power` and
-  `slew_rate`, and five further
+  `detail.failed_rows` names `quiescent_power` and `slew_rate`, and six further
   rows are declared gaps. For **slew rate** the reason is a **design** gap, not
   an evidence one. For **quiescent power** it is neither: the row fails only
   under this pass's zero-tolerance reading of an `≈` row that
   `spec/target-spec.md` itself records as "confirmed" at +2.5% — an unsettled
   spec question routed to
   [#277](https://github.com/2AMLogic/sky130-opamp/issues/277), not a design
-  verdict. For **input-referred noise** the graded row is new (issue #274,
-  [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md)) and
-  fails on the physics: the sampled floor misses 30 nV/√Hz at all warm
-  corners. See the per-item rationale above.
+  verdict. See the per-item rationale above.
 - **Item 6 (Monte Carlo) — `unmet` / `no_evidence`**, for the reason recorded
   per item above (no `klt yield` report exists).
 
@@ -499,27 +475,21 @@ full-core signoff or ratification):
   closed — the campaign of record
   [`20261113-150556-60489db-8101bf`](../sim/opamp-characterization/records/20261113-150556-60489db-8101bf.json)
   (issue [#246](https://github.com/2AMLogic/sky130-opamp/issues/246)) emits
-  `klt sim` envelopes that carry each ratified row's own bound, and issue
-  [#274](https://github.com/2AMLogic/sky130-opamp/issues/274) graded the last
-  gradable ratified row (input-referred noise, envelope
-  [`20261119-030444-02cc663-b6d61e-noise.klt.json`](envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json)),
-  so **seven of the eight ratified §2 rows are now graded by the tool at every
-  corner**. Two gates
-  remain, and they are different in kind: **(a)** three graded rows *fail* at
-  their binding corners (fall slew 11.04 V/µs vs 20 V/µs at SS / −40 °C; Iq
-  66.63 µA vs 65.0 µA at FF / 125 °C / 1.98 V; and the noise floor, worst
-  47.25 nV/√Hz vs 30 nV/√Hz at SS / 125 °C / 1.62 V, failing at 11 of 15
-  corners under [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md)).
-  For **slew rate and noise** closing
+  `klt sim` envelopes that carry each ratified row's own bound, so six of the
+  eight ratified §2 rows are now graded by the tool at every corner. Two gates
+  remain, and they are different in kind: **(a)** two graded rows *fail* at
+  their binding corners (fall slew 11.04 V/µs vs 20 V/µs at SS / −40 °C, and
+  Iq 66.63 µA vs 65.0 µA at FF / 125 °C / 1.98 V). For **slew rate** closing
   that is a design pass, never a threshold edit; for **quiescent power** the
   row fails only against this pass's zero-tolerance reading of an `≈` row that
   `spec/target-spec.md` itself records as "confirmed" at +2.5%, so what has to
   be settled first is that spec question
   ([#277](https://github.com/2AMLogic/sky130-opamp/issues/277)), not the
-  design; **(b)** five rows are declared gaps — output
+  design; **(b)** six rows are declared gaps — output
   swing is an expressibility gap in `klt sim`
   ([klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)),
-  and PSRR,
+  noise needs a validated thermal-floor measurement
+  ([#274](https://github.com/2AMLogic/sky130-opamp/issues/274)), and PSRR,
   area, offset and CMRR stay `[TBD]`, OPEN or proposed in
   `spec/target-spec.md`. See the per-item rationale above.
 - Item 6 (Monte Carlo): measured offset data exists against a proposed

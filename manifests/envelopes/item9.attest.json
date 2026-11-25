@@ -87,21 +87,21 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:9c1993841edd1e34c1d93a83c2ff3209752b378214bfd034a9374fed1ff9440a"
+        "content_hash": "sha256:ec8e2e02a6dea31834fb90a7ab607fbec2773a082e609590e852324db3ed3784"
       },
       {
         "check": "present",
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/psrr_noise_sweep.py",
         "passed": true,
-        "content_hash": "sha256:21119a624077705b0b58ff034ca7383e7f6f50afa735bc65d8c74b93885b25f6"
+        "content_hash": "sha256:f52103ced211b783b27647c1c91e62f2cecf52e5355a144d52b0416ba95dd972"
       },
       {
         "check": "present",
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:ae30767db3c7add680b4654dbb97bda6aade6e608e9be0c30096198148431472"
+        "content_hash": "sha256:57f3ff050ce1dbefe10f0d2694a975912f9d8febd4fe8325b4f29fff6579d132"
       },
       {
         "check": "present",

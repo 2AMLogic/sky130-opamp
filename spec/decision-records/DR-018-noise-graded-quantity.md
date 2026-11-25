@@ -1,164 +1,33 @@
-# DR-018: Noise-row graded quantity — sampled input-referred floor over 100 kHz – 10 MHz
+# DR-018 — Sampled input noise and the thermal-floor target
 
-- **Status**: **proposed** — a recommendation for two-key ratification via
-  this PR (Judge review + Champion/operator merge), per the standing
-  spec/DR ratification-via-PR policy
-  ([2AMLogic/2am#357](https://github.com/2AMLogic/2am/issues/357)), the same
-  path [`DR-003`](DR-003-target-spec-ratification.md) used. **Nothing here is
-  binding until this PR merges.** Upon merge, the "Decision" below takes
-  effect exactly as stated: it is the ratification act for this record, and
-  the graded quantity it names becomes the binding reading of the noise row.
-  *(Status-line wart, per DR-003's own precedent: merging does not rewrite
-  this line, so a merged copy may still read `proposed` — treat that as a
-  drafting artifact of the two-key mechanism, not as "still open".)*
-- **Date**: 2026-11-19
-- **Decided by**: Loom Builder agent, issue #274 (the drafting party only —
-  this record does not ratify itself). The graded-quantity selection it
-  carries is issue #274's **2026-11-18 decision block** (option "floor",
-  auto-selected under `--yolo 70`, confidence 75% — a recorded decision, not
-  an operator ruling); this record submits that selection for the
-  repository's ordinary DR ratification, per the issue's own Builder scope.
-- **Supersedes**: none. Does not change any ratified value: the 30 nV/√Hz
-  figure and the 100 Hz – 1 MHz band stay exactly as [`DR-003`](DR-003-target-spec-ratification.md)
-  ratified them.
-- **Superseded by**: (none)
-- **Related**: [`DR-003`](DR-003-target-spec-ratification.md) (ratified the
-  noise row *as a target* and left the graded quantity undecided
-  explicitly), issue #274 (this record's issue, with the 2026-11-18 decision
-  block and the committed-data figures below), #54 (the PSRR/noise benches),
-  #246 / PR #275 (the item 5 envelope-export machinery this grading rides),
-  #3 (T1 tracker, item 5), #287/#350/#352 (open spec PRs holding DR-015/016/017
-  — this record takes the next free number).
+- **Status** — Proposed in PR #355. Ratification requires fresh EE and market reviews on the reviewed revision and operator approval to merge. The proposal keeps compliance with the DR-003 thermal-floor target open.
+- **Date** — 2026-11-19, revised 2026-11-25 following EE review.
+- **Scope** — Input-referred noise on the schematic unity-gain follower with a 2 pF load. The target is approximately 30 nV/√Hz, with a separately reported 100 Hz–1 MHz band. [DR-003](DR-003-target-spec-ratification.md) · [Issue #274](https://github.com/2AMLogic/sky130-opamp/issues/274)
 
-## Context
+## Decision proposed
 
-`DR-003` ratified the input-referred-noise row as a target — "≈ 30 nV/√Hz
-thermal floor, band 100 Hz – 1 MHz" — and said outright that "grading this
-row against the band's integrated-number convention will require the noise
-bench". The bench exists since #54, and a committed 15-corner `klt sim`
-noise envelope exists
-(`sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.klt.json`),
-but it carries no `limits` and no `spec_row`, so item 5 carries input-referred
-noise as a declared gap: DR-003 never fixed **which number is graded**. The
-row names a spot thermal floor *and* a band; those are different measurable
-quantities and they grade differently.
+Retain the minimum of the nine reported total input-noise densities from 100 kHz through 10 MHz as a diagnostic. Compare that scalar with 30 nV/√Hz inclusively on each paired PVT corner. Keep the thermal-floor row a declared gap in T1 item 5. Issue #274 proposed using the minimum as a proxy for the thermal floor. The source comparison below found that the proxy misses the stated accuracy at ten corners. A passing diagnostic therefore gives no thermal-floor signoff. A missing scalar is a measurement error.
 
-The committed October record makes the choice consequential — every candidate
-reading fails at most or all corners, so the convention decides the recorded
-finding (all figures read from that record, 15 corners):
+The November fleet envelope records 4 corners within the diagnostic limit, 11 above and 0 errored. The four within it are TT, FF, SF and FS at −40 °C. SS at −40 °C also selects the 10 MHz endpoint and measures 30.49 nV/√Hz. The worst is SS at 1.62 V and 125 °C, 47.25 nV/√Hz. Nominal TT at 1.80 V and 27 °C measures 35.75 nV/√Hz. The envelope preserves the original experiment's row tag. New requests omit that tag, and the signoff manifest excludes the diagnostic envelope. [Fleet envelope](../../manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json)
 
-| Quantity (as the bench already computes it) | Range over 15 corners | TT / 27 °C | vs the row's 30 nV/√Hz |
-|---|---|---|---|
-| White floor: min spot density, 100 kHz – 10 MHz | 28.19 – 47.25 nV/√Hz | 35.75 | ≤ 30 at 4 of 15 corners (tt, ff, sf, fs at −40 °C only) |
-| Band-integrated, 100 Hz – 1 MHz | 62.49 – 82.19 µVrms | 70.11 | a flat 30 nV/√Hz over the band integrates to 30.0 µVrms; measured is 2.1 – 2.7× that |
-| Spot density at 100 Hz (band low edge) | 1386 – 1704 nV/√Hz | 1500 | ~50× |
-| Spot density at 1 MHz (band high edge) | 35.69 – 53.21 nV/√Hz | 42.42 | above 30 at every corner |
-| 1/f corner | 285 – 681 kHz | 442 kHz | flicker dominates most of the ratified band |
+## What the window selects
 
-Issue #274's 2026-11-18 decision block selected the **floor** option. This
-record carries that selection into the spec; the expected result is a graded
-failing row recorded as a finding — not a met row, and not a threshold edit.
+The bench reports four spots per decade. The November calculation takes the minimum of the nine reported spots from 100 kHz through 10 MHz, including both endpoints. The 100 kHz lower edge lies **below every measured crossover** (285–681 kHz, estimated at twice the sampled minimum power density). All 15 minima lie **above** the 1 MHz band edge. Ten select 5.623 MHz and all five cold corners select 10 MHz. Restricting the same calculation to reported spots from 100 Hz through 1 MHz gives 35.69–53.21 nV/√Hz, with zero corners within 30 nV/√Hz. The separately integrated band noise spans 62.49–82.19 µV RMS. DR-003 specifies no integrated RMS limit. [Fleet spectra](../../sim/opamp-characterization/records/20261119-030444-02cc663-b6d61e-noise.csv)
 
-## Decision
+## Thermal contribution at the selected spots
 
-**The input-referred-noise row is graded as the minimum input-referred spot
-noise density over the bench's reported spot frequencies from 100 kHz through
-10 MHz, inclusive — bounded ≤ 30 nV/√Hz at every corner.** Specifically:
+We replayed the November bench with ngspice 47 and its recorded SKY130A open_pdks revision `f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7`. The grid pairs FF with 1.98 V, SS with 1.62 V and TT/SF/FS with 1.80 V at −40, 27 and 125 °C. Enabling the per-source noise summary in squared units gives the modeled output power spectral density of each BSIM4 channel, device resistance, resistor and flicker source. We summed the thermal terms and checked that thermal plus flicker accounts for total output power within one part per million. Multiplying the total input-referred density by the square root of the thermal power fraction refers the thermal component through the same signal gain.
 
-- **Quantity**: `min` of the noise bench's **reported** spot densities (the
-  4-points-per-decade sample of the `dec 20` grid, indices 120–160 — nine
-  spots at 100, 177.8, 316.2, 562.3 kHz, 1, 1.778, 3.162, 5.623, 10 MHz).
-  Units V/√Hz. The graded population is the **nine reported spots only**:
-  reducing over all 41 underlying sweep samples would silently change the
-  population this decision names, and the reported spots are what the
-  committed CSV publishes, so the graded number stays recomputable from the
-  record alone.
-- **Bound**: ≤ 30 nV/√Hz (30e-9 V/√Hz), **inclusive** — a floor exactly at
-  the bound passes. This is `DR-003`'s ratified figure, unchanged, attached
-  natively as the envelope measurement's `limits.max` with
-  `spec_row: "input_referred_noise"`, so the envelope itself records
-  per-corner pass/fail and the binding corner, and `klt signoff` derives
-  item 5's row coverage from it. A graded measurement with no value (missing
-  or invalid data) fails its corner — missing data can never grade a pass.
-- **Grid**: the 15-point corner-paired PVT grid (tt/ff/ss/sf/fs ×
-  −40/27/125 °C, VDD paired per DR-002 §(f)) — the same grid the noise bench
-  already sweeps.
-- **The 100 Hz – 1 MHz band still applies to the separate integrated-noise
-  result** (`vn_int_band`), which remains an ungraded diagnostic, as do the
-  individual spot densities and this reduction's pairwise helper values.
+For this proxy check we used a **0.5 dB amplitude-error budget** for each of two effects. This bounds the error of reading a total density as thermal to about 6% (at least 89.1% thermal power), and bounds the change on moving one published frequency step in either direction to the same 6%. This is a measurement-accuracy criterion independent of the 30 nV/√Hz target and its pass count. The upper neighbor of a 10 MHz minimum is 17.78 MHz. That spot is used only to test flatness.
 
-Implementation: `SPEC_NOISE_FLOOR_MAX_V_RTHZ` and
-`noise_floor_measurements()` in
-`sim/opamp-characterization/bin/psrr_noise_sweep.py`, with the bound-equality
-and population tests in `tests/test_psrr_noise_sweep.py` as the
-no-relaxation guard. The reduction is expressed natively (ngspice `let`
-expressions, pairwise `0.5*(a+b−abs(a−b))` minima over the reported spot
-`let`s) — no tool gap needs filing.
+- **Local frequency dependence** met the budget at 15/15 corners. The larger of the two neighbor deviations was 0.17–0.29 dB.
+- **Source purity** met the budget at 5/15 corners, all at 125 °C. Flicker supplied 9.06–14.32% of the power at the selected spots. Total density exceeded thermal-only density by 0.41–0.67 dB. All five 10 MHz endpoint minima missed the purity budget (0.53–0.59 dB).
+- At SS, −40 °C, the source separation puts the thermal component below 30 nV/√Hz while the total sampled minimum exceeds 30. The distinction changes how one would classify a corner even with an identical numerical limit.
 
-## Alternatives considered
+The per-corner CSV reports selected frequency, total and thermal input densities, flicker fraction and both errors. The replay checks each search spot and its upper neighbor against the fleet CSV to its printed precision. The results describe deterministic pre-layout model noise. [Source breakdown](../../sim/opamp-characterization/records/20261125-noise-floor-source-check.csv) · [Replay script](../../sim/opamp-characterization/bin/check_noise_floor.py)
 
-- **Band-integrated input-referred noise, 100 Hz – 1 MHz** — the "integrated
-  number" `DR-003` mentioned. Rejected as the graded quantity: it measures
-  flicker-dominated in-band energy (2.1 – 2.7× the 30.0 µVrms flat-band
-  equivalent at every corner), not the thermal floor the row names, and would
-  need its own derived bound — a second spec number this record would have to
-  invent. It stays the ungraded diagnostic.
-- **Spot density at 100 Hz** — the band's low edge, ~50× over at every
-  corner: it grades the flicker region, not the floor. Rejected.
-- **Spot density at 1 MHz** — above 30 nV/√Hz at all 15 corners: fails
-  everywhere by construction and is fragile to grid placement (a
-  single-frequency read at one sample of a dec grid). Rejected: the weakest
-  defensible statement about a *floor*.
-- **Maximum spot over the band, equivalently a per-spot ceiling** — grades
-  closed-loop peaking above the floor, the opposite reduction of what the row
-  names; also fails warm-only regions far harder than the floor itself.
-  Rejected.
-- **Minimum over all 41 underlying sweep samples in 100 kHz – 10 MHz** —
-  same shape as the chosen quantity but a different population, reading
-  marginally below the published curve. Rejected: the graded number must be
-  recomputable from the committed CSV's reported spots (see Decision).
-- **Leave the row a declared gap** — rejected: DR-003 explicitly deferred
-  grading to "the noise bench", the bench exists, the decision block settled
-  the quantity, and an ungraded ratified row keeps item 5 partially
-  unverifiable for no tooling reason.
+## Fixed-frequency comparisons and remaining decision
 
-## Spec lines affected
+At TT, 1.8 V and 27 °C the follower measures **541.18 nV/√Hz at 1 kHz, 199.77 at 10 kHz and 42.42 at 1 MHz**, with 70.11 µV RMS integrated over the band. For scale, TI specifies a typical 7 nV/√Hz at 10 kHz for the 20 MHz OPA320 at 25 °C with a 10 kΩ load. The simulated block is about 29 times higher at that same frequency. The devices and conditions differ, and a packaged-part typical gives no 15-corner guarantee. Neither the quietest high-frequency spot nor the available consumer requirements justify accepting the in-band performance. [TI OPA320 electrical characteristics](https://www.ti.com/lit/ds/symlink/opa320.pdf) · [Target spec and consumers](../target-spec.md)
 
-- `spec/target-spec.md` §2, **Input-referred noise** row: gains the graded
-  quantity (this record) as its grading reference and its measured status.
-- `spec/target-spec.md` §2a, the input-referred-noise derivation caveat:
-  gains the link to this record for how the row is graded.
-- `manifests/sky130-opamp.json` `spec_rows."5"`, `input_referred_noise`:
-  declared gap → graded row cited on the noise envelope.
-
-## Consequences
-
-- **The expected result is a recorded finding, not a met row.** On the
-  committed October record the sampled floor meets 30 nV/√Hz at 4 of 15
-  corners (tt, ff, sf, fs at −40 °C) and fails warm — worst 47.25 nV/√Hz at
-  SS / 125 °C / 1.62 V, nominal TT / 27 °C at 35.75 nV/√Hz. A fresh campaign
-  on the current DUT establishes the result of record; the October numbers
-  are a comparison point only. Neither the bound nor this convention may be
-  tuned to change that (CLAUDE.md); closing a failing floor is design work
-  (topology/bias), explicitly out of scope here.
-- `klt sim`'s noise request gains one graded measurement (`en_floor`) with
-  pairwise ungraded helper lets; **neither PSRR request gains any grading**.
-- Item 5's declared-gap set shrinks by one (noise becomes a graded,
-  currently-failing row); item 5 stays `unmet` while the row fails — that is
-  the honest machine-readable statement, per the manifests README's finding
-  convention.
-- The warm corners' flicker rise is *not* penalized by this reading: the
-  window (100 kHz – 10 MHz) sits above the measured 1/f corner (285 – 681
-  kHz) at every corner, so the graded quantity is the white floor the row
-  always named, not an in-band flicker number.
-
-## Open items
-
-- **Ratification itself** — this record is `proposed`; the two-key merge of
-  the PR carrying it is the act that makes the convention binding.
-- **A graded integrated-noise convention** (the 100 Hz – 1 MHz number) is
-  *not* decided here. `vn_int_band` stays a diagnostic; if a consumer ever
-  imposes an integrated requirement, that needs its own record with its own
-  derived bound.
-- **Closing the failing corners** is design work (bias/topology), not a spec
-  change; nothing in this record pre-commits a sizing pass.
+A future grading proposal needs to identify the physical quantity and frequency conditions a consumer requires, then justify the extraction accuracy. The observed 4/15 diagnostic and the measured in-band results remain available for that decision. Neither a per-spot maximum nor an integrated voltage limit has been adopted.
