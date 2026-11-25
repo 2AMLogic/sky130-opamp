@@ -127,6 +127,16 @@ def pvt_records():
     return out
 
 
+def analysis_error(analysis, error):
+    """A unit label belongs to the longest matching bench tag."""
+    label, colon, _ = error.partition(":")
+    tag = label.replace("_", "-")
+    benches = (*pvt.FIELDNAMES, "ac_iq")  # ac-iq has its own errors but no CSV
+    matches = (a for a in benches if tag == a.replace("_", "-")
+               or tag.startswith(a.replace("_", "-") + "-"))
+    return bool(colon) and max(matches, key=len, default=None) == analysis
+
+
 class CommittedRecordShapeTests(unittest.TestCase):
     TOP = {"record_id", "timestamp", "git", "experiment", "matrix", "pdk",
            "tools", "links", "errors", "elapsed_s"}
@@ -136,6 +146,14 @@ class CommittedRecordShapeTests(unittest.TestCase):
 
     def test_at_least_one_pvt_record_is_committed(self):
         self.assertTrue(pvt_records())
+
+    def test_diagnostic_slew_error_cannot_explain_missing_standard_slew(self):
+        failure = "tran-sr-icmr-sf--40C-1.62V: no JSON report"
+        self.assertTrue(analysis_error("tran_sr_icmr", failure))
+        self.assertFalse(analysis_error("tran_sr", failure))
+        self.assertFalse(analysis_error("ac", "ac-iq: no JSON report"))
+        for label in ("tran_sr", "tran-sr", "tran-sr-sf--40C-1.62V"):
+            self.assertTrue(analysis_error("tran_sr", f"{label}: no JSON report"))
 
     def test_json_shape(self):
         for p, d in pvt_records():
@@ -165,8 +183,8 @@ class CommittedRecordShapeTests(unittest.TestCase):
             for analysis in m["analyses"]:
                 with self.subTest(record=p.name, analysis=analysis):
                     if f"{analysis}_csv" not in d["links"]:
-                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors
-                        self.assertTrue(any(e.startswith(f"{analysis}:") for e in d["errors"]), analysis)
+                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors.
+                        self.assertTrue(any(analysis_error(analysis, e) for e in d["errors"]), analysis)
                         continue
                     rel = d["links"][f"{analysis}_csv"]
                     path = REPO / rel
