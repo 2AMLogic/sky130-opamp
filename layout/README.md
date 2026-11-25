@@ -18,10 +18,15 @@ the resistor heads, see `opamp_comp/README.md`).**
 klt DRC clean, klt LVS match against the whole `opamp_core` netlist, negative
 control mismatches, `--check` reproduces it. The PDK's Magic `drc(full)` of
 the assembled core **fails**: it inherits the unfixed `opamp_comp` resistor-head
-finding (2 errors, `licon.1c`), and netgen's pin lists differ because Magic
+finding (`drc_total` 2, `licon.1c`), and netgen's pin lists differ because Magic
 exports the internal labelled nets as ports (devices and nets match uniquely);
-see `opamp_core/README.md`. It is not foundry-DRC-clean. Nothing in
-`manifests/` cites this directory yet (follow-up).
+see `opamp_core/README.md`. It is not foundry-DRC-clean. The assembled core
+is cited: `manifests/sky130-opamp.json` holds five `layout/opamp_core/`
+evidence citations (`extract.json`, `drc.json` and `lvs.json` for T1 items
+2, 3 and 4; `erc.json` and `lvs.json` again in the item-11 block), and
+`manifests/integrator.json` points `gds` at
+`layout/opamp_core/opamp_core.gds`; `manifests/README.md` and
+`manifests/sky130-opamp.signoff.json` also reference the directory.
 
 ## The flow
 
@@ -184,7 +189,9 @@ The PDK is resolved by `klt pdk find`, from `~/.volare`, installed with
 `volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b`. Under
 the pinned klt that is the default search root. **On klt `0.8.0` and newer it
 is not**: `klt pdk find` resolves `~/.ciel` (a different open_pdks commit)
-and reports `~/.volare` only under `ambiguous_sources`, so those revisions
+and reports `~/.volare` only under its top-level `ambiguous_roots` field
+(the `ambiguous_sources` list in a report's `provenance.pdk` block is a
+different, path-free surface and never carries a root), so those revisions
 need `PDK_ROOT=$HOME/.volare` exported or `compose-cell.py` refuses on the
 open_pdks pin (measured, issue #281).
 `magic-signoff.py` additionally needs `magic`, `netgen` and a `klayout`

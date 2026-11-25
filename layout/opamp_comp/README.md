@@ -11,9 +11,8 @@ XCc cz out    sky130_fd_pr__cap_mim_m3_1     W=15.62 L=15.62 MF=1 m=1
 ```
 
 **It is a sub-block, not the op-amp's layout.** Full-core GDS stays
-unqualified, T1 item 2 stays `unmet`, and nothing in `manifests/` cites this
-directory. No schematic, spec or target changed, so no new PVT campaign was
-run.
+unqualified, and nothing in `manifests/` cites this directory. No schematic,
+spec or target changed, so no new PVT campaign was run.
 
 **Status: klt DRC, extraction, LVS and netgen pass; the PDK's Magic
 `drc(full)` does NOT pass.** The Magic DRC failure is a resistor-head
@@ -30,7 +29,7 @@ waived.
 | `klt lvs` (subckt-call reference, inline extraction) | `status: "match"`: devices 2/2, nets 4/4, pins 4/4; `body_verification: "verified"` | `lvs.json` |
 | LVS negative control (`XRz` substrate `vss` -> `d2`, scratch reference) | `status: "mismatch"`, `mismatch_count: 12`; devices 1/2 and nets 1/4 matched | `negative-control/` |
 | `compose-cell.py --check` | rebuild is byte-identical (SHA-256 of `opamp_comp.gds` and every `gen/*.gds`, reference text, verdict fields) | run it |
-| Magic 8.3.683 `drc(full)`, `sky130A.tech` | **FAIL: 2 rules (3 boxes)**, all on the resistor heads: `licon.1c` "poly resistor contact length < 2.0um" and "poly contact extends poly resistor by < 2.16um". Non-vacuous: types seen include `xpolycontact ppolyres mimcap mimcapcontact metal1-4` | `magic-signoff/magic.json` |
+| Magic 8.3.683 `drc(full)`, `sky130A.tech` | **FAIL: `drc_total` 2** (Magic `drc listall count total`; `drc listall why`: 3 boxes in 2 messages), all on the resistor heads: `licon.1c` "poly resistor contact length < 2.0um" and "poly contact extends poly resistor by < 2.16um". Non-vacuous: types seen include `xpolycontact ppolyres mimcap mimcapcontact metal1-4` | `magic-signoff/magic.json` |
 | netgen 1.5.133 + `sky130A_setup.tcl` (Magic extraction vs. the same reference) | `Circuits match uniquely.`, `Netlists match uniquely.`; pins `cz d2 out vss` equivalent. Magic extracts `X1 d2 cz vss sky130_fd_pr__res_high_po_1p41 l=9.765` and `X0 cz out sky130_fd_pr__cap_mim_m3_1 l=15.62 w=15.62` | `magic-signoff/netgen.out`, `magic-signoff/opamp_comp.magic.spice` |
 
 Toolchain: klt `0.7.0+g4cbdfa769875`, KLayout 0.30.12, sky130A open_pdks
@@ -150,7 +149,7 @@ Measured on a standalone `klt gen res_array` unit, no repo geometry present:
 | standalone unit | Magic types seen | `drc(full)` |
 |---|---|---|
 | klt `0.7.0+g4cbdfa769875` (committed `gen/rz.gds`) | `poly polycont locali` -- **no `ppolyres`** | 0 errors, **vacuously**: Magic sees no resistor |
-| klt `0.8.0` | `xpolycontact ppolyres locali` | **6 errors** (`licon.1c + li.5` x1, `rpm.1` x3, `poly.2` x2) |
+| klt `0.8.0` | `xpolycontact ppolyres locali` | **`drc_total` 6** (Magic `drc listall count total`); `drc listall why` reports **8 boxes over 4 messages** -- `licon.1c + li.5` x1, `rpm.1` x3, and two distinct `poly.2` rules at 2 boxes each (`Distance between precision resistors < 0.21um`, `poly spacing < 0.21um`). Box counts are not expected to sum to `drc_total`; authoritative breakdown in klayout-tools#5659 |
 
 So the generator's own output is not Magic-DRC-clean once Magic can see the
 device. In the composed cell the net effect is:
@@ -160,7 +159,16 @@ device. In the composed cell the net effect is:
 | `area xpc/li 700000 350` -- "poly resistor contact length < 2.0um (licon.1c)" | 1 box | **0** | cleared |
 | `extend xpc/a xhrpoly,uhrpoly 2160` -- "poly contact extends poly resistor by < 2.16um (licon.1c + li.5)" | 2 boxes | 2 boxes | unchanged |
 | `cifwidth rpm_generate 1270` -- "Width of RPM/URPM < 1.27um (rpm.1)" | 0 | **5 boxes** | new |
-| **total** | **2** | **7** | |
+| **`drc_total`** (Magic `drc listall count total`) | **2** | **7** | |
+
+The per-rule cells above are `drc listall why` box counts and are **not
+expected to sum to `drc_total`** -- the two come from different Magic
+commands (`drc listall why` counts boxes per violation message;
+`drc listall count total` is Magic's own total). Read as a sum, the klt
+0.7.0 column is 3 boxes against a `drc_total` of 2: the gap is that metric
+difference, not a lost violation (`magic-signoff/magic.json` records
+`drc_total` 2 with `drc_by_rule` holding 2 + 1 boxes). The klt 0.8.0 column's
+sum of 7 boxes meeting `drc_total` 7 is coincidence, not additivity.
 
 Mechanisms, read off `sky130A.tech` rather than inferred from the verdict:
 
@@ -221,7 +229,9 @@ differently.
 
 Note for anyone re-running this on klt 0.8.0 or newer: `klt pdk find` now
 resolves `~/.ciel` (open_pdks `f6eeac7d...`) by default and lists `~/.volare`
-only as an `ambiguous_sources` entry, so **`PDK_ROOT=$HOME/.volare` must be
+only under its `ambiguous_roots` field (the `ambiguous_sources` entry in a
+report's `provenance.pdk` block is a different, path-free surface and never
+carries a root), so **`PDK_ROOT=$HOME/.volare` must be
 exported** or `compose-cell.py` refuses on the open_pdks pin. klt 0.8.0 then
 reports `provenance.pdk.compatibility.status: "mismatch"` in every generated
 JSON; that is cosmetic and must *not* be "fixed" by moving to the `~/.ciel`

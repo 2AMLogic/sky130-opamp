@@ -308,6 +308,17 @@ def report_pdk(
 # validate_psrr_noise.py, issue #65)
 # --------------------------------------------------------------------------
 
+# Per-submit wall-clock budget klt itself spends waiting out a Spot capacity or
+# fleet-concurrency refusal (`batch.capacity_wait_s`): the fleet is vCPU-budgeted,
+# so a burst of submits is refused with `batch_no_capacity`, and the worker host
+# rule requires the wait on every batch `klt sim` (2am#6872). The value is fixed
+# by the host rule, not tunable; every request builder that emits a `batch` block
+# must carry it (tests/test_spice_harness.py enumerates the builders, issue
+# #293); every builder imports this one (PR #322 retired pvt_sweep's local
+# copy).
+BATCH_CAPACITY_WAIT_S = 600
+
+
 # `klt` may be overridden (e.g. KLT_CMD='uvx --from klayout-tools==0.5.0 klt') to
 # match the batch fleet runner's klt version without touching the host install.
 # A runner that takes its own override flag (pvt_sweep.py --klt-cmd) mutates

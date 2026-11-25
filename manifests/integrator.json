@@ -4,10 +4,10 @@
   "top_cell": "opamp_core",
   "ports": ["vdd", "vss", "inn", "inp", "out", "ibias"],
   "netlist": "design/netlist/opamp_core.spice",
-  "gds": null,
-  "gds_note": "no full-core layout exists yet; a partial stage-1 layout (input pair only) is in layout/opamp_stage1 and is not the full-core deliverable",
-  "area_um2": null,
-  "area_note": "post-layout quantity; no layout exists (evaluated @ 8b3ec92, 2026-09-22)",
+  "gds": "layout/opamp_core/opamp_core.gds",
+  "gds_note": "assembled full-core layout (issue #220: opamp_bias, opamp_stage1, opamp_out and opamp_comp placed and routed in layout/opamp_core); klt DRC/extraction/LVS pass and are cited for T1 items 2, 3, 4 and 11 in manifests/sky130-opamp.json, but the PDK's Magic drc(full) does not — the inherited opamp_comp resistor-head finding — so this path is not a foundry-DRC-clean claim (evaluated @ 4d98fe0, 2026-11-15)",
+  "area_um2": 9352.465,
+  "area_note": "bounding-box area from layout/opamp_core/compose.response.json bbox_um, 161.5 × 57.91 µm, pin stubs included (evaluated @ 4d98fe0, 2026-11-15)",
   "maturity": {
     "tier": null,
     "t1_met": 9,
@@ -36,8 +36,8 @@
     }
   ],
   "evaluated_at": {
-    "commit": "8b3ec92",
-    "date": "2026-09-22",
+    "commit": "4d98fe0",
+    "date": "2026-11-15",
     "port_list_source": "re-derived from the .subckt line of design/netlist/opamp_core.spice at the same commit",
     "maturity_source": "manifests/sky130-opamp.signoff.json at the same commit"
   }

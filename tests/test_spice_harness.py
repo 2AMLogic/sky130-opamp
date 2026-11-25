@@ -1,4 +1,6 @@
+import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -198,6 +200,152 @@ class KltSimTests(unittest.TestCase):
         with mock.patch.object(sh, "first_line", return_value="klt 0.5.0") as fl:
             self.assertEqual(sh.klt_version(), "klt 0.5.0")
         fl.assert_called_once_with(["uvx", "--from", "klayout-tools==0.5.0", "klt", "--version"])
+
+
+# --------------------------------------------------------------------------
+# batch.capacity_wait_s across the request builders (issue #293)
+# --------------------------------------------------------------------------
+
+class _FakeRequestPdk:
+    """Stands in for the runners' Pdk/OpampPdk: only what request building touches."""
+
+    variant = "sky130A"
+
+    def corner_include(self, corner):
+        return Path(f"/pdk/corners/{corner}.spice")
+
+    def rc_includes(self):
+        return [Path("/pdk/rc/base.spice"), Path("/pdk/rc/lin.spice")]
+
+
+_RUNNERS = {}
+
+
+def _runner(rel):
+    """Load a runner module by repo-relative path (cached; scripts, not a package)."""
+    if rel not in _RUNNERS:
+        _RUNNERS[rel] = _paths.load_module(rel.replace("/", "_"), _paths.REPO / rel)
+    return _RUNNERS[rel]
+
+
+def _pvt_batch_request():
+    pvt = _runner("sim/opamp-characterization/bin/pvt_sweep.py")
+    with tempfile.TemporaryDirectory() as d:
+        path, _tag = pvt.build_klt_request("ac", None, None, _FakeRequestPdk(), ["tt"], [27.0],
+                                           Path(d), "batch")
+        return json.loads(path.read_text())
+
+
+def _psrr_batch_request(backend):
+    psrr = _runner("sim/opamp-characterization/bin/psrr_noise_sweep.py")
+    return psrr.build_request("noise", ["tt"], [27.0], "bench.spice", True,
+                              backend=backend)
+
+
+def _offset_probe_batch_request():
+    op = _runner("sim/offset-capability/bin/offset_probe.py")
+    return op.build_request("offset", True, None)
+
+
+def _sink_bias_request(backend):
+    """`variants/sink_bias_margin.py` with a stubbed `pvt.resolve_pdk` (the only
+    thing request building touches that needs an installed PDK)."""
+    sbm = _runner("sim/opamp-characterization/variants/sink_bias_margin.py")
+    pvt = _runner("sim/opamp-characterization/bin/pvt_sweep.py")
+    real = pvt.resolve_pdk
+    pvt.resolve_pdk = lambda: _FakeRequestPdk()
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            path = sbm.build_static_request(pvt, Path(d), "static", backend)
+            return json.loads(path.read_text())
+    finally:
+        pvt.resolve_pdk = real
+
+
+def _git_grep(pattern, pathspec):
+    """(path, line) pairs from `git grep -nE` over the checkout this test runs in."""
+    proc = subprocess.run(["git", "-C", str(_paths.REPO), "grep", "-nE", "-e", pattern, "--", pathspec],
+                          capture_output=True, text=True)
+    if proc.returncode == 1:
+        return []  # no matches
+    if proc.returncode != 0:
+        raise AssertionError(f"git grep failed ({proc.returncode}): {proc.stderr.strip()}")
+    return [(m[0], int(m[1])) for m in
+            (line.split(":", 2) for line in proc.stdout.splitlines())]
+
+
+def _batch_emit_sites():
+    """Source paths that build a request's `batch` block -- both the
+    `req["batch"] = {...}` assignment shape and the `"batch": {...}` literal
+    shape -- derived from the sources, not hand-kept. Python sources under
+    `sim/` only; `sim/lib` is excluded: it owns the klt client, not request
+    builders. A request builder outside `sim/` would be a new convention; the
+    enumeration test below fails until this function grows with it."""
+    return {path for path, _line in _git_grep(r'\["batch"\] *=|"batch": *\{', "*.py")
+            if path.startswith("sim/") and not path.startswith("sim/lib/")}
+
+
+class BatchCapacityWaitTests(unittest.TestCase):
+    """Every `klt sim` request builder that emits a `batch` block must carry
+    `capacity_wait_s == spice_harness.BATCH_CAPACITY_WAIT_S` (issue #293).
+
+    The worker host rule requires `--wait-for-capacity 600` (or the request's
+    `batch.capacity_wait_s`) on every batch `klt sim`: the Spot fleet is
+    vCPU-budgeted, so a burst of submits is refused with `batch_no_capacity`
+    (2am#6872). The builder set is derived from the sources with `git grep`,
+    so a request builder added later without the wait fails here instead of
+    submitting bare to the fleet. Simulator-free: PDK resolution is stubbed,
+    no ngspice, no klt.
+    """
+
+    BUILDERS = {
+        "sim/opamp-characterization/bin/pvt_sweep.py": _pvt_batch_request,
+        "sim/opamp-characterization/bin/psrr_noise_sweep.py":
+            lambda: _psrr_batch_request("batch"),
+        "sim/offset-capability/bin/offset_probe.py": _offset_probe_batch_request,
+        "sim/opamp-characterization/variants/sink_bias_margin.py":
+            lambda: _sink_bias_request("batch"),
+    }
+
+    def test_builder_enumeration_matches_the_sources(self):
+        """Registered builders == the batch-block emitters git grep finds.
+
+        A NEW builder (grep finds it, registry doesn't) fails here -- register
+        it and emit the wait in its `batch` block. A builder that stopped
+        emitting `batch` (registry has it, grep doesn't) fails too, since that
+        changes what reaches the fleet."""
+        self.assertEqual(
+            _batch_emit_sites(), set(self.BUILDERS),
+            "batch-block emitters and the registered request builders disagree; "
+            "for a new builder, register it in BatchCapacityWaitTests.BUILDERS "
+            "and emit \"capacity_wait_s\": BATCH_CAPACITY_WAIT_S in its `batch` "
+            "block (worker host rule 2am#6872, spice_harness.BATCH_CAPACITY_WAIT_S)")
+
+    def test_every_builder_emits_the_shared_wait(self):
+        for path, build in sorted(self.BUILDERS.items()):
+            with self.subTest(builder=path):
+                req = build()
+                batch = req.get("batch")
+                self.assertIsInstance(batch, dict, path)
+                self.assertEqual(batch.get("capacity_wait_s"), sh.BATCH_CAPACITY_WAIT_S, path)
+
+    def test_wait_value_has_a_single_owner(self):
+        """`BATCH_CAPACITY_WAIT_S = <literal>` definitions across the repo:
+        exactly one, the shared owner in sim/lib/spice_harness.py."""
+        owners = {path for path, _line in _git_grep(r"BATCH_CAPACITY_WAIT_S\s*=\s*[0-9]", "*.py")}
+        self.assertEqual(owners, {"sim/lib/spice_harness.py"})
+
+    def test_sink_bias_margin_local_backend_has_no_batch_block(self):
+        """Edge (issue #293): `--backend local` must not grow a `batch` block it
+        never had -- the wait goes inside the existing `backend == "batch"`
+        branch, not above it."""
+        self.assertNotIn("batch", _sink_bias_request("local"))
+
+    def test_psrr_noise_sweep_local_backend_has_no_batch_block(self):
+        """Edge (issue #315): same convention for the psrr runner -- the `batch`
+        block is gated on the backend, never on `--runner-version-check`, so a
+        local debug probe still gets no block."""
+        self.assertNotIn("batch", _psrr_batch_request("local"))
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@
 * possible; see the README for what that costs.
 *
 * ------------------------------------------------------------- topology
-* Why not the unity-gain follower of opamp_dc_swing.spice.tmpl: there the
+* Why not the unity-gain follower of opamp_dc_swing.klt.spice.tmpl: there the
 * output equals the input, so the swept common-mode voltage IS the output
 * voltage and an edge can be an input-stage limit or an output-compliance
 * limit with no way to tell which (that bench's own header says it is "not
@@ -62,7 +62,7 @@
 * @m.x..[vdsat], so which device leaves saturation is not recorded.
 *
 * ------------------------------------------------------ shared conventions
-* ibias / Iref = 5 uA reference and CL = 2 pF as opamp_ac.spice.tmpl; the
+* ibias / Iref = 5 uA reference and CL = 2 pF as opamp_ac.klt.spice.tmpl; the
 * netlist under test is the same flat xschem netlist. The MOS process corner
 * AND the typical R+C corner both come from the `.lib <sky130.lib.spice>
 * <corner>` section klt appends (that section itself includes corners/<c>.spice

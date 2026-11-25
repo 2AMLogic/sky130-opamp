@@ -15,14 +15,6 @@ pvt = _paths.load_module("pvt_sweep", EXP / "bin" / "pvt_sweep.py")
 NETLIST = (REPO / "design" / "netlist" / "opamp_core.spice").read_text()
 
 
-class FakePdk:
-    def corner_include(self, corner):
-        return Path(f"/pdk/corners/{corner}.spice")
-
-    def rc_includes(self):
-        return [Path("/pdk/rc/base.spice"), Path("/pdk/rc/lin.spice")]
-
-
 class Campaign:
     """A temp repo with a live netlist, a captured snapshot and a record."""
 
@@ -49,13 +41,22 @@ class CaptureTests(unittest.TestCase):
         c = Campaign(self)
         old = pvt.ACTIVE_DUT[0]
         pvt.ACTIVE_DUT[0] = c.tmp / c.dut["snapshot_path"]
+
+        class P:
+            variant = "sky130A"
+
         try:
-            before = pvt.common_subs(FakePdk(), "tt", 27.0, 1.8)
+            req, tag = pvt.build_klt_request("ac", None, None, P(), ["tt"], [27.0],
+                                             c.tmp / "req0", "local")
+            before = (req.parent / f"{tag}-body.spice").read_text()
             c.live.write_text(NETLIST.replace("W=", "W=9", 1))  # mutate the live design
-            after = pvt.common_subs(FakePdk(), "tt", 27.0, 1.8)
-            self.assertEqual(before["OPAMP_NETLIST"], after["OPAMP_NETLIST"])
-            self.assertNotEqual(after["OPAMP_NETLIST"], c.live)
-            self.assertEqual(di.sha256_file(Path(after["OPAMP_NETLIST"])), c.dut["sha256"])
+            req2, tag2 = pvt.build_klt_request("ac", None, None, P(), ["tt"], [27.0],
+                                               c.tmp / "req1", "local")
+            after = (req2.parent / f"{tag2}-body.spice").read_text()
+            self.assertEqual(before, after)  # same rendered body after the edit
+            self.assertNotIn(str(c.live), after)
+            # the staged netlist is still the captured snapshot, byte for byte
+            self.assertEqual(di.sha256_file(req2.parent / "opamp_core.spice"), c.dut["sha256"])
         finally:
             pvt.ACTIVE_DUT[0] = old
 

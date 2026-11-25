@@ -13,13 +13,14 @@
     "sim/opamp-characterization/bin/pvt_sweep.py",
     "sim/opamp-characterization/bin/psrr_noise_sweep.py",
     "sim/opamp-characterization/pdk.json",
-    "sim/opamp-characterization/testbench/opamp_ac.spice.tmpl",
-    "sim/opamp-characterization/testbench/opamp_dc_swing.spice.tmpl",
-    "sim/opamp-characterization/testbench/opamp_tran_sr.spice.tmpl",
+    "sim/opamp-characterization/testbench/opamp_ac.klt.spice.tmpl",
+    "sim/opamp-characterization/testbench/opamp_dc_swing.klt.spice.tmpl",
+    "sim/opamp-characterization/testbench/opamp_tran_sr.klt.spice.tmpl",
     "sim/offset-capability/README.md",
     "sim/offset-capability/bin/offset_probe.py",
     "sim/offset-capability/bench/offset_dc.cir",
-    "sim/offset-capability/bench/pair_diag.cir"
+    "sim/offset-capability/bench/pair_diag.cir",
+    "sim/lib/corners.py"
   ],
   "cold_start": {
     "argv": ["python3", "-m", "unittest", "discover", "-s", "tests", "-p", "test_*sweep.py"]

@@ -88,6 +88,23 @@ def capture_dut(src: Path, snapshot_dir: Path, repo_root: Path = REPO_ROOT) -> d
     }
 
 
+_DUT_INCLUDE_RE = re.compile(r'^(\s*\.(?:include|inc)\s+)"?[^"\s]*opamp_core\.spice"?', re.IGNORECASE | re.MULTILINE)
+
+
+class RenderError(ValueError):
+    """A bench template does not include the DUT exactly once."""
+
+
+def render_dut_include(template_text: str) -> str:
+    """The bench text with its DUT include line rewritten to the sibling snapshot
+    copy (bare ``SNAPSHOT_NAME``). Raises ``RenderError`` unless the template
+    includes the DUT exactly once."""
+    out, n = _DUT_INCLUDE_RE.subn(rf'\1"{SNAPSHOT_NAME}"', template_text)
+    if n != 1:
+        raise RenderError(f"bench template must include the DUT exactly once (found {n})")
+    return out
+
+
 def verify_record_dut(record: dict, repo_root: Path = REPO_ROOT) -> tuple[str, list[str]]:
     """Return (state, problems). state is VERIFIED or UNVERIFIED (legacy, no
     ``dut`` block); problems are integrity failures of a declared block."""
@@ -144,6 +161,12 @@ def pvt_record_paths(repo_root: Path = REPO_ROOT) -> list[Path]:
         if isinstance(d, dict) and "matrix" in d and "record_id" in d:
             out.append(p)
     return out
+
+
+def _pvt_record_problems(path: Path, repo_root: Path = REPO_ROOT) -> tuple[str, list[str]]:
+    """(state, problems) for a PVT matrix record, in the path-based shape the
+    shared validate driver consumes."""
+    return verify_record_dut(json.loads(path.read_text()), repo_root)
 
 
 def cited_record(manifest: dict, item: str, repo_root: Path = REPO_ROOT) -> Path:
@@ -247,19 +270,7 @@ def offset_problems(path: Path, kind: str, repo_root: Path = REPO_ROOT) -> tuple
 
 
 def validate_offset(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
-    rc = 0
-    for p, kind in offset_records(repo_root):
-        state, problems = offset_problems(p, kind, repo_root)
-        if state == UNVERIFIED:
-            print(f"{p.name}: UNVERIFIED legacy offset record (no recorded DUT identity)")
-            rc = 1 if require_verified else rc
-        elif problems:
-            rc = 1
-            for pr in problems:
-                print(f"{p.name}: FAIL {pr}")
-        else:
-            print(f"{p.name}: OK offset DUT snapshot verified")
-    return rc
+    return _validate_records(_KIND_REPORTS["offset"], repo_root, require_verified)
 
 
 def check_current_offset(repo_root: Path = REPO_ROOT) -> int:
@@ -332,36 +343,50 @@ def psrr_noise_problems(path: Path, repo_root: Path = REPO_ROOT) -> tuple[str, l
 
 
 def validate_psrr_noise(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
+    return _validate_records(_KIND_REPORTS["psrr_noise"], repo_root, require_verified)
+
+
+_KIND_REPORTS = {
+    # One row per campaign kind: (records_fn, problems_fn, UNVERIFIED message,
+    # OK message). The records_fn yields the argument tuples its problems_fn
+    # takes, record path first; _validate_records appends repo_root. Order is
+    # the validate report order.
+    "offset": (offset_records, offset_problems,
+               "legacy offset record (no recorded DUT identity)", "offset DUT snapshot verified"),
+    "psrr_noise": (psrr_noise_records, psrr_noise_problems,
+                   "legacy PSRR/noise record (no recorded DUT identity)",
+                   "PSRR/noise DUT snapshot, bodies and requests verified"),
+    "pvt": (pvt_record_paths, _pvt_record_problems,
+            "legacy record (no recorded DUT identity)", "DUT snapshot verified"),
+}
+
+
+def _validate_records(row: tuple, repo_root: Path, require_verified: bool) -> int:
+    """The validate-and-report loop shared by every campaign kind: iterate the
+    records, print UNVERIFIED (rc 1 only under ``require_verified``) / FAIL
+    <problem> / OK <message>, and OR the return code."""
+    records_fn, problems_fn, unverified_msg, ok_msg = row
     rc = 0
-    for p in psrr_noise_records(repo_root):
-        state, problems = psrr_noise_problems(p, repo_root)
+    for item in records_fn(repo_root):
+        args = item if isinstance(item, tuple) else (item,)
+        p = Path(args[0])
+        state, problems = problems_fn(*args, repo_root)
         if state == UNVERIFIED:
-            print(f"{p.name}: UNVERIFIED legacy PSRR/noise record (no recorded DUT identity)")
+            print(f"{p.name}: UNVERIFIED {unverified_msg}")
             rc = 1 if require_verified else rc
         elif problems:
             rc = 1
             for pr in problems:
                 print(f"{p.name}: FAIL {pr}")
         else:
-            print(f"{p.name}: OK PSRR/noise DUT snapshot, bodies and requests verified")
+            print(f"{p.name}: OK {ok_msg}")
     return rc
 
 
 def validate_all(repo_root: Path = REPO_ROOT, require_verified: bool = False) -> int:
-    rc = validate_offset(repo_root, require_verified)
-    rc |= validate_psrr_noise(repo_root, require_verified)
-    for p in pvt_record_paths(repo_root):
-        state, problems = verify_record_dut(json.loads(p.read_text()), repo_root)
-        if state == UNVERIFIED:
-            print(f"{p.name}: UNVERIFIED legacy record (no recorded DUT identity)")
-            if require_verified:
-                rc = 1
-        elif problems:
-            rc = 1
-            for pr in problems:
-                print(f"{p.name}: FAIL {pr}")
-        else:
-            print(f"{p.name}: OK DUT snapshot verified")
+    rc = 0
+    for row in _KIND_REPORTS.values():
+        rc |= _validate_records(row, repo_root, require_verified)
     return rc
 
 
