@@ -12,12 +12,11 @@ run, and no decision record is needed.
   the figure is listed as "not reported".
 - **Scope**: a first pass (issue #76), not an exhaustive survey. Add more
   entries later in the same format.
-- **This block's figures** come only from the committed PVT records under
-  [`sim/opamp-characterization/`](../sim/opamp-characterization/README.md),
-  cited by record id. The current sizing is the DR-007 resize, record
-  `20261001-074923-c317ff9`. All of this block's evidence is **pre-layout**
-  (schematic netlist, R+C typical, `CL = 2 pF`, `VDD` tied to corner:
-  tt/sf/fs 1.80 V, ss 1.62 V, ff 1.98 V, at −40 / 27 / 125 °C).
+- **This block's reference figures** in the original October 9 survey used
+  the DR-007 schematic at 2 pF with typical R+C. The 15-point grid paired
+  VDD with process (TT/SF/FS 1.80 V, SS 1.62 V, FF 1.98 V) at −40, 27 and
+  125 °C. The DR-013 updates below cite their own schematic or extracted
+  records. [Characterization records](../sim/opamp-characterization/README.md)
 
 ## 1. Sources surveyed
 
@@ -107,13 +106,18 @@ unless another record is named):
 | PSRR+ (DC–1 kHz window minimum), record `20261009-073254-e06f2fc` | 67.72 dB | 63.57 dB @ FS / 125 °C | no own target (`[TBD]`) |
 | PSRR− (DC–1 kHz window minimum), record `20261009-073254-e06f2fc` | 75.17 dB | **54.90 dB @ SS / −40 °C** | no own target (`[TBD]`) |
 | CMRR @ 1 kHz, CM = 0.5·VDD, record `20261009-103006-566b9a5` | 71.15 dB | 55.11 dB @ SS / −40 °C | `[TBD]` |
-| Input-referred noise @ 1 kHz, record `20261009-073753-e06f2fc` (**single corner only, not PVT evidence**) | 541 nV/√Hz | not measured (the 15-corner noise grid has no record) | no limit in spec |
+| DR-013 input noise density at 1 kHz | 541.18 nV/√Hz | 611.47 nV/√Hz @ FS / 125 °C | §2 specifies a thermal floor. The 1 kHz point includes flicker noise. |
+| DR-013 input noise integrated over 100 Hz–1 MHz | 70.11 µV RMS | 82.19 µV RMS @ SS / 125 °C | No integrated RMS limit specified. |
+
+Both noise rows come from the [15-point DR-013 noise sweep](../sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.csv).
+All 15 simulations completed. Integrated noise ranged from 62.49 µV RMS
+at SF / −40 °C to 82.19 µV RMS at SS / 125 °C.
 
 Comparison per source:
 
 | Source | Row | Source figure (conditions) | This block | Verdict |
 |---|---|---|---|---|
-| S1 | all AC / slew / Iq / swing rows | 3.3 V rail, ≤ 100 fF and 100 MΩ load, post-layout, min/typ/max over ss/tt/ff × −40/27/110 °C | 1.8 V, 2 pF, schematic, 15-point grid | **not comparable**: different supply class, a load 20× lighter, a different PM convention, and a summary statistic that is not a named point. Qualitatively, S1 leads on **evidence maturity**: it has layout, DRC/LVS and post-layout characterisation over corners, and this block does not have layout yet |
+| S1 | all AC / slew / Iq / swing rows | 3.3 V rail, ≤ 100 fF and 100 MΩ load, post-layout, min/typ/max over ss/tt/ff × −40/27/110 °C | 1.8 V, 2 pF, schematic, 15-point grid | **not comparable**: different supply class, a load 20× lighter, a different PM convention, and a summary statistic that is not a named point. Both blocks have post-layout simulations. S1 also reports independent Magic DRC and netgen LVS passes. This block's outstanding findings are listed in §3. |
 | S1 | swing | Vol 0.000 V / Voh 3.300 V into 100 MΩ (rail-to-rail driver) | 79.5 % of VDD at TT / 27 °C, 58.5 % at worst | **not comparable** (different rail, load and definition). This block's swing is plainly narrower than a rail-to-rail claim, which matches the "unmet" row in `target-spec.md` §2 |
 | S2 | — | spec limits only, no results | — | **not comparable**: nothing measured to compare |
 | S3 | DC gain | 60 dB, single point, corner and temperature not stated (committed deck: tt, no `.temp`, possibly ±1.8 V) | 65.82 dB (TT / 27 °C) | **partially comparable**: low-frequency gain does not depend on the capacitive load, but the supply is ambiguous. This block reports more gain at its typical point and also has a 15-point worst case (61.64 dB), which the source lacks |
@@ -136,12 +140,16 @@ Comparison per source:
   block is **at parity** with S5 and above S3's reported 60 dB. That is not a
   performance claim: a 4–6 dB difference in DC gain says nothing about which
   design is better overall.
-- **This block is not ahead on headline performance.** Its fall slew rate
-  (11.03 V/µs worst) and output swing (0.948 Vpp, 58.5 % worst) do not meet
-  their own targets. PSRR− drops to 54.90 dB at SS / −40 °C. The 15-corner
-  noise grid is not recorded. A layout now exists (`layout/opamp_core/`,
-  klt DRC clean / LVS matching), but not the post-layout *simulation*
-  characterisation S1 already shows.
+- Falling slew and output swing miss their respective ≈20 V/µs and ≈1.39 Vpp
+  targets. Their minima are 11.03 V/µs and 0.948 Vpp on the 15-point grid,
+  and 9.13 V/µs and 0.897 Vpp on the [45-point DR-013 schematic grid](../sim/opamp-characterization/records/20261011-194651-046fe81-86146b.json).
+  PSRR− drops to 54.90 dB at SS / −40 °C. The extracted circuit has also
+  been simulated across 15 corners, with a minimum GBW of 17.46 MHz at
+  SS / 125 °C / 1.62 V. [Extracted comparison](../sim/opamp-characterization/records/20261030-pex-opamp_core-device-only.pex.json)
+- The routed core's bounding box including pin stubs is 9780.44 µm²,
+  about 5.04× S1's reported 1940.782 µm². S1 uses a different architecture
+  and its area report does not establish an equivalent pin-stub convention.
+  [Core footprint](../layout/opamp_core/README.md)
 
 ## 3. Position
 
@@ -160,16 +168,18 @@ The differentiator is the **evidence chain**, not headline performance:
 - **Contradictions are recorded, not hidden.** Hand estimates that simulation
   contradicted (GBW on the DR-002 sizing, fall slew, swing) are written up as
   findings. No target in `target-spec.md` was relaxed to make a result pass.
-- **What this block does not yet have.** The signoff picture has since
-  split three ways (`layout/opamp_core/`): the layout and its **klt**
-  DRC/LVS verdicts now exist (`drc` clean, `lvs` match); the independent
-  **Magic/netgen** signoff does not pass — Magic `drc(full)` reports
-  `drc_total` 2 (the inherited `opamp_comp` poly-resistor contact-head
-  rule, klayout-tools#5659; in-repo record: `layout/opamp_comp/README.md`,
-  "klt 0.8.0 evaluated and rejected") and netgen `pins_matched` is false;
-  and post-layout *simulation* evidence, which S1 already shows, still
-  does not exist at all. Until that last piece exists, the evidence chain
-  runs through layout verdicts but is complete only up to schematic level.
+- **Layout verification.** Klt reports zero DRC violations and an LVS match.
+  Independent Magic `drc(full)` reports `drc_total` 2 for the inherited
+  poly-resistor contact-head rule. Netgen matches the circuits but reports
+  `pins_matched: false` because Magic exports four internal labels as ports.
+  [Core signoff results](../layout/opamp_core/README.md) · [Resistor-head finding](../layout/opamp_comp/README.md)
+- **Post-layout simulation.** The PEX report compares schematic, extracted
+  device-only and lumped-RC results at 15 paired PVT points. All 150
+  comparisons passed for ten quantities per point (DC gain, GBW, phase margin,
+  quiescent power, rising and falling slew, output swing, and ICMR low edge,
+  high edge and width). These passes grade the comparisons. Falling slew and
+  swing still miss their design targets. Noise has a separate schematic sweep.
+  [PEX comparison report](../sim/opamp-characterization/records/20261030-pex-opamp_core-device-only.pex.json)
 
 ## 4. Method and limits of this survey
 
