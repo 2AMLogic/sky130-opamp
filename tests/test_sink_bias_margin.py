@@ -49,7 +49,7 @@ class BiasMargin(unittest.TestCase):
         w = [sbm.widths(f)["p_ic"] for f in sbm.FRACTIONS.values()]
         self.assertTrue(w[0] > w[1] > w[2])
         for x in w:
-            self.assertTrue(sbm.ss.legal(x))
+            self.assertTrue(sbm.legal(x))
         self.assertEqual(len(sbm.FRACTIONS), 3)   # reference + at most two margins
 
     def test_probe_source_is_zero_volt_in_xms_source(self):
@@ -66,10 +66,6 @@ class BiasMargin(unittest.TestCase):
         a, b = sbm.static_rows(rep)
         self.assertTrue(a["ok"] and a["railed"] and a["boost_flag"])
         self.assertFalse(b["ok"])
-
-
-if __name__ == "__main__":
-    unittest.main()
 
 
 class ReportAndAccountingTests(unittest.TestCase):
@@ -361,3 +357,7 @@ class EvidenceValidationTests(unittest.TestCase):
         self.assertEqual(len(data["ic075"]["replicates"]), 11)    # Stage 1 screen points re-measured in Stage 2
         self.assertEqual(data["ic090"]["replicates"], [])
         self.assertEqual(data["ic060"]["replicates"], [])
+
+
+if __name__ == "__main__":
+    unittest.main()

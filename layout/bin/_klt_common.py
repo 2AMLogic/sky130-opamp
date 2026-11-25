@@ -5,7 +5,9 @@ Ported verbatim (contract unchanged, docstrings trimmed to this repo) from
 2AMLogic/sky130-trng ``layout/bin/_klt_common.py`` at commit
 ``5d443907c99bf4eb193092f0cf89f2a6e2a5c80e``.
 Local divergence: ``run_klt`` accepts the ``klt`` command as a string or a
-sequence of argv words (e.g. ``["uvx", "--from", ..., "klt"]``).
+sequence of argv words (e.g. ``["uvx", "--from", ..., "klt"]``), and the
+toolchain pin gate (``PDK_PIN`` + ``check_toolchain``, #371) lives here
+instead of being duplicated per script.
 
 Contract: shell out to ``klt ... --format json``; a missing/unparsable JSON
 response is fatal, an ``error`` object in an otherwise well-formed response
@@ -17,8 +19,11 @@ from __future__ import annotations
 import json
 import shlex
 import subprocess
+import sys
 from collections.abc import Sequence
 from pathlib import Path
+
+PDK_PIN = Path(__file__).resolve().parents[1] / "pdk.json"
 
 
 class BuildError(RuntimeError):
@@ -65,6 +70,49 @@ def run_klt(
             f"{klt_name} {' '.join(args)} failed: {response['error'].get('message')}"
         )
     return response
+
+
+def check_toolchain(
+    env: dict[str, str],
+    *,
+    variant: str | None = None,
+    allow_unpinned: bool = False,
+    klt: str | Sequence[str] = "klt",
+    cwd: Path | None = None,
+    pin_path: Path = PDK_PIN,
+) -> tuple[dict, dict]:
+    """Assert the running ``klt``/PDK match ``layout/pdk.json``.
+
+    Returns ``(tools, pdk)``: ``tools`` is the ``{"klt": ..., "pdk": ...}``
+    shape committed into evidence indexes; ``pdk`` is the full ``klt pdk
+    find`` response for callers that need its ``assets`` (e.g. the Magic
+    tech path).  *variant* defaults to the pin's own ``variant``.  On a
+    mismatch, raise ``BuildError`` -- or, with *allow_unpinned*, warn on
+    stderr and carry on.
+    """
+    pin = json.loads(pin_path.read_text())
+    version = run_klt(["version"], env=env, cwd=cwd, klt=klt)
+    pdk = run_klt(
+        ["pdk", "find", "--pdk", variant or pin["variant"]],
+        env=env,
+        cwd=cwd,
+        klt=klt,
+    )
+    problems = []
+    if version.get("git_commit") != pin["klt_commit"]:
+        problems.append(
+            f"klt git_commit {version.get('git_commit')} != pinned {pin['klt_commit']}"
+        )
+    if pin["open_pdks_commit"] not in str(pdk.get("version") or ""):
+        problems.append(
+            f"PDK version {pdk.get('version')!r} != pinned {pin['open_pdks_commit']}"
+        )
+    if problems:
+        message = "toolchain does not match layout/pdk.json: " + "; ".join(problems)
+        if not allow_unpinned:
+            raise BuildError(message + " (see layout/README.md, 'Toolchain')")
+        print(f"warning: {message}", file=sys.stderr)
+    return {"klt": version.get("version"), "pdk": pdk.get("version")}, pdk
 
 
 def write_json(path: Path, payload: dict) -> None:

@@ -1,5 +1,7 @@
 """Simulator-free tests for sim/offset-capability/bin/attribution.py (issue #107)."""
+import tempfile
 import unittest
+from pathlib import Path
 
 import _paths
 from _paths import REPO
@@ -8,10 +10,17 @@ at = _paths.load_module("attribution", REPO / "sim" / "offset-capability" / "bin
 CORE = at.CORE.read_text()
 
 
+def interleaved_core() -> str:
+    """The committed core with a comment and a blank between XM5 and its `+` line."""
+    lines = CORE.splitlines()
+    i = next(i for i, ln in enumerate(lines) if ln.startswith("XM5 ")) + 1
+    return "\n".join(lines[:i] + ["*.ipin tail", ""] + lines[i:]) + "\n"
+
+
 class Benches(unittest.TestCase):
     def test_committed_benches_equal_regenerated(self):
         for g in at.GROUPS:
-            self.assertEqual(at.bench_path(g).read_text(), at.bench_text(g), g)
+            self.assertEqual(at.bench_text(g).encode(), at.bench_path(g).read_bytes(), g)
 
     def test_group_instances_exist_and_partition_the_core(self):
         inst = at.instances(CORE)
@@ -55,6 +64,38 @@ class Benches(unittest.TestCase):
     def test_unknown_instance_rejected(self):
         with self.assertRaises(SystemExit):
             at.gated_netlist(CORE, ("XNOPE",))
+
+
+class CommentInterleaving(unittest.TestCase):
+    """Issue #301: a comment/blank between a card and its `+` line must not
+    swallow the continuation (`mult=` lives there) and must stay on its own
+    line in the emitted bench."""
+
+    def test_gated_netlist_keeps_mult_and_comment_line(self):
+        gated = at.gated_netlist(interleaved_core(), ("XM5", "XMB1")).splitlines()
+        xm5 = [ln for ln in gated if ln.startswith("XM5 ")]
+        self.assertEqual(len(xm5), 1)
+        self.assertIn("mult=2 m=2", xm5[0])
+        self.assertIn("*.ipin tail", gated)
+
+    def test_bench_text_keeps_mult_and_comment_line(self):
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "opamp_core.spice"
+            p.write_text(interleaved_core())
+            orig = at.CORE
+            at.CORE = p
+            try:
+                text = at.bench_text("bias")
+            finally:
+                at.CORE = orig
+        lines = text.splitlines()
+        xm5 = [ln for ln in lines if ln.startswith("XM5 ")]
+        self.assertEqual(len(xm5), 1)
+        self.assertIn("mult=2 m=2", xm5[0])
+        self.assertIn("*.ipin tail", lines)
+
+    def test_instances_mapping_unchanged_by_interleaving(self):
+        self.assertEqual(at.instances(interleaved_core()), at.instances(CORE))
 
 
 class Plan(unittest.TestCase):

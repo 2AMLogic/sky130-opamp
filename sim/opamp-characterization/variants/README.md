@@ -151,7 +151,7 @@ snapshot whose sha256 equals the committed variant file
 (`python3 sim/lib/dut_identity.py validate`), the saved requests and bodies
 under `netlist-snapshots/<id>/`, and the klt responses plus per-corner raw
 artifacts (`corner.cir`, `ngspice.log`, and for `dc-swing` the
-`waveform.raw[.json]`) under `records/<id>-logs/`. Remote provenance is in
+`waveform.raw[.json]`; the .json dumps were dropped by #298) under `records/<id>-logs/`. Remote provenance is in
 `klt_jobs[].remote`: job ids `klt-sim-*`, c7i/m6i.4xlarge spot instances. The
 fleet runner reports klt 0.5.0 against client 0.7.0 (`runner_compatibility:
 mismatch`, accepted with the default `warn`, as in #77's baseline). One submit

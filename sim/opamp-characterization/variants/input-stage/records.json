@@ -1,0 +1,42 @@
+{
+  "reference": "icmr-rebias",
+  "variant": {
+    "tag": "icmr-rebias",
+    "netlist": "sim/opamp-characterization/variants/input-stage/icmr-rebias.spice",
+    "sha256": "sha256:8c1160ee1c6cbb3eb411245280694f60fc539e69bc040e58444d08aac0b86a6d",
+    "ids": {
+      "runs": [
+        {"id": "20261120-230038-e5877a5-d9dd4b", "points": "paired"},
+        {"id": "20261121-013112-e5877a5-a1b978", "points": "added"},
+        {"id": "20261121-162850-e5877a5-a2eb9a", "points": "paired", "role": "retry"},
+        {"id": "20261121-163134-e5877a5-50970f", "points": "added", "role": "retry"}
+      ]
+    }
+  },
+  "canonical": {
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79",
+    "ids": {
+      "runs": [
+        {"id": "20261011-140526-04489d4-7e5893", "points": "paired"},
+        {"id": "20261011-141126-04489d4-b4ac6f", "points": "paired"},
+        {"id": "20261011-201913-046fe81-7c5771", "points": "paired"},
+        {"id": "20261011-194651-046fe81-86146b", "points": "added"},
+        {"id": "20261011-200341-046fe81-f7ce78", "points": "added"}
+      ]
+    },
+    "swing_fixcm": {
+      "sha256": "sha256:feb7cff49291aa308cbe3c07f5ea207f73fdf73110ac24647aacdb4753db9530",
+      "ids": [
+        {"id": "20261011-101231-39ac614-274895", "points": "paired"}
+      ],
+      "note": "issue #181 attribution campaign, pre-DR-013 widths; DR-013 measured the width move at <= 2.6e-5 Vpp swing and <= 0.003 V/us fall SR per point (disclosed slack, not hidden)"
+    }
+  },
+  "retries": {
+    "policy": "PLAN.md fleet stage: resubmission only of a request that produced no measurements for an infrastructure reason (fleet error, timeout, capacity refusal beyond the built-in wait); <= 1 per request, <= 8 total; a measured outcome is never retried. tran_sr_icmr requires same-campaign icmr rows (harness precondition), so each retry carries icmr as an agreeing replicate, not as a retried measurement. No local grid, ever.",
+    "infra_failures": [
+      "20261120-230038-e5877a5-d9dd4b: tran-sr-icmr-sf-125C-1.8V — klt sim exit 1, no JSON report on stdout (fleet infrastructure)",
+      "20261121-013112-e5877a5-a1b978: tran-sr (both tuples) and tran-sr-icmr-sf--40C-1.62V, tran-sr-icmr-fs--40C-1.62V — klt sim exit 1, no JSON report on stdout (fleet infrastructure)"
+    ]
+  }
+}

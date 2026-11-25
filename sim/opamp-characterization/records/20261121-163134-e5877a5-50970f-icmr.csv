@@ -1,0 +1,3 @@
+corner,temp_c,vdd_v,icmr_low_v,icmr_high_v,icmr_width_v,low_limiter,high_limiter,covers_target_window,covers_0v73,icmr_low_v_30db,icmr_high_v_30db,icmr_width_v_30db,icmr_low_v_50db,icmr_high_v_50db,icmr_width_v_50db,vid_mid_v,cmrr_mid_db,vout_mid_v,iq_mid_a,elapsed_s
+sf,-40.0,1.62,0.6164,1.1408,0.5243,input_stage,input_stage,1,1,0.44,1.1863,0.7463,0.6756,1.1093,0.4336,-0.000161923,69.04573627536595,0.809676,6.52334e-05,41.82
+fs,-40.0,1.62,0.6818,1.3428,0.661,input_stage,input_stage,1,1,0.46,1.3726,0.9126,0.7413,1.3202,0.5789,-0.000197638,62.09075346163914,0.809605,6.45686e-05,30.28

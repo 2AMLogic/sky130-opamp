@@ -3,14 +3,14 @@
   "kind": "generic",
   "status": "pass",
   "t1_item": 9,
-  "summary": "T1 item 9 (Testbenches shipped): 19/19 attestation checks passed (klt signoff --attest)",
+  "summary": "T1 item 9 (Testbenches shipped): 20/20 attestation checks passed (klt signoff --attest)",
   "source": "manifests/inventory/item9.json",
   "attestation": {
     "producer": "klt signoff --attest",
     "inventory_schema_version": 1,
     "hash_algorithm": "sha256-raw-bytes",
-    "check_count": 19,
-    "passed_count": 19,
+    "check_count": 20,
+    "passed_count": 20,
     "checks": [
       {
         "check": "present",
@@ -50,6 +50,13 @@
       {
         "check": "present",
         "role": "testbench",
+        "path": "sim/lib/corners.py",
+        "passed": true,
+        "content_hash": "sha256:aa7f0d868e406fba529a837a590e3d3305aad026f00ad120fa3f6784a021b7b2"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
         "path": "sim/offset-capability/README.md",
         "passed": true,
         "content_hash": "sha256:98868cf57d42b567c64682e1f1e81aa4ba92fc0c9270307ef1e8ce834e260088"
@@ -80,7 +87,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/README.md",
         "passed": true,
-        "content_hash": "sha256:97bd74118ac7cc07b8e74f666e772db6ed72525fe62034d736f44153ae1bdf07"
+        "content_hash": "sha256:9c1993841edd1e34c1d93a83c2ff3209752b378214bfd034a9374fed1ff9440a"
       },
       {
         "check": "present",
@@ -94,7 +101,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:260e135aadfaa5ac14da70d41041204dec02fa1a23fe9f0e368119feec2040b9"
+        "content_hash": "sha256:ae30767db3c7add680b4654dbb97bda6aade6e608e9be0c30096198148431472"
       },
       {
         "check": "present",
@@ -106,23 +113,23 @@
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_ac.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_ac.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:b9dd29b187ae05ab2e92bb27f50418fb451eab7c7fb62176d51892a5bf5f2993"
+        "content_hash": "sha256:01da85226cd650acb90d5d5a5b011ecf4276ff951ad30839f0b0b53edf0931cc"
       },
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_dc_swing.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_dc_swing.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:c5584d41a77c44b8d38d88be21bc0b78ce24666b7b45fb57ac4215e49c3bf0b3"
+        "content_hash": "sha256:d298e23b155217e4464a50497c502a6b345cd41fedcff27ed19cbaf65e94ac6d"
       },
       {
         "check": "present",
         "role": "testbench",
-        "path": "sim/opamp-characterization/testbench/opamp_tran_sr.spice.tmpl",
+        "path": "sim/opamp-characterization/testbench/opamp_tran_sr.klt.spice.tmpl",
         "passed": true,
-        "content_hash": "sha256:50a654ec5d3470d7c1cd9c0d06555777da5980599f44bbb2db82e840f54becd6"
+        "content_hash": "sha256:776718e00dae14fd61dbbec8d2b914a598a365f08949cf430b273cb04290c5d8"
       },
       {
         "check": "command",
@@ -171,7 +178,7 @@
         "path": "manifests/inventory/item9.json",
         "scope": "repo"
       },
-      "content_hash": "sha256:b21d1408fe3d97a7bdedeb53ba494cdabe5970cbb9263ab26e3f97b02abd92d1"
+      "content_hash": "sha256:9a24a254f531b4205098511e58c3681ed8a407cae9592a19762e077625706a62"
     }
   }
 }

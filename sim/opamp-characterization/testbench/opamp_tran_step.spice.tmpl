@@ -1,7 +1,7 @@
 * opamp_core unity-gain-follower SMALL-STEP testbench (issue #86)
 *
 * Independent second stability bench: a closed-loop time-domain cross-check of
-* the phase margin that opamp_ac.spice.tmpl reads at the (DC-servo) loop break.
+* the phase margin that opamp_ac.klt.spice.tmpl reads at the (DC-servo) loop break.
 * A phase margin that is right at the AC break but wrong in the real
 * unity-gain connection shows up here as ringing/overshoot.
 *
@@ -9,7 +9,7 @@
 * them, as for opamp_icmr/opamp_cmrr.spice.tmpl); bin/pvt_sweep.py renders the
 * placeholders and writes the request JSON (tran card + .meas cards + corners).
 *
-* Wiring reuses opamp_tran_sr.spice.tmpl: `inn` is tied to `out` through
+* Wiring reuses opamp_tran_sr.klt.spice.tmpl: `inn` is tied to `out` through
 * Rshort (1 mOhm; a genuine physical unity-gain-buffer connection, not the AC
 * bench's servo), Iref = {IBIAS_A} into `ibias`, Cload = {CL_F} (DR-001).
 *
