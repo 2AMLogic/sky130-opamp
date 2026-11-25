@@ -8,6 +8,7 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-24
 
+- **PR #363**: feat(sim): emit the ratified output-swing row natively as gated slope_band entries
 - **PR #378**: refactor: remove the local ngspice executor from pvt_sweep.py, klt sim becomes the only executor
 - **Issue #278** (closed): Remove the hand-rolled local ngspice executor from pvt_sweep.py: every record since 2026-10-10 used the klt path
 - **PR #384**: chore: drop 262 uncited waveform.raw.json dumps from sim records
