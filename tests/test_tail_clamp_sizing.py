@@ -15,6 +15,7 @@ from _paths import EXP, load_module
 
 VAR = EXP / "variants"
 ts = load_module("tail_clamp_sizing", VAR / "tail_clamp_sizing.py")
+from _gmid import GRID_UM
 
 HEADER = ("device,corner,length_um,width_um,temp_c,vds_v,overdrive_bias_v,"
           "vov_v,id_a,gm_s,gds_s,cgg_f,vth_v,gm_id_per_v,gm_gds,ft_hz\n")
@@ -75,8 +76,8 @@ class InterpolationTests(unittest.TestCase):
     def test_snap_grid(self):
         for w in (7.819, 15.4937, 10.3702, 0.001, 123.9512):
             s = ts.snap(w)
-            self.assertLess(abs(s / ts.GRID_UM - round(s / ts.GRID_UM)), 1e-9)
-            self.assertLessEqual(abs(s - w), ts.GRID_UM / 2 + 1e-12)
+            self.assertLess(abs(s / GRID_UM - round(s / GRID_UM)), 1e-9)
+            self.assertLessEqual(abs(s - w), GRID_UM / 2 + 1e-12)
         self.assertAlmostEqual(ts.snap(7.819), 7.820)
 
 

@@ -36,7 +36,6 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
-import math
 import re
 import subprocess
 import sys
@@ -48,10 +47,18 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent.parent
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 sys.path.insert(0, str(HERE.parent))
-from _gmid import SWEEP_W_UM, interp_gmid, legal, load, snap  # noqa: E402  (shared sweep loader / grid helpers, #377)
+from _gmid import (  # noqa: E402
+    CANON,
+    SWEEP_W_UM,
+    canonical_body,
+    card,
+    interp_gmid,
+    legal,
+    load,
+    snap,
+)
 from corners import VDD_BY_CORNER  # noqa: E402  (single owner of the ratified table)
 
-CANON = REPO / "design" / "netlist" / "opamp_core.spice"
 OUT_DIR = HERE
 VARIANT_TAG = "icmr-rebias"
 VARIANT = OUT_DIR / f"{VARIANT_TAG}.spice"
@@ -171,13 +178,6 @@ def sizing_report() -> str:
 
 
 # ------------------------------------------------------------------ netlist
-def card(name, d, g, s_, b, kind, w, l, mult=1):
-    r = 0.29 / w
-    return (f"{name} {d} {g} {s_} {b} sky130_fd_pr__{kind}_01v8 L={l:g} W={w:.3f} nf=1 "
-            f"ad={w * 0.29:.6g} as={w * 0.29:.6g} pd={2 * (w + 0.29):.6g} ps={2 * (w + 0.29):.6g} nrd={r!r}\n"
-            f"+ nrs={r!r} sa=0 sb=0 sd=0 mult={mult} m={mult}\n")
-
-
 REGENERATED = {
     "XM1": lambda w: card("XM1", "d1", "inn", "tail", "vss", "nfet", w["pair"], 1.2),
     "XM2": lambda w: card("XM2", "d2", "inp", "tail", "vss", "nfet", w["pair"], 1.2),
@@ -202,10 +202,8 @@ def netlist() -> str:
         "** and checks: variants/input-stage/input_stage_rebias.py (generate / check).\n"
         "** All widths on the 0.005 um grid, nf = 1.\n"
         "**.subckt opamp_core vdd vss inn inp out ibias\n")
-    text = CANON.read_text()
-    body = text[text.index("*.iopin vdd"):text.index("**.ends")]
     out = []
-    for ln in body.splitlines(keepends=True):
+    for ln in canonical_body().splitlines(keepends=True):
         name = ln.split()[0] if ln.split() else ""
         if name in REGENERATED:
             out.append(REGENERATED[name](w))
