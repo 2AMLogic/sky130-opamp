@@ -7,6 +7,7 @@ Snapshot of the repository's Loom label state at the generating Guide tick — s
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
+- **#287**: feat(spec): record measured PSRR and propose a 70 dB DC target in DR-019
 - **#304**: spec: re-evaluate Consumers verdicts on DR-013 evidence, record measured opamp_core extent
 - **#355**: Characterize the sampled noise minimum and keep thermal-floor signoff open
 - **#370**: refactor(sim): key the remaining PVT point joins through sim/lib/point_identity
@@ -27,7 +28,6 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 - **#196**: Measure paired offset drift before prototyping foreground trim *(held)*
 - **#274**: Grade the input-referred white-noise floor on T1 item 5
 - **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
-- **#396**: Improve DC PSRR on both rails toward the proposed 70 dB floor
 
 ## Ready
 
@@ -48,9 +48,8 @@ Issues currently being built (`loom:building`).
 - **#353**: DR-017 lower-side rationale cites the superseded DR-002 grid without saying so
 - **#369**: Consolidate the remaining six (corner, temp_c, vdd_v) point-key copies in pvt_sweep.py and pex_measure.py onto sim/lib/point_identity.py
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list
-- **#396**: Improve DC PSRR on both rails toward the proposed 70 dB floor
 - **#402**: Use shared point identity for PVT report lookups, Cartesian supplies and ICMR row matching
-- **#410**: Remove duplicate pvt_sweep.load_sweep and route dc_swing_row through load_wave
+- **#417**: Share SPICE end-of-line comment handling with the Pelgrom geometry reader
 
 ## PRs Awaiting Review
 
@@ -59,8 +58,7 @@ PRs with `loom:review-requested`. Judge can review a held PR once its operator h
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
 - **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base *(held)*
-- **#407**: feat: record M3/M4/M5 length candidate for DC PSRR and reject on GBW/slew regression
-- **#411**: refactor: route dc_swing_row through shared load_wave
+- **#418**: fix: strip end-of-line comments in the Pelgrom geometry reader
 
 ## Approved (Awaiting Merge)
 
@@ -91,8 +89,8 @@ Issues carrying `loom:curated`.
 - **#358**: T1 item 5: grade the output-swing row with klt sim's slope_band form now that klayout-tools#5518 is closed *(curated)* *(held)*
 - **#361**: T1 item 5: commit a CMRR klt sim envelope with DR-008's proposed limits on the current DUT, then open DR-008's ratification PR *(curated)* *(held)*
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list *(curated)*
-- **#396**: Improve DC PSRR on both rails toward the proposed 70 dB floor *(curated)*
 - **#402**: Use shared point identity for PVT report lookups, Cartesian supplies and ICMR row matching *(curated)*
+- **#415**: check-main-clean.sh exits 3 on the daemon-written .loom/account-ranking.codex (gitignore block predates it) *(curated)* *(held)*
 
 ## Proposed (Architect / Hermit)
 
@@ -106,12 +104,12 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 6 |
+| Operator merge-risk holds | 7 |
 | Very important | 1 |
-| Important | 4 |
+| Important | 3 |
 | Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 2 |
-| In Progress (`loom:building`) | 11 |
-| PRs awaiting review | 5 |
+| In Progress (`loom:building`) | 10 |
+| PRs awaiting review | 4 |
 | Approved PRs awaiting merge | 7 |
 | Curated | 15 |
 | Architect / Hermit proposals | 1 |
