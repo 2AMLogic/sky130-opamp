@@ -909,6 +909,14 @@ class CartesianSupplyTests(unittest.TestCase):
         self.assertEqual(req["corners"]["supply_v"]["vdd"], [1.62, 1.8, 1.98])
         self.assertNotIn("exclude", req)
 
+    def test_supply_values_normalize_before_deduplication(self):
+        supplies = ["1.9800004", 1.62, 1.98]
+        self.assertEqual(pvt.supply_values(["tt"], "cartesian", supplies), [1.62, 1.98])
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "nonfinite"):
+                pvt.supply_values(["tt"], "cartesian", [bad])
+        self.assertEqual(pvt.supply_values(["tt"], "paired", supplies), [1.8])
+
     def test_cartesian_icmr_requests_are_per_process_and_supply(self):
         with tempfile.TemporaryDirectory() as d:
             tags = set()
@@ -940,6 +948,11 @@ class CartesianSupplyTests(unittest.TestCase):
         self.assertAlmostEqual(row["vcm_v"], 0.99)
         row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
         self.assertEqual(row["vdd_v"], 1.8)  # default still the paired voltage
+
+    def test_report_unit_keys_preserve_omitted_supply(self):
+        report = {"corners": [{"process": " tt ", "temperature_c": "27.0000004"}]}
+        self.assertEqual(list(pvt._corner_values(report)), [("tt", 27.0)])
+        self.assertEqual(list(pvt._corner_values(report, by_supply=True)), [("tt", 27.0, None)])
 
     def test_pm_overshoot_table_distinguishes_supplies(self):
         ac = [{"corner": "tt", "temp_c": "27", "vdd_v": v, "phase_margin_deg": pm}
@@ -1257,6 +1270,34 @@ class FleetAnalysisTests(unittest.TestCase):
                              set(pvt.supply_points(self.CORNERS, self.TEMPS)), a)
             self.assertTrue(all(set(r) == set(pvt.FIELDNAMES[a]) for r in rows))
         self.assertTrue(all(j["remote"]["job_id"] == "j" for j in jobs))  # remote provenance kept
+
+    def test_slew_report_lookup_uses_the_requested_point_identity(self):
+        self.CORNERS, self.TEMPS = ["tt"], [27.0000004]
+        for mode in ("paired", "cartesian"):
+            def mutate(kind, unit, mode=mode):
+                vdd = unit["supply_v"]["vdd"]
+                unit.update(process=" tt ", temperature_c="27.0000001", runtime_s=vdd)
+                if mode == "paired" or vdd == 1.98:
+                    del unit["supply_v"]
+                return unit
+
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory() as d:
+                results, errors, _, _ = self._campaign(["tran_sr"], mode, mutate, tmp=d)
+                expected = [1.8] if mode == "paired" else [1.62, 1.8]
+                self.assertEqual([(r["vdd_v"], r["elapsed_s"]) for r in results["tran_sr"]],
+                                 [(v, v) for v in expected])
+                self.assertEqual(errors, [] if mode == "paired" else
+                                 ["tran-sr-tt-27C-1.98V: not in the klt response"])
+
+    def test_malformed_report_identity_is_reported(self):
+        self.CORNERS, self.TEMPS = ["tt"], [27.0]
+        for fields, reason in (({"process": " "}, "empty corner"),
+                               ({"temperature_c": "inf"}, "nonfinite")):
+            with self.subTest(fields=fields), tempfile.TemporaryDirectory() as d:
+                results, errors, _, _ = self._campaign(
+                    ["tran_sr"], mutate=lambda kind, unit, fields=fields: dict(unit, **fields), tmp=d)
+                self.assertEqual(results["tran_sr"], [])
+                self.assertRegex(errors[0], f"malformed.*{reason}")
 
     def test_cartesian_result_keys_unique_for_several_supplies(self):
         with tempfile.TemporaryDirectory() as d, self._armed():
@@ -1902,6 +1943,11 @@ class PreValidationTests(unittest.TestCase):
         err = self.refuse(["--corners", "tt,tt", "--temps", "27", "--analyses", "ac"])
         self.assertIn("duplicate (process, temperature, supply) tuple", err)
 
+    def test_requested_temperatures_must_form_distinct_finite_keys(self):
+        for temps, message in (("27,27.0000004", "duplicate"), ("nan", "nonfinite")):
+            with self.subTest(temps=temps):
+                self.assertIn(message, self.refuse(["--corners", "tt", "--temps", temps]))
+
 
 class DefaultKltDispatchTests(unittest.TestCase):
     """Issue #278: without --fleet, the default analyses dispatch ac,tran_sr,dc_swing
@@ -1913,7 +1959,7 @@ class DefaultKltDispatchTests(unittest.TestCase):
         pin = {"open_pdks_commit": "abc"}
         own_pin = {"rc_corner": {"choice": "typical"}}
 
-    def run_main(self, argv, env=None):
+    def run_main(self, argv, env=None, icmr_rows=()):
         """main() to completion against a mocked klt campaign and temporary
         record/snapshot dirs; returns (rc, record, klt_campaigns)."""
         import contextlib
@@ -1927,6 +1973,8 @@ class DefaultKltDispatchTests(unittest.TestCase):
                               supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
             klt_campaigns.append((list(analyses), backend))
             klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
+            if "icmr" in results:
+                results["icmr"].extend(icmr_rows)
 
         with tempfile.TemporaryDirectory() as d:
             root = Path(d) / "repo"
@@ -1956,6 +2004,40 @@ class DefaultKltDispatchTests(unittest.TestCase):
             recs = list(records.glob("*.json"))
             rec = json.loads(recs[0].read_text()) if recs else None
         return rc, rec, klt_campaigns
+
+    def test_icmr_presence_uses_normalized_keys_in_grid_order(self):
+        # Narrow ICMR windows exercise the second phase without a simulation.
+        point = {"corner": "tt", "temp_c": 27.0, "icmr_low_v": 0.89, "icmr_high_v": 0.90}
+        rows = [dict(point, temp_c=27.0000004, vdd_v=1.80000051), dict(point, corner=" tt ", vdd_v=1.98000049),
+                dict(point, temp_c=float("inf"), vdd_v=1.62)]
+        args = ["--analyses", "icmr,tran_sr_icmr", "--corners", "tt", "--temps", "27.0000004",
+                "--supply-mode", "cartesian", "--supplies", "1.80000049,1.98,1.62"]
+        rc, rec, _ = self.run_main(args, icmr_rows=rows)
+        self.assertEqual(rc, 1)
+        self.assertEqual(len(rec["errors"]), 2)
+        self.assertRegex(rec["errors"][0], "malformed icmr row 3.*nonfinite")
+        self.assertEqual(rec["errors"][1], "tran_sr_icmr: no icmr row (failed or absent) for "
+                         "tt/27C/1.62V, tt/27C/1.8V -- skipped")
+
+    def test_icmr_slew_report_lookup_normalizes_requested_temperature(self):
+        def report(req_path, out_dir, backend):
+            [vdd] = json.loads(req_path.read_text())["corners"]["supply_v"]["vdd"]
+            wave = write_wave(out_dir.parent / f"wave-{vdd}.json", follower_wave(0.7, 1.2, vdd=vdd))
+            unit = {"process": " tt ", "temperature_c": 27.0, "status": "pass",
+                    "artifacts": {"waveform": wave}}
+            if vdd != 1.98:
+                unit["supply_v"] = {"vdd": vdd}
+            return {"corners": [unit]}
+
+        rows = [{"corner": "tt", "temp_c": 27.0000004, "vdd_v": v, "icmr_low_v": 0.6, "icmr_high_v": 1.4}
+                for v in (1.62, 1.8, 1.98)]
+        args = ["--analyses", "icmr,tran_sr_icmr", "--backend", "local", "--corners", "tt",
+                "--temps", "27.0000004", "--supply-mode", "cartesian"]
+        with mock.patch.object(pvt, "run_klt_sim", report):
+            rc, rec, _ = self.run_main(args, icmr_rows=rows)
+        self.assertEqual(rc, 1)
+        self.assertEqual(rec["tran_sr_icmr_summary"]["points"], 2)
+        self.assertEqual(rec["errors"], ["tran-sr-icmr-tt-27C-1.98V: not in the klt response"])
 
     def test_default_invocation_dispatches_fleet_analyses_via_klt(self):
         rc, rec, klt = self.run_main([])

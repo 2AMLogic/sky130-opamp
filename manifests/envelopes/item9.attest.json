@@ -3,14 +3,14 @@
   "kind": "generic",
   "status": "pass",
   "t1_item": 9,
-  "summary": "T1 item 9 (Testbenches shipped): 20/20 attestation checks passed (klt signoff --attest)",
+  "summary": "T1 item 9 (Testbenches shipped): 21/21 attestation checks passed (klt signoff --attest)",
   "source": "manifests/inventory/item9.json",
   "attestation": {
     "producer": "klt signoff --attest",
     "inventory_schema_version": 1,
     "hash_algorithm": "sha256-raw-bytes",
-    "check_count": 20,
-    "passed_count": 20,
+    "check_count": 21,
+    "passed_count": 21,
     "checks": [
       {
         "check": "present",
@@ -53,6 +53,13 @@
         "path": "sim/lib/corners.py",
         "passed": true,
         "content_hash": "sha256:aa7f0d868e406fba529a837a590e3d3305aad026f00ad120fa3f6784a021b7b2"
+      },
+      {
+        "check": "present",
+        "role": "testbench",
+        "path": "sim/lib/point_identity.py",
+        "passed": true,
+        "content_hash": "sha256:348468d5a7ffb57e667ec1ebb3966ac9114b1873033804128a918caac409ab54"
       },
       {
         "check": "present",
@@ -101,7 +108,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/pvt_sweep.py",
         "passed": true,
-        "content_hash": "sha256:359c6c6ca093cdf52e0ea74c83a315b276a98f3fd3dee7328b727c2e61839da9"
+        "content_hash": "sha256:5d8cb84a746261539f62473134ceb2e0934cde8e4365d62d9ab2ff99386d1a6c"
       },
       {
         "check": "present",
@@ -178,7 +185,7 @@
         "path": "manifests/inventory/item9.json",
         "scope": "repo"
       },
-      "content_hash": "sha256:9a24a254f531b4205098511e58c3681ed8a407cae9592a19762e077625706a62"
+      "content_hash": "sha256:01c94046498db53381f01888f82614e62aeab49ca8610320c75e330843bded44"
     }
   }
 }
