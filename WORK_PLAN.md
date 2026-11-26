@@ -50,6 +50,7 @@ Issues currently being built (`loom:building`).
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list
 - **#396**: Improve DC PSRR on both rails toward the proposed 70 dB floor
 - **#402**: Use shared point identity for PVT report lookups, Cartesian supplies and ICMR row matching
+- **#410**: Remove duplicate pvt_sweep.load_sweep and route dc_swing_row through load_wave
 
 ## PRs Awaiting Review
 
@@ -59,6 +60,7 @@ PRs with `loom:review-requested`. Judge can review a held PR once its operator h
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
 - **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base *(held)*
 - **#407**: feat: record M3/M4/M5 length candidate for DC PSRR and reject on GBW/slew regression
+- **#411**: refactor: route dc_swing_row through shared load_wave
 
 ## Approved (Awaiting Merge)
 
@@ -108,8 +110,8 @@ _None._
 | Very important | 1 |
 | Important | 4 |
 | Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 2 |
-| In Progress (`loom:building`) | 10 |
-| PRs awaiting review | 4 |
+| In Progress (`loom:building`) | 11 |
+| PRs awaiting review | 5 |
 | Approved PRs awaiting merge | 7 |
 | Curated | 15 |
 | Architect / Hermit proposals | 1 |
