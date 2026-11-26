@@ -8,6 +8,7 @@ conflict refusal) on synthetic rows.
 
 import copy
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -16,25 +17,85 @@ from _paths import EXP, load_module
 VAR = EXP / "variants"
 ISR = load_module("input_stage_rebias", VAR / "input-stage" / "input_stage_rebias.py")
 COL = load_module("input_stage_collate", VAR / "input-stage" / "collate.py")
-
-
-def cards(text):
-    out = {}
-    for line in text.replace("\n+", " ").splitlines():
-        if line.startswith("XM"):
-            tok = line.split()
-            kv = dict(t.split("=") for t in tok if "=" in t)
-            out[tok[0]] = (tok[1:6], float(kv["W"]), float(kv["L"]), int(kv["m"]), int(kv["nf"]))
-    return out
+from _gmid import mos_cards
 
 
 class VariantNetlist(unittest.TestCase):
     def test_committed_file_matches_generator(self):
         self.assertEqual(ISR.check(), [])
 
+    def test_comment_and_blank_before_xm5_continuation_keep_geometry(self):
+        text = ISR.CANON.read_text()
+        continuation = text.index("\n+", text.index("\nXM5 "))
+        annotated = text[:continuation] + "\n*.ipin tail\n" + text[continuation:]
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "annotated.spice"
+            path.write_text(annotated)
+            areas = COL.gate_area(path)
+        self.assertAlmostEqual(areas[0]["XM5"], 7.820 * 1.2 * 2)
+        self.assertEqual(areas, COL.gate_area(ISR.CANON))
+        self.assertEqual(mos_cards(annotated), mos_cards(text))
+
+    def test_end_of_line_comment_does_not_override_xm5_params(self):
+        text = ISR.CANON.read_text()
+        cont = text.index("\n+", text.index("\nXM5 "))
+        eol = text.index("\n", cont + 1)
+        base = COL.gate_area(ISR.CANON)
+        for suffix in ("; previous m=1", " $ previous m=1", " // previous m=1"):
+            with self.subTest(suffix=suffix):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "eol.spice"
+                    path.write_text(text[:eol] + suffix + text[eol:])
+                    areas = COL.gate_area(path)
+                self.assertAlmostEqual(areas[0]["XM5"], 7.820 * 1.2 * 2)
+                self.assertEqual(areas, base)
+
+    def test_gate_area_accepts_integer_valued_decimal_m_and_nf(self):
+        text = ISR.CANON.read_text()
+        xm5 = text.index("\nXM5 ")
+        base = COL.gate_area(ISR.CANON)
+        for old, new in (("m=2", "m=2.0"), ("nf=1", "nf=1.0")):
+            with self.subTest(param=old):
+                end = text.index("\nXM", xm5 + 1) if "\nXM" in text[xm5 + 1:] else len(text)
+                card = text[xm5:end]
+                self.assertEqual(card.count(old) >= 1, True, old)
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "decimal.spice"
+                    path.write_text(text[:xm5] + card.replace(old, new, 1) + text[end:])
+                    self.assertEqual(COL.gate_area(path), base)
+
+    def test_gate_area_rejects_fractional_m_and_nf(self):
+        for tail in ("nf=1 m=2.5", "nf=1.5 m=2"):
+            with self.subTest(tail=tail):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "frac.spice"
+                    path.write_text("XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 "
+                                    + tail + "\n")
+                    with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
+                        COL.gate_area(path)
+
+    def test_gate_area_rejects_xm5_missing_m(self):
+        with tempfile.TemporaryDirectory() as td:
+            path = Path(td) / "truncated.spice"
+            path.write_text("XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 nf=1\n"
+                            "+ mult=2\n")
+            with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
+                COL.gate_area(path)
+
+    def test_gate_area_rejects_nonpositive_or_nonfinite_geometry(self):
+        for tail in ("L=1.2 W=-7.820 nf=1 m=2", "L=-1.2 W=7.820 nf=1 m=2",
+                     "L=1.2 W=7.820 nf=1 m=-2", "L=1.2 W=nan nf=1 m=2",
+                     "L=inf W=7.820 nf=1 m=2", "L=1.2 W=0 nf=1 m=2"):
+            with self.subTest(tail=tail):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "bad.spice"
+                    path.write_text("XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 " + tail + "\n")
+                    with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
+                        COL.gate_area(path)
+
     def test_only_input_stage_cards_differ_canonical_verbatim(self):
-        var = cards(ISR.VARIANT.read_text())
-        canon = cards(ISR.CANON.read_text())
+        var = mos_cards(ISR.VARIANT.read_text())
+        canon = mos_cards(ISR.CANON.read_text())
         self.assertEqual(set(var), set(canon))
         changed = {n for n in var if var[n] != canon[n]}
         self.assertEqual(changed, {"XM1", "XM2", "XM3", "XM4", "XM6"})
@@ -46,11 +107,11 @@ class VariantNetlist(unittest.TestCase):
             self.assertTrue(ISR.legal(w[name]), w[name])
 
     def test_mirror_ratio_law_preserved(self):
-        var = cards(ISR.VARIANT.read_text())
-        self.assertEqual(var["XM3"][1], var["XM4"][1])
-        self.assertEqual(var["XM3"][1], var["XM6"][1])
-        self.assertEqual(var["XM6"][3], 10 * var["XM3"][3])
-        self.assertEqual(var["XM1"][1], var["XM2"][1])
+        var = mos_cards(ISR.VARIANT.read_text())
+        self.assertEqual(var["XM3"].width, var["XM4"].width)
+        self.assertEqual(var["XM3"].width, var["XM6"].width)
+        self.assertEqual(var["XM6"].m, 10 * var["XM3"].m)
+        self.assertEqual(var["XM1"].width, var["XM2"].width)
 
 
 class SizingReport(unittest.TestCase):
@@ -139,7 +200,6 @@ class Collation(unittest.TestCase):
     def test_merge_role_filtering(self):
         rows = [{"corner": "sf", "temp_c": -40.0, "vdd_v": 1.8, "vpp_v": "1.0", "elapsed_s": "1"},
                 {"corner": "sf", "temp_c": -40.0, "vdd_v": 1.62, "vpp_v": "0.9", "elapsed_s": "1"}]
-        import tempfile
         with tempfile.TemporaryDirectory() as td:
             recdir = Path(td)
             (recdir / "r1.json").write_text(json.dumps({"errors": []}))
@@ -163,7 +223,6 @@ class Collation(unittest.TestCase):
 
     def test_merge_replicate_agreement_and_conflict(self):
         base = [{"corner": "ss", "temp_c": -40.0, "vdd_v": 1.62, "vpp_v": "1.01", "elapsed_s": "1"}]
-        import tempfile
         with tempfile.TemporaryDirectory() as td:
             recdir = Path(td)
             for rid, vpp in (("r1", "1.01"), ("r2", "1.01"), ("r3", "1.02")):

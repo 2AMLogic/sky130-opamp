@@ -14,16 +14,7 @@ from _paths import EXP, load_module
 
 VAR = EXP / "variants"
 sbm = load_module("sink_bias_margin", VAR / "sink_bias_margin.py")
-
-
-def cards(text):
-    out = {}
-    for line in text.replace("\n+", " ").splitlines():
-        if line.startswith("XM"):
-            tok = line.split()
-            kv = dict(t.split("=") for t in tok if "=" in t)
-            out[tok[0]] = (tok[1:6], float(kv["W"]), float(kv["L"]), int(kv["m"]), int(kv["nf"]))
-    return out
+from _gmid import mos_cards
 
 
 class BiasMargin(unittest.TestCase):
@@ -31,10 +22,10 @@ class BiasMargin(unittest.TestCase):
         self.assertEqual(sbm.check(), [])
 
     def test_only_xmc_width_differs_and_canonical_verbatim(self):
-        base = cards(sbm.path("ic090").read_text())
-        canon = cards(sbm.CANON.read_text())
+        base = mos_cards(sbm.path("ic090").read_text())
+        canon = mos_cards(sbm.CANON.read_text())
         for tag in sbm.FRACTIONS:
-            c = cards(sbm.path(tag).read_text())
+            c = mos_cards(sbm.path(tag).read_text())
             for name, v in canon.items():
                 self.assertEqual(c[name], v, (tag, name))
             for name in c:
@@ -42,10 +33,10 @@ class BiasMargin(unittest.TestCase):
                     self.assertEqual(c[name], base[name], (tag, name))
 
     def test_original_matches_signal_dependent_sink_widths(self):
-        orig = cards((VAR / "signal-dependent-sink.spice").read_text())
-        new = cards(sbm.path(sbm.ORIGINAL).read_text())
+        orig = mos_cards((VAR / "signal-dependent-sink.spice").read_text())
+        new = mos_cards(sbm.path(sbm.ORIGINAL).read_text())
         for name in ("XMP6C", "XMA", "XMA2", "XMC", "XMD", "XMS"):
-            self.assertAlmostEqual(orig[name][1], new[name][1], places=6)
+            self.assertAlmostEqual(orig[name].width, new[name].width, places=6)
 
     def test_margins_ordered_and_grid_legal(self):
         w = [sbm.widths(f)["p_ic"] for f in sbm.FRACTIONS.values()]
@@ -313,7 +304,7 @@ class EvidenceValidationTests(unittest.TestCase):
         self.assertTrue(any("ac-body.spice differs from canonical" in p for p in probs), probs)
 
     def test_icmr_aware_steps_masked_only_and_checked_against_record(self):
-        snap = self.rep.SNAP
+        snap = EXP / "netlist-snapshots"
         name = "tran-sr-icmr-sf-125C-1.8V-body.spice"
         a = (snap / "20261011-201913-046fe81-7c5771" / name).read_text()
         b = (snap / self.IC075_S2 / name).read_text()

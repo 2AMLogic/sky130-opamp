@@ -24,7 +24,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import re
 import sys
 from pathlib import Path
 
@@ -34,9 +33,10 @@ REC = VARIANTS.parent / "records"
 REPO = VARIANTS.parent.parent.parent
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 sys.path.insert(0, str(VARIANTS))
+import _gmid
+import compare  # noqa: E402  (variants/compare.py: METRICS + report tables)
 import dut_identity  # noqa: E402
 from point_identity import point_key  # noqa: E402
-import compare  # noqa: E402  (variants/compare.py: METRICS + report tables)
 
 MANIFEST = HERE / "records.json"
 REPORT = HERE / "report.out.md"
@@ -164,20 +164,10 @@ def pseudo(merged: dict) -> dict:
 
 
 def gate_area(path: Path) -> tuple[dict, float]:
-    per, total = {}, 0.0
-    text = path.read_text().replace("\n+", " ")
-    for ln in text.splitlines():
-        if not ln.startswith("XM"):
-            continue
-        name = ln.split()[0]
-        m = re.search(r"L=([\d.]+) W=([\d.]+)", ln)
-        mult = re.search(r"\bm=(\d+)", ln)
-        if not m or not mult:
-            raise CollateError(f"cannot parse MOS card: {ln[:60]}")
-        w, l, k = float(m.group(2)), float(m.group(1)), int(mult.group(1))
-        per[name] = w * l * k
-        total += per[name]
-    return per, total
+    try:
+        return _gmid.gate_area(path)
+    except ValueError as exc:
+        raise CollateError(str(exc)) from exc
 
 
 def build(manifest: dict) -> str:
@@ -271,7 +261,6 @@ def build(manifest: dict) -> str:
     A("")
     A("| Point | std fall V/us | in-window fall V/us | ratio | verdict |")
     A("|---|---|---|---|---|")
-    nan_sub = 0
     for k in sorted(cand["tran_sr_icmr"]):
         c = cand["tran_sr_icmr"][k]
         std = c["std_sr_fall_v_per_us"]
@@ -279,7 +268,6 @@ def build(manifest: dict) -> str:
         if float(std) != float(std):  # NaN: retry campaign had no tran_sr unit
             std = cand["tran_sr"][k]["sr_fall_v_per_us"]
             mark = "*"
-            nan_sub += 1
         A(f"| {fmt_pt(k)} | {float(std):.3f}{mark} "
           f"| {float(c['fall_sr_claim_v_per_us']):.3f} "
           f"| {float(c['fall_sr_claim_v_per_us'])/float(std):.3f} | {c['verdict']} |")
@@ -367,7 +355,7 @@ def build(manifest: dict) -> str:
         A(f"- {name} ICMR covers the target window at {window}/{len(rows)} points "
           f"and 0.73 V at {consumer}/{len(rows)} points.")
     A("")
-    vs, bs_area = gate_area(REPO / var["netlist"]), gate_area(REPO / "design/netlist/opamp_core.spice")
+    vs, bs_area = gate_area(REPO / var["netlist"]), gate_area(_gmid.CANON)
     A("## Drawn MOS gate area (W·L·mult, parsed from the committed netlists)")
     A("")
     A("| Device | canonical µm² | variant µm² |")
