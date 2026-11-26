@@ -587,12 +587,21 @@ class CommittedTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, tmp, True)
         rec = tmp / sf.OPAMP_RECORDS
         rec.mkdir(parents=True)
-        self.assertFalse(sf.record_exists(tmp, RID))          # nothing yet
-        (rec / f"{RID}-psrr-noise.json").write_text("{}")
-        self.assertTrue(sf.record_exists(tmp, RID))           # via the tag
-        self.assertFalse(sf.record_exists(tmp, RID.replace("abcdef1", "1234567")))
+        full_id = RID + "-b6d61e"
+        (rec / f"{full_id}-noise.request.json").write_text("{}")
+        self.assertFalse(sf.record_exists(tmp, full_id))
+        (rec / f"{full_id}-noise.klt.json").write_text("{}")
+        (rec / f"{full_id}-notes.md").write_text("x")
+        self.assertFalse(sf.record_exists(tmp, full_id))
+        (rec / f"{full_id}-psrr-noise.json").write_text("{}")
+        self.assertTrue(sf.record_exists(tmp, full_id))
+        self.assertFalse(sf.record_exists(tmp, RID))          # truncated ID
         (rec / f"{RID}.md").write_text("x")
-        self.assertTrue(sf.record_exists(tmp, RID))           # bare .md still wins
+        self.assertTrue(sf.record_exists(tmp, RID))           # genuine legacy ID
+        longer_sha_id = RID + "2-b6d61e"
+        (rec / f"{longer_sha_id}-psrr-noise-validation.json").write_text("{}")
+        self.assertEqual(sf.ID_RE.findall(f"record {longer_sha_id}"), [longer_sha_id])
+        self.assertTrue(sf.record_exists(tmp, longer_sha_id))
 
     def test_committed_scopes_are_explicit(self):
         m = json.loads((_paths.REPO / sf.MAPPING).read_text(encoding="utf-8"))

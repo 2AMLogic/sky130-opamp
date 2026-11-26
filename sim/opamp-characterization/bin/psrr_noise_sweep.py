@@ -56,6 +56,7 @@ import shutil
 import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import ExitStack
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -281,6 +282,18 @@ def num(corner: dict, name: str):
     return None
 
 
+def density(value):
+    """Return a finite, nonnegative spectral density, or None if unavailable."""
+    if type(value) in (int, float) and math.isfinite(value) and value >= 0:
+        return value
+    return None
+
+
+def sampled_floor(spots):
+    values = [spots[k] for k in FLOOR_WINDOW_IDX]
+    return min(values) if None not in values else None
+
+
 def log_interp_crossing(freqs: list[float], psd: list[float], level: float) -> float | None:
     """Highest frequency at which psd falls through `level` going up in f
     (log-log interpolation); None if the curve never crosses."""
@@ -309,22 +322,21 @@ def corner_rows(bench: str, payload: dict) -> tuple[list[dict], list[str]]:
             for k in PSRR_CURVE_IDX:
                 row[f"psrr_db@{freq_of(k):.4g}Hz"] = -curve[k] if curve[k] is not None else None
         else:
-            spot = {k: num(c, f"en_k{k:03d}") for k in CURVE_IDX}
+            spot = {k: density(num(c, f"en_k{k:03d}")) for k in CURVE_IDX}
             row = dict(base)
             row["vn_int_100hz_1mhz_uvrms"] = (
                 num(c, "vn_int_band") * 1e6 if num(c, "vn_int_band") is not None else None
             )
-            floor_pts = [spot[k] for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
-            floor = min(floor_pts) if floor_pts and all(v is not None for v in floor_pts) else None
+            floor = sampled_floor(spot)
             row["en_floor_nv_rthz"] = floor * 1e9 if floor is not None else None
             # The deck's graded value of the same reduction (DR-018): the
             # envelope's own en_floor, reported beside the Python minimum so
             # the two can be cross-checked per corner. None when the corner
             # produced no value (error) -- never zero.
-            graded = num(c, "en_floor")
+            graded = density(num(c, "en_floor"))
             row["en_floor_graded_nv_rthz"] = graded * 1e9 if graded is not None else None
             corner_hz = None
-            if all(v is not None for v in spot.values()) and floor:
+            if all(v is not None and v > 0 for v in spot.values()):
                 corner_hz = log_interp_crossing(
                     [freq_of(k) for k in CURVE_IDX], [spot[k] for k in CURVE_IDX], math.sqrt(2.0) * floor
                 )
@@ -361,22 +373,24 @@ def floor_grading_meta(payload: dict) -> dict:
     no value (errored) are listed, never folded into the minimum."""
     checks, worst, worst_at, n_graded = [], None, None, 0
     for c in payload["corners"]:
-        spot = {k: num(c, f"en_k{k:03d}") for k in CURVE_IDX}
-        pts = [spot[k] for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
-        py_min = min(pts) if pts and all(v is not None for v in pts) else None
+        py_min = sampled_floor({k: density(num(c, f"en_k{k:03d}")) for k in FLOOR_WINDOW_IDX})
         graded = num(c, "en_floor")
         if graded is None:
             checks.append({"corner_id": c["corner_id"], "graded": None,
                            "python_min": py_min, "agrees": None})
             continue
         n_graded += 1
-        if py_min is None:
+        graded = density(graded)
+        if graded is None or py_min is None:
             checks.append({"corner_id": c["corner_id"], "graded": graded,
-                           "python_min": None, "agrees": False})
+                           "python_min": py_min, "agrees": False})
             continue
         delta = abs(graded - py_min)
-        rel = delta / py_min if py_min else 0.0
-        agrees = rel <= FLOOR_KLT_VS_PYTHON_REL_TOL
+        # A zero reference can agree only with zero; its relative error is undefined.
+        rel = delta / py_min if py_min > 0 else None
+        agrees = delta <= FLOOR_KLT_VS_PYTHON_REL_TOL * py_min
+        if rel is not None and not math.isfinite(rel):
+            rel = None
         if worst is None or delta > worst:
             worst, worst_at = delta, c["corner_id"]
         checks.append({"corner_id": c["corner_id"], "graded": graded,
@@ -461,9 +475,15 @@ def main(argv=None) -> int:
         except artifact_store.ArtifactError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-    RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    # Atomically reserve a unique record namespace (issue #75) before any write.
-    record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=[SNAPSHOT_DIR])
+    # Include the export directory when reserving the append-only namespace.
+    extra_dirs = [SNAPSHOT_DIR]
+    if args.export_envelopes and not args.dry_run:
+        extra_dirs.append(args.export_envelopes)
+    try:
+        record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=extra_dirs)
+    except OSError as exc:
+        print(f"ERROR: cannot reserve campaign record: {exc}", file=sys.stderr)
+        return 1
 
     # Capture the DUT once (issue #151) and render every bench against that
     # copy before any request is prepared. The snapshot directory holds the DUT,
@@ -473,23 +493,25 @@ def main(argv=None) -> int:
     snap_dir = SNAPSHOT_DIR / f"{record_id}-psrr-noise"
     if args.dry_run:
         snap_dir = Path(tempfile.mkdtemp(prefix="opamp-psrr-noise-dryrun-")) / "snapshot"
-    keep_snapshot = False
-    try:
-        rc = _run(args, benches, corners, temps, sha, record_id, snap_dir)
-        keep_snapshot = not args.dry_run and rc is not None and rc[1]
-        return rc[0]
-    finally:
-        # A failed run writes no record, so it leaves no orphan snapshot either.
-        if not args.dry_run and not keep_snapshot:
-            shutil.rmtree(snap_dir, ignore_errors=True)
+    with ExitStack() as rollback:
+        if not args.dry_run:
+            rollback.callback(shutil.rmtree, snap_dir, ignore_errors=True)
+        try:
+            rc, recorded = _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback)
+        except OSError as exc:
+            print(f"ERROR: campaign {record_id} could not be written: {exc}", file=sys.stderr)
+            return 1
+        if recorded:
+            rollback.pop_all()
+        return rc
 
 
-def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, bool]:
+def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> tuple[int, bool]:
     """(exit code, record written)."""
     dut_root = snap_dir.parent if args.dry_run else REPO_ROOT
     dut, bodies = capture_benches(snap_dir, benches, repo_root=dut_root)
     print(f"DUT snapshot: {dut['snapshot_path']} ({dut['sha256']})", file=sys.stderr)
-    with tempfile.TemporaryDirectory(prefix="opamp-psrr-noise-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="opamp-psrr-noise-") as tmp, ExitStack() as staging:
         tmpdir = Path(tmp)
         results: dict[str, dict] = {}
         failures: list[str] = []
@@ -517,6 +539,21 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         if args.dry_run:
             print(f"dry-run snapshot dir (kept, outside the records tree): {snap_dir}")
             return 0, False
+
+        # Test writability before dispatch. Stage on each destination filesystem
+        # so a complete file can be linked into place without overwriting one.
+        envelope_dir = args.export_envelopes or RECORDS_DIR
+        stage_dirs = {}
+        for directory in {RECORDS_DIR, envelope_dir}:
+            directory.mkdir(parents=True, exist_ok=True)
+            stage_dirs[directory] = Path(staging.enter_context(
+                tempfile.TemporaryDirectory(prefix=f".{record_id}-", dir=directory)))
+        pending = {}
+
+        def stage_path(destination):
+            path = stage_dirs[destination.parent] / destination.name
+            pending[destination] = path
+            return path
 
         # One `klt sim` per bench. They are submitted concurrently only because
         # each is a thin client waiting on its own backend job (the batch fleet
@@ -553,7 +590,6 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 print(f"  - {f}", file=sys.stderr)
             return 1, False
 
-        RECORDS_DIR.mkdir(parents=True, exist_ok=True)
         log_dir = artifact_store.stage_dir(ARTIFACT_BENCH, record_id)
         # Stage the per-corner logs and store them BEFORE any record is written: a failed
         # put leaves nothing under manifests/ or records/ and the stage is kept (issue #240).
@@ -569,28 +605,31 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         manifest_path = None
         if any(n_logs.values()):
             try:
-                manifest_path, _summary = artifact_store.store(ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
+                manifest_path, summary = artifact_store.store(
+                    ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
+                for path in (manifest_path, summary):
+                    rollback.callback(path.unlink, missing_ok=True)
             except artifact_store.ArtifactError as exc:
                 print(f"ERROR: raw outputs not stored; no record written: {exc}", file=sys.stderr)
-                return 1, False  # (exit, record written) -- main() subscripts rc[1]
+                return 1, False
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
             rows, fields = corner_rows(bench, payload)
             csv_path = RECORDS_DIR / f"{record_id}-{tag}.csv"
-            write_csv(csv_path, rows, fields)
+            write_csv(stage_path(csv_path), rows, fields)
             written.append(csv_path)
             req_rec = dict(res["request"])
             req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
-            write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
-            env_path = (args.export_envelopes or RECORDS_DIR) / f"{record_id}-{tag}.klt.json"
-            env_path.parent.mkdir(parents=True, exist_ok=True)
+            req_path = RECORDS_DIR / f"{record_id}-{tag}.request.json"
+            write_new(stage_path(req_path), json.dumps(req_rec, indent=2) + "\n")
+            env_path = envelope_dir / f"{record_id}-{tag}.klt.json"
             published = payload
             if "client_ngspice_binary" in (payload.get("environment") or {}):
                 environment = dict(payload["environment"] or {})
                 environment.pop("client_ngspice_binary", None)
                 published = {**payload, "environment": environment}
-            write_new(env_path, json.dumps(published, indent=2) + "\n")
+            write_new(stage_path(env_path), json.dumps(published, indent=2) + "\n")
             n_art = n_logs[bench]
             for c in payload["corners"]:
                 src = (c.get("artifacts") or {}).get("deck")
@@ -642,7 +681,11 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             },
         }
-        write_new(RECORDS_DIR / f"{record_id}-psrr-noise.json", json.dumps(meta, indent=2) + "\n")
+        write_new(stage_path(RECORDS_DIR / f"{record_id}-psrr-noise.json"), json.dumps(meta, indent=2) + "\n")
+        # Publish metadata last. Roll back only the links this run created.
+        for destination, source in pending.items():
+            os.link(source, destination)
+            rollback.callback(destination.unlink, missing_ok=True)
         print(f"Wrote record {record_id}-psrr-noise:")
         for w in written:
             print(f"  {w.relative_to(REPO_ROOT)}")

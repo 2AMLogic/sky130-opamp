@@ -5,6 +5,7 @@ Covers the frequency<->index map, the log-log noise-corner interpolation, the
 No ngspice, PDK or klt is needed.
 """
 
+import json
 import math
 import re
 import unittest
@@ -355,6 +356,27 @@ class CornerRowsTests(unittest.TestCase):
             corner("ff", -40.0, 1.98, "error", [])]})
         self.assertIsNone(rows[0]["en_floor_graded_nv_rthz"])
         self.assertIsNone(rows[0]["en_floor_nv_rthz"])
+
+    def test_floor_agreement_requires_valid_matching_densities(self):
+        def check_corner(name, graded, spot):
+            values = {f"en_k{k:03d}": 22e-9 for k in m.FLOOR_WINDOW_IDX}
+            values[f"en_k{m.FLOOR_WINDOW_IDX[-1]:03d}"] = spot
+            return {"corner_id": name, "measurements": meas(**values, en_floor=graded)}
+
+        good = check_corner("good", 22e-9, 22e-9)
+        for graded, spot, agrees in (
+            (22e-9, 22e-9, True), (0.0, 0.0, True), (22e-9, 0.0, False),
+            (-1e-9, -1e-9, False), (22e-9, -1e-9, False), (-1e-9, 22e-9, False),
+            (22e-9, math.nan, False), (22e-9, math.inf, False), (math.inf, 22e-9, False),
+        ):
+            with self.subTest(graded=graded, spot=spot):
+                result = m.floor_grading_meta({"corners": [good, check_corner("test", graded, spot)]})
+                self.assertIs(result["corners"][1]["agrees"], agrees)
+                self.assertIs(result["klt_vs_python"]["agrees"], agrees)
+                if spot == 0 and graded != 0:
+                    self.assertIsNone(result["corners"][1]["rel_delta"])
+                    self.assertEqual(result["klt_vs_python"]["max_abs_delta_v"], graded)
+                json.dumps(result, allow_nan=False)
 
     def test_noise_failed_corner_reported_with_none_fields(self):
         payload = {"corners": [

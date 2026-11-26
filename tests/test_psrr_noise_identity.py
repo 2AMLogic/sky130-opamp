@@ -131,6 +131,55 @@ class SubmissionTests(unittest.TestCase):
         self.assertEqual(list(repo.campaign()), [])
         self.assertEqual(list(repo.snaps.glob("*")) if repo.snaps.exists() else [], [])
 
+    def test_export_destination_is_checked_before_submission(self):
+        repo = Repo(self)
+        destination = repo.tmp / "envelopes.json"
+        destination.write_text("existing file")
+        submit = mock.Mock()
+        rc = self.run_sweep(repo, submit, ["--benches", "noise", "--export-envelopes", destination.name])
+        self.assertEqual(rc, 1)
+        submit.assert_not_called()
+        self.assertEqual(destination.read_text(), "existing file")
+        self.assertFalse(list(repo.records.glob("*.json")))
+        self.assertFalse(list(repo.snaps.glob("*")))
+
+    def test_late_export_collision_rolls_back_only_this_campaign(self):
+        repo = Repo(self)
+        destination = repo.tmp / "envelopes"
+        destination.mkdir()
+
+        def submit(req_path, outdir, backend):
+            # An export target appears after preflight, for the second bench.
+            snapshot = Path(json.loads(req_path.read_text())["netlist"]).parent
+            rid = snapshot.name.removesuffix("-psrr-noise")
+            (destination / f"{rid}-noise.klt.json").write_text("existing envelope")
+            return 0, fake_payload(None), ""
+
+        rc = self.run_sweep(repo, submit, ["--benches", "psrr_vdd,noise", "--export-envelopes", "envelopes"])
+        self.assertEqual(rc, 1)
+        existing, = destination.iterdir()
+        self.assertEqual(existing.read_text(), "existing envelope")
+        self.assertFalse([p for p in repo.records.iterdir() if p.is_file()])
+        self.assertFalse(list(repo.snaps.glob("*")))
+
+    def test_partial_envelope_write_discards_campaign(self):
+        repo = Repo(self)
+        write_new = m.write_new
+
+        def write(path, text):
+            if path.name.endswith("-noise.klt.json"):
+                path.write_text(text[:10])
+                raise OSError("disk full")
+            return write_new(path, text)
+
+        with mock.patch.object(m, "write_new", side_effect=write):
+            rc = self.run_sweep(repo, lambda *args: (0, fake_payload(None), ""),
+                                ["--benches", "psrr_vdd,noise", "--export-envelopes", "envelopes"])
+        self.assertEqual(rc, 1)
+        self.assertFalse(list((repo.tmp / "envelopes").iterdir()))
+        self.assertFalse([p for p in repo.records.iterdir() if p.is_file()])
+        self.assertFalse(list(repo.snaps.glob("*")))
+
     def test_dry_run_leaves_records_tree_untouched(self):
         repo = Repo(self)
         called = []

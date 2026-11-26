@@ -94,7 +94,7 @@
         "role": "testbench",
         "path": "sim/opamp-characterization/bin/psrr_noise_sweep.py",
         "passed": true,
-        "content_hash": "sha256:f52103ced211b783b27647c1c91e62f2cecf52e5355a144d52b0416ba95dd972"
+        "content_hash": "sha256:1d5f89a7e4b90f9cf69805847f22f608a820377f49453ea599b7cf657315a0b2"
       },
       {
         "check": "present",
