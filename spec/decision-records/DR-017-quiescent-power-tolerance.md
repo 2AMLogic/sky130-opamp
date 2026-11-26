@@ -17,7 +17,9 @@
 - **Related**: [`DR-003`](DR-003-target-spec-ratification.md) (ratified the
   row's ≈ figures and explicitly declined to set a tolerance),
   [`DR-002`](DR-002-device-sizing.md) (§(a) 65 µA budget the ≈ estimate
-  encodes), DR-016, proposed in PR #350 for issue #289 (the slew-rate
+  encodes), [`DR-007`](DR-007-device-resize-gbw-slew-swing.md) (device
+  resize that superseded the DR-002 sizing used for DR-003's
+  quiescent-current measurements), DR-016, proposed in PR #350 for issue #289 (the slew-rate
   sibling record under the same operator ruling), issue #277 (this issue),
   #246 / PR #275 (the committed item-5 envelope this record grades),
   [#3](https://github.com/2AMLogic/sky130-opamp/issues/3) (gap-to-T1 item 5,
