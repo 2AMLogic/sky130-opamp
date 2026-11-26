@@ -1,0 +1,58 @@
+
+* ONE local .op probe (issue #359): variant OP for the Pelgrom hand calc. NOT a record.
+.option scale=1u
+.param mc_mm_switch=0
+.param mc_pr_switch=0
+.include "/home/ubuntu/.volare/sky130A/libs.tech/ngspice/corners/tt.spice"
+.include "/home/ubuntu/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical.spice"
+.include "/home/ubuntu/.volare/sky130A/libs.tech/ngspice/r+c/res_typical__cap_typical__lin.spice"
+.temp 27
+
+.include "/home/ubuntu/GitHub/sky130-opamp/.loom/worktrees/issue-359/sim/opamp-characterization/variants/input-stage/icmr-rebias.spice"
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Vinn inn 0 dc 0.8999245
+Vinp inp 0 dc 0.9000755
+.control
+op
+print v(out) v(d1) v(d2) v(tail)
+print @m.xm1.msky130_fd_pr__nfet_01v8[gm] @m.xm1.msky130_fd_pr__nfet_01v8[gds] @m.xm1.msky130_fd_pr__nfet_01v8[id]
+print @m.xm2.msky130_fd_pr__nfet_01v8[gds]
+print @m.xm3.msky130_fd_pr__pfet_01v8[gm] @m.xm3.msky130_fd_pr__pfet_01v8[gds] @m.xm3.msky130_fd_pr__pfet_01v8[id]
+print @m.xm4.msky130_fd_pr__pfet_01v8[gds]
+print @m.xm6.msky130_fd_pr__pfet_01v8[gm] @m.xm6.msky130_fd_pr__pfet_01v8[id]
+print @m.xm7.msky130_fd_pr__nfet_01v8[gm] @m.xm7.msky130_fd_pr__nfet_01v8[id]
+.endc
+.end
+
+
+Note: No compatibility mode selected!
+
+
+Circuit: * one local .op probe (issue #359): variant op for the pelgrom hand calc. not a record.
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+ Reference value :  0.00000e+00
+No. of Data Rows : 1
+v(out) = 1.037749e+00
+v(d1) = 8.839963e-01
+v(d2) = 8.757789e-01
+v(tail) = 2.551470e-01
+@m.xm1.msky130_fd_pr__nfet_01v8[gm] = 1.007474e-04
+@m.xm1.msky130_fd_pr__nfet_01v8[gds] = 5.280222e-07
+@m.xm1.msky130_fd_pr__nfet_01v8[id] = 4.761733e-06
+@m.xm2.msky130_fd_pr__nfet_01v8[gds] = 5.316111e-07
+@m.xm3.msky130_fd_pr__pfet_01v8[gm] = 7.552109e-05
+@m.xm3.msky130_fd_pr__pfet_01v8[gds] = 1.323774e-06
+@m.xm3.msky130_fd_pr__pfet_01v8[id] = 4.761733e-06
+@m.xm4.msky130_fd_pr__pfet_01v8[gds] = 1.322983e-06
+@m.xm6.msky130_fd_pr__pfet_01v8[gm] = 8.227474e-04
+@m.xm6.msky130_fd_pr__pfet_01v8[id] = 5.192905e-05
+@m.xm7.msky130_fd_pr__nfet_01v8[gm] = 9.489725e-04
+@m.xm7.msky130_fd_pr__nfet_01v8[id] = 5.192904e-05
+Note: Simulation executed from .control section 
+

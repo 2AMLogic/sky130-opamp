@@ -94,12 +94,7 @@ class LoadTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "s.csv"
             p.write_text(text)
-            old = ts.FULL
-            ts.FULL = str(p)
-            try:
-                rows = ts.load()
-            finally:
-                ts.FULL = old
+            rows = ts.load("nfet", ts.L_UM, path=p)
         self.assertEqual(set(rows), {("tt", 27.0), ("ss", -40.0)})
         self.assertEqual([v for v, _, _ in rows[("tt", 27.0)]], [0.2, 0.6])
         self.assertEqual(len(rows[("ss", -40.0)]), 1)
@@ -108,7 +103,7 @@ class LoadTests(unittest.TestCase):
 class CommittedNetlistTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.rows = ts.load()
+        cls.rows = ts.load("nfet", ts.L_UM)
 
     def test_default_matches_tail_clamp_spice(self):
         w = mcl_unit_width_um(self.rows, ts.V_CLAMP_DESIGN, ts.MCL_M)

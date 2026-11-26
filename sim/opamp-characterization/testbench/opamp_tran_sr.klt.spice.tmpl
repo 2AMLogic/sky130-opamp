@@ -1,16 +1,34 @@
-* opamp_core unity-gain-buffer slew-rate testbench, `klt sim` circuit BODY (issue #77)
+* opamp_core unity-gain-buffer slew-rate testbench, `klt sim` circuit BODY (issues #17, #77, #278)
 *
-* Fleet-executable twin of opamp_tran_sr.spice.tmpl. Same real unity-gain
-* connection (Rshort 1 mOhm out->inn), same 20 %-80 % slew definition on a
-* step between 0.3*VDD and 0.7*VDD (the original's V_LOW/V_HIGH = VDD/2 -/+
-* 0.2*VDD). The stimulus levels and the 20/80 % trigger levels scale with each
-* corner's own VDD (`alter vdd`) through behavioural sources, so one request
-* carries the whole supply axis:
+* Measures `design/netlist/opamp_core.spice`'s large-signal slew rate into
+* CL = 2 pF [DR-001], via the classic 20 %-80 % unity-gain-buffer step
+* response. klt supplies the .lib/.temp/alter-vdd cards and the .control
+* block; the analysis and the `.meas` cards live in the request
+* (bin/pvt_sweep.py build_klt_request).
+*
+* Feedback: `inn` is wired directly to `out` through a negligible-resistance
+* resistor (Rshort, 1 mOhm -- ngspice will not accept a literal zero-ohm
+* two-terminal element in some analysis modes, so a small non-zero value
+* stands in for a wire) -- a real physical unity-gain-buffer connection,
+* not the AC bench's DC-servo artifice, since this is a genuine large-signal
+* closed-loop transient, not an open-loop small-signal one.
+*
+* Stimulus: `inp` steps between 0.3*VDD and 0.7*VDD (a fixed fraction of
+* VDD around mid-supply, chosen in bin/pvt_sweep.py so the same relative
+* stimulus scales with each corner's own supply -- see ../README.md
+* "Stimulus choices") with a fast 1 ns edge, well inside the linear input
+* range this experiment's own opamp_dc_swing.klt.spice.tmpl bench confirms
+* independently. The levels scale with each corner's own VDD (`alter vdd`)
+* through behavioural sources, so one request carries the whole supply axis:
 *   Vp      unit pulse (0 -> 1), the only explicit transient source
 *   Bin     inp = VDD * (0.3 + 0.4 * Vp)
 *   Bl20/80 trigger levels  V_LOW + 0.2*span, V_LOW + 0.8*span
-* The crossing times are measured with `.meas ... when v(out)=v(level)`; the
-* slew rate itself (0.6*span / (t80 - t20)) is derived in bin/pvt_sweep.py.
+*
+* Measurement: `.meas ... when v(out)=v(level)` times the 20 %-80 % (rise)
+* and 80 %-20 % (fall) transit of `v(out)` between the step's low and high
+* levels -- the textbook slew-rate measurement convention -- so
+* SR = 0.6*(V_HIGH-V_LOW) / measured_time in each direction.
+* bin/pvt_sweep.py derives the row from the measured crossing times.
 
 .option scale=1u
 

@@ -1,4 +1,8 @@
 *.raw
+# #298: raw ngspice sample dumps (the .json sibling of *.raw) stay out of git;
+# one golden input read by tests/test_pvt_sweep.py is retained explicitly.
+waveform.raw.json
+!sim/opamp-characterization/records/20261010-103340-ba1dfa8-0241c1-logs/klt-dc-swing/ss_1p620V_n40C/waveform.raw.json
 *.log
 *.vcd
 *.vvp

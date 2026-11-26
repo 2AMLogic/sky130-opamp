@@ -28,39 +28,19 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import csv
 import math
-import os
-from collections import defaultdict
+import sys
+from pathlib import Path
 
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-FULL = os.path.join(REPO, "sim", "gm-id-characterization", "records",
-                    "20260909-062847-35a9d46-full-sweep.csv")
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+from _gmid import GRID_UM, I_UNIT_A, SWEEP_W_UM, legal, load, snap  # noqa: E402
 
-GRID_UM = 0.005
 L_UM = 1.2            # same channel length as the MB1/M5/M7 group (tracking)
-SWEEP_W_UM = 2.0
-I_UNIT_A = 5e-6       # DR-007: 5 uA per mirror unit
 W_MIRROR_UM = 7.819   # DR-007 drawn MB1/M5/M7 unit width (inherited, off-grid)
 I_CLAMP_A = 10e-6     # MCL must be able to carry the whole tail current (2 units)
 V_CLAMP_DESIGN = 0.100  # design clamp level of the tail node at tt / 27 C (V)
 MCL_M = 8             # MCL drawn as 8 parallel units (m = 8)
-
-
-def load():
-    rows = defaultdict(list)
-    with open(FULL) as fh:
-        for r in csv.DictReader(fh):
-            if r["device"] != "nfet" or float(r["length_um"]) != L_UM:
-                continue
-            idv = float(r["id_a"])
-            if idv <= 0:
-                continue
-            rows[(r["corner"], float(r["temp_c"]))].append(
-                (float(r["overdrive_bias_v"]), idv, r))
-    for k in rows:
-        rows[k].sort(key=lambda t: t[0])
-    return rows
 
 
 def vgs_at_density(series, j_ua_per_um):
@@ -81,19 +61,14 @@ def density_at_vgs(series, vgs):
     raise ValueError(f"Vgs {vgs} outside sweep")
 
 
-def snap(w):
-    return round(w / GRID_UM) * GRID_UM
-
-
-def main():
-    global V_CLAMP_DESIGN, MCL_M
+def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--vclamp", type=float, default=V_CLAMP_DESIGN,
                     help="design clamp level of V(tail) at tt/27C (V); default %(default)s")
     ap.add_argument("--m", type=int, default=MCL_M, help="MCL unit count; default %(default)s")
-    args = ap.parse_args()
-    V_CLAMP_DESIGN, MCL_M = args.vclamp, args.m
-    rows = load()
+    args = ap.parse_args(argv)
+    vclamp, m = args.vclamp, args.m
+    rows = load("nfet", L_UM)
     tt = rows[("tt", 27.0)]
     j0 = I_UNIT_A / W_MIRROR_UM * 1e6
     vgs_b, r0, r1 = vgs_at_density(tt, j0)
@@ -103,16 +78,16 @@ def main():
           f"{float(r1['gm_id_per_v']):.6f} @ Vgs {r1['overdrive_bias_v']})")
     print(f"   Vgs(MB1) = {vgs_b:.4f} V   (= V(ibias), the clamp gate)")
 
-    vgs_cl = vgs_b - V_CLAMP_DESIGN
+    vgs_cl = vgs_b - vclamp
     j_cl = density_at_vgs(tt, vgs_cl)
     w_tot = I_CLAMP_A / (j_cl * 1e-6)
-    w_unit = snap(w_tot / MCL_M)
-    print(f"\n2. Clamp MCL, tt/27C: Vgs = {vgs_b:.4f} - {V_CLAMP_DESIGN:.3f} = {vgs_cl:.4f} V")
+    w_unit = snap(w_tot / m)
+    print(f"\n2. Clamp MCL, tt/27C: Vgs = {vgs_b:.4f} - {vclamp:.3f} = {vgs_cl:.4f} V")
     print(f"   J_cl = {j_cl:.6f} uA/um  (density ratio J0/J_cl = {j0 / j_cl:.2f})")
-    print(f"   W_total for {I_CLAMP_A * 1e6:.0f} uA = {w_tot:.3f} um -> m = {MCL_M} x {w_unit:.3f} um "
-          f"(on 0.005 um grid: {abs(w_unit / GRID_UM - round(w_unit / GRID_UM)) < 1e-9}), "
-          f"drawn total {w_unit * MCL_M:.3f} um")
-    w_drawn = w_unit * MCL_M
+    print(f"   W_total for {I_CLAMP_A * 1e6:.0f} uA = {w_tot:.3f} um -> m = {m} x {w_unit:.3f} um "
+          f"(on 0.005 um grid: {legal(w_unit)}), "
+          f"drawn total {w_unit * m:.3f} um")
+    w_drawn = w_unit * m
 
     print("\n3. Implied clamp level V(tail) at which MCL carries 10 uA (Vsb = 0 estimate):")
     print("   corner  T(C)   Vgs(MB1)  Vgs(MCL,10uA)  clamp level")
@@ -123,7 +98,7 @@ def main():
         print(f"   {corner:6s} {temp:6.1f}   {vb:.4f}    {vc:.4f}         {vb - vc:+.4f} V")
 
     print("\n4. Drawn gate area added: MCL "
-          f"{MCL_M} x {w_unit:.3f} x {L_UM} = {w_drawn * L_UM:.2f} um^2 "
+          f"{m} x {w_unit:.3f} x {L_UM} = {w_drawn * L_UM:.2f} um^2 "
           "(gate area only; not a layout area)")
 
 

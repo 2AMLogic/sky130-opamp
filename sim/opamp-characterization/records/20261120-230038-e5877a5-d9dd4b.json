@@ -1,0 +1,3889 @@
+{
+  "record_id": "20261120-230038-e5877a5-d9dd4b",
+  "timestamp": "2026-11-20T23:31:07.712496+00:00",
+  "git": {
+    "sha": "e5877a5"
+  },
+  "dut": {
+    "source_path": "sim/opamp-characterization/variants/input-stage/icmr-rebias.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/opamp_core.spice",
+    "sha256": "sha256:8c1160ee1c6cbb3eb411245280694f60fc539e69bc040e58444d08aac0b86a6d"
+  },
+  "experiment": {
+    "slug": "opamp-characterization",
+    "title": "opamp_core PVT-corner open-loop AC / slew-rate / output-swing bench",
+    "claim": "Op-amp-level (not bare-device) closed-loop/open-loop AC and transient measurements of design/netlist/opamp_core.spice against DR-002's schematic-level sizing estimates, over the confirmed 5-corner MOS grid at -40/27/125 C."
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "analyses": [
+      "ac",
+      "tran_sr",
+      "dc_swing",
+      "swing_fixcm",
+      "icmr",
+      "tran_sr_icmr"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "cl_f": "2p",
+    "ibias_a": "5u",
+    "supply_mode": "paired",
+    "supplies_v": [
+      1.62,
+      1.8,
+      1.98
+    ],
+    "expected_tuples": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8
+      }
+    ],
+    "n_expected_tuples_per_analysis": 15,
+    "n_runs": 90,
+    "n_failed": 1,
+    "execution": {
+      "klt_analyses": [
+        "ac",
+        "tran_sr",
+        "dc_swing",
+        "swing_fixcm",
+        "icmr",
+        "tran_sr_icmr"
+      ],
+      "local_ngspice_analyses": [],
+      "fleet_flag": true,
+      "backend": "batch",
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "klt_backend": "batch",
+    "icmr_cmrr_floors_db": {
+      "40db": 40.0,
+      "30db": 30.0,
+      "50db": 50.0
+    },
+    "icmr_dv_v": 0.01,
+    "icmr_vstep_v": 0.005,
+    "target_icmr_v": [
+      0.888,
+      1.024
+    ],
+    "consumer_sense_v": 0.73,
+    "cmrr_cm_points": {
+      "mid": "0.5*v(vdd)",
+      "window": "0.956"
+    },
+    "swing_fixcm": {
+      "vcm_frac_of_vdd": 0.5,
+      "servo_scale_g": 100.0,
+      "servo_gain_ks": 1.0,
+      "vid_clamp_v": 0.25,
+      "vid_valid_v": 0.05,
+      "cm_tol_v": 1e-06,
+      "gain_floors_db": {
+        "12db": 12.041199826559248,
+        "40db": 40.0,
+        "60db": 60.0
+      },
+      "primary_floor": "12db",
+      "attribution_tol_v": 0.02,
+      "sweep": "Vsw 0 1.000001 0.00277777777778 (v(set) = VDD*v(sw))",
+      "load": {
+        "cl_f": "2p",
+        "dc_load": "none (Cload only)"
+      },
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    },
+    "tran_sr_icmr": {
+      "guard_v": 0.05,
+      "min_span_v": 0.2,
+      "stimulus": "standard 0.3..0.7*VDD intersected with [ICMR_low+guard, ICMR_high-guard] of the same point",
+      "end_margin_s": 1e-08,
+      "timing": {
+        "delay_s": 2e-07,
+        "edge_s": 1e-09,
+        "pw_s": 1e-06,
+        "stop_s": 2.2e-06
+      },
+      "reach_tol": 0.1,
+      "settle_tol": 0.01,
+      "rate_window_s": 6e-09,
+      "plateau_frac_of_peak": 0.9,
+      "slew_limited_min_fraction": 0.4,
+      "linear_max_fraction": 0.15,
+      "tail_vds_loss_v": 0.1,
+      "pair_vds_loss_v": 0.1,
+      "gain_ratio": 1.1,
+      "same_band_ratio": 0.9,
+      "solver_settings": {
+        "policy": "DR-006",
+        "option_scale": "1u",
+        "reltol": "default",
+        "abstol": "default",
+        "vntol": "default",
+        "overrides": "none"
+      }
+    }
+  },
+  "pdk": {
+    "variant": "sky130A",
+    "root": "/home/ubuntu/.volare",
+    "installed_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "pinned_commit": "c6d73a35f524070e85faff4a6a9eef49553ebc2b",
+    "matches_pin": true,
+    "rc_corner": "typical"
+  },
+  "tools": {
+    "ngspice": "not invoked (klt/fleet execution)",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1017-aws x86_64",
+    "klt": "klt 0.9.3.dev2575+g6bd18bbc8637",
+    "klt_cmd": "klt"
+  },
+  "klt_jobs": [
+    {
+      "tag": "ac-iq",
+      "backend": "batch",
+      "status": "fail",
+      "corner_count": 15,
+      "wall_s": 106.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-9610ec1bf190",
+        "region": "us-east-1",
+        "instance_id": "i-03f62b66d9351d147",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 30,
+        "client_submitted_at": "2026-11-20T23:00:39.073671Z",
+        "client_launched_at": "2026-11-20T23:01:16.288815Z",
+        "client_status_terminal_at": "2026-11-20T23:02:21.662350Z",
+        "client_collected_at": "2026-11-20T23:02:24.221200Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "exit_reason": {
+          "exit_code": 3,
+          "report_status": "fail",
+          "nothing_checked": false,
+          "nothing_checked_reasons": [],
+          "message": "klt sim exited 3 (a corner or measurement failed): aggregate status 'fail'; the job state is failed because of this verdict exit code, not a runner crash and not the whole-job ceiling (a ceiling kill reports state timeout, exit 124)",
+          "units": {
+            "total": 15,
+            "by_status": {
+              "fail": 14,
+              "pass": 1
+            },
+            "first_not_passed": [
+              {
+                "corner_id": "tt/1.800V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "tt/1.800V/27C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              },
+              {
+                "corner_id": "tt/1.800V/125C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              },
+              {
+                "corner_id": "ff/1.980V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/27C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              }
+            ]
+          }
+        },
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 9
+        },
+        "by_severity": {
+          "warning": 9
+        },
+        "corners_with_diagnostics": 9
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/ac-iq-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-ac-iq-response.json"
+    },
+    {
+      "tag": "ac",
+      "backend": "batch",
+      "status": "fail",
+      "corner_count": 15,
+      "wall_s": 104.8,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-259c00238604",
+        "region": "us-east-1",
+        "instance_id": "i-0ce02fad58e22a4a0",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 33,
+        "client_submitted_at": "2026-11-20T23:00:39.056011Z",
+        "client_launched_at": "2026-11-20T23:01:15.989005Z",
+        "client_status_terminal_at": "2026-11-20T23:02:20.668646Z",
+        "client_collected_at": "2026-11-20T23:02:22.346726Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "exit_reason": {
+          "exit_code": 3,
+          "report_status": "fail",
+          "nothing_checked": false,
+          "nothing_checked_reasons": [],
+          "message": "klt sim exited 3 (a corner or measurement failed): aggregate status 'fail'; the job state is failed because of this verdict exit code, not a runner crash and not the whole-job ceiling (a ceiling kill reports state timeout, exit 124)",
+          "units": {
+            "total": 15,
+            "by_status": {
+              "fail": 14,
+              "pass": 1
+            },
+            "first_not_passed": [
+              {
+                "corner_id": "tt/1.800V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "tt/1.800V/27C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              },
+              {
+                "corner_id": "tt/1.800V/125C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              },
+              {
+                "corner_id": "ff/1.980V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/27C",
+                "status": "fail",
+                "code": "nonconvergence",
+                "message": "Warning: Dynamic gmin stepping failed"
+              }
+            ]
+          }
+        },
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 9
+        },
+        "by_severity": {
+          "warning": 9
+        },
+        "corners_with_diagnostics": 9
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/ac-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-ac-response.json"
+    },
+    {
+      "tag": "tran-sr",
+      "backend": "batch",
+      "status": "fail",
+      "corner_count": 15,
+      "wall_s": 105.6,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-56d2c01800c7",
+        "region": "us-east-1",
+        "instance_id": "i-08528a61a5ee55726",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 32,
+        "client_submitted_at": "2026-11-20T23:02:23.890629Z",
+        "client_launched_at": "2026-11-20T23:03:01.525153Z",
+        "client_status_terminal_at": "2026-11-20T23:04:06.028268Z",
+        "client_collected_at": "2026-11-20T23:04:08.063813Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "exit_reason": {
+          "exit_code": 3,
+          "report_status": "fail",
+          "nothing_checked": false,
+          "nothing_checked_reasons": [],
+          "message": "klt sim exited 3 (a corner or measurement failed): aggregate status 'fail'; the job state is failed because of this verdict exit code, not a runner crash and not the whole-job ceiling (a ceiling kill reports state timeout, exit 124)",
+          "units": {
+            "total": 15,
+            "by_status": {
+              "fail": 15
+            },
+            "first_not_passed": [
+              {
+                "corner_id": "tt/1.800V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "tt/1.800V/27C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "tt/1.800V/125C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/27C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              }
+            ]
+          }
+        },
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-response.json"
+    },
+    {
+      "tag": "dc-swing",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 105.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-b1128d969841",
+        "region": "us-east-1",
+        "instance_id": "i-06e466120b18991a9",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 34,
+        "client_submitted_at": "2026-11-20T23:02:25.880916Z",
+        "client_launched_at": "2026-11-20T23:03:02.944218Z",
+        "client_status_terminal_at": "2026-11-20T23:04:07.570022Z",
+        "client_collected_at": "2026-11-20T23:04:09.401974Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 4
+        },
+        "by_severity": {
+          "warning": 4
+        },
+        "corners_with_diagnostics": 4
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/dc-swing-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-dc-swing-response.json"
+    },
+    {
+      "tag": "swing-fixcm",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 15,
+      "wall_s": 110.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-53102379fb31",
+        "region": "us-east-1",
+        "instance_id": "i-09c9ff7f2ec62497b",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 31,
+        "client_submitted_at": "2026-11-20T23:04:09.395275Z",
+        "client_launched_at": "2026-11-20T23:04:50.474207Z",
+        "client_status_terminal_at": "2026-11-20T23:05:55.648589Z",
+        "client_collected_at": "2026-11-20T23:05:58.249092Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/swing-fixcm-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-swing-fixcm-response.json"
+    },
+    {
+      "tag": "icmr-tt",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 109.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-76df1cab0084",
+        "region": "us-east-1",
+        "instance_id": "i-03e645aa80cc4ee2c",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 39,
+        "client_submitted_at": "2026-11-20T23:04:11.572052Z",
+        "client_launched_at": "2026-11-20T23:04:51.067985Z",
+        "client_status_terminal_at": "2026-11-20T23:05:55.923193Z",
+        "client_collected_at": "2026-11-20T23:05:58.249225Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 1920.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/icmr-tt-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-icmr-tt-response.json"
+    },
+    {
+      "tag": "icmr-ff",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 111.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-404716f5fe39",
+        "region": "us-east-1",
+        "instance_id": "i-0b2bcf0221835b394",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 44,
+        "client_submitted_at": "2026-11-20T23:06:00.199885Z",
+        "client_launched_at": "2026-11-20T23:06:42.071870Z",
+        "client_status_terminal_at": "2026-11-20T23:07:47.552396Z",
+        "client_collected_at": "2026-11-20T23:07:50.105051Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 1920.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/icmr-ff-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-icmr-ff-response.json"
+    },
+    {
+      "tag": "icmr-ss",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 113.3,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-18eddacbdd7d",
+        "region": "us-east-1",
+        "instance_id": "i-00a76b412c9862a5a",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 43,
+        "client_submitted_at": "2026-11-20T23:06:00.304547Z",
+        "client_launched_at": "2026-11-20T23:06:43.818901Z",
+        "client_status_terminal_at": "2026-11-20T23:07:49.483136Z",
+        "client_collected_at": "2026-11-20T23:07:51.584543Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 1920.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/icmr-ss-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-icmr-ss-response.json"
+    },
+    {
+      "tag": "icmr-sf",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 113.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c5658fb48181",
+        "region": "us-east-1",
+        "instance_id": "i-028593ebdb11f9e5f",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 53,
+        "client_submitted_at": "2026-11-20T23:07:52.416638Z",
+        "client_launched_at": "2026-11-20T23:08:34.983855Z",
+        "client_status_terminal_at": "2026-11-20T23:09:40.149264Z",
+        "client_collected_at": "2026-11-20T23:09:43.228357Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 1920.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/icmr-sf-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-icmr-sf-response.json"
+    },
+    {
+      "tag": "icmr-fs",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 3,
+      "wall_s": 112.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-a6a8f045adb3",
+        "region": "us-east-1",
+        "instance_id": "i-07c4a67afc32de8e0",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 44,
+        "client_submitted_at": "2026-11-20T23:07:53.383784Z",
+        "client_launched_at": "2026-11-20T23:08:36.946037Z",
+        "client_status_terminal_at": "2026-11-20T23:09:41.916631Z",
+        "client_collected_at": "2026-11-20T23:09:44.057225Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 3,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 1920.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {
+          "nonconvergence": 3
+        },
+        "by_severity": {
+          "warning": 3
+        },
+        "corners_with_diagnostics": 3
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/icmr-fs-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-icmr-fs-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 77.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-3b98a892808b",
+        "region": "us-east-1",
+        "instance_id": "i-0cd71b989677f7624",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:09:46.733831Z",
+        "client_launched_at": "2026-11-20T23:10:27.043013Z",
+        "client_status_terminal_at": "2026-11-20T23:11:00.342981Z",
+        "client_collected_at": "2026-11-20T23:11:02.397247Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-tt--40C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-tt--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 107.5,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-87c7c1c3a6ea",
+        "region": "us-east-1",
+        "instance_id": "i-02fa196873a074e6a",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 27,
+        "client_submitted_at": "2026-11-20T23:09:46.746589Z",
+        "client_launched_at": "2026-11-20T23:10:26.294815Z",
+        "client_status_terminal_at": "2026-11-20T23:11:30.731568Z",
+        "client_collected_at": "2026-11-20T23:11:32.210842Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-tt-27C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-tt-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-tt-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 74.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-2c423205c65e",
+        "region": "us-east-1",
+        "instance_id": "i-0c1349b375b40f7c5",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:11:04.037645Z",
+        "client_launched_at": "2026-11-20T23:11:40.292993Z",
+        "client_status_terminal_at": "2026-11-20T23:12:13.641858Z",
+        "client_collected_at": "2026-11-20T23:12:16.502729Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-tt-125C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-tt-125C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff--40C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 79.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-25361f2309c6",
+        "region": "us-east-1",
+        "instance_id": "i-00a03e3ecf4fc1b6b",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 20,
+        "client_submitted_at": "2026-11-20T23:11:33.544286Z",
+        "client_launched_at": "2026-11-20T23:12:15.392872Z",
+        "client_status_terminal_at": "2026-11-20T23:12:49.120284Z",
+        "client_collected_at": "2026-11-20T23:12:51.175192Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ff--40C-1.98V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ff--40C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff-27C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 113.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-8ca24657c5d7",
+        "region": "us-east-1",
+        "instance_id": "i-014f523e200d65944",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 23,
+        "client_submitted_at": "2026-11-20T23:12:18.610210Z",
+        "client_launched_at": "2026-11-20T23:13:01.953849Z",
+        "client_status_terminal_at": "2026-11-20T23:14:07.734323Z",
+        "client_collected_at": "2026-11-20T23:14:09.647385Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ff-27C-1.98V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ff-27C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ff-125C-1.98V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 81.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-eb3da87dd6db",
+        "region": "us-east-1",
+        "instance_id": "i-0b960906e4fe327d9",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:12:53.248102Z",
+        "client_launched_at": "2026-11-20T23:13:36.497841Z",
+        "client_status_terminal_at": "2026-11-20T23:14:10.043382Z",
+        "client_collected_at": "2026-11-20T23:14:12.551263Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ff-125C-1.98V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ff-125C-1.98V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss--40C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 79.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-7d18280be0ce",
+        "region": "us-east-1",
+        "instance_id": "i-064e1bb146c4a0352",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 20,
+        "client_submitted_at": "2026-11-20T23:14:11.706287Z",
+        "client_launched_at": "2026-11-20T23:14:53.559779Z",
+        "client_status_terminal_at": "2026-11-20T23:15:26.811363Z",
+        "client_collected_at": "2026-11-20T23:15:28.634795Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ss--40C-1.62V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ss--40C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss-27C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 110.7,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-7eec4863a2d1",
+        "region": "us-east-1",
+        "instance_id": "i-0f185821f5481535d",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 20,
+        "client_submitted_at": "2026-11-20T23:14:14.609485Z",
+        "client_launched_at": "2026-11-20T23:14:56.805391Z",
+        "client_status_terminal_at": "2026-11-20T23:16:01.793316Z",
+        "client_collected_at": "2026-11-20T23:16:03.528329Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ss-27C-1.62V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ss-27C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-ss-125C-1.62V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 76.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-3ca0526a8165",
+        "region": "us-east-1",
+        "instance_id": "i-024efb79d009a895c",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:15:30.260900Z",
+        "client_launched_at": "2026-11-20T23:16:10.041911Z",
+        "client_status_terminal_at": "2026-11-20T23:16:43.115261Z",
+        "client_collected_at": "2026-11-20T23:16:44.801627Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-ss-125C-1.62V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-ss-125C-1.62V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 107.2,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-142c55c2a9df",
+        "region": "us-east-1",
+        "instance_id": "i-0e531df619651ccee",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1d",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:16:05.184935Z",
+        "client_launched_at": "2026-11-20T23:16:44.806587Z",
+        "client_status_terminal_at": "2026-11-20T23:17:49.402909Z",
+        "client_collected_at": "2026-11-20T23:17:50.779302Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-sf--40C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-sf--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-sf-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 74.1,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-21d4a0aa1c4b",
+        "region": "us-east-1",
+        "instance_id": "i-0d30ed38ea1841f24",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 22,
+        "client_submitted_at": "2026-11-20T23:16:46.132812Z",
+        "client_launched_at": "2026-11-20T23:17:23.942382Z",
+        "client_status_terminal_at": "2026-11-20T23:17:57.216321Z",
+        "client_collected_at": "2026-11-20T23:17:58.825290Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-sf-27C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-sf-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs--40C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 248.4,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-516e0f608693",
+        "region": "us-east-1",
+        "instance_id": "i-060b1d9b100b7d58a",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 21,
+        "client_submitted_at": "2026-11-20T23:18:00.643128Z",
+        "client_launched_at": "2026-11-20T23:21:32.513752Z",
+        "client_status_terminal_at": "2026-11-20T23:22:05.245324Z",
+        "client_collected_at": "2026-11-20T23:22:06.955094Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-fs--40C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-fs--40C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs-27C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 150.0,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-c34fa51f3b8b",
+        "region": "us-east-1",
+        "instance_id": "i-02743299b44dfa556",
+        "instance_type": "m6i.4xlarge",
+        "availability_zone": "us-east-1f",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 23,
+        "client_submitted_at": "2026-11-20T23:22:08.820229Z",
+        "client_launched_at": "2026-11-20T23:24:00.419387Z",
+        "client_status_terminal_at": "2026-11-20T23:24:34.329455Z",
+        "client_collected_at": "2026-11-20T23:24:37.218245Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8375C CPU @ 2.90GHz",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-fs-27C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-fs-27C-1.8V-response.json"
+    },
+    {
+      "tag": "tran-sr-icmr-fs-125C-1.8V",
+      "backend": "batch",
+      "status": "pass",
+      "corner_count": 1,
+      "wall_s": 100.9,
+      "remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-94ab631d4dd7",
+        "region": "us-east-1",
+        "instance_id": "i-08d53c3d5203a69fe",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1a",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 25,
+        "client_submitted_at": "2026-11-20T23:24:39.605243Z",
+        "client_launched_at": "2026-11-20T23:25:33.016917Z",
+        "client_status_terminal_at": "2026-11-20T23:26:12.992211Z",
+        "client_collected_at": "2026-11-20T23:26:16.755015Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev2575+g6bd18bbc8637",
+        "runner_compatibility": "match",
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 1,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 720.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": false,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 1
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "diagnostic_counts": {
+        "by_code": {},
+        "by_severity": {},
+        "corners_with_diagnostics": 0
+      },
+      "request": "sim/opamp-characterization/netlist-snapshots/20261120-230038-e5877a5-d9dd4b/tran-sr-icmr-fs-125C-1.8V-request.json",
+      "response": "sim/.work/.stage/opamp-characterization-20261120-230038-e5877a5-d9dd4b/klt-tran-sr-icmr-fs-125C-1.8V-response.json"
+    }
+  ],
+  "klt_crosscheck": null,
+  "spec_row_grading": {
+    "rows": {
+      "quiescent_power": {
+        "status": "fail",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac-iq",
+            "name": "iq_a",
+            "unit": "A",
+            "limits": {
+              "max": 6.5e-05
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ff/1.980V/125C",
+              "value": 6.6694e-05,
+              "margin": -1.694000000000001e-06
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac-iq",
+          "measurement": "iq_a",
+          "corner_id": "ff/1.980V/125C",
+          "value": 6.6694e-05,
+          "margin": -1.694000000000001e-06,
+          "unit": "A"
+        }
+      },
+      "open_loop_dc_gain": {
+        "status": "pass",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "gain_dc_db",
+            "unit": "dB",
+            "limits": {
+              "min": 60.0
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/125C",
+              "value": 63.5919,
+              "margin": 3.5919000000000025
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "gain_dc_db",
+          "corner_id": "fs/1.800V/125C",
+          "value": 63.5919,
+          "margin": 3.5919000000000025,
+          "unit": "dB"
+        }
+      },
+      "gbw_cl2pf": {
+        "status": "pass",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "gbw_hz",
+            "unit": "Hz",
+            "limits": {
+              "min": 16000000.0
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/125C",
+              "value": 19978500.0,
+              "margin": 3978500.0
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "gbw_hz",
+          "corner_id": "fs/1.800V/125C",
+          "value": 19978500.0,
+          "margin": 3978500.0,
+          "unit": "Hz"
+        }
+      },
+      "phase_margin": {
+        "status": "fail",
+        "graded_measurement_points": 15,
+        "measurements": [
+          {
+            "envelope": "ac",
+            "name": "phase_margin_deg",
+            "unit": "deg",
+            "limits": {
+              "min": 60.0
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "sf/1.800V/27C",
+              "value": 55.2781,
+              "margin": -4.721899999999998
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "ac",
+          "measurement": "phase_margin_deg",
+          "corner_id": "sf/1.800V/27C",
+          "value": 55.2781,
+          "margin": -4.721899999999998,
+          "unit": "deg"
+        }
+      },
+      "slew_rate": {
+        "status": "fail",
+        "graded_measurement_points": 30,
+        "measurements": [
+          {
+            "envelope": "tran-sr",
+            "name": "sr_rise_v_per_us",
+            "unit": "V/us",
+            "limits": {
+              "min": 20.0
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 19.4881,
+              "margin": -0.5119000000000007
+            }
+          },
+          {
+            "envelope": "tran-sr",
+            "name": "sr_fall_v_per_us",
+            "unit": "V/us",
+            "limits": {
+              "min": 20.0
+            },
+            "status": "fail",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 13.3426,
+              "margin": -6.657400000000001
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "tran-sr",
+          "measurement": "sr_fall_v_per_us",
+          "corner_id": "ss/1.620V/-40C",
+          "value": 13.3426,
+          "margin": -6.657400000000001,
+          "unit": "V/us"
+        }
+      },
+      "input_common_mode_range": {
+        "status": "pass",
+        "graded_measurement_points": 30,
+        "measurements": [
+          {
+            "envelope": "icmr-tt",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "tt/1.800V/-40C",
+              "value": 0.645277,
+              "margin": 0.24272300000000002
+            }
+          },
+          {
+            "envelope": "icmr-tt",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "tt/1.800V/-40C",
+              "value": 1.44239,
+              "margin": 0.41839000000000004
+            }
+          },
+          {
+            "envelope": "icmr-ff",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ff/1.980V/-40C",
+              "value": 0.62674,
+              "margin": 0.26126000000000005
+            }
+          },
+          {
+            "envelope": "icmr-ff",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ff/1.980V/-40C",
+              "value": 1.64398,
+              "margin": 0.61998
+            }
+          },
+          {
+            "envelope": "icmr-ss",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 0.665865,
+              "margin": 0.22213499999999997
+            }
+          },
+          {
+            "envelope": "icmr-ss",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "ss/1.620V/-40C",
+              "value": 1.22571,
+              "margin": 0.20171000000000006
+            }
+          },
+          {
+            "envelope": "icmr-sf",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/-40C",
+              "value": 0.613967,
+              "margin": 0.27403299999999997
+            }
+          },
+          {
+            "envelope": "icmr-sf",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "sf/1.800V/-40C",
+              "value": 1.37362,
+              "margin": 0.34962000000000004
+            }
+          },
+          {
+            "envelope": "icmr-fs",
+            "name": "lo_40db",
+            "unit": "V",
+            "limits": {
+              "max": 0.888
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/-40C",
+              "value": 0.679782,
+              "margin": 0.20821800000000001
+            }
+          },
+          {
+            "envelope": "icmr-fs",
+            "name": "hi_40db",
+            "unit": "V",
+            "limits": {
+              "min": 1.024
+            },
+            "status": "pass",
+            "worst_case": {
+              "corner_id": "fs/1.800V/-40C",
+              "value": 1.51828,
+              "margin": 0.49428000000000005
+            }
+          }
+        ],
+        "binding": {
+          "envelope": "icmr-ss",
+          "measurement": "hi_40db",
+          "corner_id": "ss/1.620V/-40C",
+          "value": 1.22571,
+          "margin": 0.20171000000000006,
+          "unit": "V"
+        }
+      }
+    },
+    "klt_vs_python": [
+      {
+        "measurement": "phase_margin_deg",
+        "python_column": "ac.phase_margin_deg",
+        "points": 15,
+        "max_rel_delta": 5.072188892465344e-06,
+        "at": "tt/125C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "pq_w",
+        "python_column": "ac.pq_w",
+        "points": 15,
+        "max_rel_delta": 4.50491413606298e-06,
+        "at": "ss/-40C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "sr_rise_v_per_us",
+        "python_column": "tran_sr.sr_rise_v_per_us",
+        "points": 15,
+        "max_rel_delta": 3.913055555579297e-05,
+        "at": "sf/125C",
+        "rel_tol": 0.001,
+        "agrees": true
+      },
+      {
+        "measurement": "sr_fall_v_per_us",
+        "python_column": "tran_sr.sr_fall_v_per_us",
+        "points": 15,
+        "max_rel_delta": 0.00019449074073836907,
+        "at": "tt/-40C",
+        "rel_tol": 0.001,
+        "agrees": true
+      }
+    ],
+    "klt_vs_python_agrees": true,
+    "ungraded_rows": {
+      "output_swing": "the ratified grading rule is a contiguous-run reduction over a swept waveform (largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` measurement form expresses it (klayout-tools#5518), so the row is measured (dc_swing waveform, -dc-swing.csv) but graded by no envelope",
+      "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, but carry no limits/spec_row and DR-003 left the graded quantity undecided (issue #274)",
+      "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
+      "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); target proposed by DR-009, not ratified",
+      "cmrr": "target proposed by DR-008, not ratified: no ratified bound to grade",
+      "area": "not a PVT-simulated row (post-layout quantity, [TBD])"
+    },
+    "all_graded_rows_present": true
+  },
+  "swing_fixcm_comparison": {
+    "rule": {
+      "primary_floor": "12db",
+      "primary_floor_db": 12.041199826559248,
+      "tolerance_v": 0.02,
+      "input_cm": "buffer edge inside the fixed-CM edge by > tolerance",
+      "output_stage": "edges agree within tolerance",
+      "inconsistent": "fixed-CM edge inside the buffer edge by > tolerance",
+      "conclusive": "fixed Vcm inside the same point's 40 dB ICMR window and not inconsistent"
+    },
+    "points": 15,
+    "unmatched": [],
+    "summary": {
+      "low: input_cm": 9,
+      "high: input_cm": 15,
+      "low: output_stage": 6
+    },
+    "icmr_available": true,
+    "table": [
+      {
+        "corner": "tt",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6453,
+        "icmr_high_v": 1.4424,
+        "buffer_vpp_v": 1.2532078843612233,
+        "fixcm_vpp_v": 1.7861576563728416,
+        "low": {
+          "buffer_edge_v": 0.2107951355142177,
+          "fixcm_edge_v": 0.002707571407217401,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0027074655506033056,
+            "m6_vsg_v": 0.9007152881211412,
+            "m6_vsg_mid_v": 1.0590131756254477,
+            "m2_vds_v": 0.6822191422218822,
+            "tail_v": 0.2170655696569766,
+            "iq_a": 1.734930033148174e-05,
+            "iq_mid_a": 6.564197995856391e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2107951355142177,
+            "vcm_v": 0.2250000000001801,
+            "m6_vsg_v": 1.043937459315248,
+            "m2_vds_v": 0.7560624785960948,
+            "tail_v": 6.20886572959597e-08,
+            "m3_vsg_v": 0.535281803389444,
+            "iq_a": 5.172191729982401e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.464003019875441,
+          "fixcm_edge_v": 1.788865227780059,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.002898535415658745,
+            "m6_vsg_v": 1.2126048711842692,
+            "m6_vsg_mid_v": 1.0590131756254477,
+            "m2_vds_v": 0.3710369824382342,
+            "tail_v": 0.21635814637749676,
+            "iq_a": 7.02435036367286e-05,
+            "iq_mid_a": 6.564197995856391e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.464003019875441,
+            "vcm_v": 1.470000000001171,
+            "m6_vsg_v": 1.0719341228602717,
+            "m2_vds_v": 0.04640684638808423,
+            "tail_v": 0.6816590307516441,
+            "m3_vsg_v": 1.0552224241780932,
+            "iq_a": 6.92432272258875e-05
+          }
+        }
+      },
+      {
+        "corner": "tt",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.61,
+        "icmr_high_v": 1.5134,
+        "buffer_vpp_v": 1.5162350427226376,
+        "fixcm_vpp_v": 1.7841913547306172,
+        "low": {
+          "buffer_edge_v": 0.05163577433130229,
+          "fixcm_edge_v": 0.003403499184600992,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0034032889309805643,
+            "m6_vsg_v": 0.734418148240114,
+            "m6_vsg_mid_v": 0.9209940225771636,
+            "m2_vds_v": 0.8100370354921446,
+            "tail_v": 0.2555448162677415,
+            "iq_a": 1.76697211683452e-05,
+            "iq_mid_a": 6.583948373745097e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.05163577433130229,
+            "vcm_v": 0.07000000000005599,
+            "m6_vsg_v": 0.8804672170497085,
+            "m2_vds_v": 0.9195327071588426,
+            "tail_v": 7.57914489177483e-08,
+            "m3_vsg_v": 0.331011921215415,
+            "iq_a": 3.862602220146283e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.56787081705394,
+          "fixcm_edge_v": 1.7875948539152182,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0034003751621436216,
+            "m6_vsg_v": 1.0992878946178992,
+            "m6_vsg_mid_v": 0.9209940225771636,
+            "m2_vds_v": 0.44595354933263354,
+            "tail_v": 0.25475855604946723,
+            "iq_a": 6.96841308233805e-05,
+            "iq_mid_a": 6.583948373745097e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.56787081705394,
+            "vcm_v": 1.575000000001255,
+            "m6_vsg_v": 0.9382180502488764,
+            "m2_vds_v": 0.05502552127548099,
+            "tail_v": 0.8067564284756427,
+            "m3_vsg_v": 0.919951776200912,
+            "iq_a": 6.939220734782786e-05
+          }
+        }
+      },
+      {
+        "corner": "tt",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.5625,
+        "icmr_high_v": 1.6366,
+        "buffer_vpp_v": 1.6940644719776614,
+        "fixcm_vpp_v": 1.7809725439356179,
+        "low": {
+          "buffer_edge_v": 0.004739273106685538,
+          "fixcm_edge_v": 0.004395719011206267,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004395266077340125,
+            "m6_vsg_v": 0.5173744623397181,
+            "m6_vsg_mid_v": 0.7217085420171729,
+            "m2_vds_v": 0.975471121918114,
+            "tail_v": 0.307154415742168,
+            "iq_a": 1.797550289811545e-05,
+            "iq_mid_a": 6.605792867958593e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.004739273106685538,
+            "vcm_v": 0.015000000000012,
+            "m6_vsg_v": 0.521817018099344,
+            "m2_vds_v": 1.2781793260526433,
+            "tail_v": 3.655848012782833e-06,
+            "m3_vsg_v": 0.19764199515209602,
+            "iq_a": 8.522286210413399e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.698803745084347,
+          "fixcm_edge_v": 1.7853682629468242,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004196854897794487,
+            "m6_vsg_v": 0.9243736621978186,
+            "m6_vsg_mid_v": 0.7217085420171729,
+            "m2_vds_v": 0.5693277783298802,
+            "tail_v": 0.3062985594723012,
+            "iq_a": 6.921338507818569e-05,
+            "iq_mid_a": 6.605792867958593e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.698803745084347,
+            "vcm_v": 1.705000000001358,
+            "m6_vsg_v": 0.749880668023803,
+            "m2_vds_v": 0.08165126187261307,
+            "tail_v": 0.9684680701035839,
+            "m3_vsg_v": 0.7252209204946911,
+            "iq_a": 6.953473034784774e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": -40.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6267,
+        "icmr_high_v": 1.644,
+        "buffer_vpp_v": 1.4876901634763067,
+        "fixcm_vpp_v": 1.9662766760670887,
+        "low": {
+          "buffer_edge_v": 0.1994255424615403,
+          "fixcm_edge_v": 0.002884399482792161,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.002884271503048444,
+            "m6_vsg_v": 0.864598218885765,
+            "m6_vsg_mid_v": 1.0228859907562762,
+            "m2_vds_v": 0.8049043250035623,
+            "tail_v": 0.3104974561106726,
+            "iq_a": 1.776610777376453e-05,
+            "iq_mid_a": 6.64869406949431e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.1994255424615403,
+            "vcm_v": 0.2145000000001717,
+            "m6_vsg_v": 1.0048117648846815,
+            "m2_vds_v": 0.9751881633120949,
+            "tail_v": 7.180322356738796e-08,
+            "m3_vsg_v": 0.46892467449518094,
+            "iq_a": 5.164525909046036e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.687115705937847,
+          "fixcm_edge_v": 1.9691610755498807,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0029061162327783064,
+            "m6_vsg_v": 1.174320494629799,
+            "m6_vsg_mid_v": 1.0228859907562762,
+            "m2_vds_v": 0.49584339143244155,
+            "tail_v": 0.30983611393775945,
+            "iq_a": 7.168453755828022e-05,
+            "iq_mid_a": 6.64869406949431e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.687115705937847,
+            "vcm_v": 1.694000000001349,
+            "m6_vsg_v": 1.039806028790597,
+            "m2_vds_v": 0.04470022019905717,
+            "tail_v": 0.8954937510103458,
+            "m3_vsg_v": 1.0216851498822923,
+            "iq_a": 7.092084510595953e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": 27.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.592,
+        "icmr_high_v": 1.7242,
+        "buffer_vpp_v": 1.7447436966781729,
+        "fixcm_vpp_v": 1.964123197329643,
+        "low": {
+          "buffer_edge_v": 0.04122598479781914,
+          "fixcm_edge_v": 0.003698344961857153,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0036980751984993423,
+            "m6_vsg_v": 0.6922673439057119,
+            "m6_vsg_mid_v": 0.883225809075725,
+            "m2_vds_v": 0.9378360768375487,
+            "tail_v": 0.3498965792567394,
+            "iq_a": 1.814096839131141e-05,
+            "iq_mid_a": 6.657157285261395e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.04122598479781914,
+            "vcm_v": 0.06050000000004838,
+            "m6_vsg_v": 0.8303691173643379,
+            "m2_vds_v": 1.1496307974911153,
+            "tail_v": 8.514454678037947e-08,
+            "m3_vsg_v": 0.2645080645218201,
+            "iq_a": 3.437639704584328e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.785969681475992,
+          "fixcm_edge_v": 1.9678215422915,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0034303020477196708,
+            "m6_vsg_v": 1.0604578933805466,
+            "m6_vsg_mid_v": 0.883225809075725,
+            "m2_vds_v": 0.5703977360944398,
+            "tail_v": 0.3491443705250135,
+            "iq_a": 7.090313166717333e-05,
+            "iq_mid_a": 6.657157285261395e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.785969681475992,
+            "vcm_v": 1.793000000001428,
+            "m6_vsg_v": 0.9050854518813889,
+            "m2_vds_v": 0.05644502736135104,
+            "tail_v": 1.01846952075726,
+            "m3_vsg_v": 0.885175399600719,
+            "iq_a": 7.079680053648923e-05
+          }
+        }
+      },
+      {
+        "corner": "ff",
+        "temp_c": 125.0,
+        "vdd_v": 1.98,
+        "vcm_v": 0.99,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.548,
+        "icmr_high_v": 1.8542,
+        "buffer_vpp_v": 1.8977893678584186,
+        "fixcm_vpp_v": 1.9606248712051968,
+        "low": {
+          "buffer_edge_v": 0.005256943489249544,
+          "fixcm_edge_v": 0.004931747861384771,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0049311082242468815,
+            "m6_vsg_v": 0.46193232071754897,
+            "m6_vsg_mid_v": 0.677822694619862,
+            "m2_vds_v": 1.1154788815450603,
+            "tail_v": 0.4025887977373907,
+            "iq_a": 1.855604643086206e-05,
+            "iq_mid_a": 6.669399976683144e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.005256943489249544,
+            "vcm_v": 0.0165000000000132,
+            "m6_vsg_v": 0.46611068519392096,
+            "m2_vds_v": 1.5138841882505596,
+            "tail_v": 5.126555519522104e-06,
+            "m3_vsg_v": 0.14061235184238807,
+            "iq_a": 8.948896558391706e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.903046311347668,
+          "fixcm_edge_v": 1.9655566190665816,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004293712936907823,
+            "m6_vsg_v": 0.8827743140671888,
+            "m6_vsg_mid_v": 0.677822694619862,
+            "m2_vds_v": 0.6954816330003807,
+            "tail_v": 0.40174405293243054,
+            "iq_a": 7.023404598553498e-05,
+            "iq_mid_a": 6.669399976683144e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.903046311347668,
+            "vcm_v": 1.90850000000152,
+            "m6_vsg_v": 0.7182809473426139,
+            "m2_vds_v": 0.09102295314067699,
+            "tail_v": 1.170696099516709,
+            "m3_vsg_v": 0.6849787420533651,
+            "iq_a": 7.066628303808303e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": -40.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6659,
+        "icmr_high_v": 1.2257,
+        "buffer_vpp_v": 1.010621988237959,
+        "fixcm_vpp_v": 1.6053714935047432,
+        "low": {
+          "buffer_edge_v": 0.224919804339379,
+          "fixcm_edge_v": 0.002598978552445019,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0025988849282621,
+            "m6_vsg_v": 0.9396979102808503,
+            "m6_vsg_mid_v": 1.098266634217222,
+            "m2_vds_v": 0.554143694180953,
+            "tail_v": 0.1261583955381968,
+            "iq_a": 1.686900351982601e-05,
+            "iq_mid_a": 6.467604560589368e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.224919804339379,
+            "vcm_v": 0.2385000000001908,
+            "m6_vsg_v": 1.085704302557768,
+            "m2_vds_v": 0.5342956377082516,
+            "tail_v": 5.973398058005084e-08,
+            "m3_vsg_v": 0.5883515073535321,
+            "iq_a": 5.182827786910649e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.235541792577338,
+          "fixcm_edge_v": 1.6079704720571881,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.002932946998291873,
+            "m6_vsg_v": 1.2477055654176572,
+            "m6_vsg_mid_v": 1.098266634217222,
+            "m2_vds_v": 0.24691353542437017,
+            "tail_v": 0.12538089915797265,
+            "iq_a": 6.8722168869927e-05,
+            "iq_mid_a": 6.467604560589368e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.235541792577338,
+            "vcm_v": 1.24200000000099,
+            "m6_vsg_v": 1.107766691831414,
+            "m2_vds_v": 0.04434775271298674,
+            "tail_v": 0.4678855554555994,
+            "m3_vsg_v": 1.0918788821896857,
+            "iq_a": 6.758894681037353e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": 27.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6298,
+        "icmr_high_v": 1.3047,
+        "buffer_vpp_v": 1.2688320327589844,
+        "fixcm_vpp_v": 1.6035672022218923,
+        "low": {
+          "buffer_edge_v": 0.07340405267402161,
+          "fixcm_edge_v": 0.003202620903887423,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.003202445722967236,
+            "m6_vsg_v": 0.7790295637770306,
+            "m6_vsg_mid_v": 0.9611508139768401,
+            "m2_vds_v": 0.6776025230738403,
+            "tail_v": 0.1633679131491293,
+            "iq_a": 1.720024093154748e-05,
+            "iq_mid_a": 6.503390569900791e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.07340405267402161,
+            "vcm_v": 0.09000000000007202,
+            "m6_vsg_v": 0.9342419416327088,
+            "m2_vds_v": 0.6857579678995521,
+            "tail_v": 9.046773916356393e-08,
+            "m3_vsg_v": 0.3889300324175422,
+            "iq_a": 4.478071323776867e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.342236085433006,
+          "fixcm_edge_v": 1.6067698231257797,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.003448103573233204,
+            "m6_vsg_v": 1.1370535537835322,
+            "m6_vsg_mid_v": 0.9611508139768401,
+            "m2_vds_v": 0.3204216109685005,
+            "tail_v": 0.16252483524796743,
+            "iq_a": 6.842749776878003e-05,
+            "iq_mid_a": 6.503390569900791e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.342236085433006,
+            "vcm_v": 1.350000000001075,
+            "m6_vsg_v": 0.9745387334667057,
+            "m2_vds_v": 0.052483733542862177,
+            "tail_v": 0.5929775329904322,
+            "m3_vsg_v": 0.9572526263096177,
+            "iq_a": 6.800020114140076e-05
+          }
+        }
+      },
+      {
+        "corner": "ss",
+        "temp_c": 125.0,
+        "vdd_v": 1.62,
+        "vcm_v": 0.81,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.5805,
+        "icmr_high_v": 1.4155,
+        "buffer_vpp_v": 1.4789306934625512,
+        "fixcm_vpp_v": 1.6004830998827675,
+        "low": {
+          "buffer_edge_v": 0.006719974523012873,
+          "fixcm_edge_v": 0.004138325697533447,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.004137947755554028,
+            "m6_vsg_v": 0.56933721694348,
+            "m6_vsg_mid_v": 0.766528860056431,
+            "m2_vds_v": 0.8371241483259009,
+            "tail_v": 0.2135386347306192,
+            "iq_a": 1.754831041345106e-05,
+            "iq_mid_a": 6.537503218234653e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.006719974523012873,
+            "vcm_v": 0.0180000000000144,
+            "m6_vsg_v": 0.5969912256320342,
+            "m2_vds_v": 1.0230059568684355,
+            "tail_v": 2.817499530323342e-06,
+            "m3_vsg_v": 0.2404647204029262,
+            "iq_a": 9.881257689282885e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.485650667985564,
+          "fixcm_edge_v": 1.6046214255803009,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004227846549826198,
+            "m6_vsg_v": 0.9659601270308193,
+            "m6_vsg_mid_v": 0.766528860056431,
+            "m2_vds_v": 0.4413984111608963,
+            "tail_v": 0.21264146180828447,
+            "iq_a": 6.81770966929542e-05,
+            "iq_mid_a": 6.537503218234653e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.485650667985564,
+            "vcm_v": 1.49400000000119,
+            "m6_vsg_v": 0.7879349077864934,
+            "m2_vds_v": 0.07051334825611344,
+            "tail_v": 0.7615517439573932,
+            "m3_vsg_v": 0.7668488453973686,
+            "iq_a": 6.841194865080807e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.614,
+        "icmr_high_v": 1.3736,
+        "buffer_vpp_v": 1.1759641333696567,
+        "fixcm_vpp_v": 1.7856779636688027,
+        "low": {
+          "buffer_edge_v": 0.2029608018601723,
+          "fixcm_edge_v": 0.002489938939851544,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.002489856611967349,
+            "m6_vsg_v": 0.9477377980895264,
+            "m6_vsg_mid_v": 1.1070303464795228,
+            "m2_vds_v": 0.6096862442645002,
+            "tail_v": 0.2425759576459734,
+            "iq_a": 1.723973326134276e-05,
+            "iq_mid_a": 6.592904501506736e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2029608018601723,
+            "vcm_v": 0.214999999999527,
+            "m6_vsg_v": 1.0923572998136593,
+            "m2_vds_v": 0.7076426086063752,
+            "tail_v": 9.15799655951923e-08,
+            "m3_vsg_v": 0.635410306486988,
+            "iq_a": 5.174830108375245e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.378924935229829,
+          "fixcm_edge_v": 1.7881679026086543,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.002859810949862242,
+            "m6_vsg_v": 1.2682694726035952,
+            "m6_vsg_mid_v": 1.1070303464795228,
+            "m2_vds_v": 0.2899442422578967,
+            "tail_v": 0.24178628513850825,
+            "iq_a": 7.065395723264595e-05,
+            "iq_mid_a": 6.592904501506736e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.378924935229829,
+            "vcm_v": 1.384999999996948,
+            "m6_vsg_v": 1.1173923356528874,
+            "m2_vds_v": 0.04367245940259856,
+            "tail_v": 0.6389352049445141,
+            "m3_vsg_v": 1.1024521346766298,
+            "iq_a": 6.907029436360734e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.5735,
+        "icmr_high_v": 1.4277,
+        "buffer_vpp_v": 1.4804040960415603,
+        "fixcm_vpp_v": 1.7841058710518622,
+        "low": {
+          "buffer_edge_v": 0.001808074096496748,
+          "fixcm_edge_v": 0.002962301274694757,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.002962162643165394,
+            "m6_vsg_v": 0.7950218422064801,
+            "m6_vsg_mid_v": 0.97259262523932,
+            "m2_vds_v": 0.7229506140429345,
+            "tail_v": 0.2820275437505855,
+            "iq_a": 1.739188519950252e-05,
+            "iq_mid_a": 6.610161414571936e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.001808074096496748,
+            "vcm_v": 0.020000000000016,
+            "m6_vsg_v": 0.7718450543334281,
+            "m2_vds_v": 1.0281549131700929,
+            "tail_v": 3.249647906019891e-08,
+            "m3_vsg_v": 0.38615432139277694,
+            "iq_a": 6.712889993085169e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.482212170138057,
+          "fixcm_edge_v": 1.787068172326557,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0033157267972018034,
+            "m6_vsg_v": 1.1579796602707535,
+            "m6_vsg_mid_v": 0.97259262523932,
+            "m2_vds_v": 0.36083191399976555,
+            "tail_v": 0.2811884257294809,
+            "iq_a": 7.004709379335115e-05,
+            "iq_mid_a": 6.610161414571936e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.482212170138057,
+            "vcm_v": 1.490000000001187,
+            "m6_vsg_v": 0.9863549677053332,
+            "m2_vds_v": 0.04961249443646176,
+            "tail_v": 0.7640325378582051,
+            "m3_vsg_v": 0.9705658734811778,
+            "iq_a": 6.92815101250438e-05
+          }
+        }
+      },
+      {
+        "corner": "sf",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.5175,
+        "icmr_high_v": 1.5355,
+        "buffer_vpp_v": 1.6147168134883325,
+        "fixcm_vpp_v": 1.7812008506109154,
+        "low": {
+          "buffer_edge_v": 0.006529853801522378,
+          "fixcm_edge_v": 0.003815256126566983,
+          "fixcm_stop": "sweep_end",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0038149599645527447,
+            "m6_vsg_v": 0.59254474605493,
+            "m6_vsg_mid_v": 0.78593598757735,
+            "m2_vds_v": 0.8725798453252379,
+            "tail_v": 0.3348754086198321,
+            "iq_a": 1.7672111273348e-05,
+            "iq_mid_a": 6.630371777438526e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.006529853801522378,
+            "vcm_v": 0.015000000000012,
+            "m6_vsg_v": 0.6222557476339181,
+            "m2_vds_v": 1.177738651327442,
+            "tail_v": 5.60103864009694e-06,
+            "m3_vsg_v": 0.295010123679299,
+            "iq_a": 9.901140292818689e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.621246667289855,
+          "fixcm_edge_v": 1.7850161067374823,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004009420502688785,
+            "m6_vsg_v": 0.991722684779043,
+            "m6_vsg_mid_v": 0.78593598757735,
+            "m2_vds_v": 0.4742968504194585,
+            "tail_v": 0.3339804648014985,
+            "iq_a": 6.953900292390308e-05,
+            "iq_mid_a": 6.630371777438526e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.621246667289855,
+            "vcm_v": 1.630000000001298,
+            "m6_vsg_v": 0.8052293134106063,
+            "m2_vds_v": 0.06331657224535392,
+            "tail_v": 0.9314541143440398,
+            "m3_vsg_v": 0.787829746714253,
+            "iq_a": 6.952033149170561e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": -40.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6798,
+        "icmr_high_v": 1.5183,
+        "buffer_vpp_v": 1.2944610080575945,
+        "fixcm_vpp_v": 1.7860447552728966,
+        "low": {
+          "buffer_edge_v": 0.2536608077016356,
+          "fixcm_edge_v": 0.003022237868788478,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.0030220906513571347,
+            "m6_vsg_v": 0.8566170670750829,
+            "m6_vsg_mid_v": 1.0135442043165976,
+            "m2_vds_v": 0.7512694275738235,
+            "tail_v": 0.1921135053510936,
+            "iq_a": 1.755528766739234e-05,
+            "iq_mid_a": 6.535858914974435e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.2536608077016356,
+            "vcm_v": 0.2699999999994059,
+            "m6_vsg_v": 0.9982551219070743,
+            "m2_vds_v": 0.8017447360422004,
+            "tail_v": 1.420507252650913e-07,
+            "m3_vsg_v": 0.448426192789692,
+            "iq_a": 5.207084742837875e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.54812181575923,
+          "fixcm_edge_v": 1.7890669931416852,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.0030406045551742557,
+            "m6_vsg_v": 1.1588135005259939,
+            "m6_vsg_mid_v": 1.0135442043165976,
+            "m2_vds_v": 0.4497159598699225,
+            "tail_v": 0.19147053960408353,
+            "iq_a": 6.981378636317076e-05,
+            "iq_mid_a": 6.535858914974435e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.54812181575923,
+            "vcm_v": 1.554999999996573,
+            "m6_vsg_v": 1.0302085634834286,
+            "m2_vds_v": 0.04688797611774931,
+            "tail_v": 0.7229034603988221,
+            "m3_vsg_v": 1.01042063981862,
+            "iq_a": 6.937245461963865e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": 27.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6481,
+        "icmr_high_v": 1.5978,
+        "buffer_vpp_v": 1.5679763490844454,
+        "fixcm_vpp_v": 1.7837666836547776,
+        "low": {
+          "buffer_edge_v": 0.08433240932933472,
+          "fixcm_edge_v": 0.003937605311841496,
+          "fixcm_stop": "sweep_end",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.003937279735992591,
+            "m6_vsg_v": 0.6814826889086891,
+            "m6_vsg_mid_v": 0.8724020777515136,
+            "m2_vds_v": 0.8890480861046182,
+            "tail_v": 0.2294692249866928,
+            "iq_a": 1.801490880676271e-05,
+            "iq_mid_a": 6.55791749359369e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.08433240932933472,
+            "vcm_v": 0.105000000000084,
+            "m6_vsg_v": 0.8440787204878817,
+            "m2_vds_v": 0.9559211654901119,
+            "tail_v": 1.140220065153357e-07,
+            "m3_vsg_v": 0.22504267025033098,
+            "iq_a": 4.667665932034382e-05
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.65230875841378,
+          "fixcm_edge_v": 1.787704288966619,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.003583457017711575,
+            "m6_vsg_v": 1.0420232585465363,
+            "m6_vsg_mid_v": 0.8724020777515136,
+            "m2_vds_v": 0.5292423623000241,
+            "tail_v": 0.2287343791534397,
+            "iq_a": 6.930230870959936e-05,
+            "iq_mid_a": 6.55791749359369e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.65230875841378,
+            "vcm_v": 1.660000000001322,
+            "m6_vsg_v": 0.8949037987166506,
+            "m2_vds_v": 0.057707291632609015,
+            "tail_v": 0.8473889096507404,
+            "m3_vsg_v": 0.8724371909198069,
+            "iq_a": 6.945970473354324e-05
+          }
+        }
+      },
+      {
+        "corner": "fs",
+        "temp_c": 125.0,
+        "vdd_v": 1.8,
+        "vcm_v": 0.9,
+        "vcm_inside_icmr": true,
+        "icmr_low_v": 0.6107,
+        "icmr_high_v": 1.7324,
+        "buffer_vpp_v": 1.7385252184542592,
+        "fixcm_vpp_v": 1.7793343206397987,
+        "low": {
+          "buffer_edge_v": 0.002338399417092685,
+          "fixcm_edge_v": 0.005981059522700765,
+          "fixcm_stop": "gain_floor",
+          "attribution": "output_stage",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": -0.005326833961518181,
+            "m6_vsg_v": 0.44593169233349694,
+            "m6_vsg_mid_v": 0.662847712977159,
+            "m2_vds_v": 1.074456163882244,
+            "tail_v": 0.2796121437842592,
+            "iq_a": 1.8965658259227883e-05,
+            "iq_mid_a": 6.581172815406378e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 0.002338399417092685,
+            "vcm_v": 0.02500000000002,
+            "m6_vsg_v": 0.38197474601694004,
+            "m2_vds_v": 1.4180225530312724,
+            "tail_v": 2.700951787586819e-06,
+            "m3_vsg_v": 0.07197249842743014,
+            "iq_a": 6.725082226072265e-06
+          }
+        },
+        "high": {
+          "buffer_edge_v": 1.740863617871352,
+          "fixcm_edge_v": 1.7853153801624995,
+          "fixcm_stop": "gain_floor",
+          "attribution": "input_cm",
+          "buffer_edge_cm_outside_icmr": true,
+          "conclusive": true,
+          "fixcm_headroom": {
+            "vid_v": 0.004503895660362341,
+            "m6_vsg_v": 0.8599978291765973,
+            "m6_vsg_mid_v": 0.662847712977159,
+            "m2_vds_v": 0.6612184424584505,
+            "tail_v": 0.27878372836495224,
+            "iq_a": 6.886893442138881e-05,
+            "iq_mid_a": 6.581172815406378e-05
+          },
+          "buffer_headroom": {
+            "vout_v": 1.740863617871352,
+            "vcm_v": 1.74500000000139,
+            "m6_vsg_v": 0.714919133845952,
+            "m2_vds_v": 0.11163137179427784,
+            "tail_v": 0.9734494943597702,
+            "m3_vsg_v": 0.668091025317445,
+            "iq_a": 6.93739935696408e-05
+          }
+        }
+      }
+    ]
+  },
+  "tran_sr_icmr_summary": {
+    "points": 14,
+    "verdict_counts": {
+      "no_input_range_effect": 12,
+      "standard_inside_icmr": 2
+    },
+    "fall_class_counts": {
+      "slew_limited": 14,
+      "linear": 0,
+      "inconclusive": 0,
+      "invalid": 0
+    },
+    "note": "diagnostic metric only; no target closure or topology adoption is implied"
+  },
+  "links": {
+    "ac_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-ac.csv",
+    "tran_sr_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-tran-sr.csv",
+    "dc_swing_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-dc-swing.csv",
+    "swing_fixcm_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-swing-fixcm.csv",
+    "icmr_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-icmr.csv",
+    "tran_sr_icmr_csv": "sim/opamp-characterization/records/20261120-230038-e5877a5-d9dd4b-tran-sr-icmr.csv"
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-characterization-20261120-230038-e5877a5-d9dd4b.manifest.json"
+  },
+  "errors": [
+    "tran-sr-icmr-sf-125C-1.8V: klt sim exit 1: no JSON report on stdout (klt: warning: 2 installs provide PDK variant 'sky130A'; read /home/ubuntu/.ciel (search root: ~/.ciel), skipped /home/ubuntu/.volare (search root: ~/.volare). Resolution is first-match-wins, so a pinned open_pdks build may not be the one this client read -- set $PDK_ROOT to choose which install this client resolves (the only client-side pin backend 'batch' accepts); the runner reads its own install, selected by models.pdk.\nklt: batch job klt-sim-991fa5a2962b submitting to s3://<bucket>/jobs/klt-)"
+  ],
+  "elapsed_s": 1646.1
+}
