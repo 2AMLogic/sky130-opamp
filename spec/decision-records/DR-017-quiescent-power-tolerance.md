@@ -90,8 +90,23 @@ Why these sides (chosen from what the row protects, not from the data):
   merely a ceiling — a draw far below ≈65 µA would falsify the row's own
   description and normally indicates a mis-biased (non-operating) corner,
   which this row should still flag even though no consumer is harmed. A
-  `−0%` side is rejected outright because it would grade DR-003's own
-  recorded benign deviations (SS running 2–5 µA low) as failures.
+  `−0%` side is rejected on the same ground as the upper side's `+0%`: it
+  would grade the "≈" figure as an exact 65.000 µA bound — here a floor —
+  a design constraint DR-003 did not write. It would also fail benign
+  corners on the live grids: SS / 1.62 V / −40 °C (64.2433 µA, −1.16%)
+  and SS / 1.62 V / 27 °C (64.7358 µA, −0.41%) on the 15-point envelope,
+  and the 45-point cross-check's 64.0509 µA (−1.46%) minimum, all sit
+  below 65.0 µA. Stated plainly, DR-003's recorded benign deviations (SS
+  running 2–5 µA low) are not themselves the reason: a `−3%` floor
+  shares that property — the recorded corners (60.000–63.000 µA) fall
+  below the 63.05 µA floor too, the shallowest by 0.05 µA — which is
+  acceptable because those deviations were measured on the superseded
+  `DR-002` sizing, before the
+  [`DR-007`](DR-007-device-resize-gbw-slew-swing.md) device resize ("Measured
+  `Iq` across the new grid: 64.24–66.63 µA (was 59.67–66.01)"); on the
+  current sizing the lower side never binds on either committed grid, so
+  DR-003's recorded corners are history, not live evidence for this side
+  choice.
 
 Stated plainly per the ruling: the sides above follow from the protection
 analysis and the default magnitude only. The measured yield below is the
