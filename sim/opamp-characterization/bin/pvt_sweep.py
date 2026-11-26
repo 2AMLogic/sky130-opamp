@@ -680,11 +680,6 @@ KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set fro
 SWING_SLOPE_BAND = [False]
 
 
-# (tag, report) of every `klt sim` response this campaign collected, so the
-# record can summarise the spec-row grading the envelopes carry (issue #246).
-KLT_REPORTS: list[tuple[str, dict]] = []
-
-
 def spec_row_grading(reports: list[tuple[str, dict]], results: dict, *,
                      swing_slope_band: bool | None = None) -> dict:
     """Per-spec-row rollup of what the campaign's `klt sim` envelopes graded.
@@ -2017,7 +2012,7 @@ def _timed_klt_submit(req_path: Path, tag: str, log_dir: Path,
 
 
 def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir, results, errors, klt_jobs,
-                     supply_mode, supplies, icmr_rows, std_rows) -> None:
+                     klt_reports, supply_mode, supplies, icmr_rows, std_rows) -> None:
     """Second phase (needs the campaign's icmr rows): one single-unit `klt sim`
     request per usable point; unusable points become explicit no_useful_step
     rows. Batch failures are reported, never retried locally."""
@@ -2052,7 +2047,7 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
             print(f"{label}: FAIL {exc}", file=sys.stderr)
             continue
         response_rel = write_klt_response(log_dir, tag, report)
-        KLT_REPORTS.append((tag, report))
+        klt_reports.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
@@ -2119,7 +2114,7 @@ FIELDNAMES = {
 
 
 def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir,
-                     results, errors, klt_jobs, supply_mode: str = DEFAULT_SUPPLY_MODE,
+                     results, errors, klt_jobs, klt_reports, supply_mode: str = DEFAULT_SUPPLY_MODE,
                      supplies: Iterable[float] | None = None) -> None:
     """Submit one `klt sim` request per (analysis[, CM point]) and fold the
     responses into `results`/`errors`. A failed submit is reported as errors;
@@ -2170,7 +2165,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             print(f"{tag}: FAIL {exc}", file=sys.stderr)
             continue
         response_rel = write_klt_response(log_dir, tag, report)
-        KLT_REPORTS.append((tag, report))
+        klt_reports.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
@@ -2387,6 +2382,7 @@ def main(argv=None) -> int:
     t_start = time.monotonic()
 
     klt_jobs: list[dict] = []
+    klt_reports: list[tuple[str, dict]] = []
     klt_crosscheck = None
     pm_crosscheck = None
     fixcm_comparison = None
@@ -2396,7 +2392,7 @@ def main(argv=None) -> int:
         with tempfile.TemporaryDirectory(prefix="opamp-klt-") as req_tmp:
             run_klt_analyses(
                 klt_analyses, pdk, corners, temps, args.backend, Path(req_tmp),
-                log_dir, snapshot_run_dir, results, errors, klt_jobs, supply_mode, supplies,
+                log_dir, snapshot_run_dir, results, errors, klt_jobs, klt_reports, supply_mode, supplies,
             )
         if "tran_sr_icmr" in klt_analyses:
             missing = [f"{c}/{t:g}C/{v:g}V" for c, t, v in expected
@@ -2406,7 +2402,7 @@ def main(argv=None) -> int:
                 errors.append(f"tran_sr_icmr: no icmr row (failed or absent) for {', '.join(missing)} -- skipped")
             with tempfile.TemporaryDirectory(prefix="opamp-klt-sr-") as req_tmp:
                 run_tran_sr_icmr(pdk, corners, temps, args.backend, Path(req_tmp), log_dir, snapshot_run_dir,
-                                 results, errors, klt_jobs, supply_mode, supplies, results["icmr"],
+                                 results, errors, klt_jobs, klt_reports, supply_mode, supplies, results["icmr"],
                                  results.get("tran_sr"))
             sr_icmr_summary = tran_sr_icmr_summary(results["tran_sr_icmr"])
             if "tran_sr" not in analyses:
@@ -2514,7 +2510,7 @@ def main(argv=None) -> int:
             **({"klt": klt_version(), "klt_cmd": " ".join(KLT_CMD)} if klt_analyses else {}),
         },
         **({"klt_jobs": klt_jobs, "klt_crosscheck": klt_crosscheck} if klt_analyses else {}),
-        **({"spec_row_grading": spec_row_grading(KLT_REPORTS, results)} if KLT_REPORTS else {}),
+        **({"spec_row_grading": spec_row_grading(klt_reports, results)} if klt_reports else {}),
         **({"tran_step_pm_crosscheck": pm_crosscheck} if pm_crosscheck else {}),
         **({"swing_fixcm_comparison": fixcm_comparison} if fixcm_comparison is not None else {}),
         **({"tran_sr_icmr_summary": sr_icmr_summary} if sr_icmr_summary is not None else {}),
