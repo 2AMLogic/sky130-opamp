@@ -8,6 +8,10 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-26
 
+- **PR #407**: feat: record M3/M4/M5 length candidate for DC PSRR and reject on GBW/slew regression
+- **Issue #396** (closed): Improve DC PSRR on both rails toward the proposed 70 dB floor
+- **PR #411**: refactor: route dc_swing_row through shared load_wave
+- **Issue #410** (closed): Remove duplicate pvt_sweep.load_sweep and route dc_swing_row through load_wave
 - **PR #406**: fix: share MOS card parsing across op-amp variants
 - **Issue #405** (closed): Consolidate duplicated variant MOS-card helpers, continuation parsers, and dead bindings onto variants/_gmid.py
 - **PR #401**: fix: reject mc-only CLI flags on sink_bias_margin static subcommand
