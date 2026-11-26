@@ -91,7 +91,7 @@ Issues carrying `loom:curated`.
 
 ## Proposed (Architect / Hermit)
 
-_None._
+- **#391**: Skip buffer headroom extraction when the fixed-common-mode comparison is disabled *(hermit)*
 
 ## Epics
 
@@ -109,6 +109,6 @@ _None._
 | PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 7 |
 | Curated | 14 |
-| Architect / Hermit proposals | 0 |
+| Architect / Hermit proposals | 1 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
