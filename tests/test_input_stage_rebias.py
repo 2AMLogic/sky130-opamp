@@ -43,7 +43,7 @@ class VariantNetlist(unittest.TestCase):
     def test_widths_on_manufacturing_grid(self):
         w = ISR.widths()
         for name in ("pair", "mirror"):
-            self.assertTrue(ISR.ss.legal(w[name]), w[name])
+            self.assertTrue(ISR.legal(w[name]), w[name])
 
     def test_mirror_ratio_law_preserved(self):
         var = cards(ISR.VARIANT.read_text())
@@ -51,6 +51,41 @@ class VariantNetlist(unittest.TestCase):
         self.assertEqual(var["XM3"][1], var["XM6"][1])
         self.assertEqual(var["XM6"][3], 10 * var["XM3"][3])
         self.assertEqual(var["XM1"][1], var["XM2"][1])
+
+
+class SizingReport(unittest.TestCase):
+    """The `sizing` replay PLAN.md cites (regression for issue #397: series()
+    must load its rows through the shared _gmid loader, keeping the nonzero
+    gm/ID filter, density units and tuple sort — the report reads Vth from the
+    first tuple of each corner/temperature group)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.report = ISR.sizing_report()
+
+    def test_report_covers_all_fifteen_corner_temperature_groups(self):
+        for c in ("ss", "tt", "ff", "sf", "fs"):
+            for t in ("-40", "27", "125"):
+                self.assertIn(f"\n{c}/{t}C ", self.report)
+
+    def test_ss_40c_estimates_read_vth_from_the_weakest_gm_id_row(self):
+        self.assertIn("ss/-40C   0.6669  1.0652 |", self.report)
+        self.assertIn(" 1.732 vs 1.62  <== SUM+margin > VDD", self.report)
+        self.assertIn("estimated Vin_min = Vth_n = 0.6669 V.", self.report)
+        self.assertIn("measured ICMR high edge 1.1686 V (Vth2_eff = 0.676 V implied)",
+                      self.report)
+        self.assertIn("At zero mirror overdrive, estimated Vin_max = 1.230 V.", self.report)
+
+    def test_fs_40c_consumer_point_estimate(self):
+        self.assertIn("FS/-40C consumer point: pair Vov 47 -> 5 mV", self.report)
+        self.assertIn("0.7388 V -> ~0.697 V vs consumer point 0.73 V"
+                      " (currently missed by 0.0088 V)", self.report)
+
+    def test_tt_27c_grid_snapped_widths_cited_by_the_plan(self):
+        self.assertIn("W = 5 uA / 14.470069 uA/um = 14.4701 -> 14.470 um (grid)",
+                      self.report)
+        self.assertIn("W = 5 uA / 13.710124 uA/um = 13.7101 -> 13.710 um (grid",
+                      self.report)
 
 
 class Collation(unittest.TestCase):
