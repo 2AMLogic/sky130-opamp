@@ -22,6 +22,10 @@ object). Both are append-only (`sim/lib/append_only_check.py`).
   broker URL into the repo.
 - Zero-byte outputs cannot be stored; the summary lists them.
 - Manifest-forward only: evidence committed before this flow stays in
-  `sim/*/records/`.
+  `sim/*/records/`, except uncited raw sample dumps (`waveform.raw.json`),
+  which #298 dropped from the tree (one golden input, read by
+  `tests/test_pvt_sweep.py`, is kept); the dropped bytes remain retrievable
+  from git history at the parent of #298's merge commit
+  (`git show <that-commit>^:<path>`).
 - Other benches (`offset-capability`, `gm-id-characterization`) adopt
   `artifact_store` when next run.

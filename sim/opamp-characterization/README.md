@@ -55,89 +55,74 @@ below.
 
 ## Cold-start invocation
 
-Given the pinned PDK (below) is installed, regenerate the full local evidence
-set with an explicit local backend:
+Given the pinned PDK (below) is installed and `klt` is on PATH, regenerate the
+full evidence set — every analysis is submitted as `klt sim` requests (issue
+#278 removed the hand-rolled local `ngspice -b` executor; `klt sim` is the
+only executor):
 
 ```bash
-python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend batch
 ```
 
-Renders `testbench/opamp_{ac,tran_sr,dc_swing}.spice.tmpl` once per
-(analysis, corner, temperature) point (3 × 5 × 3 = 45 ngspice runs), drives
-`ngspice -b` on each rendered deck, and writes a new timestamped record under
-`records/` (never overwriting a prior one — append-only, per `CLAUDE.md`).
-Takes roughly 6–8 minutes on a single core (45 ngspice invocations, ~7–15 s
-each — this testbench's device count and Rz/Cc subcircuit expansion cost
-more per-run than the sibling bare-device sweep's ~1.4 s). Exits non-zero if
-any run's `.meas` measurement is missing or ngspice itself errors (see
-`bin/pvt_sweep.py`'s per-run `try`/`except`, which still runs every other
-point before reporting the aggregate failure — a genuinely useful property
-for triage, since one broken point should not hide 44 good ones).
-
-**Migration (issue #163)**: the bare `pvt_sweep.py` invocation no longer runs
-that local grid — on any host, with or without an environment override. The
+Submits one `klt sim` request per analysis over the whole 5 × 3 grid (3 × 15
+= 45 units; `ac` is two requests — `ac` and its `ac-iq` Iq companion) to the
+resolved backend, and writes a new timestamped record under `records/`
+(never overwriting a prior one — append-only, per `CLAUDE.md`). The
 effective backend is resolved once per invocation as `--backend` > nonempty
-`$KLT_SIM_BACKEND` > `batch`, and on the `batch` backend a request needing
-more than **one local ngspice execution unit** (local analyses × supply
-points; the default campaign is 3 × 15 = 45) is refused up front — before any
-tool/PDK check, DUT capture, record allocation or klt submission — with a
-diagnostic naming the count and pointing at `--fleet --backend batch`. Local
-users must choose one of:
+`$KLT_SIM_BACKEND` > `batch` (issue #163's resolution order): `batch`
+submits the requests to the shared Spot fleet; `--backend local` (or
+`$KLT_SIM_BACKEND=local`) runs them on this host through `klt sim` — the
+single-corner debug probe shape, e.g. `--backend local --corners tt --temps
+27`. On the batch backend no simulator subprocess is ever started on this
+host (not even `ngspice -v`; the record's `tools.ngspice` says `not
+invoked`), and a batch response with no `environment.remote` provenance is
+refused. A failed unit is reported in the record's `errors` and never
+becomes a CSV row.
 
-- `--fleet --backend batch` — the whole campaign as `klt sim` requests on the
-  Spot batch fleet (the next section);
-- `--backend local` (or `$KLT_SIM_BACKEND=local`) — direct local `ngspice -b`
-  execution of any grid, on a machine that is meant to simulate;
-- a single-unit probe such as `--corners tt --temps 27 --analyses ac` (one
-  supply point × one local analysis), which stays allowed on `batch`.
+`--fleet` is a deprecated no-op, kept so saved invocations and existing
+callers (`bin/pex_measure.py`, `variants/bias-margin/stage1.sh`) keep
+working: the fleet path it opted into (issue #77) became the default and
+only path in issue #278.
 
 ```bash
 python3 sim/opamp-characterization/bin/pvt_sweep.py --check-env   # tool/PDK/backend report, no simulation
-python3 sim/opamp-characterization/bin/pvt_sweep.py --corners ss --temps -40,125 --analyses ac --backend local
+python3 sim/opamp-characterization/bin/pvt_sweep.py --corners ss --temps -40,125 --analyses ac
 ```
 
-### Fleet execution of ac / tran_sr / dc_swing, selectable netlist (issue #77)
+### `klt sim` execution of ac / tran_sr / dc_swing, selectable netlist (issues #77, #278)
 
 ```bash
 # 45 units = 3 analyses x 5 corners x 3 temperatures (paired supplies), on the Spot batch fleet
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --analyses ac,tran_sr,dc_swing --backend batch
+python3 sim/opamp-characterization/bin/pvt_sweep.py --analyses ac,tran_sr,dc_swing --backend batch
 # characterize a candidate without touching the canonical design (flat netlist, ports vdd vss inn inp out ibias)
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --netlist path/to/candidate.spice
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --supply-mode cartesian   # 45 points per analysis
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend local --corners tt --temps 27   # single-corner probe only
+python3 sim/opamp-characterization/bin/pvt_sweep.py --netlist path/to/candidate.spice
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian   # 45 points per analysis
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local --corners tt --temps 27   # single-corner probe only
 ```
 
-`--fleet` moves the three formerly-local analyses onto `klt sim` requests
+`ac`, `tran_sr` and `dc_swing` run as `klt sim` requests
 (`testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl` are the circuit
-**bodies**; without `--fleet` the local path still exists but is bounded by
-the one-unit guard of issue #163 — see Cold-start above). On the batch
-backend no simulator subprocess is started: the
-runner does not even run `ngspice -v` (the record says `not invoked`), the
-local runner raises if anything reaches it, and a batch response with no
-`environment.remote` is refused. A submit that fails (including
-`BATCH_MAX_CONCURRENT_INSTANCES` after the retry budget) is reported as errors;
-there is no local fallback. Each analysis is one request over the whole grid
+**bodies**), one request per analysis over the whole grid, on the same path
+as every other analysis — issue #77 introduced these fleet twins and issue
+#278 made them the only executor (the full-deck templates and the
+`ngspice -b` loop they fed were removed; committed records and their saved
+decks under `netlist-snapshots/` stay replayable with a plain single
+`ngspice -b`). Each analysis is one request
 (`exclude` encodes the paired supply table; cartesian mode has none), except
 `ac`, which is two: `ac` (gain / GBW / phase `.meas` cards) and an `ac-iq`
-companion (`dc Vinp 0 1m 1m`, `.meas dc i_vdd_a find i(vdd) at=0`) for Iq/Pq.
-The same one-unit guard (issue #163) bounds every non-fleet invocation: the
-effective backend resolves as `--backend` > nonempty `$KLT_SIM_BACKEND` >
-`batch`, and on `batch` at most one local ngspice execution unit — local
-analyses × supply points, cartesian supplies included — may run; anything
-larger refuses before any tool check, DUT capture, record allocation or klt
-submission. `--fleet` itself counts zero local units, as do the klt-only
-`icmr`/`cmrr`/`tran_step` analyses; a mixed selection consumes only its local
-portion. `--backend local` (or `$KLT_SIM_BACKEND=local`) keeps direct local
-execution of any grid.
+companion (`dc Vinp 0 1m 1m`, `.meas dc i_vdd_a find i(vdd) at=0`) for
+Iq/Pq. A submit that fails (including `BATCH_MAX_CONCURRENT_INSTANCES`
+after the retry budget) is reported as errors; there is no local fallback.
 
-Definitions are the local ones (same CSV columns), re-expressed where the fleet
+Definitions are unchanged (same CSV columns) from the local `ngspice -b`
+executor these requests replaced in issue #278, re-expressed where the fleet
 requires it:
 
-| Analysis | Fleet form | Same as local |
+| Analysis | `klt sim` request form | Unchanged quantity/definition |
 |---|---|---|
 | `ac` | DC-servo AC sweep `dec 20 1 1g`, `.meas ac` gain@1 Hz / GBW / phase@GBW; Iq from the `ac-iq` companion at the identical bias point; Pq = Iq*VDD | all five measured columns |
 | `tran_sr` | 0.3*VDD -> 0.7*VDD step built by behavioural sources, so the levels follow each corner's own VDD (`alter vdd`); `.meas ... when v(out)=v(l20/l80)` crossings; SR = 0.6*span/(t80-t20) | same step, 20-80 % rule, edge/pulse timing, `tran 2n 2.2u` |
-| `dc_swing` | `Vsw` 0..1 in 1/360 steps scaled by VDD (`v(inp)` = VDD*k/360, the local grid); the sweep is returned as the klt waveform artifact and the **same** `swing_row()` slope-window rule is applied | identical function used by the local path |
+| `dc_swing` | `Vsw` 0..1 in 1/360 steps scaled by VDD (`v(inp)` = VDD*k/360, the historical local grid); the sweep is returned as the klt waveform artifact and the **same** `swing_row()` slope-window rule is applied | identical function, the single definition since issue #278 |
 
 Solver settings are DR-006's: the bodies' only `.option` is `scale=1u`, no
 `reltol`/`abstol`/`vntol` anywhere; the record's `matrix.execution.solver_settings`
@@ -162,7 +147,8 @@ simulator (`tools.ngspice: not invoked`), DUT = `design/netlist/opamp_core.spice
 (15 units, 493 s), `tran-sr` `klt-sim-f559608fc9e4` (130 s), `dc-swing`
 `klt-sim-884d4fd53766` (161 s); all `c7i.4xlarge` spot, `ngspice-46`.
 Raw artifacts (per-corner `corner.cir`, `ngspice.log`, and for `dc-swing` the
-`waveform.raw[.json]` sweep) are under `records/<id>-logs/klt-*/`.
+`waveform.raw[.json]` sweep) are under `records/<id>-logs/klt-*/`, except the
+`waveform.raw.json` dumps dropped by #298 (one golden copy kept; rest in git history).
 
 Supported versions: client `klt 0.7.0+g5e5b55992a7f`; the fleet runner image
 reported **klt 0.5.0** (`runner_compatibility: mismatch`, accepted with the
@@ -299,14 +285,36 @@ details worth knowing before editing them:
   [#277](https://github.com/2AMLogic/sky130-opamp/issues/277). Changing
   `SPEC_IQ_MAX_A` is that ruling's job, not a tuning knob.
 
-**Output swing is deliberately ungraded.** Its ratified rule is the largest
-contiguous run around mid-supply over which `d(vout)/d(vin)` stays in
-`[0.8, 1.2]` — a waveform reduction no `klt sim` measurement form expresses
-(filed generically as
-[klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)).
-The row is still measured on the full grid: `swing_row()` applies the rule to
-the envelope's waveform artifact and writes `-dc-swing.csv`. Same reason the
-`swing_fixcm` and `tran_sr_icmr` diagnostics reduce waveforms in Python.
+**Output swing is deliberately ungraded** by any committed envelope. Its
+ratified rule is the largest contiguous run around mid-supply over which
+`d(vout)/d(vin)` stays in `[0.8, 1.2]` — a waveform reduction no `klt sim`
+measurement form expressed (filed generically as
+[klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518),
+closed 2026-11-17 by the `measurements[].slope_band` form, **after** release
+v0.9.2). The row is still measured on the full grid: `swing_row()` applies the
+rule to the envelope's waveform artifact and writes `-dc-swing.csv`. Same
+reason the `swing_fixcm` and `tran_sr_icmr` diagnostics reduce waveforms in
+Python.
+
+`--swing-slope-band` (issue #358, opt-in, default off) additionally emits the
+reduction **natively**: three `slope_band` entries (low end / high end /
+difference of the same mid-supply run) tagged `spec_row: output_swing` and
+graded against the ratified row's own numbers (`0.072` / `1.464` / `1.392 Vpp`
+— containment plus span). To keep one request valid across every supply rail,
+`opamp_dc_swing.klt.spice.tmpl` exposes `v(inp_mid) = v(inp) - 0.5*v(vdd)` and
+the entries anchor `x = v(inp_mid)` at `0.0` V — each corner's own active
+`VDD/2`, preserving `d(v(out))/d(v(inp_mid)) == d(v(out))/d(v(inp))` in V/V and
+unchanged `v(out)` outputs. When `--swing-slope-band` is active (or an envelope
+grades `output_swing`), `spec_row_grading` moves `output_swing` out of
+`ungraded_rows` and expects it in `all_graded_rows_present`. Developed against
+a klayout-tools `main` build; a released klt carrying #5518 must exist before
+any committed envelope uses it (the pinned CI client 0.8.0 cannot run the
+form). Cross-checked on all 15 corners of record
+`20261113-150556-60489db-8101bf` (issue #358): native `y_lo`/`y_hi`/`y_span`
+match `swing_row()` to ≤ 2 sweep steps per edge (VDD/360 ≈ 4.5–5.5 mV; the two
+rules grade point-slope vs segment-slope conventions), binding corner
+`ss/-40 °C/1.62 V` at 0.943 Vpp native vs 0.948 Vpp `swing_row()` — the row's
+own recorded expected failure.
 
 Each record carries a `spec_row_grading` block: per row, the bound, the worst
 value with **its** corner, the binding measurement, and a cross-check of every
@@ -365,8 +373,8 @@ response into
 `records/<id>-{icmr,cmrr}.csv`. It never loops `ngspice` for these points and
 does not fall back to a local grid if a batch submit fails. Expected wall-clock
 on the fleet: about 11 min for both analyses (record below: 639 s). These
-analyses count zero local ngspice units, so the one-unit guard of issue #163
-never applies to them. The three legacy analyses were not retrofitted and
+analyses run on the same `klt sim` path as everything else. The three legacy
+analyses were not retrofitted and
 their records and CSV columns are
 unchanged. The `.include` of the R+C typical files is satisfied by the
 `.lib <sky130.lib.spice> <corner>` section klt appends, which stages correctly
@@ -376,10 +384,10 @@ on the batch backend (verified by the passing fleet record).
 
 ```bash
 # 45 units = (dc_swing + swing_fixcm) x 15 points, plus icmr (5 requests x 3) -- all on the Spot batch fleet
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses dc_swing,swing_fixcm,icmr --timeout-s 600
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend batch --analyses dc_swing,swing_fixcm,icmr --timeout-s 600
 ```
 
-`swing_fixcm` is **opt-in** and klt-only (zero local ngspice units, like
+`swing_fixcm` is **opt-in** and klt-only, like
 `icmr`); the default analysis set and the `dc_swing` bench, rule and CSV are
 unchanged. Run it in the same campaign as `dc_swing` and `icmr`: the record's
 `swing_fixcm_comparison` only joins rows of **this** campaign (same DUT
@@ -390,10 +398,10 @@ Methodology; result: "Output-swing attribution (issue #181)" below.
 ### ICMR-aware slew diagnostic (issue #185)
 
 ```bash
-# single-point method probe (one point of each; local klt backend is allowed for single units)
-python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local --fleet --corners ss --temps -40 --analyses icmr,tran_sr,tran_sr_icmr
+# single-point method probe (one point of each; local klt backend runs the requests on this host)
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend local --corners ss --temps -40 --analyses icmr,tran_sr,tran_sr_icmr
 # canonical 15-point paired-supply campaign: icmr (5 requests) + tran_sr (1) + tran_sr_icmr (<= 15 single-unit requests), Spot batch fleet
-python3 sim/opamp-characterization/bin/pvt_sweep.py --fleet --backend batch --analyses icmr,tran_sr,tran_sr_icmr --timeout-s 600
+python3 sim/opamp-characterization/bin/pvt_sweep.py --backend batch --analyses icmr,tran_sr,tran_sr_icmr --timeout-s 600
 ```
 
 `tran_sr_icmr` is **opt-in**, klt-only, and needs `icmr` (and, for the standard
@@ -411,11 +419,11 @@ mode treats the supply as an independent axis:
 
 ```bash
 # 5 processes x 3 temperatures x 3 supplies = 45 tuples per analysis
-# (135 local units: needs --fleet --backend batch, or --backend local -- issue #163)
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --fleet --analyses ac,tran_sr,dc_swing
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses icmr,cmrr,tran_step   # klt request(s), zero local units
+# (135 units: 4 batch requests, or --backend local to run them on this host)
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses ac,tran_sr,dc_swing
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --analyses icmr,cmrr,tran_step   # klt request(s)
 # cheap probe: any subset of processes / temperatures / supplies
-python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --supplies 1.98 --corners ss --temps 27 --analyses ac   # exactly one local unit: allowed even on batch
+python3 sim/opamp-characterization/bin/pvt_sweep.py --supply-mode cartesian --supplies 1.98 --corners ss --temps 27 --analyses ac   # one unit: fine with --backend local, or one batch request
 ```
 
 `--supplies` defaults to `1.62,1.8,1.98`. In cartesian mode the actual point
@@ -518,11 +526,10 @@ volare enable --pdk sky130 c6d73a35f524070e85faff4a6a9eef49553ebc2b
 | Path | Contents |
 |---|---|
 | `pdk.json` | This experiment's own addition to the PDK pin: the R+C ("typical") corner include files, and why both are required together |
-| `testbench/opamp_ac.spice.tmpl` | Open-loop AC gain/phase/Iq testbench (DC-servo bias) |
-| `testbench/opamp_tran_sr.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench |
-| `testbench/opamp_dc_swing.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench |
-| `testbench/opamp_{ac,tran_sr,dc_swing}.klt.spice.tmpl` | `klt sim` circuit-body twins of the three benches above for `--fleet` (issue #77) |
-| `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (and the `icmr,cmrr` `klt sim` path) |
+| `testbench/opamp_ac.klt.spice.tmpl` | Open-loop AC gain/phase/Iq testbench, `klt sim` circuit body (DC-servo bias) |
+| `testbench/opamp_tran_sr.klt.spice.tmpl` | Unity-gain-buffer large-step slew-rate testbench, `klt sim` circuit body |
+| `testbench/opamp_dc_swing.klt.spice.tmpl` | Unity-gain-buffer DC transfer (output swing) testbench, `klt sim` circuit body |
+| `bin/pvt_sweep.py` | The sweep runner — the one cold-start command above (every analysis as `klt sim` requests) |
 | `manifests/envelopes/<record_id>-<tag>.klt.json` | Unmodified `klt sim` response envelopes of an `--export-envelopes` campaign: committed evidence, cited per spec row by `manifests/sky130-opamp.json` (issue #246) |
 | `testbench/opamp_icmr.spice.tmpl`, `opamp_cmrr.spice.tmpl` | `klt sim` circuit-body benches: input common-mode range (output held at mid-rail) and CMRR (Adm and Acm in one deck) (issue #53) |
 | `records/<id>-{icmr,cmrr}.csv` | Per-point ICMR edges / CMRR(f) for the issue #53 benches; `<id>-logs/` holds the klt requests, responses and per-corner decks |
@@ -649,7 +656,7 @@ rail extreme too (a future bench could cross the two axes fully — 5 corners
 matter; not done here to keep this issue's scope to the 5×3 grid its
 acceptance criteria name explicitly).
 
-### Open-loop AC bench (`opamp_ac.spice.tmpl`)
+### Open-loop AC bench (`opamp_ac.klt.spice.tmpl`)
 
 **Method, stated as the acceptance criteria require**: a DC operating-point
 servo — a very large resistor (`Rfb = 1 TΩ`) from `out` to `inn`, with a
@@ -676,7 +683,7 @@ Quiescent current/power (`Iq`, `Pq = Iq × VDD`) is read from the same
 deck's initial `.op` solve, before the AC sweep — `-i(vdd)`, i.e. the total
 current pulled from the supply.
 
-### Slew-rate bench (`opamp_tran_sr.spice.tmpl`)
+### Slew-rate bench (`opamp_tran_sr.klt.spice.tmpl`)
 
 A genuine unity-gain-buffer connection (`inn` wired to `out` through a
 1 mΩ resistor, standing in for a literal wire ngspice's TRAN engine accepts
@@ -690,7 +697,7 @@ transit of `v(out)` between the step's low and high levels — the textbook
 slew-rate convention — and `bin/pvt_sweep.py` converts the measured times to
 `V/µs`.
 
-### Output-swing bench (`opamp_dc_swing.spice.tmpl`)
+### Output-swing bench (`opamp_dc_swing.klt.spice.tmpl`)
 
 The same real unity-gain-buffer connection, with `inp` DC-swept `0 → VDD`.
 While the loop holds (`v(out)` tracks `v(inp)` at unity slope), the
@@ -1477,7 +1484,7 @@ record):
 The AC bench reads phase margin at a DC-servo loop break; nothing else
 checked it against the real unity-gain connection. `opamp_tran_step.spice.tmpl`
 is the independent second bench: the same follower wiring, `ibias` and
-CL = 2 pF as `opamp_tran_sr.spice.tmpl`, driven by a **+-20 mV (40 mV) rising
+CL = 2 pF as `opamp_tran_sr.klt.spice.tmpl`, driven by a **+-20 mV (40 mV) rising
 step about VDD/2** (linear regime, no slewing), as a `klt sim` circuit body
 like icmr/cmrr. Reported per (corner, temperature):
 

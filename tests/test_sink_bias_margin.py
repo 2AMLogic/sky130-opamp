@@ -1,6 +1,8 @@
 """Simulator-free tests for variants/sink_bias_margin.py and its committed netlists (issue #197)."""
 
+import contextlib
 import csv
+import io
 import json
 import re
 import sys
@@ -49,7 +51,7 @@ class BiasMargin(unittest.TestCase):
         w = [sbm.widths(f)["p_ic"] for f in sbm.FRACTIONS.values()]
         self.assertTrue(w[0] > w[1] > w[2])
         for x in w:
-            self.assertTrue(sbm.ss.legal(x))
+            self.assertTrue(sbm.legal(x))
         self.assertEqual(len(sbm.FRACTIONS), 3)   # reference + at most two margins
 
     def test_probe_source_is_zero_volt_in_xms_source(self):
@@ -68,8 +70,40 @@ class BiasMargin(unittest.TestCase):
         self.assertFalse(b["ok"])
 
 
-if __name__ == "__main__":
-    unittest.main()
+class FleetCliTests(unittest.TestCase):
+    """`static` must reject the mc-only fleet flags, not silently ignore them (issue #400)."""
+
+    def _dispatch(self, argv):
+        seen = {}
+
+        def fake_fleet(a, mc):
+            seen["args"], seen["mc"] = a, mc
+            return 0
+
+        with mock.patch.object(sbm, "cmd_fleet", fake_fleet):
+            rc = sbm.main(argv)
+        return rc, seen["args"], seen["mc"]
+
+    def test_static_rejects_each_mc_only_flag(self):
+        for flag, val in (("--n", "5"), ("--seed-offset", "9"), ("--corner", "ss"), ("--temp", "-40")):
+            with self.subTest(flag=flag):
+                with contextlib.redirect_stderr(io.StringIO()), \
+                        mock.patch.object(sbm, "cmd_fleet", lambda *_, **__: 0):
+                    with self.assertRaises(SystemExit) as cm:
+                        sbm.main(["static", "--tag", "ic075", flag, val])
+                self.assertEqual(cm.exception.code, 2)
+
+    def test_static_dispatches_without_the_mc_only_attributes(self):
+        rc, a, mc = self._dispatch(["static", "--tag", "ic075"])
+        self.assertEqual((rc, mc), (0, False))
+        for attr in ("n", "seed_offset", "corner", "temp"):
+            self.assertFalse(hasattr(a, attr), attr)
+
+    def test_mc_still_accepts_all_four_options(self):
+        rc, a, mc = self._dispatch(["mc", "--tag", "ic075", "--n", "5", "--seed-offset", "9",
+                                    "--corner", "ss", "--temp", "-40"])
+        self.assertEqual((rc, mc), (0, True))
+        self.assertEqual((a.n, a.seed_offset, a.corner, a.temp), (5, 9, "ss", -40.0))
 
 
 class ReportAndAccountingTests(unittest.TestCase):
@@ -361,3 +395,7 @@ class EvidenceValidationTests(unittest.TestCase):
         self.assertEqual(len(data["ic075"]["replicates"]), 11)    # Stage 1 screen points re-measured in Stage 2
         self.assertEqual(data["ic090"]["replicates"], [])
         self.assertEqual(data["ic060"]["replicates"], [])
+
+
+if __name__ == "__main__":
+    unittest.main()

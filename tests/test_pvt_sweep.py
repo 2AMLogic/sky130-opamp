@@ -1,13 +1,12 @@
 import csv
 import json
 import math
-import re
 import tempfile
 import unittest
 from pathlib import Path
 
 import _paths
-from _paths import EXP, RECORDS, REPO, TESTBENCH
+from _paths import EXP, RECORDS, REPO
 import spice_harness as sh
 import dut_identity
 from unittest import mock
@@ -30,13 +29,6 @@ def fake_artifact_patches(root):
             mock.patch.object(artifact_store, "store", store)]
 
 pvt = _paths.load_module("pvt_sweep", EXP / "bin" / "pvt_sweep.py")
-
-TEMPLATES = {
-    "ac": "opamp_ac.spice.tmpl",
-    "tran_sr": "opamp_tran_sr.spice.tmpl",
-    "dc_swing": "opamp_dc_swing.spice.tmpl",
-}
-PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
 
 
 def klt_backend_env(value):
@@ -73,39 +65,7 @@ class FakePdk:
         return [Path("/pdk/rc/base.spice"), Path("/pdk/rc/lin.spice")]
 
 
-def ac_subs(vdd=1.8):
-    s = pvt.common_subs(FakePdk(), "tt", 27.0, vdd)
-    s.update({"VCM": 0.5 * vdd, "RFB": "1e12", "CFB": "1", "FSTART": "1",
-              "FSTOP": "1g", "PTS_PER_DEC": "20"})
-    return s
-
-
-class ParseMeasTests(unittest.TestCase):
-    def test_parses_plain_and_trailer_lines(self):
-        out = pvt.parse_meas(
-            "gain_dc_db = 7.2e+01\n"
-            "sr_rise_s = 2.5e-08 targ= 1.1e-06 trig= 1.0e-06\n"
-            "noise: not a meas line\n"
-            "  iq_a=6.4e-05\n"
-        )
-        self.assertEqual(out["gain_dc_db"], 72.0)
-        self.assertEqual(out["sr_rise_s"], 2.5e-08)
-        self.assertEqual(out["iq_a"], 6.4e-05)
-        self.assertEqual(len(out), 3)
-
-    def test_ignores_non_numeric_values(self):
-        self.assertEqual(pvt.parse_meas("x = failed\ny = -.5\n"), {"y": -0.5})
-
-
-class CommonSubsTests(unittest.TestCase):
-    def test_pin_resolution_into_subs(self):
-        s = pvt.common_subs(FakePdk(), "ff", 125.0, 1.98)
-        self.assertEqual(s["CORNER_INCLUDE"], Path("/pdk/corners/ff.spice"))
-        self.assertEqual(s["RC_INCLUDE_BASE"], Path("/pdk/rc/base.spice"))
-        self.assertEqual(s["RC_INCLUDE_LIN"], Path("/pdk/rc/lin.spice"))
-        self.assertEqual((s["TEMP"], s["VDD"]), (125.0, 1.98))
-        self.assertEqual(s["OPAMP_NETLIST"], pvt.DESIGN_NETLIST)
-
+class OpampPdkTests(unittest.TestCase):
     def test_opamp_pdk_rc_includes_from_own_pin(self):
         own = json.loads((EXP / "pdk.json").read_text())
         pin = json.loads((pvt.GMID_PDK_PIN_FILE).read_text())
@@ -120,50 +80,11 @@ class CommonSubsTests(unittest.TestCase):
         self.assertAlmostEqual(pvt.VDD_BY_CORNER["ss"], 0.9 * 1.8)
 
 
-class TemplateTests(unittest.TestCase):
-    def test_ac_template_renders_with_runner_subs(self):
-        text = sh.render(TESTBENCH / TEMPLATES["ac"], ac_subs())
-        self.assertNotIn("{", text)
-        self.assertIn("/pdk/corners/tt.spice", text)
-
-    def test_every_template_placeholder_is_supplied_by_the_runner(self):
-        """Each analysis's runner-side keys must cover its template's placeholders.
-
-        Keys are taken from the runner source (the literal strings passed to
-        subs/common_subs), so a renamed placeholder in either place fails.
-        """
-        src = (EXP / "bin" / "pvt_sweep.py").read_text()
-        common = set(pvt.common_subs(FakePdk(), "tt", 27.0, 1.8))
-        for analysis, name in TEMPLATES.items():
-            fn_src = src.split(f"def run_{analysis}(", 1)[1].split("\ndef ", 1)[0]
-            supplied = common | set(re.findall(r'"([A-Z][A-Z0-9_]*)":', fn_src))
-            wanted = set(PLACEHOLDER.findall((TESTBENCH / name).read_text()))
-            self.assertTrue(wanted, name)
-            self.assertLessEqual(wanted, supplied,
-                                 f"{name}: unsupplied {sorted(wanted - supplied)}")
-
-    def test_missing_placeholder_fails_render(self):
-        subs = ac_subs()
-        del subs["CL_F"]
-        with self.assertRaises(sh.HarnessError) as cm:
-            sh.render(TESTBENCH / TEMPLATES["ac"], subs)
-        self.assertIn("CL_F", str(cm.exception))
-
-    def test_scratch_copy_with_broken_placeholder_fails(self):
-        """Deliberate break: a misspelled placeholder in a copy is caught."""
-        text = (TESTBENCH / TEMPLATES["ac"]).read_text().replace("{VCM}", "{VCMM}")
-        with tempfile.TemporaryDirectory() as d:
-            p = Path(d) / "broken.tmpl"
-            p.write_text(text)
-            with self.assertRaises(sh.HarnessError):
-                sh.render(p, ac_subs())
-
-
 class AggregationTests(unittest.TestCase):
     def test_analyses_and_fieldnames_agree(self):
-        self.assertEqual(set(pvt.ANALYSES) | set(pvt.KLT_ANALYSES), set(pvt.FIELDNAMES))
-        # the legacy ngspice-loop analyses are the default set; icmr/cmrr are opt-in
-        self.assertEqual(set(pvt.ANALYSES), set(pvt.DEFAULT_ANALYSES))
+        self.assertEqual(set(pvt.FLEET_ANALYSES) | set(pvt.KLT_ANALYSES), set(pvt.FIELDNAMES))
+        # the fleet analyses are the historical default set; the rest are opt-in
+        self.assertEqual(set(pvt.FLEET_ANALYSES), set(pvt.DEFAULT_ANALYSES))
         self.assertFalse(set(pvt.KLT_ANALYSES) & set(pvt.DEFAULT_ANALYSES))
 
     def test_csv_roundtrip_with_runner_fieldnames(self):
@@ -206,6 +127,16 @@ def pvt_records():
     return out
 
 
+def analysis_error(analysis, error):
+    """A unit label belongs to the longest matching bench tag."""
+    label, colon, _ = error.partition(":")
+    tag = label.replace("_", "-")
+    benches = (*pvt.FIELDNAMES, "ac_iq")  # ac-iq has its own errors but no CSV
+    matches = (a for a in benches if tag == a.replace("_", "-")
+               or tag.startswith(a.replace("_", "-") + "-"))
+    return bool(colon) and max(matches, key=len, default=None) == analysis
+
+
 class CommittedRecordShapeTests(unittest.TestCase):
     TOP = {"record_id", "timestamp", "git", "experiment", "matrix", "pdk",
            "tools", "links", "errors", "elapsed_s"}
@@ -215,6 +146,14 @@ class CommittedRecordShapeTests(unittest.TestCase):
 
     def test_at_least_one_pvt_record_is_committed(self):
         self.assertTrue(pvt_records())
+
+    def test_diagnostic_slew_error_cannot_explain_missing_standard_slew(self):
+        failure = "tran-sr-icmr-sf--40C-1.62V: no JSON report"
+        self.assertTrue(analysis_error("tran_sr_icmr", failure))
+        self.assertFalse(analysis_error("tran_sr", failure))
+        self.assertFalse(analysis_error("ac", "ac-iq: no JSON report"))
+        for label in ("tran_sr", "tran-sr", "tran-sr-sf--40C-1.62V"):
+            self.assertTrue(analysis_error("tran_sr", f"{label}: no JSON report"))
 
     def test_json_shape(self):
         for p, d in pvt_records():
@@ -244,8 +183,8 @@ class CommittedRecordShapeTests(unittest.TestCase):
             for analysis in m["analyses"]:
                 with self.subTest(record=p.name, analysis=analysis):
                     if f"{analysis}_csv" not in d["links"]:
-                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors
-                        self.assertTrue(any(e.startswith(f"{analysis}:") for e in d["errors"]), analysis)
+                        # whole bench refused by the fleet (#197 12f3e2): no rows, failure kept in errors.
+                        self.assertTrue(any(analysis_error(analysis, e) for e in d["errors"]), analysis)
                         continue
                     rel = d["links"][f"{analysis}_csv"]
                     path = REPO / rel
@@ -362,6 +301,11 @@ class KltBenchTests(unittest.TestCase):
         # the two ratified quiescent-power figures ARE that current at their supplies
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.98, 128.7e-6, places=9)
         self.assertAlmostEqual(pvt.SPEC_IQ_MAX_A * 1.80, 117.0e-6, places=9)
+        # output swing (issue #358): "~ 0.072 - 1.464 V (~ 1.39 Vpp)" -- the row's
+        # own numbers, graded as window containment plus the endpoints' difference
+        self.assertEqual(pvt.SPEC_SWING_LOW_MAX_V, 0.072)
+        self.assertEqual(pvt.SPEC_SWING_HIGH_MIN_V, 1.464)
+        self.assertAlmostEqual(pvt.SPEC_SWING_VPP_MIN_V, 1.464 - 0.072, places=12)
 
     def test_every_graded_row_is_tagged_exactly_once_per_request_set(self):
         tagged = {}
@@ -389,6 +333,180 @@ class KltBenchTests(unittest.TestCase):
         by = {m["name"]: m for m in pvt.icmr_measurements(1.8)}
         self.assertEqual(by["lo_40db"]["limits"], {"max": pvt.TARGET_ICMR_V[0]})
         self.assertEqual(by["hi_40db"]["limits"], {"min": pvt.TARGET_ICMR_V[1]})
+
+    # -- native slope_band swing emission (issue #358) -----------------------
+
+    def test_swing_slope_band_is_gated_off_by_default(self):
+        """The pinned CI client (klt 0.8.0) cannot run the slope_band form, so the
+        default dc_swing request must stay `.meas`-only (unchanged shape)."""
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
+        req, _body, _tag = klt_request("dc_swing")
+        self.assertTrue(all("slope_band" not in m for m in req["measurements"]))
+        self.assertTrue(all("spice" in m for m in req["measurements"]))
+
+    def test_swing_slope_band_emits_the_ratified_row_natively(self):
+        was = pvt.SWING_SLOPE_BAND[0]
+        pvt.SWING_SLOPE_BAND[0] = True
+        try:
+            by = {m["name"]: m for m in pvt.swing_slope_band_measurements()}
+            self.assertEqual(sorted(by), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+            for name, m in by.items():
+                self.assertNotIn("spice", m, name)  # slope_band is an exclusive form
+                self.assertEqual(m["spec_row"], "output_swing", name)
+                self.assertIn("limits", m, name)  # a spec_row tag without limits covers nothing
+                sb = m["slope_band"]
+                self.assertEqual(sorted(sb), ["anchor", "max_slope", "min_slope", "report", "x", "y"], name)
+                self.assertEqual((sb["y"], sb["x"]), ("v(out)", "v(inp_mid)"), name)
+                # swing_row()'s own band constants: the native rule cannot drift
+                self.assertEqual((sb["min_slope"], sb["max_slope"]),
+                                 (pvt.SWING_SLOPE_MIN, pvt.SWING_SLOPE_MAX), name)
+                # anchor at 0.0 on v(inp_mid) = v(inp) - 0.5*v(vdd) -> active VDD/2 at every corner
+                self.assertEqual(sb["anchor"], 0.0, name)
+            self.assertEqual(by["swing_lo_v"]["slope_band"]["report"], "y_lo")
+            self.assertEqual(by["swing_hi_v"]["slope_band"]["report"], "y_hi")
+            self.assertEqual(by["swing_vpp_v"]["slope_band"]["report"], "y_span")
+            # containment plus span, exactly as the ratified row states them
+            self.assertEqual(by["swing_lo_v"]["limits"], {"max": pvt.SPEC_SWING_LOW_MAX_V})
+            self.assertEqual(by["swing_hi_v"]["limits"], {"min": pvt.SPEC_SWING_HIGH_MIN_V})
+            self.assertEqual(by["swing_vpp_v"]["limits"], {"min": pvt.SPEC_SWING_VPP_MIN_V})
+            # full-grid and single-corner SS/FF requests all carry the shifted node and 0.0 anchor
+            for corners, exp_vdd in ((None, [1.62, 1.8, 1.98]), (["ss"], [1.62]), (["ff"], [1.98])):
+                req, body, _tag = klt_request("dc_swing", corners=corners)
+                self.assertEqual(req["corners"]["supply_v"]["vdd"], exp_vdd)
+                self.assertIn("Bmid inp_mid 0 V = v(inp) - 0.5*v(vdd)", body)
+                names = [m["name"] for m in req["measurements"]]
+                self.assertEqual(names[0], "vout_mid_v")
+                self.assertEqual(sorted(names[1:]), ["swing_hi_v", "swing_lo_v", "swing_vpp_v"])
+                self.assertEqual(len(names), len(set(names)))
+                for m in req["measurements"][1:]:
+                    self.assertEqual(m["slope_band"]["x"], "v(inp_mid)")
+                    self.assertEqual(m["slope_band"]["anchor"], 0.0)
+        finally:
+            pvt.SWING_SLOPE_BAND[0] = was
+        self.assertEqual([m["name"] for m in pvt.swing_measurements()], ["vout_mid_v"])
+
+    def test_swing_slope_band_mid_supply_shift_tracks_active_vdd(self):
+        """v(inp_mid) = v(inp) - 0.5*v(vdd) puts anchor=0.0 at each corner's own
+        VDD/2 with identical V/V slope and unchanged v(out) values. Covers the
+        off-nominal SS (1.62 V) and FF (1.98 V) cases where a fixed TT 0.9 V
+        anchor sits outside a narrow linear window centred on VDD/2."""
+        def central_slopes(xs, ys):
+            n = len(xs)
+            return ([(ys[1] - ys[0]) / (xs[1] - xs[0])]
+                    + [(ys[i + 1] - ys[i - 1]) / (xs[i + 1] - xs[i - 1]) for i in range(1, n - 1)]
+                    + [(ys[n - 1] - ys[n - 2]) / (xs[n - 1] - xs[n - 2])])
+
+        def run_span_at(xs, ys, anchor):
+            slopes = central_slopes(xs, ys)
+            idx = min(range(len(xs)), key=lambda i: abs(xs[i] - anchor))
+            if not (pvt.SWING_SLOPE_MIN <= slopes[idx] <= pvt.SWING_SLOPE_MAX):
+                return None
+            lo = hi = idx
+            while lo > 0 and pvt.SWING_SLOPE_MIN <= slopes[lo - 1] <= pvt.SWING_SLOPE_MAX:
+                lo -= 1
+            while hi < len(xs) - 1 and pvt.SWING_SLOPE_MIN <= slopes[hi + 1] <= pvt.SWING_SLOPE_MAX:
+                hi += 1
+            return ys[lo], ys[hi], ys[hi] - ys[lo]
+
+        # Judge counterexample (SS, 1.62 V -> VDD/2 = 0.81 V) and FF mirror (1.98 V -> VDD/2 = 0.99 V):
+        # linear window contains VDD/2, excludes TT's 0.9 V.
+        cases = [
+            ("ss", 1.62, 0.74, 0.87, 0.117),
+            ("ff", 1.98, 0.93, 1.06, 0.121),
+        ]
+        for corner, vdd, clip_lo, clip_hi, exp_span in cases:
+            vin = [vdd * k / pvt.SWING_POINTS for k in range(pvt.SWING_POINTS + 1)]
+            x_mid = [v - 0.5 * vdd for v in vin]
+            vout = [max(clip_lo, min(v, clip_hi)) for v in vin]
+            # Shifting x by a constant preserves central-difference slopes in V/V
+            for s_in, s_mid in zip(central_slopes(vin, vout), central_slopes(x_mid, vout)):
+                self.assertAlmostEqual(s_mid, s_in, places=10)
+            # Fixed TT 0.9 V anchor fails (out of band), while shifted x_mid @ 0.0 succeeds
+            self.assertIsNone(run_span_at(vin, vout, 0.5 * pvt.VDD_BY_CORNER["tt"]), corner)
+            got_mid = run_span_at(x_mid, vout, 0.0)
+            got_vdd2 = run_span_at(vin, vout, 0.5 * vdd)
+            self.assertIsNotNone(got_mid, corner)
+            self.assertEqual(got_mid, got_vdd2, corner)
+            self.assertAlmostEqual(got_mid[2], exp_span, delta=0.01, msg=corner)
+
+    def test_spec_row_grading_accounts_for_opt_in_output_swing_in_both_modes(self):
+        """spec_row_grading() keeps graded and ungraded rows disjoint and
+        evaluates all_graded_rows_present consistently in both default mode
+        (6 graded, 6 ungraded) and opt-in output_swing mode (7 graded, 5 ungraded)."""
+        g_off, u_off = pvt.item5_row_partition(False)
+        g_on, u_on = pvt.item5_row_partition(True)
+        self.assertEqual(set(g_off) & set(u_off), set())
+        self.assertEqual(set(g_on) & set(u_on), set())
+        self.assertEqual(len(g_off) + len(u_off), 12)
+        self.assertEqual(len(g_on) + len(u_on), 12)
+        self.assertIn("output_swing", u_off)
+        self.assertNotIn("output_swing", u_on)
+        self.assertIn("output_swing", g_on)
+
+        # Replay the committed campaign envelopes without and with an opt-in dc-swing report
+        env_dir = pvt.REPO_ROOT / "manifests" / "envelopes"
+        prefix = "20261113-150556-60489db-8101bf-"
+        committed = [
+            (p.name[len(prefix):-len(".klt.json")], json.loads(p.read_text()))
+            for p in sorted(env_dir.glob(f"{prefix}*.klt.json"))
+        ]
+        self.assertTrue(committed)
+
+        # Default mode: output_swing is ungraded, all 6 default graded rows present
+        was = pvt.SWING_SLOPE_BAND[0]
+        try:
+            pvt.SWING_SLOPE_BAND[0] = False
+            default_out = pvt.spec_row_grading(committed, {})
+            self.assertNotIn("output_swing", default_out["rows"])
+            self.assertIn("output_swing", default_out["ungraded_rows"])
+            self.assertEqual(set(default_out["rows"]) & set(default_out["ungraded_rows"]), set())
+            self.assertTrue(default_out["all_graded_rows_present"])
+
+            # Simulated dc-swing report carrying the three emitted slope_band measurements
+            swing_meas = pvt.swing_slope_band_measurements()
+            sim_swing_report = {
+                "corner_count": 15,
+                "measurements": [
+                    {**swing_meas[0], "status": "fail",
+                     "worst_case": {"corner_id": "fs/1.800V/-40C", "value": 0.2763, "margin": -0.2043}},
+                    {**swing_meas[1], "status": "fail",
+                     "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 1.2029, "margin": -0.2611}},
+                    {**swing_meas[2], "status": "fail",
+                     "worst_case": {"corner_id": "ss/1.620V/-40C", "value": 0.9431, "margin": -0.4489}},
+                ],
+                "corners": [],
+            }
+            with_swing = [(t, r) for t, r in committed if t != "dc-swing"] + [("dc-swing", sim_swing_report)]
+
+            # Even when called directly without toggling the global flag (as offline replay does),
+            # output_swing must not appear in both rows and ungraded_rows, and all_graded_rows_present stays True.
+            for flag in (False, True):
+                pvt.SWING_SLOPE_BAND[0] = flag
+                opt_out = pvt.spec_row_grading(with_swing, {})
+                self.assertIn("output_swing", opt_out["rows"])
+                self.assertNotIn("output_swing", opt_out["ungraded_rows"])
+                self.assertEqual(set(opt_out["rows"]) & set(opt_out["ungraded_rows"]), set())
+                self.assertEqual(len(opt_out["rows"]) + len(opt_out["ungraded_rows"]), 12)
+                self.assertTrue(opt_out["all_graded_rows_present"])
+                self.assertEqual(opt_out["rows"]["output_swing"]["status"], "fail")
+                self.assertEqual(opt_out["rows"]["output_swing"]["binding"]["measurement"], "swing_vpp_v")
+
+            # Flag enabled, but dc-swing report did NOT grade output_swing -> missing expected row
+            pvt.SWING_SLOPE_BAND[0] = True
+            missing_out = pvt.spec_row_grading(committed, {})
+            self.assertNotIn("output_swing", missing_out["rows"])
+            self.assertNotIn("output_swing", missing_out["ungraded_rows"])
+            self.assertFalse(missing_out["all_graded_rows_present"])
+
+            # Partial campaign (dc-swing only): output_swing is not duplicated in ungraded_rows,
+            # and all_graded_rows_present is False because the other 6 rows are absent
+            pvt.SWING_SLOPE_BAND[0] = False
+            partial_out = pvt.spec_row_grading([("dc-swing", sim_swing_report)], {})
+            self.assertIn("output_swing", partial_out["rows"])
+            self.assertNotIn("output_swing", partial_out["ungraded_rows"])
+            self.assertFalse(partial_out["all_graded_rows_present"])
+        finally:
+            pvt.SWING_SLOPE_BAND[0] = was
 
     def test_slew_numerator_is_the_level_difference_not_a_vdd_literal(self):
         """0.6*span == v(l80) - v(l20) at EVERY supply, so one request spans the
@@ -838,15 +956,6 @@ class CartesianSupplyTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             pvt.supply_values(self.CORNERS, "bogus")
 
-    def test_artifact_names_unique_per_point(self):
-        for mode, n in (("paired", 15), ("cartesian", 45)):
-            pts = pvt.supply_points(self.CORNERS, self.TEMPS, mode)
-            names = {pvt.point_tag("ac", c, t, v, mode) for c, t, v in pts}
-            self.assertEqual(len(names), n, mode)
-        self.assertEqual(pvt.point_tag("ac", "tt", 27.0, 1.8, "paired"), "ac-tt-27C")
-        self.assertNotEqual(pvt.point_tag("ac", "tt", 27.0, 1.62, "cartesian"),
-                            pvt.point_tag("ac", "tt", 27.0, 1.98, "cartesian"))
-
     def test_cartesian_request_has_all_supplies_and_no_exclusions(self):
         with tempfile.TemporaryDirectory() as d:
             path, tag = pvt.build_klt_request("cmrr", "mid", None, FakeKltPdk(), self.CORNERS, self.TEMPS,
@@ -887,29 +996,6 @@ class CartesianSupplyTests(unittest.TestCase):
         self.assertAlmostEqual(row["vcm_v"], 0.99)
         row = pvt.cmrr_row("tt", 27.0, {"values": vals, "status": "pass", "runtime_s": 1.0}, "mid")
         self.assertEqual(row["vdd_v"], 1.8)  # default still the paired voltage
-
-    def test_local_stimuli_use_point_voltage(self):
-        captured = []
-
-        def fake_run(ngspice, deck_text, workdir, log_path, timeout_s=120):
-            captured.append(deck_text)
-            return "iq_a=1e-5\npq_w=1e-5\ngain_dc_db=60\ngbw_hz=1e6\nphase_at_gbw_rad=-2\n" \
-                   "sr_rise_s=1e-8\nsr_fall_s=1e-8\n", 0.1
-
-        real = pvt.run_ngspice
-        pvt.run_ngspice = fake_run
-        try:
-            with tempfile.TemporaryDirectory() as d:
-                row, deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
-                self.assertEqual((row["vdd_v"], row["vcm_v"]), (1.98, 0.99))
-                self.assertIn("1.98", deck)
-                row, _deck = pvt.run_tran_sr(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l", vdd=1.98)
-                self.assertAlmostEqual(row["v_low_v"], 0.3 * 1.98)
-                self.assertAlmostEqual(row["v_high_v"], 0.7 * 1.98)
-                row, _deck = pvt.run_ac(FakePdk(), "ngspice", "ss", 27.0, Path(d), Path(d) / "l")
-                self.assertEqual(row["vdd_v"], 1.62)  # omitted -> paired mapping
-        finally:
-            pvt.run_ngspice = real
 
     def test_pm_overshoot_table_distinguishes_supplies(self):
         ac = [{"corner": "tt", "temp_c": "27", "vdd_v": v, "phase_margin_deg": pm}
@@ -1213,11 +1299,13 @@ class FleetAnalysisTests(unittest.TestCase):
         return mock.patch.object(subprocess, "run", boom)
 
     def test_paired_campaign_accounts_for_all_45_units_without_local_sim(self):
-        with tempfile.TemporaryDirectory() as d, self._armed():
-            results, errors, jobs, calls = self._campaign(list(pvt.FLEET_ANALYSES), tmp=d)
+        with tempfile.TemporaryDirectory() as d, self._armed(), \
+                mock.patch.object(pvt, "buffer_edge_headroom") as headroom:
+            results, errors, jobs, calls = self._campaign(list(pvt.DEFAULT_ANALYSES), tmp=d)
         self.assertEqual(errors, [])
         self.assertEqual({a: len(r) for a, r in results.items()}, {a: 15 for a in pvt.FLEET_ANALYSES})
         self.assertEqual(sum(len(r) for r in results.values()), 45)
+        self.assertEqual(headroom.call_count, 0)
         self.assertEqual(len(calls), 4)  # ac-iq (Iq companion), ac, tran-sr, dc-swing
         self.assertTrue(all(bk == "batch" for _r, bk in calls))
         for a, rows in results.items():
@@ -1314,14 +1402,6 @@ class FleetAnalysisTests(unittest.TestCase):
         self.assertEqual(results["ac"], [])
         self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", errors[0])
 
-    def test_local_ngspice_is_forbidden_for_a_batch_fleet_campaign(self):
-        pvt.LOCAL_SIM_FORBIDDEN[0] = True
-        try:
-            with self.assertRaises(sh.HarnessError):
-                pvt.run_ngspice("ngspice", "* deck", Path("/nonexistent"), Path("/nonexistent/log"))
-        finally:
-            pvt.LOCAL_SIM_FORBIDDEN[0] = False
-
     def test_cli_fleet_and_netlist_flags(self):
         # issue #163: the default backend depends on $KLT_SIM_BACKEND -- pin it unset
         with klt_backend_env(None):
@@ -1331,8 +1411,9 @@ class FleetAnalysisTests(unittest.TestCase):
             self.assertEqual((a.fleet, a.netlist), (True, "/x/cand.spice"))
 
     def test_end_to_end_fleet_record_with_selected_netlist(self):
-        """main(): --fleet --netlist writes a 45-unit record, snapshots the INPUT netlist, leaves the
-        canonical design untouched and never starts a local simulator."""
+        """main(): the default invocation (--netlist, no --fleet) writes a 45-unit
+        record via klt sim, snapshots the INPUT netlist, leaves the canonical
+        design untouched and never starts a local simulator (issue #278)."""
         import hashlib
         from unittest import mock
 
@@ -1356,7 +1437,6 @@ class FleetAnalysisTests(unittest.TestCase):
                 mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
                 mock.patch.object(pvt, "klt_version", lambda: "klt-test"), mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
                 mock.patch.object(pvt, "run_klt_sim", self._fake_klt(Path(d))),
-                mock.patch.object(pvt, "first_line", lambda *_a, **_k: self.fail("ngspice version probed")),
                 mock.patch.object(pvt, "ACTIVE_DUT", [canon]),
             ]
             (Path(d) / "dummy").mkdir()
@@ -1364,15 +1444,17 @@ class FleetAnalysisTests(unittest.TestCase):
                 for p in patches:
                     p.start()
                 try:
-                    rc = pvt.main(["--fleet", "--netlist", str(cand), "--backend", "batch"])
+                    rc = pvt.main(["--netlist", str(cand), "--backend", "batch"])
                 finally:
                     mock.patch.stopall()
-                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
             self.assertEqual(rc, 0)
             rec = json.loads(next(records.glob("*.json")).read_text())
             self.assertEqual(rec["matrix"]["n_failed"], 0)
             self.assertEqual(rec["matrix"]["n_runs"], 45)
+            self.assertEqual(rec["matrix"]["execution"]["klt_analyses"], list(pvt.FLEET_ANALYSES))
             self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+            self.assertIs(rec["matrix"]["execution"]["fleet_flag"], False)
+            self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
             self.assertEqual(rec["matrix"]["execution"]["solver_settings"]["policy"], "DR-006")
             self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
             self.assertEqual(rec["dut"]["sha256"], "sha256:" + hashlib.sha256(cand.read_bytes()).hexdigest())
@@ -1698,6 +1780,14 @@ class SwingFixcmTests(unittest.TestCase):
         self.assertTrue(all(set(r) == set(pvt.FIELDNAMES["swing_fixcm"]) for r in results["swing_fixcm"]))
         self.assertEqual([j["remote"]["job_id"] for j in jobs], ["j-swing-fixcm"])
 
+    def test_buffer_headroom_failure_preserves_dc_swing_rows(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(pvt, "SWING_POINTS", 60), \
+                mock.patch.object(pvt, "buffer_edge_headroom", side_effect=sh.HarnessError("unavailable")) as headroom:
+            results, errors, _jobs = self._campaign(d, ["dc_swing", "swing_fixcm"])
+        self.assertEqual(headroom.call_count, 15)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(results["dc_swing"]), 15)
+
     def test_campaign_failures_are_errors_and_no_remote_is_refused(self):
         from unittest import mock
 
@@ -1748,11 +1838,10 @@ class SwingFixcmTests(unittest.TestCase):
                 for p in patches:
                     p.start()
                 try:
-                    rc = pvt.main(["--fleet", "--backend", "batch", "--analyses", "dc_swing,swing_fixcm",
+                    rc = pvt.main(["--backend", "batch", "--analyses", "dc_swing,swing_fixcm",
                                    "--netlist", str(cand)])
                 finally:
                     mock.patch.stopall()
-                    pvt.LOCAL_SIM_FORBIDDEN[0] = False
             self.assertEqual(rc, 0)
             rec = json.loads(next(records.glob("*.json")).read_text())
             rows = list(csv.DictReader((records / Path(rec["links"]["swing_fixcm_csv"]).name).open()))
@@ -1766,7 +1855,10 @@ class SwingFixcmTests(unittest.TestCase):
         self.assertEqual((cmp_["points"], cmp_["unmatched"]), (15, []))
         # the mocked follower clips 0.25 V from each rail, the mocked output stage only 0.1 V from it
         self.assertEqual(cmp_["summary"], {"low: input_cm (inconclusive)": 15, "high: input_cm (inconclusive)": 15})
-        self.assertIsNotNone(cmp_["table"][0]["low"]["buffer_headroom"])
+        for point in cmp_["table"]:
+            for side in ("low", "high"):
+                edge = point[side]
+                self.assertEqual(edge["buffer_headroom"]["vout_v"], edge["buffer_edge_v"])
 
 
 class EffectiveBackendTests(unittest.TestCase):
@@ -1790,213 +1882,6 @@ class EffectiveBackendTests(unittest.TestCase):
         self.assertEqual(self.backend(["--backend", "batch"], env="local"), "batch")
         self.assertEqual(self.backend(["--backend", "local"], env="batch"), "local")
 
-
-class BatchLocalGridRefusalTests(unittest.TestCase):
-    """Issue #163: on the effective batch backend, a request needing more than
-    one local ngspice execution unit (local analyses x supply points) exits
-    non-zero before any tool/PDK check, simulator/version probe, klt submission
-    or record/snapshot allocation. Every later stage is armed to fail the test."""
-
-    def refuse(self, argv, env=None):
-        import contextlib
-        import io
-        import subprocess as sp
-        from unittest import mock
-
-        def fail(stage):
-            def _fail(*a, **k):
-                raise AssertionError(f"{stage} reached despite the refusal")
-            return _fail
-
-        with tempfile.TemporaryDirectory() as d:
-            records, snaps = Path(d) / "records", Path(d) / "snaps"
-            records.mkdir()
-            snaps.mkdir()
-            err = io.StringIO()
-            with klt_backend_env(env), \
-                    mock.patch.object(sp, "run", fail("local subprocess")), \
-                    mock.patch.object(pvt, "resolve_pdk", fail("PDK resolution")), \
-                    mock.patch.object(pvt, "klt_available", fail("klt probe")), \
-                    mock.patch.object(pvt, "first_line", fail("tool version probe")), \
-                    mock.patch.object(pvt, "allocate_record_id", fail("record allocation")), \
-                    mock.patch.object(pvt, "run_klt_sim", fail("klt submission")), \
-                    mock.patch.object(pvt, "RECORDS_DIR", records), \
-                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
-                    contextlib.redirect_stderr(err):
-                rc = pvt.main(list(argv))
-            self.assertEqual(list(records.iterdir()), [], "refusal wrote record files")
-            self.assertEqual(list(snaps.iterdir()), [], "refusal wrote snapshots")
-        self.assertNotEqual(rc, 0)
-        return err.getvalue()
-
-    def test_default_campaign_refuses_naming_45_units_and_the_fleet_escape(self):
-        err = self.refuse([])
-        self.assertIn("45 local ngspice unit", err)
-        self.assertIn("'--fleet --backend batch'", err)
-
-    def test_env_batch_refuses_identically(self):
-        err = self.refuse([], env="batch")
-        self.assertIn("45 local ngspice unit", err)
-
-    def test_cli_batch_beats_env_local(self):
-        err = self.refuse(["--backend", "batch"], env="local")
-        self.assertIn("'--fleet --backend batch'", err)
-
-    def test_two_local_analyses_at_one_supply_point_are_two_units(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,tran_sr"])
-        self.assertIn("2 local ngspice unit", err)
-        self.assertIn("2 local analysis(es) x 1 supply point", err)
-
-    def test_repeated_analysis_entries_are_not_deduplicated(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,ac"])
-        self.assertIn("2 local ngspice unit", err)
-
-    def test_two_cartesian_supplies_at_one_point_are_two_units(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac",
-                           "--supply-mode", "cartesian", "--supplies", "1.62,1.98"])
-        self.assertIn("2 local ngspice unit", err)
-        self.assertIn("1 local analysis(es) x 2 supply point", err)
-
-    def test_unknown_analysis_still_reports_the_pre_guard_error(self):
-        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,bogus"])
-        self.assertIn("unknown analysis 'bogus'", err)
-        self.assertNotIn("--fleet --backend batch", err)
-
-    def test_duplicate_supply_tuple_still_reports_the_pre_guard_error(self):
-        err = self.refuse(["--corners", "tt,tt", "--temps", "27", "--analyses", "ac"])
-        self.assertIn("duplicate (process, temperature, supply) tuple", err)
-        self.assertNotIn("--fleet --backend batch", err)
-
-
-class LocalExecutionAllowanceTests(unittest.TestCase):
-    """Issue #163: what the batch guard lets through -- exactly one local unit,
-    an explicit local backend of any grid size, an env-selected local backend,
-    mixed local+klt selections (remote work does not consume the local
-    allowance) and the zero-local-unit --fleet / klt-only paths -- with the
-    unchanged record schema, and no routing state leaking between main() calls."""
-
-    NGSPICE_OUT = ("iq_a=1e-5\npq_w=1e-5\ngain_dc_db=60\ngbw_hz=1e6\nphase_at_gbw_rad=-2\n"
-                   "sr_rise_s=1e-8\nsr_fall_s=1e-8\n")
-
-    class LocalPdk(FakePdk):
-        variant = "sky130A"
-        matches_pin, root, installed_commit = True, Path("/pdk"), "abc"
-        pin = {"open_pdks_commit": "abc"}
-        own_pin = {"rc_corner": {"choice": "typical"}}
-
-    def run_main(self, argv, env=None):
-        """main() to completion against mocked local/klt runners and temporary
-        record/snapshot dirs; returns (rc, record, local_decks, klt_campaigns)."""
-        import contextlib
-        import io
-        from unittest import mock
-
-        local_decks, klt_campaigns = [], []
-
-        def fake_ngspice(_ngspice, deck_text, _workdir, _log_path, timeout_s=120):
-            local_decks.append(deck_text)
-            return self.NGSPICE_OUT, 0.1
-
-        def fake_klt_campaign(analyses, pdk, corners, temps, backend, req_dir, log_dir,
-                              snapshot_run_dir, results, errors, klt_jobs,
-                              supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
-            klt_campaigns.append((list(analyses), backend))
-            klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
-
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d) / "repo"
-            records, snaps = root / "records", root / "snaps"
-            records.mkdir(parents=True)
-            snaps.mkdir(parents=True)
-            out = io.StringIO()
-            patches = [
-                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root),
-                mock.patch.object(pvt, "RECORDS_DIR", records),
-                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps),
-                mock.patch.object(pvt, "resolve_pdk", lambda: self.LocalPdk()),
-                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
-                mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
-                mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
-                mock.patch.object(pvt, "first_line", lambda *a, **k: "fake-ngspice v42"),
-                mock.patch.object(pvt.shutil, "which", lambda n: f"/bin/{n}"),
-                mock.patch.object(pvt, "run_ngspice", fake_ngspice),
-                mock.patch.object(pvt, "run_klt_analyses", fake_klt_campaign),
-                mock.patch.object(pvt, "ACTIVE_DUT", [pvt.DESIGN_NETLIST]),
-            ]
-            with klt_backend_env(env):
-                for p in patches:
-                    p.start()
-                try:
-                    with contextlib.redirect_stderr(out), contextlib.redirect_stdout(out):
-                        rc = pvt.main(list(argv))
-                finally:
-                    mock.patch.stopall()
-            recs = list(records.glob("*.json"))
-            rec = json.loads(recs[0].read_text()) if recs else None
-        return rc, rec, local_decks, klt_campaigns
-
-    def test_single_unit_probe_runs_locally_on_batch(self):
-        rc, rec, decks, klt = self.run_main(["--corners", "tt", "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc, len(decks), klt), (0, 1, []))
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac"])
-        self.assertEqual(rec["matrix"]["n_runs"], 1)
-        self.assertIsNone(rec["matrix"]["execution"]["backend"])
-        self.assertEqual(rec["tools"]["ngspice"], "fake-ngspice v42")
-        self.assertIn("ac_csv", rec["links"])
-
-    def test_explicit_local_backend_runs_any_grid(self):
-        rc, rec, decks, klt = self.run_main(["--backend", "local", "--corners", "tt,ss",
-                                             "--temps", "27", "--analyses", "ac,tran_sr"])
-        self.assertEqual((rc, klt), (0, []))
-        self.assertEqual(len(decks), 4)  # 2 local analyses x 2 supply points
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac", "tran_sr"])
-
-    def test_env_selected_local_preserves_the_full_local_campaign(self):
-        rc, rec, decks, klt = self.run_main(["--analyses", "ac,tran_sr"], env="local")
-        self.assertEqual((rc, klt), (0, []))
-        self.assertEqual(len(decks), 30)  # 2 local analyses x 15 supply points, no refusal
-        self.assertEqual(rec["matrix"]["n_runs"], 30)
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac", "tran_sr"])
-
-    def test_mixed_selection_counts_only_the_local_portion(self):
-        rc, rec, decks, klt = self.run_main(["--corners", "tt", "--temps", "27",
-                                             "--analyses", "ac,icmr"])
-        self.assertEqual(rc, 0)
-        self.assertEqual(len(decks), 1)  # one local unit allowed on batch
-        self.assertEqual(klt, [(["icmr"], "batch")])  # remote work is not constrained
-        self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], ["ac"])
-        self.assertEqual([j["backend"] for j in rec["klt_jobs"]], ["batch"])
-
-    def test_klt_only_selection_is_never_rejected(self):
-        rc, rec, decks, klt = self.run_main(["--analyses", "icmr,cmrr,tran_step"])
-        self.assertEqual((rc, decks, rec["matrix"]["n_failed"]), (0, [], 0))
-        self.assertEqual(klt, [(["icmr", "cmrr", "tran_step"], "batch")])
-
-    def test_fleet_counts_zero_local_units(self):
-        rc, rec, decks, klt = self.run_main(["--fleet", "--backend", "batch"])
-        self.assertEqual((rc, decks), (0, []))
-        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
-        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
-        self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
-
-    def test_consecutive_main_calls_leave_no_routing_state_stuck(self):
-        # fleet/batch sets LOCAL_SIM_FORBIDDEN for its own run; each later call
-        # must re-derive the flag and the backend from its own argv/environment.
-        self.addCleanup(pvt.LOCAL_SIM_FORBIDDEN.__setitem__, 0, False)
-        rc0, _r0, decks0, klt0 = self.run_main(["--fleet", "--backend", "batch",
-                                                "--corners", "tt", "--temps", "27"])
-        self.assertEqual((rc0, decks0), (0, []))
-        self.assertEqual(klt0, [(["ac", "tran_sr", "dc_swing"], "batch")])
-        self.assertTrue(pvt.LOCAL_SIM_FORBIDDEN[0])  # left set, as the fleet run does today
-        rc1, _r1, decks1, _k1 = self.run_main(["--corners", "tt", "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc1, len(decks1)), (0, 1))  # one-unit probe not poisoned by the fleet call
-        self.assertFalse(pvt.LOCAL_SIM_FORBIDDEN[0])
-        rc2, _r2, decks2, _k2 = self.run_main(["--backend", "local", "--corners", "tt,ss",
-                                               "--temps", "27", "--analyses", "ac"])
-        self.assertEqual((rc2, len(decks2)), (0, 2))
-        pvt.LOCAL_SIM_FORBIDDEN[0] = False
-
     def test_check_env_reports_the_effective_backend_and_precedence(self):
         import contextlib
         import io
@@ -2015,6 +1900,161 @@ class LocalExecutionAllowanceTests(unittest.TestCase):
         self.assertIn("klt sim backend: local", text)
         self.assertIn("KLT_SIM_BACKEND='batch'", text)
         self.assertIn("--backend", text)
+
+    def test_check_env_fails_when_klt_is_missing(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        out = io.StringIO()
+        with mock.patch.object(pvt, "report_tool_status", lambda: 0), \
+                mock.patch.object(pvt, "report_pdk", lambda resolve, corners, label: (0, None)), \
+                mock.patch.object(pvt, "klt_available", lambda: None), \
+                contextlib.redirect_stdout(out):
+            rc = pvt.check_env()
+        self.assertNotEqual(rc, 0)  # klt is required for every analysis now (issue #278)
+        self.assertIn("klt     : MISSING", out.getvalue())
+
+
+class PreValidationTests(unittest.TestCase):
+    """Analysis-name and supply-tuple validation errors exit non-zero before
+    any tool/PDK check, klt probe, record/snapshot allocation or klt
+    submission. Every later stage is armed to fail the test."""
+
+    def refuse(self, argv, env=None):
+        import contextlib
+        import io
+        from unittest import mock
+
+        def fail(stage):
+            def _fail(*a, **k):
+                raise AssertionError(f"{stage} reached despite the refusal")
+            return _fail
+
+        with tempfile.TemporaryDirectory() as d:
+            records, snaps = Path(d) / "records", Path(d) / "snaps"
+            records.mkdir()
+            snaps.mkdir()
+            err = io.StringIO()
+            with klt_backend_env(env), \
+                    mock.patch.object(pvt, "resolve_pdk", fail("PDK resolution")), \
+                    mock.patch.object(pvt, "klt_available", fail("klt probe")), \
+                    mock.patch.object(pvt, "allocate_record_id", fail("record allocation")), \
+                    mock.patch.object(pvt, "run_klt_sim", fail("klt submission")), \
+                    mock.patch.object(pvt, "RECORDS_DIR", records), \
+                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
+                    contextlib.redirect_stderr(err):
+                rc = pvt.main(list(argv))
+            self.assertEqual(list(records.iterdir()), [], "refusal wrote record files")
+            self.assertEqual(list(snaps.iterdir()), [], "refusal wrote snapshots")
+        self.assertNotEqual(rc, 0)
+        return err.getvalue()
+
+    def test_unknown_analysis_still_reports_the_pre_guard_error(self):
+        err = self.refuse(["--corners", "tt", "--temps", "27", "--analyses", "ac,bogus"])
+        self.assertIn("unknown analysis 'bogus'", err)
+
+    def test_duplicate_supply_tuple_still_reports_the_pre_guard_error(self):
+        err = self.refuse(["--corners", "tt,tt", "--temps", "27", "--analyses", "ac"])
+        self.assertIn("duplicate (process, temperature, supply) tuple", err)
+
+
+class DefaultKltDispatchTests(unittest.TestCase):
+    """Issue #278: without --fleet, the default analyses dispatch ac,tran_sr,dc_swing
+    through `klt sim` on the resolved backend; --fleet stays accepted as a no-op."""
+
+    class Pdk(FakePdk):
+        variant = "sky130A"
+        matches_pin, root, installed_commit = True, Path("/pdk"), "abc"
+        pin = {"open_pdks_commit": "abc"}
+        own_pin = {"rc_corner": {"choice": "typical"}}
+
+    def run_main(self, argv, env=None):
+        """main() to completion against a mocked klt campaign and temporary
+        record/snapshot dirs; returns (rc, record, klt_campaigns)."""
+        import contextlib
+        import io
+        from unittest import mock
+
+        klt_campaigns = []
+
+        def fake_klt_campaign(analyses, pdk, corners, temps, backend, req_dir, log_dir,
+                              snapshot_run_dir, results, errors, klt_jobs,
+                              supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
+            klt_campaigns.append((list(analyses), backend))
+            klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d) / "repo"
+            records, snaps = root / "records", root / "snaps"
+            records.mkdir(parents=True)
+            snaps.mkdir(parents=True)
+            out = io.StringIO()
+            patches = [
+                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root),
+                mock.patch.object(pvt, "RECORDS_DIR", records),
+                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps),
+                mock.patch.object(pvt, "resolve_pdk", lambda: self.Pdk()),
+                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
+                mock.patch.object(pvt, "klt_version", lambda: "klt-test"),
+                mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
+                mock.patch.object(pvt, "run_klt_analyses", fake_klt_campaign),
+                mock.patch.object(pvt, "ACTIVE_DUT", [pvt.DESIGN_NETLIST]),
+            ]
+            with klt_backend_env(env):
+                for p in patches:
+                    p.start()
+                try:
+                    with contextlib.redirect_stderr(out), contextlib.redirect_stdout(out):
+                        rc = pvt.main(list(argv))
+                finally:
+                    mock.patch.stopall()
+            recs = list(records.glob("*.json"))
+            rec = json.loads(recs[0].read_text()) if recs else None
+        return rc, rec, klt_campaigns
+
+    def test_default_invocation_dispatches_fleet_analyses_via_klt(self):
+        rc, rec, klt = self.run_main([])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
+        self.assertEqual(rec["matrix"]["execution"]["klt_analyses"], ["ac", "tran_sr", "dc_swing"])
+        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+        self.assertIs(rec["matrix"]["execution"]["fleet_flag"], False)
+        self.assertEqual(rec["matrix"]["execution"]["backend"], "batch")
+        self.assertEqual(rec["tools"]["ngspice"], "not invoked (klt/fleet execution)")
+
+    def test_fleet_flag_is_an_accepted_no_op(self):
+        rc, rec, klt = self.run_main(["--fleet", "--backend", "batch"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "batch")])
+        self.assertEqual(rec["matrix"]["execution"]["local_ngspice_analyses"], [])
+        self.assertIs(rec["matrix"]["execution"]["fleet_flag"], True)
+
+    def test_backend_local_routes_the_same_analyses_locally_via_klt(self):
+        rc, rec, klt = self.run_main(["--backend", "local", "--corners", "tt", "--temps", "27"])
+        self.assertEqual(rc, 0)
+        self.assertEqual(klt, [(["ac", "tran_sr", "dc_swing"], "local")])
+        self.assertEqual(rec["matrix"]["execution"]["backend"], "local")
+
+    def test_missing_klt_fails_before_any_work(self):
+        import contextlib
+        import io
+        from unittest import mock
+
+        with tempfile.TemporaryDirectory() as d:
+            records, snaps = Path(d) / "records", Path(d) / "snaps"
+            records.mkdir()
+            snaps.mkdir()
+            err = io.StringIO()
+            with mock.patch.object(pvt, "klt_available", lambda: None), \
+                    mock.patch.object(pvt, "RECORDS_DIR", records), \
+                    mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), \
+                    contextlib.redirect_stderr(err):
+                rc = pvt.main([])
+            self.assertNotEqual(rc, 0)
+            self.assertIn("klt not found on PATH", err.getvalue())
+            self.assertEqual(list(records.iterdir()), [], "run wrote record files")
+            self.assertEqual(list(snaps.iterdir()), [], "run wrote snapshots")
 
 
 def follower_wave(lo, hi, sr=15e6, k=1e8, vdd=1.8, t_stop=2.2e-6, dt=2e-9, offset=0.0, sr_fall=None,

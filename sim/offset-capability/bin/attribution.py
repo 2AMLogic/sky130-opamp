@@ -55,6 +55,9 @@ BENCH_DIR = EXP / "bench" / "attribution"
 CORE = REPO / "design" / "netlist" / "opamp_core.spice"
 BASE_BENCH = EXP / "bench" / "offset_dc.cir"
 
+sys.path.insert(0, str(REPO / "lib"))
+from spice_text import join_continuations  # noqa: E402
+
 # group -> (instances with mismatch ON, N per group). Verified against
 # design/netlist/opamp_core.spice by `instances()`/test_attribution.
 GROUPS = {
@@ -99,14 +102,12 @@ XX c0 c1 sky130_fd_pr__cap_mim_m3_1 w={w} l={l} mf={mf} m={m}
 
 
 def logical_lines(text: str) -> list[str]:
-    """Netlist lines with `+` continuations joined (cards kept in file order)."""
-    out: list[str] = []
-    for ln in text.splitlines():
-        if ln.startswith("+") and out:
-            out[-1] += " " + ln[1:].strip()
-        else:
-            out.append(ln.rstrip())
-    return out
+    """Emitting adapter over the shared joiner (lib/spice_text.py, issue #301):
+    `+` continuations fold onto their owning card -- a full-line `*` comment or
+    blank between them never becomes the continuation target -- while comment
+    and blank lines are retained in file order, so regenerated benches and
+    candidates are byte-stable."""
+    return join_continuations(text, keep_comments=True)
 
 
 def instances(core_text: str) -> dict[str, str]:
