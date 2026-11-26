@@ -261,9 +261,6 @@ class KltBenchTests(unittest.TestCase):
         self.assertEqual(req["batch"]["runner_version_check"], pvt.RUNNER_VERSION_CHECK[0])
 
     def test_icmr_request_is_one_per_corner_with_literal_midpoint(self):
-        groups = pvt.vdd_groups(list(pvt.DEFAULT_CORNERS))
-        self.assertEqual(sorted(groups), [1.62, 1.8, 1.98])
-        self.assertEqual(sorted(groups[1.8]), ["fs", "sf", "tt"])
         req, _b, tag = klt_request("icmr", None, 1.62, ["ss"])
         self.assertEqual(tag, "icmr-ss")
         self.assertEqual(req["corners"]["process"], ["ss"])
@@ -1184,8 +1181,9 @@ class FleetAnalysisTests(unittest.TestCase):
             Path(out_dir).mkdir(parents=True, exist_ok=True)  # klt creates its outdir
             req = json.loads(Path(req_path).read_text())
             calls.append((req, bk))
-            kind = req["netlist"].split("-body")[0]  # ac / ac-iq / tran-sr / dc-swing
-            kind = {"ac": "ac", "ac-iq": "ac_iq", "tran-sr": "tran_sr", "dc-swing": "dc_swing"}[kind]
+            kind = req["netlist"].split("-body")[0]  # ac / ac-iq / tran-sr / dc-swing / icmr-<corner>[-<VDD>V]
+            kind = "icmr" if kind.startswith("icmr") else \
+                {"ac": "ac", "ac-iq": "ac_iq", "tran-sr": "tran_sr", "dc-swing": "dc_swing"}[kind]
             excl = {(e["process"], e["supply_v"]["vdd"]) for e in req.get("exclude", [])}
             units = []
             for c in req["corners"]["process"]:
@@ -1235,6 +1233,10 @@ class FleetAnalysisTests(unittest.TestCase):
             vals = {"i_vdd_a": -6e-5}
         elif kind == "tran_sr":
             vals = {"t20_rise": 1e-7, "t80_rise": 1.5e-7, "t80_fall": 5e-7, "t20_fall": 5.6e-7}
+        elif kind == "icmr":
+            vals = {"vid_mid_v": 1e-4, "vout_mid_v": 0.5 * vdd, "iq_mid_a": -6e-5, "k_mid": 1e-3}
+            for label in pvt.ICMR_CMRR_FLOORS_DB:
+                vals[f"lo_{label}"], vals[f"hi_{label}"] = 0.6, 1.3
         else:
             vals = {"vout_mid_v": 0.5 * vdd}
         return [{"name": k, "value": v} for k, v in vals.items()]
@@ -1276,6 +1278,29 @@ class FleetAnalysisTests(unittest.TestCase):
         # several supplies at the SAME process/temperature stay distinct rows
         tt27 = [r["vdd_v"] for r in results["tran_sr"] if (r["corner"], r["temp_c"]) == ("tt", 27.0)]
         self.assertEqual(sorted(tt27), [1.62, 1.8, 1.98])
+
+    def test_icmr_plan_is_one_process_per_request_in_both_supply_modes(self):
+        """The planner never groups a VDD's processes into one icmr request (the
+        fleet's 9-unit tt/sf/fs 1.8 V request stalled; see run_klt_analyses):
+        paired = one request per process at its tied VDD, cartesian = one per
+        (process, supply). A request built from a single corner (KltBenchTests)
+        cannot see a regression in this grouping."""
+        supplies = pvt.supply_values(self.CORNERS, "cartesian")
+        for mode, expected in (("paired", {(c, pvt.VDD_BY_CORNER[c]) for c in self.CORNERS}),
+                               ("cartesian", {(c, v) for c in self.CORNERS for v in supplies})):
+            with self.subTest(supply_mode=mode), tempfile.TemporaryDirectory() as d, self._armed():
+                results, errors, _jobs, calls = self._campaign(["icmr"], mode, tmp=d)
+            self.assertEqual(errors, [])
+            self.assertEqual(len(calls), len(expected))  # 5 paired / 15 cartesian requests
+            self.assertEqual({(c, v) for req, _bk in calls for c in req["corners"]["process"]
+                              for v in req["corners"]["supply_v"]["vdd"]}, expected)  # each pair once
+            for req, _bk in calls:
+                self.assertEqual(len(req["corners"]["process"]), 1)  # one process per request, never a VDD group
+                self.assertEqual(len(req["corners"]["supply_v"]["vdd"]), 1)
+                self.assertEqual(req["corners"]["temperature_c"], self.TEMPS)
+            self.assertEqual(len(results["icmr"]), len(expected) * len(self.TEMPS))  # 15 / 45 points
+            self.assertEqual({(r["corner"], r["temp_c"], r["vdd_v"]) for r in results["icmr"]},
+                             set(pvt.supply_points(self.CORNERS, self.TEMPS, mode)))
 
     def test_missing_metric_and_missing_unit_are_failures_not_zeros(self):
         def mutate(kind, u):

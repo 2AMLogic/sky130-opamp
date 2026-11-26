@@ -438,12 +438,6 @@ SKY130_LIB = "libs.tech/ngspice/sky130.lib.spice"  # sections tt/ff/ss/sf/fs
 # "ICMR bench" section and ../testbench/opamp_icmr.spice.tmpl's header state the
 # same criterion: ICMR = contiguous Vcm range around VDD/2, output held at
 # mid-rail, over which the local DC CMRR 1/|d vid/d Vcm| stays >= 40 dB.
-# One icmr request per corner (3 units each: the temperatures), not per VDD group.
-# Observed on the fleet (ngspice-46): the 9-unit tt/sf/fs 1.8 V group request had 7 of
-# 9 units sit in gmin/source stepping until the per-corner timeout (twice, with
-# different sets of units each time), while the 3-unit 1.62 V / 1.98 V group
-# requests and a 1-unit tt/27 C request of the same deck converged in 40-150 s.
-ICMR_REQUEST_PER_CORNER = True
 ICMR_VSTEP_V = 0.005  # swept-Vcm resolution (edges are interpolated between points)
 ICMR_DV_V = 0.01  # Vcm offset between the two amplifier copies (finite-difference step)
 ICMR_VSWEEP_START_V = 0.0  # NOT below ground: the fleet's ngspice-46 stalled in source stepping from -0.02 V (README)
@@ -474,7 +468,7 @@ CROSSCHECK_TOL_IQ_FRAC = 0.01  # ICMR mid-point supply current vs committed ac i
 def icmr_measurements(vdd: float) -> list[dict]:
     """`.meas dc` cards for one VDD group (mid-supply and the sweep's `to`/`from`
     limits are literal numbers in a .meas card, hence one request per VDD; and see
-    ICMR_REQUEST_PER_CORNER for why each corner is its own request)."""
+    run_klt_analyses for why each corner is its own request)."""
     mid = 0.5 * vdd
     ms = [
         {"name": "vout_mid_v", "unit": "V", "spice": f".meas dc vout_mid_v find v(out_1) at={mid:g}"},
@@ -789,14 +783,6 @@ def klt_available() -> str | None:
     return shutil.which(KLT_CMD[0])
 
 
-def vdd_groups(corners: list[str]) -> dict[float, list[str]]:
-    """Corners grouped by their tied VDD (VDD_BY_CORNER)."""
-    groups: dict[float, list[str]] = {}
-    for c in corners:
-        groups.setdefault(VDD_BY_CORNER[c], []).append(c)
-    return dict(sorted(groups.items()))
-
-
 def vdd_pairing(corners: list[str], mode: str = DEFAULT_SUPPLY_MODE,
                 supplies: Iterable[float] | None = None) -> tuple[list[float], list[dict]]:
     """Supply axis + `exclude` of one request. paired: the distinct VDDs, with
@@ -818,7 +804,7 @@ def build_klt_request(analysis: str, cm_point: str | None, vdd_group: float | No
 
     cmrr: one request for the whole grid (VDD pairing via supply axis + exclude).
     icmr: one request per corner (`.meas ... at=VDD/2` needs a literal mid-supply,
-    and the 9-unit tt/sf/fs 1.8 V request stalled on the fleet; see ICMR_REQUEST_PER_CORNER).
+    and the 9-unit tt/sf/fs 1.8 V request stalled on the fleet; see run_klt_analyses).
     """
     # klt stages a body's .include closure at submit time (sim_staging), resolving
     # a relative target against the request's directory. Copy the campaign's DUT
@@ -2142,12 +2128,15 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
     plan = []
     for a in klt_analyses:
         if a == "icmr":
+            # One icmr request per corner (3 units each: the temperatures), not per VDD group.
+            # Observed on the fleet (ngspice-46): the 9-unit tt/sf/fs 1.8 V group request had 7 of
+            # 9 units sit in gmin/source stepping until the per-corner timeout (twice, with
+            # different sets of units each time), while the 3-unit 1.62 V / 1.98 V group
+            # requests and a 1-unit tt/27 C request of the same deck converged in 40-150 s.
             if supply_mode == "cartesian":
                 plan.extend(("icmr", None, v, [c]) for c in corners for v in supply_values(corners, supply_mode, supplies))
-            elif ICMR_REQUEST_PER_CORNER:
-                plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
             else:
-                plan.extend(("icmr", None, vdd, cs) for vdd, cs in vdd_groups(corners).items())
+                plan.extend(("icmr", None, VDD_BY_CORNER[c], [c]) for c in corners)
         elif a == "ac":
             plan.extend([("ac_iq", None, None, corners), ("ac", None, None, corners)])  # companion first
         elif a == "tran_sr_icmr":

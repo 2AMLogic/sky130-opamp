@@ -19,7 +19,7 @@ relax the ratified spec"). Changing any of them is a spec change: it goes throug
 ``spec/`` with a decision record first.
 
 The paired/cartesian supply *logic* built on this table (``vdd_pairing``,
-``SUPPLY_MODES``, ``vdd_groups``) stays in
+``SUPPLY_MODES``) stays in
 ``sim/opamp-characterization/bin/pvt_sweep.py`` -- this module owns the table, not
 the sweep policy.
 """
