@@ -48,7 +48,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent.parent
 sys.path.insert(0, str(REPO / "sim" / "lib"))
 sys.path.insert(0, str(HERE.parent))
-import sink_sizing as ss  # noqa: E402  (committed CSV loader / interpolation)
+from _gmid import SWEEP_W_UM, interp_gmid, legal, load, snap  # noqa: E402  (shared sweep loader / grid helpers, #377)
 from corners import VDD_BY_CORNER  # noqa: E402  (single owner of the ratified table)
 
 CANON = REPO / "design" / "netlist" / "opamp_core.spice"
@@ -81,26 +81,23 @@ OP = {
 
 # ---------------------------------------------------------------- sizing data
 def widths() -> dict:
-    n = ss.load("nfet", 1.2)[("tt", 27.0)]
-    p = ss.load("pfet", 0.3)[("tt", 27.0)]
-    jn, *_ = ss.interp_gmid(n, GM_ID_PAIR)
-    jp, *_ = ss.interp_gmid(p, GM_ID_MIRROR)
-    return {"pair": ss.snap(I_UNIT_UA / jn), "pair_raw": I_UNIT_UA / jn,
-            "mirror": ss.snap(I_UNIT_UA / jp), "mirror_raw": I_UNIT_UA / jp}
+    n = load("nfet", 1.2)[("tt", 27.0)]
+    p = load("pfet", 0.3)[("tt", 27.0)]
+    jn, *_ = interp_gmid(n, GM_ID_PAIR)
+    jp, *_ = interp_gmid(p, GM_ID_MIRROR)
+    return {"pair": snap(I_UNIT_UA / jn), "pair_raw": I_UNIT_UA / jn, "pair_density": jn,
+            "mirror": snap(I_UNIT_UA / jp), "mirror_raw": I_UNIT_UA / jp, "mirror_density": jp}
 
 
 def series(device: str, length: float):
     """(gm/ID, J uA/um, Vov V, Vth V) rows of one (device, L) over all corners."""
     out = defaultdict(list)
-    with open(ss.FULL) as fh:
-        import csv
-        for r in csv.DictReader(fh):
-            if r["device"] != device or float(r["length_um"]) != length:
-                continue
+    for key, rows in load(device, length).items():
+        for _, i, r in rows:
             g = float(r["gm_id_per_v"]) if r["gm_id_per_v"] else None
-            if g and float(r["id_a"]) > 0:
-                out[(r["corner"], float(r["temp_c"]))].append(
-                    (g, float(r["id_a"]) / ss.SWEEP_W_UM * 1e6, float(r["vov_v"]), float(r["vth_v"])))
+            if g:
+                out[key].append(
+                    (g, i / SWEEP_W_UM * 1e6, float(r["vov_v"]), float(r["vth_v"])))
     for k in out:
         out[k].sort()
     return out
@@ -120,9 +117,9 @@ def sizing_report() -> str:
     w = widths()
     L = []
     A = L.append
-    A(f"pair  : gm/ID 17 -> {GM_ID_PAIR:g} at TT/27C: W = 5 uA / {w['pair_raw']:.6f} uA/um"
+    A(f"pair  : gm/ID 17 -> {GM_ID_PAIR:g} at TT/27C: W = {I_UNIT_UA:g} uA / {w['pair_density']:.6f} uA/um"
       f" = {w['pair_raw']:.4f} -> {w['pair']:.3f} um (grid)")
-    A(f"mirror: gm/ID 14 -> {GM_ID_MIRROR:g} at TT/27C: W = 5 uA / {w['mirror_raw']:.6f} uA/um"
+    A(f"mirror: gm/ID 14 -> {GM_ID_MIRROR:g} at TT/27C: W = {I_UNIT_UA:g} uA / {w['mirror_density']:.6f} uA/um"
       f" = {w['mirror_raw']:.4f} -> {w['mirror']:.3f} um (grid; XM6 keeps m=10, ratio 1:1:10)")
     j_pair_cur, j_pair_new = I_UNIT_UA / 6.030, I_UNIT_UA / w["pair"]
     j_mir_cur, j_mir_new = I_UNIT_UA / 4.635, I_UNIT_UA / w["mirror"]
@@ -243,7 +240,7 @@ def check() -> list[str]:
         m = re.search(r"W=([\d.]+)", ln)
         if not m or abs(float(m.group(1)) - width) > 1e-9:
             errs.append(f"{name}: W != {width:.3f}")
-        if not ss.legal(width):
+        if not legal(width):
             errs.append(f"{name}: W={width} off the 0.005 um grid")
     if "sky130_fd_pr__nfet_01v8_lvt" in got or "pfet_01v8_lvt" in got:
         errs.append("variant uses a lower-Vth flavor (out of scope: no committed gm/ID or mismatch data)")
