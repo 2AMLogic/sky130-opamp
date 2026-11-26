@@ -1049,29 +1049,11 @@ def tran_sr_row(corner: str, temp: float, info: dict, vdd: float | None = None) 
     }
 
 
-def load_sweep(info: dict, label: str) -> tuple[list[float], list[float]]:
-    """(v(inp), v(out)) columns of a unit's waveform artifact. A missing or
-    malformed artifact raises HarnessError (never an empty-sweep success)."""
-    wf = (info.get("artifacts") or {}).get("waveform")
-    if not wf or not Path(wf).is_file():
-        raise HarnessError(f"{label}: missing waveform artifact ({wf!r})")
-    try:
-        doc = json.loads(Path(wf).read_text())
-        names = [str(v["name"]).lower() for v in doc["variables"]]
-        i_in, i_out = names.index("v(inp)"), names.index("v(out)")
-        vin = [float(pt[i_in]) for pt in doc["points"]]
-        vout = [float(pt[i_out]) for pt in doc["points"]]
-    except (OSError, ValueError, KeyError, IndexError, TypeError) as exc:
-        raise HarnessError(f"{label}: unreadable waveform artifact {wf}: {exc}") from exc
-    if len(vin) < SWING_POINTS // 2 or not all(math.isfinite(x) for x in vin + vout):
-        raise HarnessError(f"{label}: incomplete sweep ({len(vin)} of ~{SWING_POINTS + 1} points)")
-    return vin, vout
-
-
 def dc_swing_row(corner: str, temp: float, info: dict, vdd: float | None = None) -> dict:
     vdd = VDD_BY_CORNER[corner] if vdd is None else float(vdd)
     label = f"dc_swing[{corner}/{temp:g}C]"
-    vin, vout = load_sweep(info, label)
+    wave = load_wave(info, label, ("v(inp)", "v(out)"))
+    vin, vout = wave["v(inp)"], wave["v(out)"]
     if abs(max(vin) - vdd) > 1e-3 * vdd:  # the sweep must really cover 0..VDD of this corner
         raise HarnessError(f"{label}: sweep ends at {max(vin):g} V, expected {vdd:g} V")
     row = swing_row(corner, temp, vdd, vin, vout)

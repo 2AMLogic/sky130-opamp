@@ -1158,11 +1158,17 @@ class FleetAnalysisTests(unittest.TestCase):
             trunc = self.write_waveform(Path(d) / "t.json", vin[:250], vout[:250])
             junk = Path(d) / "j.json"
             junk.write_text("{not json")
+            nan_vout = self.write_waveform(Path(d) / "nan.json", vin, vout[:100] + [float("nan")] + vout[101:])
+            no_vout = write_wave(Path(d) / "no_vout.json", {"v(sw)": [a / 1.8 for a in vin], "v(inp)": vin})
             wrong_supply = ok
             for label, wf in (("missing", str(Path(d) / "none.json")), ("none", None), ("short", short),
                               ("junk", str(junk))):
                 with self.subTest(label), self.assertRaises(sh.HarnessError):
                     pvt.dc_swing_row("tt", 27.0, {"artifacts": {"waveform": wf}, "status": "pass", "runtime_s": 1.0})
+            with self.assertRaisesRegex(sh.HarnessError, "non-finite waveform values"):
+                pvt.dc_swing_row("tt", 27.0, {"artifacts": {"waveform": nan_vout}, "status": "pass", "runtime_s": 1.0})
+            with self.assertRaisesRegex(sh.HarnessError, r"waveform lacks v\(out\)"):
+                pvt.dc_swing_row("tt", 27.0, {"artifacts": {"waveform": no_vout}, "status": "pass", "runtime_s": 1.0})
             with self.assertRaises(sh.HarnessError):  # sweep does not reach this corner's VDD
                 pvt.dc_swing_row("ff", 27.0, {"artifacts": {"waveform": trunc}, "status": "pass", "runtime_s": 1.0})
             with self.assertRaises(sh.HarnessError):  # 1.8 V sweep presented as the 1.98 V corner
