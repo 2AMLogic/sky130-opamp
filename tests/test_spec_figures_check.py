@@ -595,6 +595,30 @@ class RecordResolutionTests(FixtureTests):
         self.assertIsNone(err)
         self.assertEqual(path.name, f"{RID}-{self.CAMPAIGN}.json")
 
+    def test_tokenized_record_cannot_satisfy_a_shortened_citation(self):
+        short_id = "20261114-032827-96d9fbc"
+        full_id = f"{short_id}-288af8"
+        record = Path(sf.OPAMP_RECORDS) / f"{full_id}-{self.CAMPAIGN}.json"
+        (self.tmp / record).write_text("{}")
+        citation = f"[{full_id}](../{record})"
+        self.write_spec(SPEC.replace("Summary:", citation))
+        self.assertEqual(sf.check(self.tmp), [])
+
+        broken_link = f"[{full_id}](../{record.parent}/{short_id}-{self.CAMPAIGN}.json)"
+        for shortened in (short_id, broken_link):
+            with self.subTest(citation=shortened):
+                self.write_spec(SPEC.replace("Summary:", shortened))
+                self.assertIn(f"section 2 cites record {short_id} which does not exist under {sf.RECORDS_GLOB}",
+                              sf.check(self.tmp))
+
+    def test_tokenized_citation_cannot_stand_in_for_legacy_figure_id(self):
+        full_id = f"{RID}-288af8"
+        (self.tmp / sf.OPAMP_RECORDS / f"{full_id}-{self.CAMPAIGN}.json").write_text("{}")
+        self.assertEqual(sf.check(self.tmp), [])
+        self.alter_row(RID, full_id)
+        self.assertEqual(sf.check(self.tmp),
+                         [f"Open-loop DC gain: record {RID} is not cited in its section 2 row"])
+
     def test_bare_spelling_still_wins_when_both_exist(self):
         (self.tmp / sf.OPAMP_RECORDS / f"{RID}.json").write_text("{}")
         path, err = sf.resolve_record(self.tmp, RID)
@@ -624,6 +648,24 @@ class RecordResolutionTests(FixtureTests):
         self.assertTrue(any("ambiguously" in e for e in errs), errs)
         self.assertTrue(any(e.startswith("Open-loop DC gain:") and "ambiguously" in e
                             for e in errs), errs)
+
+    def test_same_record_stem_in_different_directories_is_ambiguous(self):
+        other = self.tmp / "sim/other/records"
+        other.mkdir(parents=True)
+        for stem in (f"{RID}-{self.CAMPAIGN}", RID):
+            with self.subTest(stem=stem):
+                record = self.tmp / sf.OPAMP_RECORDS / f"{stem}.json"
+                record.write_text("{}")
+                record.with_suffix(".md").write_text("companion report")
+                self.assertEqual(sf.resolve_record(self.tmp, RID), (record, None))
+
+                duplicate = other / record.name
+                duplicate.write_text('{"other": true}')
+                errors = sf.check(self.tmp)
+                self.assertEqual(len(errors), 1, errors)
+                self.assertIn(f"section 2: record id {RID} resolves ambiguously to 2", errors[0])
+                for path in (record, duplicate):
+                    self.assertIn(str(path.relative_to(self.tmp)), errors[0])
 
     def test_md_only_campaign_record_satisfies_the_citation_check(self):
         rec = self.tmp / sf.OPAMP_RECORDS
