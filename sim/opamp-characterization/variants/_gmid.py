@@ -83,16 +83,24 @@ class MosCard(NamedTuple):
     nf: int | None
 
 
-_EOL_COMMENT = re.compile(r"(?:;|(?<!\S)\$).*")
+_EOL_COMMENT = re.compile(r"(?:;|//|(?<!\S)\$).*")
 
 
 def strip_eol_comments(text: str) -> str:
-    """Drop ``;`` / `` $`` end-of-line comment text from each physical line.
+    """Drop ``;`` / ``//`` / `` $`` end-of-line comment text from each physical line.
 
     Must run before continuations are folded: a comment's ``m=1`` would
     otherwise join the card and overwrite the active parameter.
     """
     return "\n".join(_EOL_COMMENT.sub("", ln) for ln in text.splitlines())
+
+
+def _whole_number(value: str) -> int:
+    """Parse an integer-valued spelling (``2``, ``2.0``); reject truncating ones."""
+    number = float(value)
+    if not number.is_integer():
+        raise ValueError(f"non-integer value: {value}")
+    return int(number)
 
 
 def mos_cards(text: str) -> dict[str, MosCard]:
@@ -106,7 +114,8 @@ def mos_cards(text: str) -> dict[str, MosCard]:
         try:
             cards[tokens[0]] = MosCard(
                 tokens[1:6], float(params["W"]), float(params["L"]),
-                int(params["m"]), int(params["nf"]) if "nf" in params else None)
+                _whole_number(params["m"]),
+                _whole_number(params["nf"]) if "nf" in params else None)
         except (KeyError, ValueError) as exc:
             raise ValueError(f"cannot parse MOS card: {line[:60]}") from exc
     return cards

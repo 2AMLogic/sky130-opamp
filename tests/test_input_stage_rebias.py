@@ -41,7 +41,7 @@ class VariantNetlist(unittest.TestCase):
         cont = text.index("\n+", text.index("\nXM5 "))
         eol = text.index("\n", cont + 1)
         base = COL.gate_area(ISR.CANON)
-        for suffix in ("; previous m=1", " $ previous m=1"):
+        for suffix in ("; previous m=1", " $ previous m=1", " // previous m=1"):
             with self.subTest(suffix=suffix):
                 with tempfile.TemporaryDirectory() as td:
                     path = Path(td) / "eol.spice"
@@ -49,6 +49,30 @@ class VariantNetlist(unittest.TestCase):
                     areas = COL.gate_area(path)
                 self.assertAlmostEqual(areas[0]["XM5"], 7.820 * 1.2 * 2)
                 self.assertEqual(areas, base)
+
+    def test_gate_area_accepts_integer_valued_decimal_m_and_nf(self):
+        text = ISR.CANON.read_text()
+        xm5 = text.index("\nXM5 ")
+        base = COL.gate_area(ISR.CANON)
+        for old, new in (("m=2", "m=2.0"), ("nf=1", "nf=1.0")):
+            with self.subTest(param=old):
+                end = text.index("\nXM", xm5 + 1) if "\nXM" in text[xm5 + 1:] else len(text)
+                card = text[xm5:end]
+                self.assertEqual(card.count(old) >= 1, True, old)
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "decimal.spice"
+                    path.write_text(text[:xm5] + card.replace(old, new, 1) + text[end:])
+                    self.assertEqual(COL.gate_area(path), base)
+
+    def test_gate_area_rejects_fractional_m_and_nf(self):
+        for tail in ("nf=1 m=2.5", "nf=1.5 m=2"):
+            with self.subTest(tail=tail):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "frac.spice"
+                    path.write_text("XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 L=1.2 W=7.820 "
+                                    + tail + "\n")
+                    with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
+                        COL.gate_area(path)
 
     def test_gate_area_rejects_xm5_missing_m(self):
         with tempfile.TemporaryDirectory() as td:
