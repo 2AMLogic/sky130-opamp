@@ -8,6 +8,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-26
 
+- **PR #406**: fix: share MOS card parsing across op-amp variants
+- **Issue #405** (closed): Consolidate duplicated variant MOS-card helpers, continuation parsers, and dead bindings onto variants/_gmid.py
 - **PR #401**: fix: reject mc-only CLI flags on sink_bias_margin static subcommand
 - **Issue #400** (closed): Drop the four ignored mc-only flags from sink_bias_margin.py static
 - **PR #399**: fix: log fleet capacity waits from the ICMR-aware slew submitter too
