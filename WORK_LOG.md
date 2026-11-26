@@ -8,6 +8,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-26
 
+- **PR #418**: fix: strip end-of-line comments in the Pelgrom geometry reader
+- **Issue #417** (closed): Share SPICE end-of-line comment handling with the Pelgrom geometry reader
 - **Issue #413** (closed): Remove the unused ICMR supply-group planner and test the emitted requests
 - **PR #414**: refactor: drop unused ICMR VDD-group planner, test emitted requests
 - **PR #407**: feat: record M3/M4/M5 length candidate for DC PSRR and reject on GBW/slew regression
