@@ -1324,6 +1324,9 @@ class FleetAnalysisTests(unittest.TestCase):
         self.assertTrue(all("no environment.remote" in e for e in errors))
 
     def test_capacity_refusal_is_retried_then_reported_never_run_locally(self):
+        import contextlib
+        import io
+
         attempts = []
 
         def refuse(req_path, out_dir, bk):
@@ -1338,13 +1341,49 @@ class FleetAnalysisTests(unittest.TestCase):
                 (dd / "snap").mkdir()
                 (dd / "logs").mkdir()
                 results, errors, jobs = {"ac": []}, [], []
-                pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
-                                     dd / "logs", dd / "snap", results, errors, jobs)
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
+                                         dd / "logs", dd / "snap", results, errors, jobs)
         finally:
             pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
         self.assertEqual(attempts, ["batch"] * 6)  # ac-iq and ac, 1 try + 2 retries each
         self.assertEqual(results["ac"], [])
         self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", errors[0])
+        # every wait is announced (issue #395): tag + retry count + duration, both requests
+        self.assertEqual(err.getvalue().count("fleet at capacity"), 4)
+        self.assertIn("ac-iq: fleet at capacity, retry 1/2 in 0s", err.getvalue())
+        self.assertIn("ac: fleet at capacity, retry 2/2 in 0s", err.getvalue())
+
+    def test_unrelated_submit_error_surfaces_on_first_attempt(self):
+        import contextlib
+        import io
+
+        attempts = []
+
+        def fail(req_path, out_dir, bk):
+            attempts.append(bk)
+            raise sh.HarnessError("klt sim died for an unrelated reason")
+
+        saved = (pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S)
+        pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = fail, 2, 0
+        try:
+            with tempfile.TemporaryDirectory() as d, self._armed():
+                dd = Path(d)
+                (dd / "snap").mkdir()
+                (dd / "logs").mkdir()
+                results, errors, jobs = {"ac": []}, [], []
+                err = io.StringIO()
+                with contextlib.redirect_stderr(err):
+                    pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
+                                         dd / "logs", dd / "snap", results, errors, jobs)
+        finally:
+            pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
+        self.assertEqual(attempts, ["batch"] * 2)  # one attempt per request, no retries
+        self.assertEqual(results["ac"], [])
+        self.assertEqual(len(errors), 2)
+        self.assertTrue(all("unrelated reason" in e for e in errors))
+        self.assertNotIn("fleet at capacity", err.getvalue())
 
     def test_cli_fleet_and_netlist_flags(self):
         # issue #163: the default backend depends on $KLT_SIM_BACKEND -- pin it unset
@@ -2235,6 +2274,62 @@ class IcmrAwareSlewTests(unittest.TestCase):
             pvt.ICMR_SR_STEPS.clear()
         summ = pvt.tran_sr_icmr_summary([row])
         self.assertEqual(summ["points"], 1)
+
+    # -- submission (issue #395: capacity waits logged like the main loop) ---
+    def _run_icmr_pass(self, run_klt):
+        """run_tran_sr_icmr over one usable TT point: run_klt_sim mocked, CAPACITY_* pinned, stderr captured."""
+        import contextlib
+        import io
+
+        saved = (pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S)
+        pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = run_klt, 2, 0
+        err = io.StringIO()
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                dd = Path(d)
+                (dd / "snap").mkdir()
+                (dd / "logs").mkdir()
+                results, errors, jobs = {"tran_sr_icmr": []}, [], []
+                icmr_rows = [{"corner": "tt", "temp_c": 27.0, "vdd_v": 1.8,
+                              "icmr_low_v": 0.3, "icmr_high_v": 1.5}]  # wide window: a usable step
+                with contextlib.redirect_stderr(err):
+                    pvt.run_tran_sr_icmr(FakeKltPdk(), ["tt"], [27.0], "batch", dd / "req", dd / "logs",
+                                         dd / "snap", results, errors, jobs, "paired", None, icmr_rows, [])
+        finally:
+            pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
+            pvt.ICMR_SR_STEPS.clear()
+        return results, errors, err.getvalue()
+
+    def test_capacity_refusal_waits_are_logged_and_final_error_reported(self):
+        attempts = []
+
+        def refuse(req_path, out_dir, bk):
+            attempts.append(bk)
+            raise sh.HarnessError("batch backend failed: ... exceeds BATCH_MAX_CONCURRENT_INSTANCES=8")
+
+        results, errors, err = self._run_icmr_pass(refuse)
+        self.assertEqual(attempts, ["batch"] * 3)  # 1 try + 2 capacity retries, all on the fleet
+        self.assertEqual(results["tran_sr_icmr"], [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("BATCH_MAX_CONCURRENT_INSTANCES", errors[0])
+        # issue #395: every wait is announced -- tag, retry count, wait duration
+        self.assertEqual(err.count("fleet at capacity"), 2)
+        self.assertIn("tran-sr-icmr-tt-27C-1.8V: fleet at capacity, retry 1/2 in 0s", err)
+        self.assertIn("tran-sr-icmr-tt-27C-1.8V: fleet at capacity, retry 2/2 in 0s", err)
+
+    def test_unrelated_submit_error_surfaces_on_first_attempt(self):
+        attempts = []
+
+        def fail(req_path, out_dir, bk):
+            attempts.append(bk)
+            raise sh.HarnessError("klt sim died for an unrelated reason")
+
+        results, errors, err = self._run_icmr_pass(fail)
+        self.assertEqual(attempts, ["batch"])  # no retry on a non-capacity error
+        self.assertEqual(results["tran_sr_icmr"], [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("unrelated reason", errors[0])
+        self.assertNotIn("fleet at capacity", err)
 
 
 if __name__ == "__main__":

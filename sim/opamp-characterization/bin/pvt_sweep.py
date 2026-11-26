@@ -2022,6 +2022,32 @@ def tran_sr_icmr_summary(rows: list[dict]) -> dict:
             "note": "diagnostic metric only; no target closure or topology adoption is implied"}
 
 
+def _timed_klt_submit(req_path: Path, tag: str, log_dir: Path,
+                      backend: str) -> tuple[dict | None, float, HarnessError | None]:
+    """One `klt sim` submit, timed, with the fleet capacity retry -- shared by
+    run_klt_analyses and run_tran_sr_icmr. The fleet is shared and capped
+    (BATCH_MAX_CONCURRENT_INSTANCES): a submit refused for capacity is retried
+    after a wait (still the fleet, never a local fallback); any other failure is
+    reported at once. Every wait is announced on stderr -- tag, retry count,
+    wait duration -- so a delayed request is diagnosable from stderr alone.
+    Returns (report, wall_seconds, exc); exc is None exactly when the fleet
+    accepted the request."""
+    print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
+    t0 = time.monotonic()
+    exc = None
+    for attempt in range(CAPACITY_RETRIES + 1):
+        try:
+            return run_klt_sim(req_path, log_dir / f"klt-{tag}", backend), time.monotonic() - t0, None
+        except HarnessError as e:
+            exc = e
+            if "BATCH_MAX_CONCURRENT_INSTANCES" not in str(e) or attempt == CAPACITY_RETRIES:
+                break
+            print(f"klt sim {tag}: fleet at capacity, retry {attempt + 1}/{CAPACITY_RETRIES} in {CAPACITY_WAIT_S}s",
+                  file=sys.stderr)
+            time.sleep(CAPACITY_WAIT_S)
+    return None, time.monotonic() - t0, exc
+
+
 def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_run_dir, results, errors, klt_jobs,
                      supply_mode, supplies, icmr_rows, std_rows) -> None:
     """Second phase (needs the campaign's icmr rows): one single-unit `klt sim`
@@ -2046,18 +2072,8 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
                                           supply_mode, supplies)
         shutil.copy(req_path, snapshot_run_dir / req_path.name)
         shutil.copy(req_path.with_name(f"{tag}-body.spice"), snapshot_run_dir / f"{tag}-body.spice")
-        print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
-        t0 = time.monotonic()
-        exc = None
-        for attempt in range(CAPACITY_RETRIES + 1):
-            try:
-                return tag, req_path, run_klt_sim(req_path, log_dir / f"klt-{tag}", backend), time.monotonic() - t0, None
-            except HarnessError as e:
-                exc = e
-                if "BATCH_MAX_CONCURRENT_INSTANCES" not in str(e) or attempt == CAPACITY_RETRIES:
-                    break
-                time.sleep(CAPACITY_WAIT_S)
-        return tag, req_path, None, time.monotonic() - t0, exc
+        report, wall, exc = _timed_klt_submit(req_path, tag, log_dir, backend)
+        return tag, req_path, report, wall, exc
 
     with ThreadPoolExecutor(max_workers=max(1, min(len(todo), KLT_MAX_PARALLEL_SUBMITS))) as pool:
         outcomes = list(pool.map(submit, todo))
@@ -2171,23 +2187,7 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
 
     def submit(item):
         _analysis, _cm, _gc, req_path, tag, _vg = item
-        print(f"klt sim {tag} ({backend}) ...", file=sys.stderr)
-        t0 = time.monotonic()
-        # The fleet is shared and capped (BATCH_MAX_CONCURRENT_INSTANCES): a
-        # submit refused for capacity is retried after a wait (still the fleet,
-        # never a local fallback); any other failure is reported at once.
-        exc = None
-        for attempt in range(CAPACITY_RETRIES + 1):
-            try:
-                return run_klt_sim(req_path, log_dir / f"klt-{tag}", backend), time.monotonic() - t0, None
-            except HarnessError as e:
-                exc = e
-                if "BATCH_MAX_CONCURRENT_INSTANCES" not in str(e) or attempt == CAPACITY_RETRIES:
-                    break
-                print(f"klt sim {tag}: fleet at capacity, retry {attempt + 1}/{CAPACITY_RETRIES} in {CAPACITY_WAIT_S}s",
-                      file=sys.stderr)
-                time.sleep(CAPACITY_WAIT_S)
-        return None, time.monotonic() - t0, exc
+        return _timed_klt_submit(req_path, tag, log_dir, backend)
 
     with ThreadPoolExecutor(max_workers=max(1, min(len(prepared), KLT_MAX_PARALLEL_SUBMITS))) as pool:
         outcomes = list(pool.map(submit, prepared))
