@@ -7,6 +7,7 @@ Reading and emitting their MOS geometry needs only the standard library.
 from __future__ import annotations
 
 import csv
+import math
 import os
 import re
 import sys
@@ -112,12 +113,17 @@ def mos_cards(text: str) -> dict[str, MosCard]:
         tokens = line.split()
         params = dict(t.split("=", 1) for t in tokens[6:] if "=" in t)
         try:
-            cards[tokens[0]] = MosCard(
+            card_ = MosCard(
                 tokens[1:6], float(params["W"]), float(params["L"]),
                 _whole_number(params["m"]),
                 _whole_number(params["nf"]) if "nf" in params else None)
-        except (KeyError, ValueError) as exc:
+            if not all(math.isfinite(v) and v > 0 for v in (card_.width, card_.length)):
+                raise ValueError("W and L must be finite and positive")
+            if card_.m < 1 or (card_.nf is not None and card_.nf < 1):
+                raise ValueError("m and nf must be positive")
+        except (KeyError, ValueError, OverflowError) as exc:
             raise ValueError(f"cannot parse MOS card: {line[:60]}") from exc
+        cards[tokens[0]] = card_
     return cards
 
 

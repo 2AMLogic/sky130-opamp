@@ -82,6 +82,17 @@ class VariantNetlist(unittest.TestCase):
             with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
                 COL.gate_area(path)
 
+    def test_gate_area_rejects_nonpositive_or_nonfinite_geometry(self):
+        for tail in ("L=1.2 W=-7.820 nf=1 m=2", "L=-1.2 W=7.820 nf=1 m=2",
+                     "L=1.2 W=7.820 nf=1 m=-2", "L=1.2 W=nan nf=1 m=2",
+                     "L=inf W=7.820 nf=1 m=2", "L=1.2 W=0 nf=1 m=2"):
+            with self.subTest(tail=tail):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "bad.spice"
+                    path.write_text("XM5 tail ibias vss vss sky130_fd_pr__nfet_01v8 " + tail + "\n")
+                    with self.assertRaisesRegex(COL.CollateError, "cannot parse MOS card: XM5"):
+                        COL.gate_area(path)
+
     def test_only_input_stage_cards_differ_canonical_verbatim(self):
         var = mos_cards(ISR.VARIANT.read_text())
         canon = mos_cards(ISR.CANON.read_text())
