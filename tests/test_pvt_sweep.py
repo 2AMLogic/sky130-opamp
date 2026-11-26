@@ -979,7 +979,7 @@ class CartesianSupplyTests(unittest.TestCase):
                 snap.mkdir()
                 logs.mkdir()
                 pvt.run_klt_analyses(["cmrr"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch",
-                                     Path(d) / "req", logs, snap, results, errors, jobs, mode, None)
+                                     Path(d) / "req", logs, snap, results, errors, jobs, [], mode, None)
         finally:
             pvt.run_klt_sim = real
         return results["cmrr"], errors
@@ -1220,7 +1220,7 @@ class FleetAnalysisTests(unittest.TestCase):
         pvt.run_klt_sim = fake_klt
         try:
             pvt.run_klt_analyses(analyses, FakeKltPdk(), self.CORNERS, self.TEMPS, backend, d / "req", logs, snap,
-                                 results, errors, jobs, mode, None)
+                                 results, errors, jobs, [], mode, None)
         finally:
             pvt.run_klt_sim = real
         return results, errors, jobs, calls
@@ -1375,7 +1375,7 @@ class FleetAnalysisTests(unittest.TestCase):
                 err = io.StringIO()
                 with contextlib.redirect_stderr(err):
                     pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
-                                         dd / "logs", dd / "snap", results, errors, jobs)
+                                         dd / "logs", dd / "snap", results, errors, jobs, [])
         finally:
             pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
         self.assertEqual(attempts, ["batch"] * 6)  # ac-iq and ac, 1 try + 2 retries each
@@ -1407,7 +1407,7 @@ class FleetAnalysisTests(unittest.TestCase):
                 err = io.StringIO()
                 with contextlib.redirect_stderr(err):
                     pvt.run_klt_analyses(["ac"], FakeKltPdk(), self.CORNERS, self.TEMPS, "batch", dd / "req",
-                                         dd / "logs", dd / "snap", results, errors, jobs)
+                                         dd / "logs", dd / "snap", results, errors, jobs, [])
         finally:
             pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
         self.assertEqual(attempts, ["batch"] * 2)  # one attempt per request, no retries
@@ -1424,43 +1424,62 @@ class FleetAnalysisTests(unittest.TestCase):
             a = pvt.parse_args(["--fleet", "--netlist", "/x/cand.spice"])
             self.assertEqual((a.fleet, a.netlist), (True, "/x/cand.spice"))
 
-    def test_end_to_end_fleet_record_with_selected_netlist(self):
-        """main(): the default invocation (--netlist, no --fleet) writes a 45-unit
-        record via klt sim, snapshots the INPUT netlist, leaves the canonical
-        design untouched and never starts a local simulator (issue #278)."""
-        import hashlib
-        from unittest import mock
-
-        canon = pvt.DESIGN_NETLIST
-        canon_hash = hashlib.sha256(canon.read_bytes()).hexdigest()
+    def _run_fleet_main(self, root, argv, run_klt):
+        from contextlib import ExitStack
 
         class Pdk:
             matches_pin, variant, root, installed_commit = True, "sky130A", Path("/pdk"), "abc"
             pin = {"open_pdks_commit": "abc"}
             own_pin = {"rc_corner": {"choice": "typical"}}
 
+        with ExitStack() as stack:
+            for patch in fake_artifact_patches(root):
+                stack.enter_context(patch)
+            stack.enter_context(self._armed())
+            stack.enter_context(mock.patch.multiple(
+                pvt, REPO_ROOT=root, RECORDS_DIR=root / "records", SNAPSHOT_DIR=root / "snaps",
+                resolve_pdk=Pdk, klt_available=lambda: "/bin/klt", klt_version=lambda: "klt-test",
+                git_sha=lambda _r: "abc1234", run_klt_sim=run_klt, ACTIVE_DUT=[pvt.DESIGN_NETLIST],
+            ))
+            return pvt.main(argv)
+
+    def test_each_campaign_grades_only_its_own_slew_measurement(self):
+        argv = ["--analyses", "tran_sr", "--corners", "tt", "--temps", "27", "--backend", "batch"]
+        with tempfile.TemporaryDirectory() as d:
+            fake_klt = self._fake_klt(d)
+            for status in ("fail", "pass"):
+                def graded_report(req_path, out_dir, backend, status=status):
+                    report = fake_klt(req_path, out_dir, backend)
+                    report["status"] = report["corners"][0]["status"] = status
+                    report["measurements"] = [
+                        {"name": "sr_rise_v_per_us", "spec_row": "slew_rate", "status": status},
+                    ]
+                    return report
+
+                with self.subTest(status=status):
+                    root = Path(d) / status
+                    self.assertEqual(self._run_fleet_main(root, argv, graded_report), 0)
+                    record = json.loads(next((root / "records").glob("*.json")).read_text())
+                    self.assertEqual(len(record["klt_jobs"]), 1)
+                    self.assertEqual(record["matrix"]["n_runs"], 1)
+                    row = record["spec_row_grading"]["rows"]["slew_rate"]
+                    self.assertEqual((row["graded_measurement_points"], row["status"]), (1, status))
+
+    def test_end_to_end_fleet_record_with_selected_netlist(self):
+        """main(): the default invocation (--netlist, no --fleet) writes a 45-unit
+        record via klt sim, snapshots the INPUT netlist, leaves the canonical
+        design untouched and never starts a local simulator (issue #278)."""
+        import hashlib
+
+        canon = pvt.DESIGN_NETLIST
+        canon_hash = hashlib.sha256(canon.read_bytes()).hexdigest()
         with tempfile.TemporaryDirectory() as d:
             root = Path(d) / "repo"
             (root / "cand").mkdir(parents=True)
             cand = root / "cand" / "candidate.spice"
             cand.write_text("* candidate netlist, not the canonical design\n")
-            records, snaps = root / "records", root / "snaps"
-            patches = [
-                *fake_artifact_patches(root), mock.patch.object(pvt, "REPO_ROOT", root), mock.patch.object(pvt, "RECORDS_DIR", records),
-                mock.patch.object(pvt, "SNAPSHOT_DIR", snaps), mock.patch.object(pvt, "resolve_pdk", lambda: Pdk()),
-                mock.patch.object(pvt, "klt_available", lambda: "/bin/klt"),
-                mock.patch.object(pvt, "klt_version", lambda: "klt-test"), mock.patch.object(pvt, "git_sha", lambda _r: "abc1234"),
-                mock.patch.object(pvt, "run_klt_sim", self._fake_klt(Path(d))),
-                mock.patch.object(pvt, "ACTIVE_DUT", [canon]),
-            ]
-            (Path(d) / "dummy").mkdir()
-            with self._armed():
-                for p in patches:
-                    p.start()
-                try:
-                    rc = pvt.main(["--netlist", str(cand), "--backend", "batch"])
-                finally:
-                    mock.patch.stopall()
+            records = root / "records"
+            rc = self._run_fleet_main(root, ["--netlist", str(cand), "--backend", "batch"], self._fake_klt(d))
             self.assertEqual(rc, 0)
             rec = json.loads(next(records.glob("*.json")).read_text())
             self.assertEqual(rec["matrix"]["n_failed"], 0)
@@ -1781,7 +1800,7 @@ class SwingFixcmTests(unittest.TestCase):
         with mock.patch.object(pvt, "run_klt_sim", self._fake_klt(d, **kw)), \
                 FleetAnalysisTests._armed(self):
             pvt.run_klt_analyses(analyses, FakeKltPdk(), list(pvt.DEFAULT_CORNERS), [-40.0, 27.0, 125.0], "batch",
-                                 d / "req", d / "logs", d / "snap", results, errors, jobs)
+                                 d / "req", d / "logs", d / "snap", results, errors, jobs, [])
         return results, errors, jobs
 
     def test_campaign_rows_and_buffer_headroom_without_local_sim(self):
@@ -1993,7 +2012,7 @@ class DefaultKltDispatchTests(unittest.TestCase):
         klt_campaigns = []
 
         def fake_klt_campaign(analyses, pdk, corners, temps, backend, req_dir, log_dir,
-                              snapshot_run_dir, results, errors, klt_jobs,
+                              snapshot_run_dir, results, errors, klt_jobs, klt_reports,
                               supply_mode=pvt.DEFAULT_SUPPLY_MODE, supplies=None):
             klt_campaigns.append((list(analyses), backend))
             klt_jobs.append({"remote": {"job_id": f"j-{len(klt_campaigns)}"}, "backend": backend})
@@ -2325,7 +2344,7 @@ class IcmrAwareSlewTests(unittest.TestCase):
                               "icmr_low_v": 0.3, "icmr_high_v": 1.5}]  # wide window: a usable step
                 with contextlib.redirect_stderr(err):
                     pvt.run_tran_sr_icmr(FakeKltPdk(), ["tt"], [27.0], "batch", dd / "req", dd / "logs",
-                                         dd / "snap", results, errors, jobs, "paired", None, icmr_rows, [])
+                                         dd / "snap", results, errors, jobs, [], "paired", None, icmr_rows, [])
         finally:
             pvt.run_klt_sim, pvt.CAPACITY_RETRIES, pvt.CAPACITY_WAIT_S = saved
             pvt.ICMR_SR_STEPS.clear()
