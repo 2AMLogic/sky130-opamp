@@ -6,6 +6,22 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-26
+
+- **PR #401**: fix: reject mc-only CLI flags on sink_bias_margin static subcommand
+- **Issue #400** (closed): Drop the four ignored mc-only flags from sink_bias_margin.py static
+- **PR #399**: fix: log fleet capacity waits from the ICMR-aware slew submitter too
+- **Issue #395** (closed): Share the PVT capacity-retry loop so ICMR-aware slew logs its waits
+- **PR #398**: fix: reuse the shared gm/ID sweep loader in input-stage sizing
+- **Issue #397** (closed): Restore input-stage sizing by reusing the shared gm/ID sweep loader
+- **PR #393**: perf: compute buffer headroom only for fixed-CM comparisons
+- **Issue #391** (closed): Skip buffer headroom extraction when the fixed-common-mode comparison is disabled
+
+### 2026-11-25
+
+- **PR #365**: sim: input-stage icmr-rebias screen — 17-point fleet evidence, collation, DR-015 (proposed)
+- **Issue #359** (closed): Design iteration: screen an input-stage candidate that widens the common-mode range, against the ratified output-swing row (and the SS / -40 C fall-slew share)
+
 ### 2026-11-24
 
 - **PR #363**: feat(sim): emit the ratified output-swing row natively as gated slope_band entries
