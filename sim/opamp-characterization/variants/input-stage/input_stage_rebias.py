@@ -85,8 +85,8 @@ def widths() -> dict:
     p = load("pfet", 0.3)[("tt", 27.0)]
     jn, *_ = interp_gmid(n, GM_ID_PAIR)
     jp, *_ = interp_gmid(p, GM_ID_MIRROR)
-    return {"pair": snap(I_UNIT_UA / jn), "pair_raw": I_UNIT_UA / jn,
-            "mirror": snap(I_UNIT_UA / jp), "mirror_raw": I_UNIT_UA / jp}
+    return {"pair": snap(I_UNIT_UA / jn), "pair_raw": I_UNIT_UA / jn, "pair_density": jn,
+            "mirror": snap(I_UNIT_UA / jp), "mirror_raw": I_UNIT_UA / jp, "mirror_density": jp}
 
 
 def series(device: str, length: float):
@@ -117,9 +117,9 @@ def sizing_report() -> str:
     w = widths()
     L = []
     A = L.append
-    A(f"pair  : gm/ID 17 -> {GM_ID_PAIR:g} at TT/27C: W = 5 uA / {w['pair_raw']:.6f} uA/um"
+    A(f"pair  : gm/ID 17 -> {GM_ID_PAIR:g} at TT/27C: W = {I_UNIT_UA:g} uA / {w['pair_density']:.6f} uA/um"
       f" = {w['pair_raw']:.4f} -> {w['pair']:.3f} um (grid)")
-    A(f"mirror: gm/ID 14 -> {GM_ID_MIRROR:g} at TT/27C: W = 5 uA / {w['mirror_raw']:.6f} uA/um"
+    A(f"mirror: gm/ID 14 -> {GM_ID_MIRROR:g} at TT/27C: W = {I_UNIT_UA:g} uA / {w['mirror_density']:.6f} uA/um"
       f" = {w['mirror_raw']:.4f} -> {w['mirror']:.3f} um (grid; XM6 keeps m=10, ratio 1:1:10)")
     j_pair_cur, j_pair_new = I_UNIT_UA / 6.030, I_UNIT_UA / w["pair"]
     j_mir_cur, j_mir_new = I_UNIT_UA / 4.635, I_UNIT_UA / w["mirror"]

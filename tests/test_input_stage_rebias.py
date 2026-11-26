@@ -82,9 +82,9 @@ class SizingReport(unittest.TestCase):
                       " (currently missed by 0.0088 V)", self.report)
 
     def test_tt_27c_grid_snapped_widths_cited_by_the_plan(self):
-        self.assertIn("W = 5 uA / 14.470069 uA/um = 14.4701 -> 14.470 um (grid)",
+        self.assertIn("W = 5 uA / 0.345541 uA/um = 14.4701 -> 14.470 um (grid)",
                       self.report)
-        self.assertIn("W = 5 uA / 13.710124 uA/um = 13.7101 -> 13.710 um (grid",
+        self.assertIn("W = 5 uA / 0.364694 uA/um = 13.7101 -> 13.710 um (grid",
                       self.report)
 
 
