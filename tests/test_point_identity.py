@@ -15,6 +15,7 @@ Two jobs:
 No simulator, no PDK, no committed evidence is read or written.
 """
 
+import ast
 import csv
 import unittest
 from pathlib import Path
@@ -145,6 +146,15 @@ class SingleOwnerTests(unittest.TestCase):
         src = (_paths.REPO / "sim" / "lib" / "point_identity.py").read_text()
         for banned in ("import numpy", "import pandas", "import yaml", "import requests"):
             self.assertNotIn(banned, src)
+
+    def test_pvt_supplies_and_report_keys_delegate_rounding(self):
+        module = ast.parse((_paths.EXP / "bin" / "pvt_sweep.py").read_text())
+        for fn in module.body:
+            if isinstance(fn, ast.FunctionDef) and fn.name in {"supply_values", "_corner_values", "_report_key"}:
+                with self.subTest(function=fn.name):
+                    self.assertFalse(any(isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+                                         and n.func.id == "round" for n in ast.walk(fn)),
+                                     "use point_identity.norm_num for identity rounding")
 
 
 class CommittedRecordsTests(unittest.TestCase):

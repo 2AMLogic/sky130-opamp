@@ -117,6 +117,7 @@ from corners import (  # noqa: E402  -- the ratified PVT table; sim/lib/corners.
     DEFAULT_TEMPS_C,
     VDD_BY_CORNER,
 )
+from point_identity import IDENTITY_EXC, norm_corner, norm_num, point_key  # noqa: E402
 from spice_harness import (  # noqa: E402  -- import follows the sys.path bootstrap above
     BATCH_CAPACITY_WAIT_S,
     KLT_CMD,
@@ -299,13 +300,21 @@ ITEM5_UNGRADED_ROWS = {
 KLT_VS_PYTHON_REL_TOL = 1e-3
 
 
+def _report_key(process, temperature_c, vdd, *, by_supply: bool) -> tuple:
+    """Key a requested or reported point, retaining None for a missing Cartesian VDD."""
+    key = (norm_corner(process), norm_num(temperature_c))
+    if by_supply:
+        key += (None if vdd is None else norm_num(vdd),)
+    return key
+
+
 def supply_values(corners: list[str], mode: str = DEFAULT_SUPPLY_MODE,
                   supplies: Iterable[float] | None = None) -> list[float]:
     """Distinct supply voltages (sorted) a campaign touches."""
     if mode == "paired":
         return sorted({VDD_BY_CORNER[c] for c in corners})
     if mode == "cartesian":
-        vals = sorted({round(float(v), 6) for v in (CARTESIAN_SUPPLIES_V if supplies is None else supplies)})
+        vals = sorted({norm_num(v) for v in (CARTESIAN_SUPPLIES_V if supplies is None else supplies)})
         if not vals:
             raise ValueError("cartesian supply mode needs at least one supply")
         return vals
@@ -321,7 +330,7 @@ def supply_points(corners: list[str], temps: list[float], mode: str = DEFAULT_SU
         vdds = [VDD_BY_CORNER[c]] if mode == "paired" else supply_values(corners, mode, supplies)
         for t in temps:
             out.extend((c, float(t), float(v)) for v in vdds)
-    if len(set(out)) != len(out):
+    if len({_report_key(*point, by_supply=True) for point in out}) != len(out):
         raise ValueError("duplicate (process, temperature, supply) tuple requested")
     return out
 
@@ -686,7 +695,7 @@ KLT_TIMEOUT_S = [1200]  # per-corner ngspice timeout in the klt request; set fro
 SWING_SLOPE_BAND = [False]
 
 
-# (tag, report) of every `klt sim` response this campaign collected, so the
+# (tag, report) of the accepted `klt sim` responses this campaign collected, so the
 # record can summarise the spec-row grading the envelopes carry (issue #246).
 KLT_REPORTS: list[tuple[str, dict]] = []
 
@@ -931,15 +940,17 @@ def _corner_values(report: dict, by_supply: bool = False) -> dict[tuple, dict]:
     """Report units keyed (process, temperature) -- or, with by_supply,
     (process, temperature, vdd) so independent supplies cannot overwrite each other."""
     out = {}
-    for c in report.get("corners", []):
+    for i, c in enumerate(report.get("corners", []), 1):
+        try:
+            supply = c.get("supply_v")
+            vdd = None if supply is None else supply.get("vdd")
+            key = _report_key(c["process"], c["temperature_c"], vdd, by_supply=by_supply)
+        except (*IDENTITY_EXC, AttributeError) as exc:
+            raise HarnessError(f"malformed klt report unit {i} identity: {exc}") from exc
         vals = {m["name"]: m["value"] for m in c.get("measurements", [])}
-        key = (c["process"], float(c["temperature_c"]))
-        if by_supply:
-            v = (c.get("supply_v") or {}).get("vdd")
-            key += (None if v is None else round(float(v), 6),)
         out[key] = {
             "values": vals, "status": c.get("status"), "runtime_s": c.get("runtime_s"),
-            "diagnostics": c.get("diagnostics", []), "vdd": (c.get("supply_v") or {}).get("vdd"),
+            "diagnostics": c.get("diagnostics", []), "vdd": vdd,
             "artifacts": c.get("artifacts") or {},
         }
     return out
@@ -2013,6 +2024,25 @@ def plan_icmr_steps(icmr_rows: list[dict]) -> dict[tuple, dict]:
             for r in icmr_rows}
 
 
+def _icmr_rows_for_slew(rows, expected, errors):
+    """Check ICMR coverage and pass rows with usable identities to the step planner."""
+    present = set()
+    valid = []
+    for i, row in enumerate(rows, 1):
+        try:
+            key = point_key(row)
+        except IDENTITY_EXC as exc:
+            errors.append(f"tran_sr_icmr: malformed icmr row {i}: {exc}")
+            continue
+        present.add(key)
+        valid.append(dict(row, corner=key[0]))
+    missing = [f"{c}/{t:g}C/{v:g}V" for c, t, v in expected
+               if _report_key(c, t, v, by_supply=True) not in present]
+    if missing:
+        errors.append(f"tran_sr_icmr: no icmr row (failed or absent) for {', '.join(missing)} -- skipped")
+    return valid
+
+
 def tran_sr_icmr_summary(rows: list[dict]) -> dict:
     counts: dict[str, int] = {}
     for r in rows:
@@ -2068,7 +2098,6 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
             print(f"{label}: FAIL {exc}", file=sys.stderr)
             continue
         response_rel = write_klt_response(log_dir, tag, report)
-        KLT_REPORTS.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
@@ -2083,8 +2112,10 @@ def run_tran_sr_icmr(pdk, corners, temps, backend, req_dir, log_dir, snapshot_ru
         if backend == "batch" and not env.get("remote"):
             errors.append(f"{label}: batch response carries no environment.remote provenance -- refusing")
             continue
-        info = _corner_values(report, by_supply=True).get((corner, float(temp), round(vdd, 6)))
         try:
+            by_point = _corner_values(report, by_supply=True)
+            KLT_REPORTS.append((tag, report))
+            info = by_point.get(_report_key(corner, temp, vdd, by_supply=True))
             if info is None:
                 raise HarnessError("not in the klt response")
             bad = [d for d in info["diagnostics"] if d.get("severity") == "error"]
@@ -2199,7 +2230,6 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             print(f"{tag}: FAIL {exc}", file=sys.stderr)
             continue
         response_rel = write_klt_response(log_dir, tag, report)
-        KLT_REPORTS.append((tag, report))
         env = report.get("environment", {})
         klt_jobs.append({
             "tag": tag, "backend": backend, "status": report.get("status"),
@@ -2219,13 +2249,18 @@ def run_klt_analyses(klt_analyses, pdk, corners, temps, backend, req_dir, log_di
             errors.append(f"{tag}: batch response carries no environment.remote provenance -- refusing")
             continue
         cart = supply_mode == "cartesian"
-        by_point = _corner_values(report, by_supply=cart)
+        try:
+            by_point = _corner_values(report, by_supply=cart)
+        except HarnessError as exc:
+            errors.append(f"{tag}: {exc}")
+            continue
+        KLT_REPORTS.append((tag, report))
         group_vdds = ([vdd_group] if vdd_group is not None else supply_values(corners, supply_mode, supplies))
         for corner, temp, vdd in ((c, t, v) for c in group_corners for t in temps
                                   for v in (group_vdds if cart else [VDD_BY_CORNER[c]])):
             if True:
                 label = f"{tag}-{corner}-{temp:g}C" + (f"-{vdd:g}V" if cart else "")
-                info = by_point.get((corner, float(temp), round(vdd, 6)) if cart else (corner, float(temp)))
+                info = by_point.get(_report_key(corner, temp, vdd, by_supply=cart))
                 if info is None:
                     errors.append(f"{label}: not in the klt response")
                     continue
@@ -2428,14 +2463,10 @@ def main(argv=None) -> int:
                 log_dir, snapshot_run_dir, results, errors, klt_jobs, supply_mode, supplies,
             )
         if "tran_sr_icmr" in klt_analyses:
-            missing = [f"{c}/{t:g}C/{v:g}V" for c, t, v in expected
-                       if not any(r["corner"] == c and r["temp_c"] == t and abs(r["vdd_v"] - v) < 1e-6
-                                  for r in results["icmr"])]
-            if missing:
-                errors.append(f"tran_sr_icmr: no icmr row (failed or absent) for {', '.join(missing)} -- skipped")
+            icmr_rows = _icmr_rows_for_slew(results["icmr"], expected, errors)
             with tempfile.TemporaryDirectory(prefix="opamp-klt-sr-") as req_tmp:
                 run_tran_sr_icmr(pdk, corners, temps, args.backend, Path(req_tmp), log_dir, snapshot_run_dir,
-                                 results, errors, klt_jobs, supply_mode, supplies, results["icmr"],
+                                 results, errors, klt_jobs, supply_mode, supplies, icmr_rows,
                                  results.get("tran_sr"))
             sr_icmr_summary = tran_sr_icmr_summary(results["tran_sr_icmr"])
             if "tran_sr" not in analyses:
