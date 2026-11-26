@@ -1,0 +1,72 @@
+* opamp_core open-loop AC testbench, `klt sim` circuit BODY (issues #17, #77, #278)
+*
+* Measures `design/netlist/opamp_core.spice`'s open-loop small-signal AC
+* response into CL = 2 pF [DR-001], plus the quiescent supply current at the
+* same operating point. klt supplies the .lib/.temp/alter-vdd cards and the
+* .control block; the analysis and the `.meas` cards live in the request
+* (bin/pvt_sweep.py build_klt_request). The same body serves two requests:
+* `ac` (the sweep and gain/GBW/phase measurements) and `ac-iq` (a zero-offset
+* `dc` point of Vinp = the AC bias point, measuring Iq -- the fleet runner takes
+* `.meas` cards only, and `.meas` has no operating-point type).
+* The DUT is wrapped in a subckt so a candidate netlist selected with
+* --netlist is included unmodified (ports: vdd vss inn inp out ibias).
+* The common-mode level follows each corner's own VDD (`alter vdd`): VDD/2.
+*
+* -------------------------------------------------------- bias / topology
+* `design/netlist/opamp_core.spice` is xschem's *flat top-level* netlist for
+* this block (its `.subckt`/`.ends` lines are commented out -- opamp_core.sch
+* is this repo's top schematic, not a hierarchical leaf cell) -- so here it
+* is included inside a wrapper .subckt and its own node names (vdd, vss, inn,
+* inp, out, ibias) are driven from this body's Xdut instantiation.
+*
+* `ibias`: per `design/opamp_core.sch`'s header comment, the block expects a
+* 5 uA reference current SUNK INTO the block through this pin, feeding the
+* on-chip diode-connected reference MB1. Modeled as a current source from
+* vdd into the ibias node (Iref vdd ibias 5u), matching that framing
+* and DR-002 (a)'s adopted 5 uA reference branch.
+*
+* Open-loop AC gain measurement method: a DC operating-point servo (a very
+* large resistor Rfb from `out` to `inn`, with a large capacitor Cfb from
+* `inn` to ground) sets the correct closed-loop DC bias point (the servo's
+* own corner frequency, 1/(2*pi*Rfb*Cfb), sits many decades below this
+* sweep's start frequency) while presenting an effectively open circuit at
+* every AC analysis frequency actually swept -- so the AC response from
+* 1 Hz upward is the amplifier's true open-loop response, not a closed-loop
+* one. This is the standard "DC servo" open-loop AC testbench technique (as
+* opposed to closing an explicit feedback network and probing loop gain at
+* a break point, which does not apply here since this device has no feedback
+* network of its own). Stated explicitly per this issue's acceptance
+* criteria ("state which" method is used for the loop-broken/
+* high-gain-approximation open-loop gain measurement).
+*
+* The AC excitation (ac 1) is applied only at `inp` (the non-inverting
+* input, per `design/opamp_core.sch`'s header "polarity" section) so
+* vdb(out)/vp(out) directly report the open-loop gain/phase in dB/radians
+* (ngspice's vp() output is in RADIANS, confirmed against a trivial R-C
+* low-pass testbench whose high-frequency phase asymptote lands at exactly
+* -pi/2; bin/pvt_sweep.py converts to degrees in the row builder).
+*
+* R+C corner: sky130's resistor/capacitor process corner is an axis
+* orthogonal to the 5-corner MOS grid this experiment sweeps (like
+* temperature is orthogonal to the MOS grid in
+* sim/gm-id-characterization/corners/README.md's "What is not a corner axis
+* here"). The request's `.lib` cards always include the *typical* R+C corner
+* (both r+c/res_typical__cap_typical.spice and its __lin sibling) at every
+* MOS process corner, a stated methodology choice (not a re-derivation of
+* Rz/Cc's own process spread) -- see ../README.md and ../pdk.json.
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Bcm cm 0 V = 0.5*v(vdd)
+Vinp inp cm dc 0 ac 1
+Xdut vdd vss inn inp out ibias opamp_dut
+Rfb out inn 1e12
+Cfb inn 0 1
+Cload out 0 2p

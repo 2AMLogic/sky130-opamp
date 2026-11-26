@@ -1,0 +1,168 @@
+{
+  "record_id": "20261126-093515-d98af7bb-dbc106",
+  "timestamp": "2026-11-26T09:36:55.533627+00:00",
+  "git": {
+    "sha": "d98af7bb"
+  },
+  "label": "issue-396 candidate X noise regression",
+  "experiment": {
+    "slug": "opamp-characterization/psrr-noise",
+    "claim": "Pre-layout (schematic netlist) PSRR+/PSRR- and input-referred noise of design/netlist/opamp_core.spice over the 5-corner x 3-temperature grid (corner-paired VDD), via klt sim corner requests.",
+    "netlist_source": "schematic (pre-layout)"
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "benches": [
+      "noise"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "grid": {
+      "ppd": 20,
+      "f0_hz": 0.1,
+      "f1_hz": 1000000000.0,
+      "curve_step": 5
+    },
+    "psrr_window_hz": [
+      0.1,
+      1000.0
+    ],
+    "noise_band_hz": [
+      100.0,
+      1000000.0
+    ]
+  },
+  "backend_arg": null,
+  "env_KLT_SIM_BACKEND": "batch",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261126-093515-d98af7bb-dbc106-psrr-noise/opamp_core.spice",
+    "sha256": "sha256:d449b512017bbd6c19e9f978b6bdeb12148c0e064d398043d603a3aefb9a280a"
+  },
+  "benches": {
+    "noise": {
+      "status": "pass",
+      "corner_count": 15,
+      "passed": 15,
+      "failed": 0,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "47",
+      "backend_remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-4bcdfeb3a395",
+        "image_profile": "sim",
+        "region": "us-east-1",
+        "instance_id": "i-0257c46500cad4124",
+        "instance_type": "m7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "done",
+        "exit_code": "0",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 32,
+        "client_submitted_at": "2026-11-26T09:35:16.895199Z",
+        "client_launched_at": "2026-11-26T09:35:46.650299Z",
+        "client_status_terminal_at": "2026-11-26T09:36:50.506554Z",
+        "client_collected_at": "2026-11-26T09:36:52.517567Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev5645+gdb5b0cad5338",
+        "runner_compatibility": "match",
+        "runner_request_features": {
+          "required": [
+            "measurements[].expr",
+            "options.ngspice_init"
+          ],
+          "missing": [],
+          "status": "supported"
+        },
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok",
+            "binary_sha256": "e12148baf532d879d2e2053cecc5b498680bd4156a0dc3f69ce4f83e741e1314"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "threads_per_worker": 1,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_corner_section_libs": null,
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling",
+          "image_profile": "sim"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "artifacts_copied": 30,
+      "rendered_body": "sim/opamp-characterization/netlist-snapshots/20261126-093515-d98af7bb-dbc106-psrr-noise/noise.spice",
+      "request_snapshot": "sim/opamp-characterization/netlist-snapshots/20261126-093515-d98af7bb-dbc106-psrr-noise/noise.request.json",
+      "csv": "sim/opamp-characterization/records/20261126-093515-d98af7bb-dbc106-noise.csv"
+    }
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-psrr-noise-20261126-093515-d98af7bb-dbc106.manifest.json"
+  },
+  "tools": {
+    "klt": "klt 0.9.3.dev5645+gdb5b0cad5338",
+    "python": "3.12.3",
+    "platform": "Linux 6.17.0-1019-aws x86_64"
+  }
+}
