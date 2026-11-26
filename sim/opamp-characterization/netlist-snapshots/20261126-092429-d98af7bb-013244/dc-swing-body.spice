@@ -1,0 +1,45 @@
+* opamp_core unity-gain-buffer DC transfer testbench, `klt sim` circuit BODY (issues #17, #77, #278)
+*
+* Measures `design/netlist/opamp_core.spice`'s headroom-limited output
+* compliance range via a unity-gain-buffer DC transfer sweep (`out` wired
+* directly to `inn`, `inp` swept DC 0 -> VDD) -- the same real closed-loop
+* connection opamp_tran_sr.klt.spice.tmpl uses, and the standard lab method
+* for measuring an amplifier's output swing (a voltage-follower DC transfer
+* curve): while the loop holds (v(out) tracks v(inp) with unity slope), the
+* amplifier is in its linear region; wherever the slope collapses toward
+* zero, some device has left saturation and v(out) has hit its headroom
+* limit in that direction.
+*
+* The swept source Vsw runs 0 -> 1 in 1/360 steps and Bin scales it by each
+* corner's own VDD (`alter vdd`), so v(inp) = VDD * k/360 exactly as a
+* `dc Vinp 0 VDD VDD/360` sweep. Bmid exposes the mid-supply-shifted input
+* node `v(inp_mid) = v(inp) - 0.5*v(vdd)`, so `v(inp_mid) = 0` at every
+* corner's own VDD/2 while preserving `d(v(out))/d(v(inp_mid)) == d(v(out))/d(v(inp))`
+* in V/V -- letting a single native `slope_band` request anchor at 0.0 across
+* the whole supply axis (issue #358). The sweep itself is returned as a waveform
+* artifact (options.waveforms) and bin/pvt_sweep.py applies the unchanged
+* slope-window rule to it -- a contiguous-run search cannot be expressed as
+* a .meas card. The rule: the largest contiguous run around mid-supply
+* where d(v(out))/d(v(inp)) stays within 0.8-1.2 of unity -- see
+* ../README.md "How output swing is derived from the DC sweep" for the
+* exact rule and its stated (not hidden) limitation: this is
+* a combined output-swing/closed-loop-compliance measurement, not an
+* independent measurement of the *open-loop* input-common-mode range DR-002
+* separately estimates (out of scope for the original issue; see its body's
+* "Explicitly Out of Scope").
+
+.option scale=1u
+
+.subckt opamp_dut vdd vss inn inp out ibias
+.include "opamp_core.spice"
+.ends opamp_dut
+
+Vdd vdd 0 dc 1.8
+Vss vss 0 dc 0
+Iref vdd ibias dc 5u
+Xdut vdd vss inn inp out ibias opamp_dut
+Rshort inn out 1m
+Vsw sw 0 dc 0
+Bin inp 0 V = v(vdd)*v(sw)
+Bmid inp_mid 0 V = v(inp) - 0.5*v(vdd)
+Cload out 0 2p
