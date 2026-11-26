@@ -1,12 +1,14 @@
 """Simulator-free tests: PSRR/noise campaigns bind to one immutable DUT snapshot (#151)."""
 
 import contextlib
+import csv
 import hashlib
 import io
 import json
 import shutil
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 from unittest import mock
 
@@ -23,10 +25,14 @@ def sha(path):
     return "sha256:" + hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def fake_payload(req):
+def fake_payload(kind="noise"):
+    measurements = []
+    if kind == "noise":
+        measurements = [{"name": f"en_k{k:03d}", "value": 20e-9} for k in m.FLOOR_WINDOW_IDX]
+        measurements.append({"name": "en_floor", "value": 20e-9})
     return {"status": "pass", "corner_count": 1, "passed": 1, "failed": 0, "errored": 0,
             "corners": [{"process": "tt", "temperature_c": 27.0, "supply_v": {"vdd": 1.8},
-                         "status": "pass", "measurements": [], "diagnostics": [],
+                         "status": "pass", "measurements": measurements, "diagnostics": [],
                          "corner_id": "tt/1.800V/27C", "artifacts": {}}],
             "environment": {"engine_version": "fake"}}
 
@@ -95,7 +101,7 @@ class SubmissionTests(unittest.TestCase):
             self.assertIn('.include "opamp_core.spice"', text)
             self.assertNotIn("design/netlist", text)
             seen.append((body.parent, sha(body.parent / "opamp_core.spice")))
-            return 0, fake_payload(req), ""
+            return 0, fake_payload(req["analysis"]["kind"]), ""
 
         self.assertEqual(self.run_sweep(repo, fake), 0)
         self.assertEqual(len(seen), 3)
@@ -112,18 +118,93 @@ class SubmissionTests(unittest.TestCase):
             self.assertTrue((snap.parent / f"{tag}.request.json").is_file())
         self.assertEqual(di.validate_psrr_noise(repo.tmp), 0)  # historical integrity survives the edit
 
-    def test_both_envelope_destinations_omit_only_the_client_path(self):
+    def test_envelopes_omit_workstation_paths_and_keep_worker_provenance(self):
+        client = "/workstation/bin/ngspice"
+        worker = "/fleet/bin/ngspice"
+        for host in ("local", "worker", None):
+            repo = Repo(self)
+            payload = fake_payload()
+            env = payload["environment"]
+            env["engine_build"] = {"binary_sha256": "a" * 64}
+            if host is not None:
+                env["engine_host"] = host
+            if host == "worker":
+                env.update(ngspice_binary=worker, client_ngspice_binary=client,
+                           remote={"worker_environment": {"simulator": {"selected_path": worker}}})
+                client_key = "client_ngspice_binary"
+            else:
+                env["ngspice_binary"] = client
+                client_key = "ngspice_binary"
+            expected = deepcopy(payload)
+            del expected["environment"][client_key]
+            for extra, destination in [(["--export-envelopes", "envelopes"], repo.tmp / "envelopes"),
+                                       ([], repo.records)]:
+                with self.subTest(host=host, export=bool(extra)):
+                    backend = "batch" if host == "worker" else "local"
+                    rc = self.run_sweep(repo, lambda *args: (0, payload, ""),
+                                        ["--backend", backend, "--benches", "noise", *extra])
+                    self.assertEqual(rc, 0)
+                    envelope, = destination.glob("*-noise.klt.json")
+                    self.assertEqual(json.loads(envelope.read_text()), expected)
+                    self.assertEqual(payload["environment"][client_key], client)
+
+    def test_passing_backend_without_floor_is_a_measurement_error(self):
         repo = Repo(self)
-        payload = fake_payload(None)
-        payload["environment"]["client_ngspice_binary"] = "/workstation/bin/ngspice"
-        expected = {**payload, "environment": {"engine_version": "fake"}}
-        for extra, destination in [(["--export-envelopes", "envelopes"], repo.tmp / "envelopes"),
-                                   ([], repo.records)]:
-            self.assertEqual(self.run_sweep(repo, lambda *args: (0, payload, ""),
-                                            ["--benches", "noise", *extra]), 0)
-            envelope, = destination.glob("*-noise.klt.json")
-            self.assertEqual(json.loads(envelope.read_text()), expected)
-            self.assertIn("client_ngspice_binary", payload["environment"])
+        record = EXP / "records/20261030-050623-0fa5c15-950b9f-noise.klt.json"
+        payload = json.loads(record.read_text())
+
+        def submit(*args):
+            return 0, payload, ""
+
+        args = ["--backend", "batch", "--benches", "noise", "--corners", "tt,ff,ss,sf,fs",
+                "--temps=-40,27,125"]
+        self.assertEqual(self.run_sweep(repo, submit, args), 1)
+        self.assertFalse(list(repo.campaign()))
+        self.assertEqual(self.run_sweep(repo, submit, [*args, "--allow-errors"]), 1)
+        meta_path, = repo.campaign()
+        bench = json.loads(meta_path.read_text())["benches"]["noise"]
+        self.assertEqual((bench["status"], bench["passed"], bench["failed"], bench["errored"]),
+                         ("error", 0, 0, 15))
+        self.assertEqual(bench["floor_grading"]["klt_vs_python"]["graded_points"], 0)
+        with (repo.tmp / bench["csv"]).open() as csv_file:
+            self.assertEqual([r["status"] for r in csv.DictReader(csv_file)], ["error"] * 15)
+        raw = json.loads((repo.tmp / bench["envelope"]).read_text())
+        self.assertEqual((raw["status"], raw["passed"], raw["errored"]), ("pass", 15, 0))
+        self.assertEqual(raw["corners"], payload["corners"])
+
+    def test_disagreeing_and_invalid_floors_are_distinct_from_limit_failures(self):
+        repo = Repo(self)
+        record = REPO / "manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json"
+        payload = json.loads(record.read_text())
+        for status, value in [("pass", 1e-9), ("fail", -1e-9)]:
+            corner = next(c for c in payload["corners"] if c["status"] == status)
+            floor = next(item for item in corner["measurements"] if item["name"] == "en_floor")
+            floor["value"] = value
+        rc = self.run_sweep(repo, lambda *args: (3, payload, ""),
+                            ["--backend", "batch", "--benches", "noise", "--allow-errors",
+                             "--corners", "tt,ff,ss,sf,fs", "--temps=-40,27,125"])
+        self.assertEqual(rc, 1)
+        meta_path, = repo.campaign()
+        bench = json.loads(meta_path.read_text())["benches"]["noise"]
+        self.assertEqual((bench["status"], bench["passed"], bench["failed"], bench["errored"]),
+                         ("error", 3, 10, 2))
+        self.assertEqual(json.loads((repo.tmp / bench["envelope"]).read_text()), payload)
+        with (repo.tmp / bench["csv"]).open() as csv_file:
+            statuses = [r["status"] for r in csv.DictReader(csv_file)]
+        self.assertEqual((statuses.count("pass"), statuses.count("fail"), statuses.count("error")), (3, 10, 2))
+
+    def test_verified_over_limit_floor_is_recorded_as_a_failure(self):
+        repo = Repo(self)
+        payload = fake_payload()
+        for measurement in payload["corners"][0]["measurements"]:
+            measurement["value"] = 40e-9
+        rc = self.run_sweep(repo, lambda *args: (0, payload, ""), ["--benches", "noise"])
+        self.assertEqual(rc, 1)
+        meta_path, = repo.campaign()
+        bench = json.loads(meta_path.read_text())["benches"]["noise"]
+        self.assertEqual((bench["status"], bench["passed"], bench["failed"], bench["errored"]),
+                         ("fail", 0, 1, 0))
+        self.assertTrue(bench["floor_grading"]["klt_vs_python"]["agrees"])
 
     def test_failure_writes_no_record_and_no_orphan_snapshot(self):
         repo = Repo(self)
@@ -153,7 +234,7 @@ class SubmissionTests(unittest.TestCase):
             snapshot = Path(json.loads(req_path.read_text())["netlist"]).parent
             rid = snapshot.name.removesuffix("-psrr-noise")
             (destination / f"{rid}-noise.klt.json").write_text("existing envelope")
-            return 0, fake_payload(None), ""
+            return 0, fake_payload(), ""
 
         rc = self.run_sweep(repo, submit, ["--benches", "psrr_vdd,noise", "--export-envelopes", "envelopes"])
         self.assertEqual(rc, 1)
@@ -173,7 +254,7 @@ class SubmissionTests(unittest.TestCase):
             return write_new(path, text)
 
         with mock.patch.object(m, "write_new", side_effect=write):
-            rc = self.run_sweep(repo, lambda *args: (0, fake_payload(None), ""),
+            rc = self.run_sweep(repo, lambda *args: (0, fake_payload(), ""),
                                 ["--benches", "psrr_vdd,noise", "--export-envelopes", "envelopes"])
         self.assertEqual(rc, 1)
         self.assertFalse(list((repo.tmp / "envelopes").iterdir()))
@@ -192,7 +273,7 @@ class SubmissionTests(unittest.TestCase):
 class ValidateTests(unittest.TestCase):
     def good(self):
         repo = Repo(self)
-        with mock.patch.object(m, "run_klt", lambda p, o, b: (0, fake_payload(None), "")), \
+        with mock.patch.object(m, "run_klt", lambda p, o, b: (0, fake_payload(), "")), \
                 contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(m.main(["--backend", "local", "--corners", "tt", "--temps", "27"]), 0)
         meta_path, = repo.campaign()

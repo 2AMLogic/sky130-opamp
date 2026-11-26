@@ -590,11 +590,14 @@ point into the snapshot, and any body that includes the live DUT. Records that
 predate this change have no `dut` block and are reported UNVERIFIED, never
 inferred.
 
-Dry run and failure: `--dry-run` captures into a scratch directory outside the
-repo (printed, kept for inspection) and writes nothing under `records/` or
-`netlist-snapshots/`. A failed or partially errored run still writes no record
-and removes its just-created snapshot directory (no orphan, nothing falls back
-to a local grid); `--allow-errors` behaves as before.
+`--dry-run` keeps its snapshot in a scratch directory outside the repo and prints
+the path. For a noise run, the campaign checks each deck's `en_floor` against
+the minimum of its nine reported spots. A missing, invalid or disagreeing floor
+is a measurement error. The runner exits nonzero and discards the campaign by
+default. With `--allow-errors` it also writes the evidence. The CSV and campaign
+summary count each affected corner as an error, and the envelope preserves the
+backend's grade. A verified floor above the diagnostic limit is recorded as a
+failed corner and returns a nonzero exit even with the default options.
 
 Current versus historical: `validate` is historical -- a record stays valid
 after the design changes. `current` fails with a "DUT mismatch (stale design)"

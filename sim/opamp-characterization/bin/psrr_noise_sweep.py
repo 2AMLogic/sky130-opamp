@@ -55,6 +55,7 @@ import platform
 import shutil
 import sys
 import tempfile
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from datetime import datetime, timezone
@@ -276,9 +277,9 @@ def run_klt(request_path: Path, outdir: Path, backend: str | None) -> tuple[int,
 
 
 def num(corner: dict, name: str):
-    for m in corner["measurements"]:
+    for m in corner.get("measurements") or ():
         if m["name"] == name:
-            return m["value"]
+            return m.get("value")
     return None
 
 
@@ -379,8 +380,9 @@ def floor_grading_meta(payload: dict) -> dict:
             checks.append({"corner_id": c["corner_id"], "graded": None,
                            "python_min": py_min, "agrees": None})
             continue
-        n_graded += 1
         graded = density(graded)
+        if graded is not None:
+            n_graded += 1
         if graded is None or py_min is None:
             checks.append({"corner_id": c["corner_id"], "graded": graded,
                            "python_min": py_min, "agrees": False})
@@ -411,6 +413,46 @@ def floor_grading_meta(payload: dict) -> dict:
                           "agrees": all(c["agrees"] for c in checks) if checks else None},
         "corners": checks,
     }
+
+
+def campaign_results(bench: str, payload: dict) -> tuple[dict, list[dict], list[str]]:
+    """Grade the campaign summary and CSV rows without altering the klt envelope."""
+    rows, fields = corner_rows(bench, payload)
+    grade = {key: payload[key] for key in ("status", "corner_count", "passed", "failed", "errored")}
+    grade["inconclusive"] = payload.get("inconclusive")
+    if bench != "noise":
+        return grade, rows, fields
+
+    grading = floor_grading_meta(payload)
+    grade["floor_grading"] = grading
+    for row, check in zip(rows, grading["corners"], strict=True):
+        if not check["agrees"]:
+            row["status"] = "error"
+            print(f"[noise] {check['corner_id']}: cannot verify en_floor "
+                  f"(graded={check['graded']}, spot minimum={check['python_min']})", file=sys.stderr)
+        elif row["status"] == "pass" and check["graded"] > SPEC_NOISE_FLOOR_MAX_V_RTHZ:
+            row["status"] = "fail"
+    counts = Counter(row["status"] for row in rows)
+    grade.update(passed=counts["pass"], failed=counts["fail"], errored=counts["error"])
+    if grade["inconclusive"] is not None:
+        grade["inconclusive"] = counts["inconclusive"]
+    if grade["errored"]:
+        grade["status"] = "error"
+    elif grade["failed"] and grade["status"] in ("pass", "pass_partial"):
+        grade["status"] = "fail"
+    return grade, rows, fields
+
+
+def published_envelope(payload: dict) -> dict:
+    """Omit workstation executable locations and retain worker provenance."""
+    if not payload.get("environment"):
+        return payload
+    environment = payload["environment"].copy()
+    environment.pop("client_ngspice_binary", None)
+    # Before engine_host was recorded, ngspice_binary identified the client.
+    if environment.get("engine_host") != "worker":
+        environment.pop("ngspice_binary", None)
+    return {**payload, "environment": environment}
 
 
 def check_env() -> int:
@@ -569,20 +611,26 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> t
         with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
             outcomes = list(pool.map(submit, prepared))
         for bench, (rc, payload, err) in outcomes:
-            req, _req_path, outdir = prepared[bench]
             if payload is None or "corners" not in payload:
                 msg = (payload or {}).get("error", {}).get("message") if payload else err.strip()[-500:]
                 failures.append(f"{bench}: klt sim produced no report (exit {rc}): {msg}")
                 print(f"[{bench}] FAILED: {msg}", file=sys.stderr)
                 continue
-            print(f"[{bench}] status={payload['status']} corners={payload['corner_count']} "
-                  f"pass={payload['passed']} err={payload['errored']}", file=sys.stderr)
-            if payload["errored"] and not args.allow_errors:
-                diag = next((d for c in payload["corners"] for d in c["diagnostics"]), {})
-                failures.append(f"{bench}: {payload['errored']} errored corner(s), e.g. "
-                                f"{diag.get('code')}: {str(diag.get('message'))[:400]}")
+            if bench == "noise" and not payload["corners"]:
+                failures.append("noise: no corners returned to verify en_floor")
                 continue
-            results[bench] = {"request": req, "payload": payload, "outdir": outdir}
+            grade, rows, fields = campaign_results(bench, payload)
+            print(f"[{bench}] status={grade['status']} corners={grade['corner_count']} "
+                  f"pass={grade['passed']} fail={grade['failed']} err={grade['errored']}", file=sys.stderr)
+            if grade["errored"] and not args.allow_errors:
+                message = f"{bench}: {grade['errored']} errored corner(s)"
+                diag = next((d for c in payload["corners"] for d in c.get("diagnostics", [])), None)
+                if diag:
+                    message += f", e.g. {diag.get('code')}: {str(diag.get('message'))[:400]}"
+                failures.append(message)
+                continue
+            results[bench] = {"request": prepared[bench][0], "payload": payload, "grade": grade,
+                              "rows": rows, "fields": fields}
         if failures or not results:
             # Do NOT fall back to a local grid and do not write a partial record.
             print("\nNo record written. Failures:", file=sys.stderr)
@@ -615,21 +663,15 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> t
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
-            rows, fields = corner_rows(bench, payload)
             csv_path = RECORDS_DIR / f"{record_id}-{tag}.csv"
-            write_csv(stage_path(csv_path), rows, fields)
+            write_csv(stage_path(csv_path), res["rows"], res["fields"])
             written.append(csv_path)
             req_rec = dict(res["request"])
             req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
             req_path = RECORDS_DIR / f"{record_id}-{tag}.request.json"
             write_new(stage_path(req_path), json.dumps(req_rec, indent=2) + "\n")
             env_path = envelope_dir / f"{record_id}-{tag}.klt.json"
-            published = payload
-            if "client_ngspice_binary" in (payload.get("environment") or {}):
-                environment = dict(payload["environment"] or {})
-                environment.pop("client_ngspice_binary", None)
-                published = {**payload, "environment": environment}
-            write_new(stage_path(env_path), json.dumps(published, indent=2) + "\n")
+            write_new(stage_path(env_path), json.dumps(published_envelope(payload), indent=2) + "\n")
             n_art = n_logs[bench]
             for c in payload["corners"]:
                 src = (c.get("artifacts") or {}).get("deck")
@@ -639,9 +681,7 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> t
                     n_art += 1
             remote = (payload.get("environment") or {}).get("remote")
             meta_benches[bench] = {
-                "status": payload["status"], "corner_count": payload["corner_count"],
-                "passed": payload["passed"], "failed": payload["failed"], "errored": payload["errored"],
-                "inconclusive": payload.get("inconclusive"),
+                **res["grade"],
                 "engine_version": (payload.get("environment") or {}).get("engine_version"),
                 "backend_remote": remote,
                 "artifacts_copied": n_art,
@@ -650,9 +690,7 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> t
                 "csv": f"sim/opamp-characterization/records/{csv_path.name}",
                 "envelope": env_path.relative_to(REPO_ROOT).as_posix(),
             }
-            if bench == "noise":
-                meta_benches[bench]["floor_grading"] = floor_grading_meta(payload)
-            any_bad |= payload["status"] not in ("pass", "pass_partial")
+            any_bad |= res["grade"]["status"] not in ("pass", "pass_partial")
 
         meta = {
             "record_id": record_id,
