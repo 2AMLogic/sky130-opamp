@@ -271,7 +271,8 @@ def cmd_fleet(a, mc: bool):
     dut = pvt.dut_identity.capture_dut(src, snap, REPO)
     pvt.ACTIVE_DUT[0] = REPO / dut["snapshot_path"]
     req = build_static_request(pvt, snap, f"{kind}-{tag}", a.backend,
-                               {"n": a.n, "seed": MC_SEED + a.seed_offset} if mc else None, a.corner, a.temp)
+                               {"n": a.n, "seed": MC_SEED + a.seed_offset} if mc else None,
+                               **({"corner": a.corner, "temp": a.temp} if mc else {}))
     t0 = time.monotonic()
     report = pvt.run_klt_sim(req, rec / f"{rid}-logs" / kind, a.backend)
     wall = time.monotonic() - t0
@@ -309,10 +310,11 @@ def main(argv=None):
         q = sub.add_parser(n)
         q.add_argument("--tag", required=True, choices=sorted(FRACTIONS))
         q.add_argument("--backend", default="batch")
-        q.add_argument("--n", type=int, default=100)
-        q.add_argument("--seed-offset", type=int, default=0)
-        q.add_argument("--corner", default="tt")
-        q.add_argument("--temp", type=float, default=27.0)
+        if mc:   # mc-only (issue #400): static runs the fixed 15-unit paired grid and ignores them
+            q.add_argument("--n", type=int, default=100)
+            q.add_argument("--seed-offset", type=int, default=0)
+            q.add_argument("--corner", default="tt")
+            q.add_argument("--temp", type=float, default=27.0)
         q.set_defaults(fn=lambda a, mc=mc: cmd_fleet(a, mc))
     a = ap.parse_args(argv)
     return a.fn(a) or 0
