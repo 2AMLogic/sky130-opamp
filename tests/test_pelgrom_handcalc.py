@@ -9,6 +9,8 @@ from _paths import REPO
 
 hc = _paths.load_module("pelgrom_handcalc", REPO / "sim" / "offset-capability" / "bin" / "pelgrom_handcalc.py")
 
+EOL_SUFFIXES = ("; previous mult=1 m=1", " $ previous mult=1 m=1", " // previous mult=1 m=1")
+
 
 class Core(unittest.TestCase):
     def test_parse_core_geometry(self):
@@ -28,6 +30,37 @@ class Core(unittest.TestCase):
             c = hc.parse_core(p)
         self.assertEqual(c["XM5"]["mult"], 2.0)
         self.assertEqual(c, hc.parse_core())
+
+    def _parse_core_with_comment(self, line_start: int, suffix: str) -> dict:
+        """parse_core() of the canonical netlist with `suffix` ending the line at `line_start`."""
+        text = hc.CORE.read_text()
+        eol = text.index("\n", line_start)
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "opamp_core.spice"
+            p.write_text(text[:eol] + suffix + text[eol:])
+            return hc.parse_core(p)
+
+    def test_end_of_line_comment_after_continuation_keeps_geometry(self):
+        """issue #417: a trailing '; previous mult=1 m=1' on XM7's continuation
+        overrode the active multiplier -- the key/value scan keeps the last
+        assignment, commented or not -- and shrank its Pelgrom area tenfold."""
+        text = hc.CORE.read_text()
+        continuation = text.index("\n+", text.index("\nXM7 ")) + 1
+        base = hc.parse_core()
+        self.assertEqual(base["XM7"]["mult"], 10.0)
+        for suffix in EOL_SUFFIXES:
+            with self.subTest(suffix=suffix):
+                self.assertEqual(self._parse_core_with_comment(continuation, suffix), base)
+
+    def test_end_of_line_comment_on_card_before_continuation_keeps_geometry(self):
+        """The comment is dropped per physical line, before the fold: placed on
+        the card ahead of a real continuation, it must not cut that
+        continuation off with it."""
+        card = hc.CORE.read_text().index("\nXM7 ") + 1
+        base = hc.parse_core()
+        for suffix in EOL_SUFFIXES:
+            with self.subTest(suffix=suffix):
+                self.assertEqual(self._parse_core_with_comment(card, suffix), base)
 
 
 class Calc(unittest.TestCase):

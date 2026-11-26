@@ -9,7 +9,6 @@ from __future__ import annotations
 import csv
 import math
 import os
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -17,7 +16,7 @@ from typing import NamedTuple
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, os.path.join(REPO, "lib"))
-from spice_text import join_continuations
+from spice_text import join_continuations, strip_eol_comments
 
 CANON = Path(REPO) / "design" / "netlist" / "opamp_core.spice"
 FULL = os.path.join(REPO, "sim", "gm-id-characterization", "records",
@@ -82,18 +81,6 @@ class MosCard(NamedTuple):
     length: float
     m: int
     nf: int | None
-
-
-_EOL_COMMENT = re.compile(r"(?:;|//|(?<!\S)\$).*")
-
-
-def strip_eol_comments(text: str) -> str:
-    """Drop ``;`` / ``//`` / `` $`` end-of-line comment text from each physical line.
-
-    Must run before continuations are folded: a comment's ``m=1`` would
-    otherwise join the card and overwrite the active parameter.
-    """
-    return "\n".join(_EOL_COMMENT.sub("", ln) for ln in text.splitlines())
 
 
 def _whole_number(value: str) -> int:

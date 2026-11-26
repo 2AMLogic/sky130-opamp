@@ -65,7 +65,7 @@ PDK_JSON = REPO / "sim" / "opamp-characterization" / "pdk.json"
 SPICE = "libs.ref/sky130_fd_pr/spice"
 
 sys.path.insert(0, str(REPO / "lib"))
-from spice_text import join_continuations  # noqa: E402  (own path: loads before attribution too)
+from spice_text import join_continuations, strip_eol_comments  # noqa: E402  (own path: loads before attribution too)
 
 # Nominal operating point (see module docstring). Device-level totals as ngspice
 # reports them for the m-scaled instances; per-side first-stage devices m=1.
@@ -99,7 +99,7 @@ def parse_core(core: Path | None = None) -> dict[str, dict]:
     """instance -> {kind, w, l, mult} (um) from the core netlist (default: the
     canonical design netlist; issue #144 passes a candidate netlist)."""
     out = {}
-    for ln in join_continuations(Path(core or CORE).read_text()):
+    for ln in join_continuations(strip_eol_comments(Path(core or CORE).read_text())):
         if not ln.startswith("X"):
             continue
         t = ln.split()

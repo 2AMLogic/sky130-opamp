@@ -69,6 +69,34 @@ class JoinModesTests(unittest.TestCase):
         self.assertEqual(spice_text.join_continuations(text, keep_comments=True),
                          ["*.iopin tail"])
 
+    def test_neither_mode_strips_end_of_line_comment_text(self):
+        """Stripping is the geometry readers' explicit opt-in (issue #417):
+        the joiner alone leaves comment text in place, so the bench emitters
+        that fold cards with it keep their comments."""
+        text = "M1 a b w=1 ; m=1\n+ l=2 $ m=1\n"
+        self.assertEqual(spice_text.join_continuations(text), ["M1 a b w=1 ; m=1 l=2 $ m=1"])
+        self.assertEqual(spice_text.join_continuations(text, keep_comments=True),
+                         ["M1 a b w=1 ; m=1 l=2 $ m=1"])
+
+
+class StripEolCommentsTests(unittest.TestCase):
+    """The geometry readers' end-of-line comment stripper (issue #417): a
+    separate opt-in step over physical lines, so it is not part of
+    join_continuations (the emitters keep comment text) and must run before it."""
+
+    def test_each_prefix_ends_only_its_own_line(self):
+        text = "M1 a b w=1 ; m=1\n+ l=2 $ m=1\n*.note // m=1\nR1 a b 1k\n"
+        self.assertEqual(spice_text.strip_eol_comments(text).split("\n"),
+                         ["M1 a b w=1 ", "+ l=2 ", "*.note ", "R1 a b 1k"])
+
+    def test_dollar_needs_preceding_whitespace(self):
+        self.assertEqual(spice_text.strip_eol_comments("M1 a b w=$w m=1\n"), "M1 a b w=$w m=1")
+
+    def test_strip_then_join_keeps_a_commented_cards_continuation(self):
+        text = "M1 a b ; m=1\n+ w=1 m=2\n"
+        self.assertEqual(spice_text.join_continuations(spice_text.strip_eol_comments(text)),
+                         ["M1 a b w=1 m=2"])
+
 
 class Sha256PrefixedTests(unittest.TestCase):
     def test_prefix_and_digest(self):

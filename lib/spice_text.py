@@ -17,9 +17,19 @@ Two modes:
   and blanks are retained in file order and each continuation folds into its
   owning card, so regenerating a committed bench or candidate is byte-stable
   (operator ruling on #301).
+
+``strip_eol_comments`` is the opt-in companion of the *geometry readers*
+(``sim/opamp-characterization/variants/_gmid.py`` and ``parse_core`` in
+``sim/offset-capability/bin/pelgrom_handcalc.py``, issue #417). It drops
+``;`` / ``//`` / `` $`` comment text from each physical line and must run
+*before* ``join_continuations``, so a comment never contributes a ``key=value``
+token to its card, nor, once folded, hides the continuation behind it. It is
+kept out of the joiner on purpose: the emitters retain comment text.
 """
 
 from __future__ import annotations
+
+import re
 
 
 def join_continuations(text: str, *, keep_comments: bool = False) -> list[str]:
@@ -48,3 +58,15 @@ def join_continuations(text: str, *, keep_comments: bool = False) -> list[str]:
             out.append(raw.rstrip() if keep_comments else line)
             last_card = len(out) - 1
     return out
+
+
+_EOL_COMMENT = re.compile(r"(?:;|//|(?<!\S)\$).*")
+
+
+def strip_eol_comments(text: str) -> str:
+    """Drop ``;`` / ``//`` / `` $`` end-of-line comment text from each physical line.
+
+    Must run before continuations are folded: a comment's ``m=1`` would
+    otherwise join the card and overwrite the active parameter.
+    """
+    return "\n".join(_EOL_COMMENT.sub("", ln) for ln in text.splitlines())
