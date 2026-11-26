@@ -1,23 +1,25 @@
-"""Shared gm/ID sweep loading and 0.005 um grid helpers for variants/ scripts.
+"""Shared gm/ID sizing and MOS netlist helpers for variants/ scripts.
 
-Single owner (issue #377) of what tail_clamp_sizing (#78), sink_sizing (#79),
-sink_bias_margin (#197) and later candidate scripts share: the committed
-bare-device sweep path, the sizing grid constants, the linear-in-J gm/ID
-interpolation DR-007 quotes, and the grid snap/legality predicates. Scripts
-here run as ``python3 sim/opamp-characterization/variants/<script>.py``
-(directory on sys.path) or are loaded by file path from the tests, so every
-importer puts this directory on sys.path before ``from _gmid import ...``
-(the pattern sink_bias_margin.py already uses).
-
-stdlib only; nothing here needs ngspice, volare or a PDK.
+Candidate scripts use the committed bare-device sweep, DR-007's linear-in-J
+interpolation and the sizing grid to generate variants of the canonical netlist.
+Reading and emitting their MOS geometry needs only the standard library.
 """
 from __future__ import annotations
 
 import csv
+import math
 import os
+import re
+import sys
 from collections import defaultdict
+from pathlib import Path
+from typing import NamedTuple
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(0, os.path.join(REPO, "lib"))
+from spice_text import join_continuations
+
+CANON = Path(REPO) / "design" / "netlist" / "opamp_core.spice"
 FULL = os.path.join(REPO, "sim", "gm-id-characterization", "records",
                     "20260909-062847-35a9d46-full-sweep.csv")
 GRID_UM = 0.005
@@ -58,3 +60,75 @@ def snap(w):
 
 def legal(w):
     return abs(w / GRID_UM - round(w / GRID_UM)) < 1e-9
+
+
+def canonical_body() -> str:
+    """Return the verbatim pin and device lines of the canonical netlist."""
+    text = CANON.read_text()
+    return text[text.index("*.iopin vdd"):text.index("**.ends")]
+
+
+def card(name, d, g, s_, b, kind, w, l, mult=1):
+    """Emit an xschem-style MOS card with the canonical diffusion geometry."""
+    r = 0.29 / w
+    return (f"{name} {d} {g} {s_} {b} sky130_fd_pr__{kind}_01v8 L={l:g} W={w:.3f} nf=1 "
+            f"ad={w * 0.29:.6g} as={w * 0.29:.6g} pd={2 * (w + 0.29):.6g} ps={2 * (w + 0.29):.6g} nrd={r!r}\n"
+            f"+ nrs={r!r} sa=0 sb=0 sd=0 mult={mult} m={mult}\n")
+
+
+class MosCard(NamedTuple):
+    nodes_and_model: list[str]
+    width: float
+    length: float
+    m: int
+    nf: int | None
+
+
+_EOL_COMMENT = re.compile(r"(?:;|//|(?<!\S)\$).*")
+
+
+def strip_eol_comments(text: str) -> str:
+    """Drop ``;`` / ``//`` / `` $`` end-of-line comment text from each physical line.
+
+    Must run before continuations are folded: a comment's ``m=1`` would
+    otherwise join the card and overwrite the active parameter.
+    """
+    return "\n".join(_EOL_COMMENT.sub("", ln) for ln in text.splitlines())
+
+
+def _whole_number(value: str) -> int:
+    """Parse an integer-valued spelling (``2``, ``2.0``); reject truncating ones."""
+    number = float(value)
+    if not number.is_integer():
+        raise ValueError(f"non-integer value: {value}")
+    return int(number)
+
+
+def mos_cards(text: str) -> dict[str, MosCard]:
+    """Read connectivity and drawn geometry of the flat netlist's XM devices."""
+    cards = {}
+    for line in join_continuations(strip_eol_comments(text)):
+        if not line.startswith("XM"):
+            continue
+        tokens = line.split()
+        params = dict(t.split("=", 1) for t in tokens[6:] if "=" in t)
+        try:
+            card_ = MosCard(
+                tokens[1:6], float(params["W"]), float(params["L"]),
+                _whole_number(params["m"]),
+                _whole_number(params["nf"]) if "nf" in params else None)
+            if not all(math.isfinite(v) and v > 0 for v in (card_.width, card_.length)):
+                raise ValueError("W and L must be finite and positive")
+            if card_.m < 1 or (card_.nf is not None and card_.nf < 1):
+                raise ValueError("m and nf must be positive")
+        except (KeyError, ValueError, OverflowError) as exc:
+            raise ValueError(f"cannot parse MOS card: {line[:60]}") from exc
+        cards[tokens[0]] = card_
+    return cards
+
+
+def gate_area(path: Path) -> tuple[dict[str, float], float]:
+    """Return per-device and total drawn MOS gate area in square micrometres."""
+    areas = {name: device.width * device.length * device.m
+             for name, device in mos_cards(path.read_text()).items()}
+    return areas, sum(areas.values(), 0.0)

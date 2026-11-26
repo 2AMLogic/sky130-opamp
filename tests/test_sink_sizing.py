@@ -7,6 +7,7 @@ from _paths import EXP, load_module
 
 VAR = EXP / "variants"
 ss = load_module("sink_sizing", VAR / "sink_sizing.py")
+from _gmid import mos_cards
 
 
 def series(pairs):
@@ -48,36 +49,25 @@ class GmidHelpers(unittest.TestCase):
             self.assertTrue(ss.legal(ss.snap(w)), w)
 
 
-def devices(path):
-    text = (VAR / path).read_text().replace("\n+", " ")
-    out = {}
-    for line in text.splitlines():
-        if line.startswith("XM"):
-            tok = line.split()
-            kv = dict(t.split("=") for t in tok if "=" in t)
-            out[tok[0]] = (tok[5], float(kv["W"]), float(kv["L"]), int(kv["m"]), int(kv["nf"]))
-    return out
-
-
 class SinkSizing(unittest.TestCase):
     def test_widths_match_netlist(self):
-        d = devices("signal-dependent-sink.spice")
+        d = mos_cards((VAR / "signal-dependent-sink.spice").read_text())
         jn, *_ = ss.interp_gmid(ss.load("nfet", 1.2)[("tt", 27.0)], 18.0)
         jp, *_ = ss.interp_gmid(ss.load("pfet", 0.3)[("tt", 27.0)], 14.0)
         for name in ("XMA", "XMA2", "XMD", "XMS"):
-            self.assertAlmostEqual(d[name][1], ss.snap(5.0 / jn), places=6)
-        self.assertAlmostEqual(d["XMP6C"][1], ss.snap(5.0 / jp), places=6)
-        self.assertAlmostEqual(d["XMC"][1], ss.snap(0.9 * 5.0 / jp), places=6)
+            self.assertAlmostEqual(d[name].width, ss.snap(5.0 / jn), places=6)
+        self.assertAlmostEqual(d["XMP6C"].width, ss.snap(5.0 / jp), places=6)
+        self.assertAlmostEqual(d["XMC"].width, ss.snap(0.9 * 5.0 / jp), places=6)
 
     def test_new_devices_grid_legal_nf1(self):
-        base = devices("signal-dependent-sink.spice")
+        base = mos_cards((VAR / "signal-dependent-sink.spice").read_text())
         for name in ("XMP6C", "XMA", "XMA2", "XMC", "XMD", "XMS"):
-            self.assertTrue(ss.legal(base[name][1]), name)
-            self.assertEqual(base[name][4], 1, name)
+            self.assertTrue(ss.legal(base[name].width), name)
+            self.assertEqual(base[name].nf, 1, name)
 
     def test_existing_devices_unchanged_vs_tail_clamp_base(self):
-        sink = devices("signal-dependent-sink.spice")
-        clamp = devices("tail-clamp.spice")
+        sink = mos_cards((VAR / "signal-dependent-sink.spice").read_text())
+        clamp = mos_cards((VAR / "tail-clamp.spice").read_text())
         for name, v in clamp.items():
             if name != "XMCL":
                 self.assertEqual(sink[name], v, name)

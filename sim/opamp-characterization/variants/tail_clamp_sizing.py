@@ -34,7 +34,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from _gmid import GRID_UM, I_UNIT_A, SWEEP_W_UM, legal, load, snap  # noqa: E402
+from _gmid import I_UNIT_A, SWEEP_W_UM, legal, load, snap  # noqa: E402
 
 L_UM = 1.2            # same channel length as the MB1/M5/M7 group (tracking)
 W_MIRROR_UM = 7.819   # DR-007 drawn MB1/M5/M7 unit width (inherited, off-grid)

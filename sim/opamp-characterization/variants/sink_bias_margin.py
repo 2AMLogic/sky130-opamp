@@ -36,10 +36,18 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent.parent.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "sim" / "lib"))
-from _gmid import GM_ID_PFET, interp_gmid, legal, load, snap  # noqa: E402
+from _gmid import (  # noqa: E402
+    CANON,  # noqa: F401 (re-exported for callers)
+    GM_ID_PFET,
+    canonical_body,
+    card,
+    interp_gmid,
+    legal,
+    load,
+    snap,
+)
 from spice_harness import BATCH_CAPACITY_WAIT_S  # noqa: E402
 
-CANON = REPO / "design" / "netlist" / "opamp_core.spice"
 OUT_DIR = HERE / "bias-margin"
 FRACTIONS = {"ic090": 0.90, "ic075": 0.75, "ic060": 0.60}
 ORIGINAL = "ic090"
@@ -55,22 +63,6 @@ def widths(frac: float) -> dict:
     jp, *_ = interp_gmid(p, GM_ID_PFET)
     return {"n_unit": snap(I_UNIT_UA / jn), "p_rep": snap(I_UNIT_UA / jp),
             "p_ic": snap(frac * I_UNIT_UA / jp), "jp": jp}
-
-
-def card(name, d, g, s_, b, kind, w, l, mult=1):
-    """One xschem-style MOS card (diffusion terms by the canonical rule: ad = as = 0.29 W,
-    pd = ps = 2 (W + 0.29), nrd = nrs = 0.29 / W)."""
-    r = 0.29 / w
-    return (f"{name} {d} {g} {s_} {b} sky130_fd_pr__{kind}_01v8 L={l:g} W={w:.3f} nf=1 "
-            f"ad={w * 0.29:.6g} as={w * 0.29:.6g} pd={2 * (w + 0.29):.6g} ps={2 * (w + 0.29):.6g} nrd={r!r}\n"
-            f"+ nrs={r!r} sa=0 sb=0 sd=0 mult={mult} m={mult}\n")
-
-
-def canonical_body() -> str:
-    """Canonical card lines verbatim, from the first card to just before `**.ends`."""
-    text = CANON.read_text()
-    start = text.index("*.iopin vdd")
-    return text[start:text.index("**.ends")]
 
 
 def netlist(tag: str) -> str:
