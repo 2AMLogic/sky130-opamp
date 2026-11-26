@@ -281,9 +281,8 @@ ITEM5_UNGRADED_ROWS = {
                     "(largest run around mid-supply with local slope in [0.8, 1.2]); no `klt sim` "
                     "measurement form expresses it (klayout-tools#5518), so the row is measured "
                     "(dc_swing waveform, -dc-swing.csv) but graded by no envelope",
-    "input_referred_noise": "ratified as a target; issue #54's noise bench and its klt sim envelope exist, "
-                            "but carry no limits/spec_row and DR-003 left the graded quantity undecided "
-                            "(issue #274)",
+    "input_referred_noise": "DR-003 thermal-floor compliance remains open; DR-018 documents the "
+                            "sampled-minimum diagnostic and source comparison (#274)",
     "psrr": "[TBD] in spec/target-spec.md, not ratified: no bound to grade",
     "input_referred_offset": "statistical row (T1 item 6, a Monte Carlo campaign, not a corner envelope); "
                              "target proposed by DR-009, not ratified",

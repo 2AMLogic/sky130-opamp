@@ -272,12 +272,11 @@ identified there.
         the full grid by this campaign's `…-dc-swing` envelope and
         `-dc-swing.csv`. Filed generically as
         [klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)
-        under the friction protocol); **input-referred noise** (ratified as a
-        target; [#54](https://github.com/2AMLogic/sky130-opamp/issues/54)'s
-        bench has landed and its 15-corner envelope is committed, but it carries
-        no `limits`/`spec_row` and `DR-003` left the row's graded quantity
-        undecided —
-        [#274](https://github.com/2AMLogic/sky130-opamp/issues/274));
+        under the friction protocol); **input-referred noise** (thermal-floor compliance remains open.
+        The November sampled-minimum diagnostic measured 4 of 15 within
+        30 nV/√Hz, with the worst at 47.25 nV/√Hz. Source decomposition
+        found the proxy outside a 0.5 dB accuracy budget at ten corners.
+        See [DR-018](../spec/decision-records/DR-018-noise-graded-quantity.md));
         **PSRR** and **area** (`[TBD]`, no ratified bound); and
         **input-referred offset** and **CMRR** (targets *proposed* by `DR-009`
         and `DR-008`, not ratified, so there is no ratified bound to grade —
@@ -489,7 +488,7 @@ full-core signoff or ratification):
   design; **(b)** six rows are declared gaps — output
   swing is an expressibility gap in `klt sim`
   ([klayout-tools#5518](https://github.com/2AMLogic/klayout-tools/issues/5518)),
-  noise needs a graded quantity and `limits`
+  noise needs a validated thermal-floor measurement
   ([#274](https://github.com/2AMLogic/sky130-opamp/issues/274)), and PSRR,
   area, offset and CMRR stay `[TBD]`, OPEN or proposed in
   `spec/target-spec.md`. See the per-item rationale above.

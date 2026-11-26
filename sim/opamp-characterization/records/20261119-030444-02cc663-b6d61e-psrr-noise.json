@@ -1,0 +1,337 @@
+{
+  "record_id": "20261119-030444-02cc663-b6d61e",
+  "timestamp": "2026-11-19T03:06:42.039487+00:00",
+  "git": {
+    "sha": "02cc663"
+  },
+  "label": "T1 item 5 sampled-noise-floor grading campaign (issue #274, DR-018)",
+  "experiment": {
+    "slug": "opamp-characterization/psrr-noise",
+    "claim": "Pre-layout (schematic netlist) PSRR+/PSRR- and input-referred noise of design/netlist/opamp_core.spice over the 5-corner x 3-temperature grid (corner-paired VDD), via klt sim corner requests.",
+    "netlist_source": "schematic (pre-layout)"
+  },
+  "matrix": {
+    "corners": [
+      "tt",
+      "ff",
+      "ss",
+      "sf",
+      "fs"
+    ],
+    "temps_c": [
+      -40.0,
+      27.0,
+      125.0
+    ],
+    "benches": [
+      "noise"
+    ],
+    "vdd_by_corner": {
+      "tt": 1.8,
+      "ff": 1.98,
+      "ss": 1.62,
+      "sf": 1.8,
+      "fs": 1.8
+    },
+    "grid": {
+      "ppd": 20,
+      "f0_hz": 0.1,
+      "f1_hz": 1000000000.0,
+      "curve_step": 5
+    },
+    "psrr_window_hz": [
+      0.1,
+      1000.0
+    ],
+    "noise_band_hz": [
+      100.0,
+      1000000.0
+    ]
+  },
+  "backend_arg": "batch",
+  "env_KLT_SIM_BACKEND": "batch",
+  "dut": {
+    "source_path": "design/netlist/opamp_core.spice",
+    "snapshot_path": "sim/opamp-characterization/netlist-snapshots/20261119-030444-02cc663-b6d61e-psrr-noise/opamp_core.spice",
+    "sha256": "sha256:e954d17d085642d1d384694fc3c7799382b6d9ea777b650d60e6125fe918ce79"
+  },
+  "benches": {
+    "noise": {
+      "status": "fail",
+      "corner_count": 15,
+      "passed": 4,
+      "failed": 11,
+      "errored": 0,
+      "inconclusive": 0,
+      "engine_version": "47",
+      "backend_remote": {
+        "provider": "aws-batch-fleet",
+        "job_id": "klt-sim-f682e14d3430",
+        "region": "us-east-1",
+        "instance_id": "i-0000f62997de0cda2",
+        "instance_type": "c7i.4xlarge",
+        "availability_zone": "us-east-1b",
+        "ami_id": "ami-09c14f55df4958cbd",
+        "lifecycle": "spot",
+        "spot": true,
+        "state": "failed",
+        "exit_code": "3",
+        "concurrency": "1",
+        "physical_cores": "8",
+        "elapsed_seconds": 52,
+        "client_submitted_at": "2026-11-19T03:04:45.349710Z",
+        "client_launched_at": "2026-11-19T03:05:05.169423Z",
+        "client_status_terminal_at": "2026-11-19T03:06:38.093492Z",
+        "client_collected_at": "2026-11-19T03:06:39.092151Z",
+        "runner_klt_version": "0.9.0",
+        "client_klt_version": "0.9.3.dev1601+gf6e067c81e5f",
+        "runner_compatibility": "match",
+        "runner_request_features": {
+          "required": [
+            "measurements[].expr",
+            "options.ngspice_init"
+          ],
+          "missing": [],
+          "status": "supported"
+        },
+        "worker_environment": {
+          "capture": "ok",
+          "simulator": {
+            "requested_binary": "ngspice",
+            "binary_source": "PATH",
+            "selected_path": "/usr/local/bin/ngspice",
+            "version_banner": "******\n** ngspice-47 : Circuit level simulation program\n** Compiled with KLU Direct Linear Solver\n** The U. C. Berkeley CAD Group\n** Copyright 1985-1994, Regents of the University of California.\n** Copyright 2001-2026, The ngspice team.\n** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html\n** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html\n** Creation Date: Fri Nov 13 23:19:32 UTC 2026\n******\n",
+            "version_probe": "ok"
+          },
+          "pdk": {
+            "variant": "sky130A",
+            "root": "/opt/pdk",
+            "stamp_scheme": "sources-sha256",
+            "stamp_sha256": "4ca10280ae9f293aa1ff69f0060a52e0026929111bda881503717469b429ce67",
+            "stamp_text": "open_pdks f6eeac7dad085ffcc829ccfd721f7b4ce39edcf7",
+            "models_staged": false,
+            "stamp_scope": "executed"
+          },
+          "cpu_model": "Intel(R) Xeon(R) Platinum 8488C",
+          "omp_num_threads": null,
+          "image_manifest": null,
+          "model_inputs": null,
+          "diagnostics": [],
+          "pdk_stamp_comparison": {
+            "status": "match"
+          },
+          "ngspice_init": null,
+          "engine_build_comparison": {
+            "status": "match"
+          }
+        },
+        "runner_model_inputs": null,
+        "exit_reason": {
+          "exit_code": 3,
+          "report_status": "fail",
+          "nothing_checked": false,
+          "nothing_checked_reasons": [],
+          "message": "klt sim exited 3 (a corner or measurement failed): aggregate status 'fail'; the job state is failed because of this verdict exit code, not a runner crash and not the whole-job ceiling (a ceiling kill reports state timeout, exit 124)",
+          "units": {
+            "total": 15,
+            "by_status": {
+              "pass": 4,
+              "fail": 11
+            },
+            "first_not_passed": [
+              {
+                "corner_id": "tt/1.800V/27C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "tt/1.800V/125C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/27C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ff/1.980V/125C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              },
+              {
+                "corner_id": "ss/1.620V/-40C",
+                "status": "fail",
+                "code": null,
+                "message": null
+              }
+            ]
+          }
+        },
+        "runner_models_lib_sha256": "17c208a699228f5acb87bf59c09c22a4c4d3937b6766b4957737d34e8e075f64",
+        "runner_osdi_preload": null,
+        "job_ceiling": {
+          "basis": "conservative_serial_bound",
+          "unit_count": 15,
+          "per_unit_timeout_s": 600,
+          "overhead_s": 120.0,
+          "job_bound_s": 9120.0,
+          "max_job_seconds": 3600.0,
+          "max_job_seconds_source": "fleet_config",
+          "exceeds_ceiling": true,
+          "check": "warn",
+          "max_units_per_job": 5,
+          "recommended_hosts": 3,
+          "warning": "batch job bound 9120s (options.timeout_s 600s x 15 units + 120s; a conservative fully-serial upper bound, not a runtime estimate) exceeds the fleet's whole-job ceiling of 3600s (max_job_seconds from fleet_config); a job still running at the ceiling is killed and every unit is reported batch_job_timeout. Set request.remote.hosts to at least 3 to run one job per shard of at most 5 units, each within the ceiling"
+        },
+        "models_lib_comparison": {
+          "status": "match"
+        }
+      },
+      "artifacts_copied": 30,
+      "rendered_body": "sim/opamp-characterization/netlist-snapshots/20261119-030444-02cc663-b6d61e-psrr-noise/noise.spice",
+      "request_snapshot": "sim/opamp-characterization/netlist-snapshots/20261119-030444-02cc663-b6d61e-psrr-noise/noise.request.json",
+      "csv": "sim/opamp-characterization/records/20261119-030444-02cc663-b6d61e-noise.csv",
+      "envelope": "manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json",
+      "floor_grading": {
+        "measurement": "en_floor",
+        "spec_row": "input_referred_noise",
+        "graded_quantity": "minimum reported spot density over [100000, 1e+07] Hz, 9 reported spots, inclusive endpoints",
+        "window_hz": [
+          100000.0,
+          10000000.0
+        ],
+        "reported_spots": 9,
+        "limits_max_v_rthz": 3e-08,
+        "decision": "issue #274 decision block 2026-11-18 (option floor)",
+        "dr": "spec/decision-records/DR-018-noise-graded-quantity.md",
+        "klt_vs_python": {
+          "graded_points": 15,
+          "max_abs_delta_v": 0.0,
+          "at": "tt/1.800V/-40C",
+          "rel_tol": 1e-06,
+          "agrees": true
+        },
+        "corners": [
+          {
+            "corner_id": "tt/1.800V/-40C",
+            "graded": 2.91635841e-08,
+            "python_min": 2.91635841e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "tt/1.800V/27C",
+            "graded": 3.57535702e-08,
+            "python_min": 3.57535702e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "tt/1.800V/125C",
+            "graded": 4.54083287e-08,
+            "python_min": 4.54083287e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ff/1.980V/-40C",
+            "graded": 2.81861762e-08,
+            "python_min": 2.81861762e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ff/1.980V/27C",
+            "graded": 3.46030219e-08,
+            "python_min": 3.46030219e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ff/1.980V/125C",
+            "graded": 4.38547588e-08,
+            "python_min": 4.38547588e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ss/1.620V/-40C",
+            "graded": 3.0486439e-08,
+            "python_min": 3.0486439e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ss/1.620V/27C",
+            "graded": 3.71273536e-08,
+            "python_min": 3.71273536e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "ss/1.620V/125C",
+            "graded": 4.72526142e-08,
+            "python_min": 4.72526142e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "sf/1.800V/-40C",
+            "graded": 2.84421558e-08,
+            "python_min": 2.84421558e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "sf/1.800V/27C",
+            "graded": 3.49274484e-08,
+            "python_min": 3.49274484e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "sf/1.800V/125C",
+            "graded": 4.48120474e-08,
+            "python_min": 4.48120474e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "fs/1.800V/-40C",
+            "graded": 2.9777021e-08,
+            "python_min": 2.9777021e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "fs/1.800V/27C",
+            "graded": 3.65030135e-08,
+            "python_min": 3.65030135e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          },
+          {
+            "corner_id": "fs/1.800V/125C",
+            "graded": 4.6099532e-08,
+            "python_min": 4.6099532e-08,
+            "rel_delta": 0.0,
+            "agrees": true
+          }
+        ]
+      }
+    }
+  },
+  "artifacts": {
+    "manifest": "manifests/artifacts/opamp-psrr-noise-20261119-030444-02cc663-b6d61e.manifest.json"
+  },
+  "tools": {
+    "klt": "klt 0.9.3.dev1601+gf6e067c81e5f",
+    "python": "3.12.3",
+    "platform": "Linux 7.0.0-1014-aws x86_64"
+  }
+}

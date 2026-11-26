@@ -30,7 +30,9 @@ from pathlib import Path
 EXP_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = EXP_DIR.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "sim" / "lib"))
+sys.path.insert(0, str(EXP_DIR / "bin"))
 import dut_identity  # noqa: E402
+import psrr_noise_sweep  # noqa: E402
 from spice_harness import allocate_record_id, git_sha, run_klt_sim, write_new  # noqa: E402
 
 RECORDS_DIR = EXP_DIR / "records"
@@ -45,6 +47,17 @@ def req(netlist, corner, vdd, temp, analysis, meas, digits=10):
         "analysis": analysis, "measurements": meas,
         "options": {"timeout_s": 300, "ngspice_init": [f"set numdgt={digits}"]},
     }
+
+
+def full_sweep_noise_request(netlist: Path) -> dict:
+    request = psrr_noise_sweep.build_request(
+        "noise", ["ss"], [125.0], str(netlist), keep_artifacts=False,
+    )
+    # A high sampled floor is a valid input to the integration cross-check.
+    for measurement in request["measurements"]:
+        if measurement["name"] == "en_floor":
+            measurement.pop("limits", None)
+    return request
 
 
 def run(tmp: Path, name: str, r: dict) -> dict:
@@ -200,8 +213,6 @@ def evaluate(res: dict) -> tuple[dict, list[dict], bool]:
 
 def main() -> int:
     ac = {"kind": "ac", "args": "dec 20 0.1 1g"}
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    import psrr_noise_sweep as m  # noqa: E402
     # Capture the DUT once (issue #151); every run below uses bodies rendered
     # against that copy, retained with their requests in the snapshot dir.
     rid = allocate_record_id(RECORDS_DIR, git_sha(REPO_ROOT), extra_dirs=[SNAPSHOT_DIR])
@@ -209,7 +220,7 @@ def main() -> int:
     out = RECORDS_DIR / f"{rid}-psrr-noise-validation.json"
     done = False
     try:
-        dut, bodies = m.capture_benches(snap, ["psrr_vdd", "noise"])
+        dut, bodies = psrr_noise_sweep.capture_benches(snap, ["psrr_vdd", "noise"])
         print(f"DUT snapshot: {dut['snapshot_path']} ({dut['sha256']})", file=sys.stderr)
         psrr_body = bodies["psrr_vdd"].read_text()
         assert "Cinp inp 0 1\n" in psrr_body
@@ -253,7 +264,7 @@ def main() -> int:
                     [{"name": "avs_1khz_db", "expr": "db(v(out))[80]", "unit": "dB"}])),
             }
             # Same corner through the main bench's full-sweep trapezoid.
-            nreq = m.build_request("noise", ["ss"], [125.0], str(bodies["noise"]), False)
+            nreq = full_sweep_noise_request(bodies["noise"])
             res["noise_full_sweep_same_corner"] = go("noise_full_sweep_same_corner", nreq)
 
         summary, criteria, ok = evaluate(res)

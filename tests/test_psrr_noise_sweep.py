@@ -5,7 +5,9 @@ Covers the frequency<->index map, the log-log noise-corner interpolation, the
 No ngspice, PDK or klt is needed.
 """
 
+import json
 import math
+import re
 import unittest
 
 import _paths
@@ -109,12 +111,96 @@ class MeasurementsTests(unittest.TestCase):
     def test_noise_measurements_use_expr(self):
         ms = m.measurements("noise")
         self.assertEqual([x["name"] for x in ms],
-                         [f"en_k{k:03d}" for k in m.CURVE_IDX] + ["vn_int_band"])
-        for x in ms[:-1]:
+                         [f"en_k{k:03d}" for k in m.CURVE_IDX] + ["vn_int_band"]
+                         + [x["name"] for x in m.noise_floor_measurements()])
+        for x in ms[:len(m.CURVE_IDX)]:
             self.assertTrue(x["expr"].startswith("noise1.inoise_spectrum["))
-        integ = ms[-1]
+        integ = ms[len(m.CURVE_IDX)]
+        self.assertEqual(integ["name"], "vn_int_band")
         self.assertEqual(integ["unit"], "V")
         self.assertIn(f"[{m.NOISE_LO_IDX},{m.NOISE_HI_IDX}]", integ["expr"])
+
+    def test_floor_window_is_nine_reported_spots_inclusive(self):
+        # DR-018's sampled population: the nine CURVE_IDX spots from 100 kHz
+        # through 10 MHz, endpoints included -- not the 41 underlying samples.
+        self.assertEqual(m.FLOOR_WINDOW_IDX,
+                         [m.idx_of(1e5) + i * m.CURVE_STEP for i in range(9)])
+        self.assertEqual(m.freq_of(m.FLOOR_WINDOW_IDX[0]), 1e5)
+        self.assertEqual(m.freq_of(m.FLOOR_WINDOW_IDX[-1]), 1e7)
+        self.assertEqual(m.FLOOR_LO_IDX % m.CURVE_STEP, 0)
+        self.assertEqual(m.FLOOR_HI_IDX % m.CURVE_STEP, 0)
+
+    def test_graded_floor_measurement_shape(self):
+        ms = m.noise_floor_measurements()
+        graded = [x for x in ms if "limits" in x]
+        self.assertEqual([x["name"] for x in graded], ["en_floor"])
+        g = graded[0]
+        self.assertEqual(g["unit"], "V/rtHz")
+        self.assertEqual(g["limits"], {"max": m.SPEC_NOISE_FLOOR_MAX_V_RTHZ})
+        self.assertNotIn("spec_row", g)
+        # exact SI bound, from the ratified figure -- never a rescaled copy
+        self.assertEqual(m.SPEC_NOISE_FLOOR_MAX_V_RTHZ, 30e-9)
+        # helpers are ungraded diagnostics and every expr is single-line
+        # ngspice with no redirection
+        for x in ms:
+            self.assertNotIn("\n", x["expr"])
+            self.assertNotIn("<", x["expr"])
+            self.assertNotIn(">", x["expr"])
+            if x["name"] != "en_floor":
+                self.assertNotIn("limits", x)
+                self.assertNotIn("spec_row", x)
+
+    def test_floor_reduction_is_the_minimum_of_the_reported_spots(self):
+        # Evaluate the emitted let tree exactly as ngspice would (declarations
+        # in order) and compare against Python's min over the same spots:
+        # inclusive endpoints, interior minimum, and the all-equal case.
+        def resolve(spotvals):
+            env = dict(spotvals)
+            for x in m.noise_floor_measurements():
+                env[x["name"]] = eval(x["expr"], {"abs": abs}, env)
+            return env["en_floor"]
+        cases = {
+            "interior_min": {f"en_k{k:03d}": 40e-9 for k in m.FLOOR_WINDOW_IDX}
+                            | {"en_k135": 22.5e-9},
+            "min_at_low_endpoint": {f"en_k{k:03d}": 40e-9 for k in m.FLOOR_WINDOW_IDX}
+                                   | {"en_k120": 15e-9},
+            "min_at_high_endpoint": {f"en_k{k:03d}": 40e-9 for k in m.FLOOR_WINDOW_IDX}
+                                    | {"en_k160": 17.25e-9},
+            "all_equal": {f"en_k{k:03d}": 30e-9 for k in m.FLOOR_WINDOW_IDX},
+            "all_above": {f"en_k{k:03d}": 47.2526e-9 for k in m.FLOOR_WINDOW_IDX},
+            "all_below": {f"en_k{k:03d}": 28.19e-9 for k in m.FLOOR_WINDOW_IDX},
+        }
+        for label, spotvals in cases.items():
+            got = resolve(spotvals)
+            want = min(spotvals.values())
+            self.assertAlmostEqual(got, want, delta=1e-12 * want, msg=label)
+        # the tree's leaves are exactly the window's spots, nothing else
+        leaves = set(re.findall(r"en_k\d+", " ".join(x["expr"] for x in m.noise_floor_measurements())))
+        self.assertEqual(leaves, {f"en_k{k:03d}" for k in m.FLOOR_WINDOW_IDX})
+
+    def test_floor_helpers_reference_only_earlier_declarations(self):
+        # klt emits one let per expr in declaration order, so every referenced
+        # name must be declared before its user.
+        declared = {f"en_k{k:03d}" for k in m.CURVE_IDX}
+        for x in m.noise_floor_measurements():
+            for ref in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", x["expr"]):
+                if ref in ("abs",):
+                    continue
+                self.assertIn(ref, declared, f"{x['name']} references {ref}")
+            declared.add(x["name"])
+
+    def test_neither_psrr_request_gains_a_graded_measurement(self):
+        for bench in ("psrr_vdd", "psrr_vss"):
+            for x in m.measurements(bench):
+                self.assertNotIn("limits", x)
+                self.assertNotIn("spec_row", x)
+        req = m.build_request("psrr_vdd", ["tt"], [27.0], "body.spice", keep_artifacts=True)
+        self.assertTrue(all("spec_row" not in x and "limits" not in x for x in req["measurements"]))
+        req = m.build_request("noise", ["tt"], [27.0], "body.spice", keep_artifacts=True)
+        self.assertFalse(any("spec_row" in x for x in req["measurements"]))
+        graded = [x for x in req["measurements"] if "limits" in x]
+        self.assertEqual([x["name"] for x in graded], ["en_floor"])
+        self.assertEqual(graded[0]["limits"]["max"], 30e-9)
 
 
 class BuildRequestTests(unittest.TestCase):
@@ -228,10 +314,12 @@ class CornerRowsTests(unittest.TestCase):
         self.assertEqual(rows[0]["psrr_dc_0p1hz_db"], 60.0)
         self.assertEqual(rows[0]["status"], "fail")
 
-    def noise_meas(self, drop=None):
+    def noise_meas(self, drop=None, floor=None):
         white, k = (10e-9) ** 2, (10e-9) ** 2 * 1e3
         d = {f"en_k{i:03d}": math.sqrt(white + k / m.freq_of(i)) for i in m.CURVE_IDX}
         d["vn_int_band"] = 2e-6
+        if floor is not None:
+            d["en_floor"] = floor
         if drop:
             d.pop(drop)
         return meas(**d)
@@ -244,6 +332,51 @@ class CornerRowsTests(unittest.TestCase):
         self.assertAlmostEqual(r["en_floor_nv_rthz"], 10.0, delta=0.05)
         self.assertAlmostEqual(math.log10(r["f_1overf_corner_hz"]), 3.0, delta=0.05)
         self.assertIn("en_nv_rthz@0.1Hz", fields)
+        # graded column present but None until the deck reports en_floor
+        self.assertIsNone(r["en_floor_graded_nv_rthz"])
+        self.assertIn("en_floor_graded_nv_rthz", fields)
+
+    def test_noise_graded_floor_column_tracks_the_deck_value(self):
+        # the deck's graded reduction is reported beside the Python minimum,
+        # never folded into it: they agree here only because both are the min
+        rows, _ = m.corner_rows("noise", {"corners": [
+            corner("tt", 27.0, 1.8, "pass",
+                   self.noise_meas(floor=28.19e-9)),
+            corner("ss", 125.0, 1.62, "fail",
+                   self.noise_meas(floor=47.2526e-9)),  # warm corner over the bound
+        ]})
+        self.assertAlmostEqual(rows[0]["en_floor_graded_nv_rthz"], 28.19, places=6)
+        self.assertAlmostEqual(rows[1]["en_floor_graded_nv_rthz"], 47.2526, places=6)
+        self.assertEqual(rows[1]["status"], "fail")  # a limit miss is kept, not an error
+
+    def test_noise_graded_floor_missing_stays_none_not_zero(self):
+        # missing or invalid data cannot yield a passing grade: an errored
+        # corner carries no en_floor and the column stays None
+        rows, _ = m.corner_rows("noise", {"corners": [
+            corner("ff", -40.0, 1.98, "error", [])]})
+        self.assertIsNone(rows[0]["en_floor_graded_nv_rthz"])
+        self.assertIsNone(rows[0]["en_floor_nv_rthz"])
+
+    def test_floor_agreement_requires_valid_matching_densities(self):
+        def check_corner(name, graded, spot):
+            values = {f"en_k{k:03d}": 22e-9 for k in m.FLOOR_WINDOW_IDX}
+            values[f"en_k{m.FLOOR_WINDOW_IDX[-1]:03d}"] = spot
+            return {"corner_id": name, "measurements": meas(**values, en_floor=graded)}
+
+        good = check_corner("good", 22e-9, 22e-9)
+        for graded, spot, agrees in (
+            (22e-9, 22e-9, True), (0.0, 0.0, True), (22e-9, 0.0, False),
+            (-1e-9, -1e-9, False), (22e-9, -1e-9, False), (-1e-9, 22e-9, False),
+            (22e-9, math.nan, False), (22e-9, math.inf, False), (math.inf, 22e-9, False),
+        ):
+            with self.subTest(graded=graded, spot=spot):
+                result = m.floor_grading_meta({"corners": [good, check_corner("test", graded, spot)]})
+                self.assertIs(result["corners"][1]["agrees"], agrees)
+                self.assertIs(result["klt_vs_python"]["agrees"], agrees)
+                if spot == 0 and graded != 0:
+                    self.assertIsNone(result["corners"][1]["rel_delta"])
+                    self.assertEqual(result["klt_vs_python"]["max_abs_delta_v"], graded)
+                json.dumps(result, allow_nan=False)
 
     def test_noise_failed_corner_reported_with_none_fields(self):
         payload = {"corners": [

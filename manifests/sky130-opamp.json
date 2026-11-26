@@ -131,7 +131,7 @@
       },
       {
         "id": "input_referred_noise",
-        "gap": "#54's noise bench landed and its 15-corner klt sim envelope is committed (sim/opamp-characterization/records/20261030-050623-0fa5c15-950b9f-noise.klt.json), but its measurements carry no limits or spec_row, and DR-003 ratified the row as a target without settling which number is graded (spot thermal floor vs band-integrated). Both are tracked in #274"
+        "gap": "DR-003 thermal-floor compliance is unresolved. The nine-spot total-density minimum met 30 nV/√Hz at 4/15 corners, but exceeds the thermal-only density by more than 0.5 dB at 10/15. DR-018 retains the November envelope as a diagnostic (#274)."
       },
       {
         "id": "psrr",

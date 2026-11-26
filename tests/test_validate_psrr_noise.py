@@ -1,4 +1,4 @@
-"""Simulator-free tests for the validate_psrr_noise.py acceptance evaluator (#98)."""
+"""Simulator-free tests for the PSRR/noise validator's requests and acceptance criteria."""
 
 import copy
 import json
@@ -19,6 +19,21 @@ def good():
 
 def failed(criteria):
     return {c["name"] for c in criteria if c["verdict"] == "fail"}
+
+
+class NoiseRequestTest(unittest.TestCase):
+    def test_hot_ss_validation_omits_only_the_campaign_floor_limit(self):
+        netlist = EXP / "testbench" / "noise.cir"
+        validation = v.full_sweep_noise_request(netlist)
+        self.assertEqual(validation["corners"], {
+            "process": ["ss"], "supply_v": {"vdd": [1.62]}, "temperature_c": [125.0],
+        })
+        campaign = v.psrr_noise_sweep.build_request(
+            "noise", ["ss"], [125.0], str(netlist), keep_artifacts=False,
+        )
+        floor = next(m for m in campaign["measurements"] if m["name"] == "en_floor")
+        self.assertEqual(floor.pop("limits"), {"max": 30e-9})
+        self.assertEqual(validation, campaign)
 
 
 class EvaluateTest(unittest.TestCase):
@@ -53,11 +68,13 @@ class EvaluateTest(unittest.TestCase):
         self.assertEqual(failed(c), {"negative_control"})
 
     def test_failed_status(self):
-        r = good()
-        r["noise_bandlimited"]["status"] = "fail"
-        _, c, ok = v.evaluate(r)
-        self.assertFalse(ok)
-        self.assertIn("noise_bandlimited:status", failed(c))
+        for name, status in (("noise_bandlimited", "fail"), ("noise_full_sweep_same_corner", "error")):
+            with self.subTest(name=name):
+                r = good()
+                r[name]["status"] = status
+                _, c, ok = v.evaluate(r)
+                self.assertFalse(ok)
+                self.assertIn(f"{name}:status", failed(c))
 
     def test_missing_corner_and_measurement(self):
         r = good()
@@ -77,6 +94,13 @@ class EvaluateTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("negative_control_no_cinp:present", failed(c))
         self.assertIn("negative_control", failed(c))
+
+    def test_missing_full_sweep_integral_fails(self):
+        r = good()
+        del r["noise_full_sweep_same_corner"]["values"][0]["ss/1.620V/125C"]["vn_int_band"]
+        _, c, ok = v.evaluate(r)
+        self.assertFalse(ok)
+        self.assertIn("noise_integration", failed(c))
 
     def test_nonfinite_values(self):
         for bad in (math.nan, math.inf, None):

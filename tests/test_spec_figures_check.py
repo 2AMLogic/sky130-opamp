@@ -579,6 +579,30 @@ class CommittedTests(unittest.TestCase):
     def test_committed_spec_agrees_with_records(self):
         self.assertEqual(sf.check(_paths.REPO), [])
 
+    def test_record_exists_resolves_campaign_tag(self):
+        # Multi-bench campaigns commit their metadata as <rid>-<campaign>.json
+        # (e.g. <rid>-psrr-noise.json), while a spec citation names the bare
+        # <rid>; existence must resolve through the tag (issue #274).
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        rec = tmp / sf.OPAMP_RECORDS
+        rec.mkdir(parents=True)
+        full_id = RID + "-b6d61e"
+        (rec / f"{full_id}-noise.request.json").write_text("{}")
+        self.assertFalse(sf.record_exists(tmp, full_id))
+        (rec / f"{full_id}-noise.klt.json").write_text("{}")
+        (rec / f"{full_id}-notes.md").write_text("x")
+        self.assertFalse(sf.record_exists(tmp, full_id))
+        (rec / f"{full_id}-psrr-noise.json").write_text("{}")
+        self.assertTrue(sf.record_exists(tmp, full_id))
+        self.assertFalse(sf.record_exists(tmp, RID))          # truncated ID
+        (rec / f"{RID}.md").write_text("x")
+        self.assertTrue(sf.record_exists(tmp, RID))           # genuine legacy ID
+        longer_sha_id = RID + "2-b6d61e"
+        (rec / f"{longer_sha_id}-psrr-noise-validation.json").write_text("{}")
+        self.assertEqual(sf.ID_RE.findall(f"record {longer_sha_id}"), [longer_sha_id])
+        self.assertTrue(sf.record_exists(tmp, longer_sha_id))
+
     def test_committed_scopes_are_explicit(self):
         m = json.loads((_paths.REPO / sf.MAPPING).read_text(encoding="utf-8"))
         allf = m["figures"] + m["campaign_figures"]

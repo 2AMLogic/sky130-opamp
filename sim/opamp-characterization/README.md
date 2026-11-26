@@ -337,7 +337,8 @@ envelopes under `manifests/envelopes/`; see `manifests/README.md` item 5.
 ```bash
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --check-env
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py          # all three benches, 15 corners each
-python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch   # the 15-corner noise record (2026-10-30)
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch   # the 15-corner noise record (2026-10-30; sampled-minimum diagnostic added 2026-11-19)
+python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches noise --backend batch --export-envelopes manifests/envelopes   # export the diagnostic envelope
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --benches psrr_vdd,psrr_vss --runner-version-check warn
 python3 sim/opamp-characterization/bin/psrr_noise_sweep.py --backend local --corners tt --temps 27 --benches noise   # single-corner debug probe only
 python3 sim/opamp-characterization/bin/validate_psrr_noise.py       # four single-corner cross-checks (local)
@@ -589,11 +590,14 @@ point into the snapshot, and any body that includes the live DUT. Records that
 predate this change have no `dut` block and are reported UNVERIFIED, never
 inferred.
 
-Dry run and failure: `--dry-run` captures into a scratch directory outside the
-repo (printed, kept for inspection) and writes nothing under `records/` or
-`netlist-snapshots/`. A failed or partially errored run still writes no record
-and removes its just-created snapshot directory (no orphan, nothing falls back
-to a local grid); `--allow-errors` behaves as before.
+`--dry-run` keeps its snapshot in a scratch directory outside the repo and prints
+the path. For a noise run, the campaign checks each deck's `en_floor` against
+the minimum of its nine reported spots. A missing, invalid or disagreeing floor
+is a measurement error. The runner exits nonzero and discards the campaign by
+default. With `--allow-errors` it also writes the evidence. The CSV and campaign
+summary count each affected corner as an error, and the envelope preserves the
+backend's grade. A verified floor above the diagnostic limit is recorded as a
+failed corner and returns a nonzero exit even with the default options.
 
 Current versus historical: `validate` is historical -- a record stays valid
 after the design changes. `current` fails with a "DUT mismatch (stale design)"
@@ -1306,6 +1310,39 @@ curves are in the CSV.)
 - Limitation: pre-layout schematic only; the response's PDK stamp comparison is
   `not_comparable` (client stamp unavailable), and the fleet job-ceiling check
   warned (job bound above 3600 s) but the job completed in 94 s.
+
+### November noise campaign and source comparison
+
+The November batch run on the 2 pF follower compared the minimum of nine
+reported total input-noise densities (100 kHz through 10 MHz) with
+30 nV/√Hz. The deck and the independent minimum agree at all 15 corners.
+Four cold corners were within the limit, 11 corners exceeded it, and none
+errored. The October and November minima agree to the printed digits at
+14 corners. At SF / −40 °C they round to 28.4421 and 28.4422 nV/√Hz.
+[November CSV](records/20261119-030444-02cc663-b6d61e-noise.csv) ·
+[October CSV](records/20261030-050623-0fa5c15-950b9f-noise.csv)
+
+The recorded envelope carries the original request's `input_referred_noise`
+tag. The signoff manifest treats the thermal floor as a declared gap. New
+requests retain the diagnostic limit and omit the tag. The published envelope
+omits the client executable location and retains binary and model hashes. The
+DUT snapshot resolves to the byte-identical, append-only October DUT.
+[November envelope](../../manifests/envelopes/20261119-030444-02cc663-b6d61e-noise.klt.json)
+
+The November 25 source check separates thermal and flicker power at each
+selected spot and checks the total density at both neighboring frequencies.
+With ngspice 47 and the campaign's open_pdks revision, run from the repository root:
+
+```sh
+python3 sim/opamp-characterization/bin/check_noise_floor.py \
+    "$PDK_ROOT/sky130A/libs.tech/ngspice/sky130.lib.spice" > /tmp/noise-floor-source-check.csv
+diff sim/opamp-characterization/records/20261125-noise-floor-source-check.csv /tmp/noise-floor-source-check.csv
+```
+
+All five 10 MHz endpoint minima are bracketed, including the 17.78 MHz
+neighbor outside the search window. The total spectrum is locally flat at
+all 15 minima, but only five estimates agree with thermal-only density within
+0.5 dB. [DR-018](../../spec/decision-records/DR-018-noise-graded-quantity.md)
 
 ### Validation of the benches (`bin/validate_psrr_noise.py`)
 

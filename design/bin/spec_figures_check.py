@@ -108,7 +108,7 @@ from point_identity import norm_corner, norm_num, validate_rows  # noqa: E402
 MAPPING = "manifests/spec-section2-figures.json"
 SPEC = "spec/target-spec.md"
 RECORDS_GLOB = "sim/*/records"
-ID_RE = re.compile(r"\b\d{8}-\d{6}-[0-9a-f]{7}(?:-[0-9a-f]{6})?\b")
+ID_RE = re.compile(r"\b\d{8}-\d{6}-[0-9a-f]{7,40}(?:-[0-9a-f]{6})?\b")
 NUM_RE = re.compile(r"\d+(?:\.\d+)?")
 OPAMP_RECORDS = "sim/opamp-characterization/records"
 SCOPES = ("current", "historical")
@@ -258,10 +258,14 @@ def check_provenance(root, name, fig, rec_path):
 
 
 def record_exists(root, rid):
-    for d in Path(root).glob(RECORDS_GLOB):
-        if any((d / f"{rid}{ext}").is_file() for ext in (".json", ".md")):
-            return True
-    return False
+    if not ID_RE.fullmatch(rid):
+        return False
+    # Match campaign records by their published filenames. A request, an
+    # envelope, or a longer ID sharing this prefix cannot back a citation.
+    suffixes = (".json", ".md", "-psrr-noise.json", "-psrr-noise-validation.json",
+                "-sink-static-ic[0-9][0-9][0-9].json", "-sink-mc-ic[0-9][0-9][0-9].json")
+    return any(p.is_file() for d in Path(root).glob(RECORDS_GLOB)
+               for suffix in suffixes for p in d.glob(f"{rid}{suffix}"))
 
 
 def filtered(fig, rows):

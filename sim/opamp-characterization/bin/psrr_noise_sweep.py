@@ -25,7 +25,8 @@ same corner->VDD pairing (tt/sf/fs 1.80 V, ss 1.62 V, ff 1.98 V).
 Records (append-only; a new timestamped set per run, never overwritten):
 
     records/<id>-psrr-vdd.csv  records/<id>-psrr-vss.csv  records/<id>-noise.csv
-    records/<id>-<bench>.klt.json      the unmodified `klt sim` response
+    records/<id>-<bench>.klt.json      klt response with the client executable location omitted
+                                       (--export-envelopes DIR selects its destination)
     records/<id>-psrr-noise.json/.md   metadata (backend, remote job ids, pins)
     manifests/artifacts/opamp-psrr-noise-<id>.manifest.json  per-corner ngspice logs, stored in the
                                        fleet artifact store (issue #240); never committed as bytes
@@ -40,6 +41,7 @@ Records (append-only; a new timestamped set per run, never overwritten):
     --backend NAME    forwarded to `klt sim --backend` (default: leave to
                       $KLT_SIM_BACKEND / request / local)
     --label TEXT      free-text label stored in the record (e.g. 'debug probe')
+    --export-envelopes DIR   publish the envelope here instead of records/ (repo-relative)
 """
 
 from __future__ import annotations
@@ -53,7 +55,9 @@ import platform
 import shutil
 import sys
 import tempfile
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import ExitStack
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -118,15 +122,50 @@ def freq_of(k: int) -> float:
 PSRR_WIN_HI_IDX = idx_of(1e3)
 NOISE_LO_IDX = idx_of(1e2)
 NOISE_HI_IDX = idx_of(1e6)
-FLOOR_LO_IDX = idx_of(1e5)  # white-floor proxy: minimum spot density over
-FLOOR_HI_IDX = idx_of(1e7)  # 100 kHz - 10 MHz (below the closed-loop peaking)
+# DR-018 sampled-minimum diagnostic on the nine published quarter-decade spots.
+FLOOR_LO_IDX = idx_of(1e5)
+FLOOR_HI_IDX = idx_of(1e7)
+FLOOR_WINDOW_IDX = [k for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
+# Compare total density with DR-003's figure. Source decomposition leaves
+# thermal-floor compliance open, so this limit carries no signoff row tag.
+SPEC_NOISE_FLOOR_MAX_V_RTHZ = 30e-9
+
+
+def min2_expr(a: str, b: str) -> str:
+    """min(a, b) as one ngspice `let` expression: 0.5*(a+b-abs(a-b)).
+
+    Exact for reals; ngspice's control expression language has vecmin for
+    whole vectors but no n-ary minimum over *selected* samples, and slicing
+    `inoise_spectrum[lo,hi]` would take all 41 underlying samples -- the
+    population DR-018 pins to the nine reported spots. The graded reduction
+    therefore references the reported `en_k*` lets, pairwise via this
+    identity, in declaration order (klt emits one `let` per expr measurement
+    in list order, so a later expr resolves the earlier lets)."""
+    return f"0.5*({a}+{b}-abs({a}-{b}))"
+
+
+def noise_floor_measurements() -> list[dict]:
+    """Compute the sampled total-density minimum and its diagnostic limit."""
+    ms: list[dict] = []
+    work = [f"en_k{k:03d}" for k in FLOOR_WINDOW_IDX]
+    rnd = 0
+    while len(work) > 2:
+        nxt = [f"en_floor_r{rnd}m{i // 2}" for i in range(0, len(work) - 1, 2)]
+        ms.extend({"name": n, "expr": min2_expr(work[i], work[i + 1]), "unit": "V/rtHz"}
+                  for i, n in zip(range(0, len(work) - 1, 2), nxt))
+        if len(work) % 2:
+            nxt.append(work[-1])
+        work = nxt
+        rnd += 1
+    ms.append({"name": "en_floor", "expr": min2_expr(work[0], work[1]), "unit": "V/rtHz",
+               "limits": {"max": SPEC_NOISE_FLOOR_MAX_V_RTHZ}})
+    return ms
 
 BENCHES = {
     "psrr_vdd": {"netlist": "psrr_vdd.cir", "kind": "ac", "tag": "psrr-vdd"},
     "psrr_vss": {"netlist": "psrr_vss.cir", "kind": "ac", "tag": "psrr-vss"},
     "noise": {"netlist": "noise.cir", "kind": "noise", "tag": "noise"},
 }
-
 
 def measurements(bench: str) -> list[dict]:
     m: list[dict] = []
@@ -165,6 +204,9 @@ def measurements(bench: str) -> list[dict]:
             "expr": f"sqrt(ln(10) / {PPD} * ({integrand_body} - ({edge})))",
             "unit": "V",
         })
+        # Emit the diagnostic minimum after the spot lets it references;
+        # `vn_int_band` and the spots stay ungraded diagnostics.
+        m.extend(noise_floor_measurements())
     return m
 
 
@@ -235,10 +277,22 @@ def run_klt(request_path: Path, outdir: Path, backend: str | None) -> tuple[int,
 
 
 def num(corner: dict, name: str):
-    for m in corner["measurements"]:
+    for m in corner.get("measurements") or ():
         if m["name"] == name:
-            return m["value"]
+            return m.get("value")
     return None
+
+
+def density(value):
+    """Return a finite, nonnegative spectral density, or None if unavailable."""
+    if type(value) in (int, float) and math.isfinite(value) and value >= 0:
+        return value
+    return None
+
+
+def sampled_floor(spots):
+    values = [spots[k] for k in FLOOR_WINDOW_IDX]
+    return min(values) if None not in values else None
 
 
 def log_interp_crossing(freqs: list[float], psd: list[float], level: float) -> float | None:
@@ -269,16 +323,21 @@ def corner_rows(bench: str, payload: dict) -> tuple[list[dict], list[str]]:
             for k in PSRR_CURVE_IDX:
                 row[f"psrr_db@{freq_of(k):.4g}Hz"] = -curve[k] if curve[k] is not None else None
         else:
-            spot = {k: num(c, f"en_k{k:03d}") for k in CURVE_IDX}
+            spot = {k: density(num(c, f"en_k{k:03d}")) for k in CURVE_IDX}
             row = dict(base)
             row["vn_int_100hz_1mhz_uvrms"] = (
                 num(c, "vn_int_band") * 1e6 if num(c, "vn_int_band") is not None else None
             )
-            floor_pts = [spot[k] for k in CURVE_IDX if FLOOR_LO_IDX <= k <= FLOOR_HI_IDX]
-            floor = min(floor_pts) if floor_pts and all(v is not None for v in floor_pts) else None
+            floor = sampled_floor(spot)
             row["en_floor_nv_rthz"] = floor * 1e9 if floor is not None else None
+            # The deck's graded value of the same reduction (DR-018): the
+            # envelope's own en_floor, reported beside the Python minimum so
+            # the two can be cross-checked per corner. None when the corner
+            # produced no value (error) -- never zero.
+            graded = density(num(c, "en_floor"))
+            row["en_floor_graded_nv_rthz"] = graded * 1e9 if graded is not None else None
             corner_hz = None
-            if all(v is not None for v in spot.values()) and floor:
+            if all(v is not None and v > 0 for v in spot.values()):
                 corner_hz = log_interp_crossing(
                     [freq_of(k) for k in CURVE_IDX], [spot[k] for k in CURVE_IDX], math.sqrt(2.0) * floor
                 )
@@ -301,6 +360,99 @@ def write_csv(path: Path, rows: list[dict], fields: list[str]) -> None:
         w.writerow(fields)
         for r in rows:
             w.writerow([fmt(r[k]) for k in fields])
+
+
+FLOOR_KLT_VS_PYTHON_REL_TOL = 1e-6  # both sides read the same printed spot values
+
+
+def floor_grading_meta(payload: dict) -> dict:
+    """What the campaign's noise envelope graded, and the independent
+    cross-check (issue #274): the deck's graded `en_floor` against the Python
+    minimum of the same reported spots in the same response. The two must
+    agree to print precision -- a disagreement means the graded reduction
+    does not reduce what the bench reports. Corners whose `en_floor` carries
+    no value (errored) are listed, never folded into the minimum."""
+    checks, worst, worst_at, n_graded = [], None, None, 0
+    for c in payload["corners"]:
+        py_min = sampled_floor({k: density(num(c, f"en_k{k:03d}")) for k in FLOOR_WINDOW_IDX})
+        graded = num(c, "en_floor")
+        if graded is None:
+            checks.append({"corner_id": c["corner_id"], "graded": None,
+                           "python_min": py_min, "agrees": None})
+            continue
+        graded = density(graded)
+        if graded is not None:
+            n_graded += 1
+        if graded is None or py_min is None:
+            checks.append({"corner_id": c["corner_id"], "graded": graded,
+                           "python_min": py_min, "agrees": False})
+            continue
+        delta = abs(graded - py_min)
+        # A zero reference can agree only with zero; its relative error is undefined.
+        rel = delta / py_min if py_min > 0 else None
+        agrees = delta <= FLOOR_KLT_VS_PYTHON_REL_TOL * py_min
+        if rel is not None and not math.isfinite(rel):
+            rel = None
+        if worst is None or delta > worst:
+            worst, worst_at = delta, c["corner_id"]
+        checks.append({"corner_id": c["corner_id"], "graded": graded,
+                       "python_min": py_min, "rel_delta": rel, "agrees": agrees})
+    return {
+        "measurement": "en_floor", "spec_row": None,
+        "graded_quantity": "minimum reported spot density over "
+                           f"[{freq_of(FLOOR_LO_IDX):g}, {freq_of(FLOOR_HI_IDX):g}] Hz, "
+                           f"{len(FLOOR_WINDOW_IDX)} reported spots, inclusive endpoints",
+        "window_hz": [freq_of(FLOOR_LO_IDX), freq_of(FLOOR_HI_IDX)],
+        "reported_spots": len(FLOOR_WINDOW_IDX),
+        "limits_max_v_rthz": SPEC_NOISE_FLOOR_MAX_V_RTHZ,
+        "decision": "DR-018 sampled-minimum diagnostic; thermal-floor compliance unresolved",
+        "dr": "spec/decision-records/DR-018-noise-graded-quantity.md",
+        "klt_vs_python": {"graded_points": n_graded,
+                          "max_abs_delta_v": worst, "at": worst_at,
+                          "rel_tol": FLOOR_KLT_VS_PYTHON_REL_TOL,
+                          "agrees": all(c["agrees"] for c in checks) if checks else None},
+        "corners": checks,
+    }
+
+
+def campaign_results(bench: str, payload: dict) -> tuple[dict, list[dict], list[str]]:
+    """Grade the campaign summary and CSV rows without altering the klt envelope."""
+    rows, fields = corner_rows(bench, payload)
+    grade = {key: payload[key] for key in ("status", "corner_count", "passed", "failed", "errored")}
+    grade["inconclusive"] = payload.get("inconclusive")
+    if bench != "noise":
+        return grade, rows, fields
+
+    grading = floor_grading_meta(payload)
+    grade["floor_grading"] = grading
+    for row, check in zip(rows, grading["corners"], strict=True):
+        if not check["agrees"]:
+            row["status"] = "error"
+            print(f"[noise] {check['corner_id']}: cannot verify en_floor "
+                  f"(graded={check['graded']}, spot minimum={check['python_min']})", file=sys.stderr)
+        elif row["status"] == "pass" and check["graded"] > SPEC_NOISE_FLOOR_MAX_V_RTHZ:
+            row["status"] = "fail"
+    counts = Counter(row["status"] for row in rows)
+    grade.update(passed=counts["pass"], failed=counts["fail"], errored=counts["error"])
+    if grade["inconclusive"] is not None:
+        grade["inconclusive"] = counts["inconclusive"]
+    if grade["errored"]:
+        grade["status"] = "error"
+    elif grade["failed"] and grade["status"] in ("pass", "pass_partial"):
+        grade["status"] = "fail"
+    return grade, rows, fields
+
+
+def published_envelope(payload: dict) -> dict:
+    """Omit workstation executable locations and retain worker provenance."""
+    if not payload.get("environment"):
+        return payload
+    environment = payload["environment"].copy()
+    environment.pop("client_ngspice_binary", None)
+    # Before engine_host was recorded, ngspice_binary identified the client.
+    if environment.get("engine_host") != "worker":
+        environment.pop("ngspice_binary", None)
+    return {**payload, "environment": environment}
 
 
 def check_env() -> int:
@@ -327,10 +479,19 @@ def main(argv=None) -> int:
                    help="forwarded as batch.runner_version_check (batch backend only)")
     p.add_argument("--allow-errors", action="store_true",
                    help="record a bench even if some corners errored (default: write nothing)")
+    p.add_argument("--export-envelopes", default=None, metavar="DIR",
+                   help="publish klt envelopes in this repo-relative directory instead of records/")
     args = p.parse_args(argv)
 
     if args.check_env:
         return check_env()
+
+    if args.export_envelopes:
+        args.export_envelopes = (REPO_ROOT / args.export_envelopes).resolve()
+        if not args.export_envelopes.is_relative_to(REPO_ROOT):
+            print(f"ERROR: --export-envelopes must stay inside the checkout: "
+                  f"{args.export_envelopes}", file=sys.stderr)
+            return 1
 
     benches = [b.strip() for b in args.benches.split(",") if b.strip()]
     corners = [c.strip() for c in args.corners.split(",") if c.strip()]
@@ -356,9 +517,15 @@ def main(argv=None) -> int:
         except artifact_store.ArtifactError as exc:
             print(f"ERROR: {exc}", file=sys.stderr)
             return 1
-    RECORDS_DIR.mkdir(parents=True, exist_ok=True)
-    # Atomically reserve a unique record namespace (issue #75) before any write.
-    record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=[SNAPSHOT_DIR])
+    # Include the export directory when reserving the append-only namespace.
+    extra_dirs = [SNAPSHOT_DIR]
+    if args.export_envelopes and not args.dry_run:
+        extra_dirs.append(args.export_envelopes)
+    try:
+        record_id = allocate_record_id(RECORDS_DIR, sha, extra_dirs=extra_dirs)
+    except OSError as exc:
+        print(f"ERROR: cannot reserve campaign record: {exc}", file=sys.stderr)
+        return 1
 
     # Capture the DUT once (issue #151) and render every bench against that
     # copy before any request is prepared. The snapshot directory holds the DUT,
@@ -368,23 +535,25 @@ def main(argv=None) -> int:
     snap_dir = SNAPSHOT_DIR / f"{record_id}-psrr-noise"
     if args.dry_run:
         snap_dir = Path(tempfile.mkdtemp(prefix="opamp-psrr-noise-dryrun-")) / "snapshot"
-    keep_snapshot = False
-    try:
-        rc = _run(args, benches, corners, temps, sha, record_id, snap_dir)
-        keep_snapshot = not args.dry_run and rc is not None and rc[1]
-        return rc[0]
-    finally:
-        # A failed run writes no record, so it leaves no orphan snapshot either.
-        if not args.dry_run and not keep_snapshot:
-            shutil.rmtree(snap_dir, ignore_errors=True)
+    with ExitStack() as rollback:
+        if not args.dry_run:
+            rollback.callback(shutil.rmtree, snap_dir, ignore_errors=True)
+        try:
+            rc, recorded = _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback)
+        except OSError as exc:
+            print(f"ERROR: campaign {record_id} could not be written: {exc}", file=sys.stderr)
+            return 1
+        if recorded:
+            rollback.pop_all()
+        return rc
 
 
-def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, bool]:
+def _run(args, benches, corners, temps, sha, record_id, snap_dir, rollback) -> tuple[int, bool]:
     """(exit code, record written)."""
     dut_root = snap_dir.parent if args.dry_run else REPO_ROOT
     dut, bodies = capture_benches(snap_dir, benches, repo_root=dut_root)
     print(f"DUT snapshot: {dut['snapshot_path']} ({dut['sha256']})", file=sys.stderr)
-    with tempfile.TemporaryDirectory(prefix="opamp-psrr-noise-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="opamp-psrr-noise-") as tmp, ExitStack() as staging:
         tmpdir = Path(tmp)
         results: dict[str, dict] = {}
         failures: list[str] = []
@@ -413,6 +582,21 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
             print(f"dry-run snapshot dir (kept, outside the records tree): {snap_dir}")
             return 0, False
 
+        # Test writability before dispatch. Stage on each destination filesystem
+        # so a complete file can be linked into place without overwriting one.
+        envelope_dir = args.export_envelopes or RECORDS_DIR
+        stage_dirs = {}
+        for directory in {RECORDS_DIR, envelope_dir}:
+            directory.mkdir(parents=True, exist_ok=True)
+            stage_dirs[directory] = Path(staging.enter_context(
+                tempfile.TemporaryDirectory(prefix=f".{record_id}-", dir=directory)))
+        pending = {}
+
+        def stage_path(destination):
+            path = stage_dirs[destination.parent] / destination.name
+            pending[destination] = path
+            return path
+
         # One `klt sim` per bench. They are submitted concurrently only because
         # each is a thin client waiting on its own backend job (the batch fleet
         # does the ngspice work); no ngspice runs on this host unless the
@@ -427,20 +611,26 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
             outcomes = list(pool.map(submit, prepared))
         for bench, (rc, payload, err) in outcomes:
-            req, _req_path, outdir = prepared[bench]
             if payload is None or "corners" not in payload:
                 msg = (payload or {}).get("error", {}).get("message") if payload else err.strip()[-500:]
                 failures.append(f"{bench}: klt sim produced no report (exit {rc}): {msg}")
                 print(f"[{bench}] FAILED: {msg}", file=sys.stderr)
                 continue
-            print(f"[{bench}] status={payload['status']} corners={payload['corner_count']} "
-                  f"pass={payload['passed']} err={payload['errored']}", file=sys.stderr)
-            if payload["errored"] and not args.allow_errors:
-                diag = next((d for c in payload["corners"] for d in c["diagnostics"]), {})
-                failures.append(f"{bench}: {payload['errored']} errored corner(s), e.g. "
-                                f"{diag.get('code')}: {str(diag.get('message'))[:400]}")
+            if bench == "noise" and not payload["corners"]:
+                failures.append("noise: no corners returned to verify en_floor")
                 continue
-            results[bench] = {"request": req, "payload": payload, "outdir": outdir}
+            grade, rows, fields = campaign_results(bench, payload)
+            print(f"[{bench}] status={grade['status']} corners={grade['corner_count']} "
+                  f"pass={grade['passed']} fail={grade['failed']} err={grade['errored']}", file=sys.stderr)
+            if grade["errored"] and not args.allow_errors:
+                message = f"{bench}: {grade['errored']} errored corner(s)"
+                diag = next((d for c in payload["corners"] for d in c.get("diagnostics", [])), None)
+                if diag:
+                    message += f", e.g. {diag.get('code')}: {str(diag.get('message'))[:400]}"
+                failures.append(message)
+                continue
+            results[bench] = {"request": prepared[bench][0], "payload": payload, "grade": grade,
+                              "rows": rows, "fields": fields}
         if failures or not results:
             # Do NOT fall back to a local grid and do not write a partial record.
             print("\nNo record written. Failures:", file=sys.stderr)
@@ -448,7 +638,6 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 print(f"  - {f}", file=sys.stderr)
             return 1, False
 
-        RECORDS_DIR.mkdir(parents=True, exist_ok=True)
         log_dir = artifact_store.stage_dir(ARTIFACT_BENCH, record_id)
         # Stage the per-corner logs and store them BEFORE any record is written: a failed
         # put leaves nothing under manifests/ or records/ and the stage is kept (issue #240).
@@ -464,21 +653,25 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
         manifest_path = None
         if any(n_logs.values()):
             try:
-                manifest_path, _summary = artifact_store.store(ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
+                manifest_path, summary = artifact_store.store(
+                    ARTIFACT_BENCH, record_id, log_dir, artifact_store.klt_command())
+                for path in (manifest_path, summary):
+                    rollback.callback(path.unlink, missing_ok=True)
             except artifact_store.ArtifactError as exc:
                 print(f"ERROR: raw outputs not stored; no record written: {exc}", file=sys.stderr)
-                return 1
+                return 1, False
         written, meta_benches, any_bad = [], {}, False
         for bench, res in results.items():
             payload, tag = res["payload"], BENCHES[bench]["tag"]
-            rows, fields = corner_rows(bench, payload)
             csv_path = RECORDS_DIR / f"{record_id}-{tag}.csv"
-            write_csv(csv_path, rows, fields)
+            write_csv(stage_path(csv_path), res["rows"], res["fields"])
             written.append(csv_path)
             req_rec = dict(res["request"])
             req_rec["netlist"] = os.path.relpath(bodies[bench], RECORDS_DIR)
-            write_new(RECORDS_DIR / f"{record_id}-{tag}.request.json", json.dumps(req_rec, indent=2) + "\n")
-            write_new(RECORDS_DIR / f"{record_id}-{tag}.klt.json", json.dumps(payload, indent=2) + "\n")
+            req_path = RECORDS_DIR / f"{record_id}-{tag}.request.json"
+            write_new(stage_path(req_path), json.dumps(req_rec, indent=2) + "\n")
+            env_path = envelope_dir / f"{record_id}-{tag}.klt.json"
+            write_new(stage_path(env_path), json.dumps(published_envelope(payload), indent=2) + "\n")
             n_art = n_logs[bench]
             for c in payload["corners"]:
                 src = (c.get("artifacts") or {}).get("deck")
@@ -488,17 +681,16 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                     n_art += 1
             remote = (payload.get("environment") or {}).get("remote")
             meta_benches[bench] = {
-                "status": payload["status"], "corner_count": payload["corner_count"],
-                "passed": payload["passed"], "failed": payload["failed"], "errored": payload["errored"],
-                "inconclusive": payload.get("inconclusive"),
+                **res["grade"],
                 "engine_version": (payload.get("environment") or {}).get("engine_version"),
                 "backend_remote": remote,
                 "artifacts_copied": n_art,
                 "rendered_body": bodies[bench].relative_to(REPO_ROOT).as_posix(),
                 "request_snapshot": (snap_dir / f"{tag}.request.json").relative_to(REPO_ROOT).as_posix(),
                 "csv": f"sim/opamp-characterization/records/{csv_path.name}",
+                "envelope": env_path.relative_to(REPO_ROOT).as_posix(),
             }
-            any_bad |= payload["status"] not in ("pass", "pass_partial")
+            any_bad |= res["grade"]["status"] not in ("pass", "pass_partial")
 
         meta = {
             "record_id": record_id,
@@ -527,7 +719,11 @@ def _run(args, benches, corners, temps, sha, record_id, snap_dir) -> tuple[int, 
                 "platform": f"{platform.system()} {platform.release()} {platform.machine()}",
             },
         }
-        write_new(RECORDS_DIR / f"{record_id}-psrr-noise.json", json.dumps(meta, indent=2) + "\n")
+        write_new(stage_path(RECORDS_DIR / f"{record_id}-psrr-noise.json"), json.dumps(meta, indent=2) + "\n")
+        # Publish metadata last. Roll back only the links this run created.
+        for destination, source in pending.items():
+            os.link(source, destination)
+            rollback.callback(destination.unlink, missing_ok=True)
         print(f"Wrote record {record_id}-psrr-noise:")
         for w in written:
             print(f"  {w.relative_to(REPO_ROOT)}")
