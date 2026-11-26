@@ -36,6 +36,20 @@ class VariantNetlist(unittest.TestCase):
         self.assertEqual(areas, COL.gate_area(ISR.CANON))
         self.assertEqual(mos_cards(annotated), mos_cards(text))
 
+    def test_end_of_line_comment_does_not_override_xm5_params(self):
+        text = ISR.CANON.read_text()
+        cont = text.index("\n+", text.index("\nXM5 "))
+        eol = text.index("\n", cont + 1)
+        base = COL.gate_area(ISR.CANON)
+        for suffix in ("; previous m=1", " $ previous m=1"):
+            with self.subTest(suffix=suffix):
+                with tempfile.TemporaryDirectory() as td:
+                    path = Path(td) / "eol.spice"
+                    path.write_text(text[:eol] + suffix + text[eol:])
+                    areas = COL.gate_area(path)
+                self.assertAlmostEqual(areas[0]["XM5"], 7.820 * 1.2 * 2)
+                self.assertEqual(areas, base)
+
     def test_gate_area_rejects_xm5_missing_m(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "truncated.spice"
