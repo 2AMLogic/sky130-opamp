@@ -106,7 +106,7 @@ micrometres because the request names `reference.deck: "sky130"`
 (klayout-tools#1492/#1505). The sibling's `u`-suffix rewrite is therefore
 not needed. Unit tests (all `layout/bin/test_*.py`: stage_reference,
 compose-cell, magic-signoff; tool-free, run from the repo root of a full
-checkout, as in `.github/workflows/tests.yml`):
+checkout; part of the `python3 design/bin/check_ci.py` gate):
 
 ```
 python3 -m unittest discover -s layout/bin -p 'test_*.py' -v
