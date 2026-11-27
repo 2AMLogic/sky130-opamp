@@ -257,11 +257,45 @@ def check_provenance(root, name, fig, rec_path):
     return errs
 
 
-def record_exists(root, rid):
-    for d in Path(root).glob(RECORDS_GLOB):
-        if any((d / f"{rid}{ext}").is_file() for ext in (".json", ".md")):
-            return True
-    return False
+def _campaign_variants(d, rid, ext):
+    """`<rid>-<campaign><ext>` files in `d` -- the spelling a campaign runner
+    writes when it writes no bare `<rid><ext>` at all (the PSRR/noise campaign
+    writes only `<rid>-psrr-noise.json`). The campaign tag carries no dot, which
+    excludes the raw per-bench `klt sim` siblings (`<rid>-<bench>.klt.json`,
+    `<rid>-<bench>.request.json`): those are replay envelopes, not the record's
+    own metadata, and several of them share one record id."""
+    out = []
+    for q in sorted(d.glob(f"{rid}-*{ext}")):
+        # A six-hex run token belongs to the record ID, before the campaign.
+        record_id = ID_RE.match(q.name)
+        if record_id is None or record_id.group() != rid:
+            continue
+        tag = q.name[len(rid) + 1: -len(ext)]
+        if q.is_file() and tag and "." not in tag:
+            out.append(q)
+    return out
+
+
+def resolve_record(root, rid, exts=(".json", ".md"), dirs=None):
+    """(path, error) of the record file behind a cited record id.
+
+    Accepts a bare `<rid><ext>` first, else a *unique* `<rid>-<campaign><ext>`.
+    JSON and Markdown files with the same stem in one directory describe one
+    record. `(None, None)` means no record file exists for the id at all.
+    """
+    root = Path(root)
+    search = [root / d for d in dirs] if dirs is not None else sorted(root.glob(RECORDS_GLOB))
+    bare = (d / f"{rid}{ext}" for d in search for ext in exts)
+    hits = [path for path in bare if path.is_file()]
+    if not hits:
+        for d in search:
+            for ext in exts:
+                hits.extend(_campaign_variants(d, rid, ext))
+    records = {path.with_suffix("") for path in hits}
+    if len(records) > 1:
+        paths = ", ".join(str(path.relative_to(root)) for path in sorted(hits))
+        return None, f"record id {rid} resolves ambiguously to {len(records)} records: {paths}"
+    return (hits[0] if hits else None), None
 
 
 def filtered(fig, rows):
@@ -410,7 +444,10 @@ def check(root):
     except (OSError, ValueError) as e:
         return [f"cannot load inputs: {e}"]
     for rid in sorted(set(ID_RE.findall(spec2))):
-        if not record_exists(root, rid):
+        rid_path, rid_err = resolve_record(root, rid)
+        if rid_err:
+            errs.append(f"section 2: {rid_err}")
+        elif rid_path is None:
             errs.append(f"section 2 cites record {rid} which does not exist under {RECORDS_GLOB}")
     matrices = mapping.get("matrices", {})
     checked = set()
@@ -423,9 +460,16 @@ def check(root):
         else:
             errs += check_text(name, fig, rows[0])
             errs += check_scope_text(name, fig, rows[0], hist_words(mapping))
-            if fig["record"] not in rows[0]:
+            if fig["record"] not in ID_RE.findall(rows[0]):
                 errs.append(f"{name}: record {fig['record']} is not cited in its section 2 row")
-        errs += check_provenance(root, name, fig, root / OPAMP_RECORDS / f"{fig['record']}.json")
+        rec_path, rec_err = resolve_record(root, fig["record"], exts=(".json",), dirs=(OPAMP_RECORDS,))
+        if rec_err:
+            errs.append(f"{name}: {rec_err}")
+        else:
+            # Fall back to the bare spelling when nothing resolved, so a missing
+            # record still reports check_provenance's "cannot read record" error.
+            errs += check_provenance(root, name, fig,
+                                     rec_path or root / OPAMP_RECORDS / f"{fig['record']}.json")
         path = root / OPAMP_RECORDS / f"{fig['record']}-{fig['csv']}.csv"
         if not path.is_file():
             errs.append(f"{name}: record CSV missing: {path.relative_to(root)}")

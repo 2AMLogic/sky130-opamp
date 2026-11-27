@@ -128,6 +128,7 @@ BENCHES = {
 }
 
 
+
 def measurements(bench: str) -> list[dict]:
     m: list[dict] = []
     if bench.startswith("psrr"):
