@@ -37,7 +37,7 @@ class IntegratorCheckTests(unittest.TestCase):
         m = json.loads((_paths.REPO / ic.MANIFEST).read_text())
         self.assertIsNone(m["maturity"]["tier"])
         self.assertEqual(m["gds"], "layout/opamp_core/opamp_core.gds")
-        self.assertEqual(m["area_um2"], 9352.465)
+        self.assertEqual(m["area_um2"], 9780.44)
 
     def test_parses_xschem_comment_and_plain_subckt(self):
         self.assertEqual(ic.parse_subckt("**.subckt a x y\n"), ("a", ["x", "y"]))

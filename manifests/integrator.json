@@ -6,8 +6,8 @@
   "netlist": "design/netlist/opamp_core.spice",
   "gds": "layout/opamp_core/opamp_core.gds",
   "gds_note": "assembled full-core layout (issue #220: opamp_bias, opamp_stage1, opamp_out and opamp_comp placed and routed in layout/opamp_core); klt DRC/extraction/LVS pass and are cited for T1 items 2, 3, 4 and 11 in manifests/sky130-opamp.json, but the PDK's Magic drc(full) does not — the inherited opamp_comp resistor-head finding — so this path is not a foundry-DRC-clean claim (evaluated @ 4d98fe0, 2026-11-15)",
-  "area_um2": 9352.465,
-  "area_note": "bounding-box area from layout/opamp_core/compose.response.json bbox_um, 161.5 × 57.91 µm, pin stubs included (evaluated @ 4d98fe0, 2026-11-15)",
+  "area_um2": 9780.44,
+  "area_note": "KLayout bounding box of opamp_core in layout/opamp_core/opamp_core.gds across all layers, 161.5 × 60.56 µm, pin stubs included (evaluated @ d100178b, 2026-11-25)",
   "maturity": {
     "tier": null,
     "t1_met": 9,
