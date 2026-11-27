@@ -34,7 +34,6 @@ Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a h
 Ready counts issues with `loom:issue`. It excludes issues on hold (`loom:blocked`, `loom:operator`, or `loom:frozen`), issues already being built (`loom:building`), and issues an open approved PR (`loom:pr`) will close. The Approved section lists those PRs and their issues.
 
 - **#360**: Design iteration: screen a power-neutral class-AB output candidate for the output-current-limited fall slew
-- **#408**: Remove the process-wide PVT report list so each campaign grades only its own measurements
 
 ## In Progress
 
@@ -49,7 +48,6 @@ Issues currently being built (`loom:building`).
 - **#369**: Consolidate the remaining six (corner, temp_c, vdd_v) point-key copies in pvt_sweep.py and pex_measure.py onto sim/lib/point_identity.py
 - **#373**: DR-017 cites DR-007 inline but omits it from the Related list
 - **#402**: Use shared point identity for PVT report lookups, Cartesian supplies and ICMR row matching
-- **#417**: Share SPICE end-of-line comment handling with the Pelgrom geometry reader
 
 ## PRs Awaiting Review
 
@@ -58,7 +56,6 @@ PRs with `loom:review-requested`. Judge can review a held PR once its operator h
 - **#337**: ci: build fleet-pinned xschem 3.4.7 from source instead of noble apt 3.4.4 *(held)*
 - **#344**: ci: single-source the simulator-free gate in check_ci.py; drop the workflow-parity tests *(held)*
 - **#348**: ci: run append-only check in the merge queue, failing closed on an unresolvable base *(held)*
-- **#418**: fix: strip end-of-line comments in the Pelgrom geometry reader
 
 ## Approved (Awaiting Merge)
 
@@ -107,9 +104,9 @@ _None._
 | Operator merge-risk holds | 7 |
 | Very important | 1 |
 | Important | 3 |
-| Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 2 |
-| In Progress (`loom:building`) | 10 |
-| PRs awaiting review | 4 |
+| Ready (`loom:issue`, excluding holds, builds in progress, and issues awaiting merge) | 1 |
+| In Progress (`loom:building`) | 9 |
+| PRs awaiting review | 3 |
 | Approved PRs awaiting merge | 7 |
 | Curated | 15 |
 | Architect / Hermit proposals | 1 |
