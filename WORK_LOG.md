@@ -8,6 +8,8 @@ Chronological record of merged pull requests and closed issues, maintained by th
 
 ### 2026-11-26
 
+- **PR #420**: fix: scope PVT grading reports to each campaign
+- **Issue #408** (closed): Remove the process-wide PVT report list so each campaign grades only its own measurements
 - **PR #418**: fix: strip end-of-line comments in the Pelgrom geometry reader
 - **Issue #417** (closed): Share SPICE end-of-line comment handling with the Pelgrom geometry reader
 - **Issue #413** (closed): Remove the unused ICMR supply-group planner and test the emitted requests
