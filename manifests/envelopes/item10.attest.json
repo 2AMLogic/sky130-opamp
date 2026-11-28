@@ -38,7 +38,7 @@
         "role": "hygiene",
         "path": ".gitignore",
         "passed": true,
-        "content_hash": "sha256:d53aef0c393a5694297b8c5d3cc4823ef4815d8292366796a2283db1fc63a823"
+        "content_hash": "sha256:ddafc7c2a9aa700c030e345770c9d14e54b56b0382758c9835cfed1014d2ba94"
       },
       {
         "check": "present",
